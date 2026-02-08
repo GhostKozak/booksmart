@@ -59,6 +59,30 @@ function App() {
     setIsCheckingLinks(false)
   }
 
+  // Ignored URLs State (Persisted)
+  const [ignoredUrls, setIgnoredUrls] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ignoredUrls')
+      return saved ? new Set(JSON.parse(saved)) : new Set()
+    } catch (e) {
+      console.error("Failed to load ignored rules", e)
+      return new Set()
+    }
+  })
+
+  const toggleIgnoreUrl = useCallback((url) => {
+    setIgnoredUrls(prev => {
+      const next = new Set(prev)
+      if (next.has(url)) {
+        next.delete(url)
+      } else {
+        next.add(url)
+      }
+      localStorage.setItem('ignoredUrls', JSON.stringify([...next]))
+      return next
+    })
+  }, [])
+
   // Rule State
   const [newRule, setNewRule] = useState({
     type: 'keyword', // keyword, domain, exact
@@ -311,27 +335,37 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Header */}
-      <header className="border-b h-16 flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
         <div className="flex items-center gap-2">
-          <Folder className="h-6 w-6 text-primary" />
-          <h1 className="font-bold text-xl tracking-tight hidden md:block">BookSmart</h1>
+          {/* Mobile Menu Button - Show up to LG */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden mr-2 -ml-2"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+
+          <Folder className="h-6 w-6 text-primary shrink-0" />
+          <h1 className="font-bold text-xl tracking-tight hidden sm:block">BookSmart</h1>
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-md mx-4">
+        <div className="flex-1 max-w-md mx-2 sm:mx-4">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search bookmarks..."
-              className="pl-8 bg-background/50 focus:bg-background transition-colors"
+              placeholder="Search..."
+              className="pl-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 border-r pr-4 mr-2">
+        <div className="flex items-center gap-1 sm:gap-4">
+          <div className="hidden sm:flex items-center gap-1 border-r pr-4 mr-2">
             <Button variant="ghost" size="icon" disabled={!canUndo} onClick={undo} title="Undo (Ctrl+Z)">
               <Undo2 className="h-4 w-4" />
             </Button>
@@ -340,16 +374,18 @@ function App() {
             </Button>
           </div>
 
+          {/* Mobile: Collapse Actions into a unified menu or simplify */}
           {duplicateCount > 0 && (
-            <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2">
+            <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2 hidden sm:flex">
               <Layers className="h-4 w-4" />
-              Remove {duplicateCount} Duplicates
+              <span className="hidden lg:inline">Remove {duplicateCount} Duplicates</span>
+              <span className="lg:hidden">{duplicateCount}</span>
             </Button>
           )}
 
           {bookmarks.length > 0 && (
-            <div className="flex gap-2">
-              <div className="flex bg-muted/50 p-1 rounded-lg border mr-2">
+            <div className="flex gap-1 sm:gap-2">
+              <div className="flex bg-muted/50 p-1 rounded-lg border mr-0 sm:mr-2 shrink-0">
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
@@ -370,13 +406,14 @@ function App() {
                 </Button>
               </div>
 
-              <Button onClick={checkAllLinks} disabled={isCheckingLinks} variant="outline" className="gap-2">
+              <Button onClick={checkAllLinks} disabled={isCheckingLinks} variant="outline" size="icon" className="hidden sm:flex gap-2 w-auto px-3">
                 {isCheckingLinks ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-                {isCheckingLinks ? 'Checking...' : 'Check Health'}
+                <span className="hidden lg:inline">{isCheckingLinks ? 'Checking...' : 'Check Health'}</span>
               </Button>
-              <Button onClick={handleExport} variant="default" className="gap-2 shadow-lg shadow-primary/20">
+
+              <Button onClick={handleExport} variant="default" size="icon" className="hidden sm:flex gap-2 w-auto px-3 shadow-lg shadow-primary/20">
                 <Download className="h-4 w-4" />
-                Export
+                <span className="hidden lg:inline">Export</span>
               </Button>
             </div>
           )}
@@ -385,19 +422,23 @@ function App() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
+            className="rounded-full shrink-0"
           >
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar - Mobile Overlay or Desktop Sidebar */}
         <aside
           className={cn(
-            "border-r bg-card/30 flex-col overflow-y-auto transition-all duration-300 ease-in-out",
-            isSidebarOpen ? "w-80 p-4" : "w-0 p-0 overflow-hidden"
+            "bg-card border-r flex-col overflow-y-auto transition-all duration-300 ease-in-out z-30",
+            // Desktop behavior (LG+ now)
+            "lg:static lg:block",
+            // Mobile/Tablet behavior (Absolute overlay)
+            "absolute inset-y-0 left-0 h-full shadow-2xl lg:shadow-none",
+            isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
           )}
         >
           <div className="flex items-center justify-between mb-6">
@@ -405,6 +446,10 @@ function App() {
               <Settings className="h-5 w-5" />
               Rules
             </h2>
+            {/* Mobile/Tablet Close Button */}
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+              <ArrowRight className="h-4 w-4 rotate-180" />
+            </Button>
           </div>
 
           <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
@@ -526,6 +571,8 @@ function App() {
                     toggleSelection={toggleSelection}
                     toggleAll={toggleAll}
                     linkHealth={linkHealth}
+                    ignoredUrls={ignoredUrls}
+                    toggleIgnoreUrl={toggleIgnoreUrl}
                   />
                 </div>
               )}
