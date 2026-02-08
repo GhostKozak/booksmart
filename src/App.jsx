@@ -27,7 +27,6 @@ import { TaxonomyManager } from './components/TaxonomyManager'
 import { BackupSettings } from './components/BackupSettings'
 import { SimpleModal } from './components/ui/SimpleModal'
 import { Button } from './components/ui/button'
-
 // Modal Components
 import { ExportModal } from './components/modals/ExportModal'
 import { RuleModal } from './components/modals/RuleModal'
@@ -39,6 +38,14 @@ import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
+import { Checkbox } from './components/ui/checkbox'
+import { Card } from './components/ui/card'
+import { Input } from './components/ui/input'
+import { Favicon } from './components/Favicon'
+import { AnalyticsDashboard } from './components/AnalyticsDashboard'
+import { SettingsModal } from './components/SettingsModal'
+import { categorizeBookmarks } from './services/ai-service'
+import { cn } from './lib/utils'
 
 const EMPTY_ARRAY = [];
 
@@ -265,8 +272,56 @@ function App() {
 
   // ── Render ──
 
+  // AI Magic Sort
+  const [isProcessingAI, setIsProcessingAI] = useState(false)
+
+  const handleMagicSort = async () => {
+    const apiKey = localStorage.getItem("bs_api_key")
+    const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
+
+    if (!apiKey) {
+      setIsSettingsOpen(true)
+      return
+    }
+
+    setIsProcessingAI(true)
+    try {
+      const selectedBookmarks = worker.bookmarks.filter(b => selectedIds.has(b.id))
+      const results = await categorizeBookmarks(selectedBookmarks, apiKey, model, (processed, total) => {
+        // Optional: Update a progress state here if we want detailed feedback
+      })
+
+      // Update bookmarks with suggestions
+      const updated = rawBookmarks.map(b => {
+        if (results[b.id]) {
+          return { ...b, suggestedFolder: results[b.id], newFolder: results[b.id], status: 'matched' }
+        }
+        return b
+      })
+
+      // Update in DB
+      await db.transaction('rw', db.bookmarks, async () => {
+        await db.bookmarks.bulkPut(updated)
+      })
+
+      setSelectedIds(new Set())
+    } catch (error) {
+      alert("AI Classification Failed: " + error.message)
+      if (error.message.includes("API Key") || error.message.includes("401")) {
+        setIsSettingsOpen(true)
+      }
+    } finally {
+      setIsProcessingAI(false)
+    }
+  }
+
   return (
     <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSave={() => handleMagicSort()}
+      />
       <Header
         theme={theme} setTheme={setTheme}
         canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
@@ -322,7 +377,6 @@ function App() {
           clearAll={clearAll} setSmartFilter={setSmartFilter} setViewMode={setViewMode}
           setSearchQuery={setSearchQuery} setActiveTag={setActiveTag} setActiveFolder={setActiveFolder}
         />
-
         <FloatingActionBar
           selectedCount={selectedIds.size}
           onDelete={operations.handleBatchDelete}
@@ -334,6 +388,8 @@ function App() {
           onAddTags={operations.handleBatchAddTags}
           onExportSelected={exporter.openExportSelectedModal}
           onCleanUrls={operations.cleanSelectedUrls}
+          onMagicSort={handleMagicSort}
+          isProcessingAI={isProcessingAI}
         />
 
         {/* Settings Modal */}

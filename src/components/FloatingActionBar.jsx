@@ -16,7 +16,9 @@ export function FloatingActionBar({
     onOverrideStatus,
     onAddTags,
     onExportSelected,
-    onCleanUrls
+    onCleanUrls,
+    onMagicSort,
+    isProcessingAI
 }) {
     const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
@@ -65,7 +67,28 @@ export function FloatingActionBar({
                     onToggle={() => togglePopover('move')}
                 />
 
-                {/* Status Override */}
+                {/* Magic Sort */}
+                <div className="border-l pl-2 ml-2">
+                    <Button
+                        variant="default"
+                        size="sm"
+                        className="rounded-full gap-2 h-8 px-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md transition-all"
+                        onClick={onMagicSort}
+                        disabled={isProcessingAI}
+                    >
+                        {isProcessingAI ? (
+                            <>
+                                <span className="animate-spin text-xs">⏳</span>
+                                Sorting...
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-xs">✨</span>
+                                Magic Sort
+                            </>
+                        )}
+                    </Button>
+                </div>
                 {onOverrideStatus && (
                     <div className="flex gap-1 border-l pl-2 ml-1 sm:ml-0">
                         <Button
