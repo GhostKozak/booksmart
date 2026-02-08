@@ -5,6 +5,7 @@ import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
 import { Button } from './components/ui/button'
+import { Checkbox } from './components/ui/checkbox'
 import { Card } from './components/ui/card'
 import { Input } from './components/ui/input'
 import { parseBookmarks } from './lib/parser'
@@ -494,11 +495,10 @@ function App() {
                       <thead className="bg-muted/50 text-muted-foreground font-medium uppercase text-xs">
                         <tr>
                           <th className="px-4 py-3 w-12 text-center">
-                            <input
-                              type="checkbox"
-                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                            <Checkbox
                               checked={bookmarks.length > 0 && selectedIds.size === bookmarks.length}
                               onChange={toggleAll}
+                              className="bg-card"
                             />
                           </th>
                           <th className="px-4 py-3 w-12 text-center">Status</th>
@@ -522,11 +522,10 @@ function App() {
                                   : "hover:bg-muted/30"
                           )}>
                             <td className="px-4 py-3 text-center">
-                              <input
-                                type="checkbox"
-                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                              <Checkbox
                                 checked={selectedIds.has(bookmark.id)}
                                 onChange={() => toggleSelection(bookmark.id)}
+                                className="bg-card"
                               />
                             </td>
                             <td className="px-4 py-3 text-center">
