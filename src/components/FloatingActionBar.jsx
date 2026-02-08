@@ -9,7 +9,9 @@ export function FloatingActionBar({
     onMove,
     onClearSelection,
     allFolders,
-    onOverrideStatus
+    onOverrideStatus,
+    onMagicSort,
+    isProcessingAI
 }) {
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [targetFolder, setTargetFolder] = useState('');
@@ -99,6 +101,29 @@ export function FloatingActionBar({
                     )}
                 </div>
 
+                {/* Magic Sort */}
+                <div className="border-l pl-2 ml-2">
+                    <Button
+                        variant="default"
+                        size="sm"
+                        className="rounded-full gap-2 h-8 px-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md transition-all"
+                        onClick={onMagicSort}
+                        disabled={isProcessingAI}
+                    >
+                        {isProcessingAI ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                Sorting...
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-xs">✨</span>
+                                Magic Sort
+                            </>
+                        )}
+                    </Button>
+                </div>
+
                 {/* Status Override - Only useful if we track specific statuses */}
                 {onOverrideStatus && (
                     <div className="flex gap-1 border-l pl-2">
@@ -122,7 +147,6 @@ export function FloatingActionBar({
                         </Button>
                     </div>
                 )}
-
             </div>
         </div>
     );

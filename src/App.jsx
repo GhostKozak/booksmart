@@ -12,6 +12,8 @@ import { parseBookmarks } from './lib/parser'
 import { exportBookmarks } from './lib/exporter'
 import { Favicon } from './components/Favicon'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
+import { SettingsModal } from './components/SettingsModal'
+import { categorizeBookmarks } from './services/ai-service'
 import { cn } from './lib/utils'
 
 function App() {
@@ -292,8 +294,53 @@ function App() {
     setSelectedIds(new Set())
   }
 
+  // AI Magic Sort
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isProcessingAI, setIsProcessingAI] = useState(false)
+
+  const handleMagicSort = async () => {
+    const apiKey = localStorage.getItem("bs_api_key")
+    const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
+
+    if (!apiKey) {
+      setIsSettingsOpen(true)
+      return
+    }
+
+    setIsProcessingAI(true)
+    try {
+      const selectedBookmarks = bookmarks.filter(b => selectedIds.has(b.id))
+      const results = await categorizeBookmarks(selectedBookmarks, apiKey, model, (processed, total) => {
+        // Optional: Update a progress state here if we want detailed feedback
+      })
+
+      // Update bookmarks with suggestions
+      const updated = rawBookmarks.map(b => {
+        if (results[b.id]) {
+          return { ...b, suggestedFolder: results[b.id], newFolder: results[b.id], status: 'matched' }
+        }
+        return b
+      })
+
+      setRawBookmarks(updated)
+      setSelectedIds(new Set())
+    } catch (error) {
+      alert("AI Classification Failed: " + error.message)
+      if (error.message.includes("API Key") || error.message.includes("401")) {
+        setIsSettingsOpen(true)
+      }
+    } finally {
+      setIsProcessingAI(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSave={() => handleMagicSort()}
+      />
       {/* Header */}
       <header className="border-b h-16 flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-2">
@@ -373,9 +420,12 @@ function App() {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-semibold text-lg flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+              <Layers className="h-5 w-5" />
               Rules
             </h2>
+            <Button variant="ghost" size="sm" onClick={() => setIsSettingsOpen(true)} title="AI Settings">
+              <Settings className="h-4 w-4" />
+            </Button>
           </div>
 
           <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
@@ -633,6 +683,8 @@ function App() {
           onMove={handleBatchMove}
           onClearSelection={() => setSelectedIds(new Set())}
           onOverrideStatus={handleStatusOverride}
+          onMagicSort={handleMagicSort}
+          isProcessingAI={isProcessingAI}
         />
       </div>
     </div>
