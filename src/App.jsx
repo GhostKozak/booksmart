@@ -1,7 +1,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2 } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
+import { useHistory } from './hooks/use-history'
+import { FloatingActionBar } from './components/FloatingActionBar'
 import { Button } from './components/ui/button'
 import { Card } from './components/ui/card'
 import { Input } from './components/ui/input'
@@ -13,7 +15,12 @@ import { cn } from './lib/utils'
 
 function App() {
   const { theme, setTheme } = useTheme()
-  const [rawBookmarks, setRawBookmarks] = useState([]) // Stores the initial parsed bookmarks
+  // History-aware state for bookmarks
+  const { state: rawBookmarks, set: setRawBookmarks, undo, redo, canUndo, canRedo } = useHistory([])
+
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState(new Set())
+
   const [rules, setRules] = useState([])
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics'
@@ -230,6 +237,58 @@ function App() {
   const clearAll = () => {
     setRawBookmarks([])
     setRules([])
+    setSelectedIds(new Set())
+  }
+
+  // Selection Logic
+  const toggleSelection = (id) => {
+    const newSelected = new Set(selectedIds)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  const toggleAll = () => {
+    if (selectedIds.size === bookmarks.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(bookmarks.map(b => b.id)))
+    }
+  }
+
+  // Batch Operations
+  const handleBatchDelete = () => {
+    const remaining = rawBookmarks.filter(b => !selectedIds.has(b.id))
+    setRawBookmarks(remaining)
+    setSelectedIds(new Set())
+  }
+
+  const handleBatchMove = (targetFolder) => {
+    const updated = rawBookmarks.map(b => {
+      if (selectedIds.has(b.id)) {
+        return { ...b, originalFolder: targetFolder, newFolder: targetFolder }
+      }
+      return b
+    })
+    setRawBookmarks(updated)
+    setSelectedIds(new Set())
+  }
+
+  const handleStatusOverride = (status) => {
+    // This only updates local state visually, logic depends on if we store this override
+    // For now, let's just update the linkHealth to reflect this manual override
+    const newHealth = { ...linkHealth }
+    selectedIds.forEach(id => {
+      const bookmark = bookmarks.find(b => b.id === id)
+      if (bookmark) {
+        newHealth[bookmark.url] = status
+      }
+    })
+    setLinkHealth(newHealth)
+    setSelectedIds(new Set())
   }
 
   return (
@@ -242,6 +301,15 @@ function App() {
         </div>
 
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 border-r pr-4 mr-2">
+            <Button variant="ghost" size="icon" disabled={!canUndo} onClick={undo} title="Undo (Ctrl+Z)">
+              <Undo2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Shift+Z)">
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </div>
+
           {duplicateCount > 0 && (
             <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2">
               <Layers className="h-4 w-4" />
@@ -425,6 +493,14 @@ function App() {
                     <table className="w-full text-sm text-left">
                       <thead className="bg-muted/50 text-muted-foreground font-medium uppercase text-xs">
                         <tr>
+                          <th className="px-4 py-3 w-12 text-center">
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={bookmarks.length > 0 && selectedIds.size === bookmarks.length}
+                              onChange={toggleAll}
+                            />
+                          </th>
                           <th className="px-4 py-3 w-12 text-center">Status</th>
                           <th className="px-4 py-3 w-12 text-center">Health</th>
                           <th className="px-4 py-3 max-w-[300px]">Title / URL</th>
@@ -436,14 +512,23 @@ function App() {
                         {bookmarks.map(bookmark => (
                           <tr key={bookmark.id} className={cn(
                             "transition-colors duration-200",
-                            bookmark.isDuplicate
+                            selectedIds.has(bookmark.id) ? "bg-primary/5" : "",
+                            !selectedIds.has(bookmark.id) && bookmark.isDuplicate
                               ? "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
-                              : bookmark.hasDuplicate
+                              : !selectedIds.has(bookmark.id) && bookmark.hasDuplicate
                                 ? "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
-                                : bookmark.status === 'matched'
+                                : !selectedIds.has(bookmark.id) && bookmark.status === 'matched'
                                   ? "bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
                                   : "hover:bg-muted/30"
                           )}>
+                            <td className="px-4 py-3 text-center">
+                              <input
+                                type="checkbox"
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                checked={selectedIds.has(bookmark.id)}
+                                onChange={() => toggleSelection(bookmark.id)}
+                              />
+                            </td>
                             <td className="px-4 py-3 text-center">
                               {bookmark.isDuplicate ? (
                                 <div className="flex justify-center" title="Duplicate (Will be removed)">
@@ -543,6 +628,13 @@ function App() {
             </div>
           )}
         </main>
+        <FloatingActionBar
+          selectedCount={selectedIds.size}
+          onDelete={handleBatchDelete}
+          onMove={handleBatchMove}
+          onClearSelection={() => setSelectedIds(new Set())}
+          onOverrideStatus={handleStatusOverride}
+        />
       </div>
     </div>
   )
