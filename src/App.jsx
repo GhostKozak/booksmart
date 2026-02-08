@@ -4,6 +4,7 @@ import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Se
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
+import { BookmarkList } from './components/BookmarkList'
 import { Button } from './components/ui/button'
 import { Checkbox } from './components/ui/checkbox'
 import { Card } from './components/ui/card'
@@ -12,7 +13,7 @@ import { parseBookmarks } from './lib/parser'
 import { exportBookmarks } from './lib/exporter'
 import { Favicon } from './components/Favicon'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { cn, generateUUID } from './utils'
+import { cn, generateUUID } from './lib/utils'
 
 function App() {
   const { theme, setTheme } = useTheme()
@@ -506,7 +507,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4 max-w-6xl mx-auto">
+            <div className="space-y-4 max-w-[1600px] mx-auto">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({bookmarks.length})</h2>
                 <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
@@ -517,139 +518,15 @@ function App() {
               {viewMode === 'analytics' ? (
                 <AnalyticsDashboard bookmarks={bookmarks} linkHealth={linkHealth} />
               ) : (
-                <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-muted/50 text-muted-foreground font-medium uppercase text-xs">
-                        <tr>
-                          <th className="px-4 py-3 w-12 text-center">
-                            <Checkbox
-                              checked={bookmarks.length > 0 && selectedIds.size === bookmarks.length}
-                              onChange={toggleAll}
-                              className="bg-card"
-                            />
-                          </th>
-                          <th className="px-4 py-3 w-12 text-center">Status</th>
-                          <th className="px-4 py-3 w-12 text-center">Health</th>
-                          <th className="px-4 py-3 max-w-[300px]">Title / URL</th>
-                          <th className="px-4 py-3">Original Folder</th>
-                          <th className="px-4 py-3">New Folder</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {bookmarks.map(bookmark => (
-                          <tr key={bookmark.id} className={cn(
-                            "transition-colors duration-200",
-                            selectedIds.has(bookmark.id) ? "bg-primary/5" : "",
-                            !selectedIds.has(bookmark.id) && bookmark.isDuplicate
-                              ? "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
-                              : !selectedIds.has(bookmark.id) && bookmark.hasDuplicate
-                                ? "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
-                                : !selectedIds.has(bookmark.id) && bookmark.status === 'matched'
-                                  ? "bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
-                                  : "hover:bg-muted/30"
-                          )}>
-                            <td className="px-4 py-3 text-center">
-                              <Checkbox
-                                checked={selectedIds.has(bookmark.id)}
-                                onChange={() => toggleSelection(bookmark.id)}
-                                className="bg-card"
-                              />
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {bookmark.isDuplicate ? (
-                                <div className="flex justify-center" title="Duplicate (Will be removed)">
-                                  <div className="w-6 h-6 rounded-full bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
-                                    <XCircle className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : bookmark.hasDuplicate ? (
-                                <div className="flex justify-center" title="Original (Has duplicates)">
-                                  <div className="w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center">
-                                    <Layers className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : bookmark.status === 'matched' ? (
-                                <div className="flex justify-center">
-                                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                    <Check className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex justify-center">
-                                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                                  </div>
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {linkHealth[bookmark.url] === 'checking' ? (
-                                <div className="flex justify-center" title="Checking...">
-                                  <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                                </div>
-                              ) : linkHealth[bookmark.url] === 'alive' ? (
-                                <div className="flex justify-center" title="Alive">
-                                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                                </div>
-                              ) : linkHealth[bookmark.url] === 'dead' ? (
-                                <div className="flex justify-center" title="Network Error (Likely Dead)">
-                                  <XCircle className="h-4 w-4 text-red-500" />
-                                </div>
-                              ) : (
-                                <div className="flex justify-center" title="Unknown">
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground/30" />
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 max-w-[300px]">
-                              <div className="flex flex-col">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
-                                  <span className={cn(
-                                    "font-medium truncate",
-                                    bookmark.status === 'matched' && "text-emerald-700 dark:text-emerald-300"
-                                  )} title={bookmark.title}>{bookmark.title}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
-                                {bookmark.tags && bookmark.tags.length > 0 && (
-                                  <div className="flex gap-1 mt-1 flex-wrap">
-                                    {bookmark.tags.map(tag => (
-                                      <span key={tag} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                        #{tag}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
-                                  <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                                    <Layers className="h-3 w-3" />
-                                    <span>Duplicate in: {bookmark.otherLocations.join(', ')}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border">
-                                {bookmark.originalFolder}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={cn(
-                                "inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium",
-                                bookmark.status === 'matched'
-                                  ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30"
-                                  : "bg-muted text-muted-foreground border-transparent"
-                              )}>
-                                {bookmark.newFolder}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                <div className="h-[calc(100vh-250px)]">
+                  {/* Fixed height container for AutoSizer to work. 250px accounts for header, summary rects etc. */}
+                  <BookmarkList
+                    bookmarks={bookmarks}
+                    selectedIds={selectedIds}
+                    toggleSelection={toggleSelection}
+                    toggleAll={toggleAll}
+                    linkHealth={linkHealth}
+                  />
                 </div>
               )}
             </div>
