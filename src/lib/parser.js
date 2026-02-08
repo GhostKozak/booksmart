@@ -1,3 +1,5 @@
+import { generateUUID } from './utils';
+
 /**
  * Parses a Netscape Bookmark HTML content string.
  * Flattens the folder structure but preserves the path.
@@ -35,7 +37,7 @@ export const parseBookmarks = (htmlContent) => {
                     const a = child.querySelector('a');
                     if (a) {
                         bookmarks.push({
-                            id: crypto.randomUUID(),
+                            id: generateUUID(),
                             title: a.textContent,
                             url: a.href,
                             addDate: a.getAttribute('add_date'),

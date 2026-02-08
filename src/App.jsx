@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2 } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -12,7 +12,7 @@ import { parseBookmarks } from './lib/parser'
 import { exportBookmarks } from './lib/exporter'
 import { Favicon } from './components/Favicon'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { cn } from './lib/utils'
+import { cn, generateUUID } from './utils'
 
 function App() {
   const { theme, setTheme } = useTheme()
@@ -66,13 +66,28 @@ function App() {
     tags: ''
   })
 
-  // Derived state: Apply rules and sort
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Derived state: Apply rules, search, and sort
   const bookmarks = useMemo(() => {
     if (rawBookmarks.length === 0) return [];
 
+    let filtered = rawBookmarks;
+
+    // 0. Search Filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(b =>
+        (b.title || '').toLowerCase().includes(query) ||
+        (b.url || '').toLowerCase().includes(query) ||
+        (b.tags || []).some(t => t.toLowerCase().includes(query))
+      );
+    }
+
     // 1. First pass: Map URLs to find all duplicates
     const urlMap = new Map();
-    rawBookmarks.forEach(b => {
+    filtered.forEach(b => {
       const u = b.url;
       if (!urlMap.has(u)) {
         urlMap.set(u, []);
@@ -80,15 +95,15 @@ function App() {
       urlMap.get(u).push({ id: b.id, folder: b.originalFolder });
     });
 
-    const processed = rawBookmarks.map(b => {
+    const processed = filtered.map(b => {
       let matchedRule = null;
       let newFolder = b.originalFolder;
       let tags = [];
 
       // Check duplicate status
       const siblings = urlMap.get(b.url);
-      const isMulti = siblings.length > 1;
-      const indexInSiblings = siblings.findIndex(s => s.id === b.id);
+      const isMulti = siblings && siblings.length > 1;
+      const indexInSiblings = siblings ? siblings.findIndex(s => s.id === b.id) : 0;
       const isDuplicate = isMulti && indexInSiblings > 0; // It's a duplicate (2nd+ instance)
       const hasDuplicate = isMulti && indexInSiblings === 0; // It's the original (1st instance) but has duplicates
 
@@ -164,7 +179,7 @@ function App() {
     });
 
     return processed;
-  }, [rawBookmarks, rules]);
+  }, [rawBookmarks, rules, searchQuery]);
 
   // Duplicate Logic
   const duplicateCount = useMemo(() => {
@@ -226,7 +241,7 @@ function App() {
   // Manage Rules
   const addRule = () => {
     if (newRule.value && (newRule.targetFolder || newRule.tags)) {
-      setRules([...rules, { ...newRule, id: crypto.randomUUID() }])
+      setRules([...rules, { ...newRule, id: generateUUID() }])
       setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
     }
   }
@@ -298,7 +313,20 @@ function App() {
       <header className="border-b h-16 flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <Folder className="h-6 w-6 text-primary" />
-          <h1 className="font-bold text-xl tracking-tight">BookSmart</h1>
+          <h1 className="font-bold text-xl tracking-tight hidden md:block">BookSmart</h1>
+        </div>
+
+        {/* Search Bar */}
+        <div className="flex-1 max-w-md mx-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bookmarks..."
+              className="pl-8 bg-background/50 focus:bg-background transition-colors"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
