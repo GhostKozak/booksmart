@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -150,6 +150,7 @@ function App() {
     targetFolder: '',
     tags: ''
   })
+  const [editingRuleId, setEditingRuleId] = useState(null)
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('')
@@ -431,13 +432,36 @@ function App() {
   // Manage Rules
   const addRule = () => {
     if (newRule.value && (newRule.targetFolder || newRule.tags)) {
-      setRules([...rules, { ...newRule, id: generateUUID() }])
+      if (editingRuleId) {
+        setRules(rules.map(r => r.id === editingRuleId ? { ...newRule, id: editingRuleId } : r))
+        setEditingRuleId(null)
+      } else {
+        setRules([...rules, { ...newRule, id: generateUUID() }])
+      }
       setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
     }
   }
 
+  const startEditing = (rule) => {
+    setEditingRuleId(rule.id)
+    setNewRule({
+      type: rule.type,
+      value: rule.value,
+      targetFolder: rule.targetFolder || '',
+      tags: rule.tags || ''
+    })
+  }
+
+  const cancelEditing = () => {
+    setEditingRuleId(null)
+    setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
+  }
+
   const deleteRule = (id) => {
     setRules(rules.filter(r => r.id !== id))
+    if (editingRuleId === id) {
+      cancelEditing()
+    }
   }
 
   const clearAll = () => {
@@ -872,9 +896,17 @@ function App() {
               </div>
             </div>
 
-            <Button onClick={addRule} className="w-full" size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Rule
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={addRule} className="flex-1" size="sm">
+                {editingRuleId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                {editingRuleId ? 'Update Rule' : 'Add Rule'}
+              </Button>
+              {editingRuleId && (
+                <Button onClick={cancelEditing} variant="outline" size="sm" className="px-3">
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </Card>
 
           <div className="space-y-2">
@@ -914,14 +946,26 @@ function App() {
                   )}
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                  onClick={() => deleteRule(rule.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <div className="flex flex-col gap-1 shrink-0 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    onClick={() => startEditing(rule)}
+                    title="Edit Rule"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => deleteRule(rule.id)}
+                    title="Delete Rule"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
