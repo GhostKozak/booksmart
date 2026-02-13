@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -23,7 +23,24 @@ function App() {
   // Selection State
   const [selectedIds, setSelectedIds] = useState(new Set())
 
-  const [rules, setRules] = useState([])
+  // Persistent File State
+  const [hasFileLoaded, setHasFileLoaded] = useState(false)
+
+  const [rules, setRules] = useState(() => {
+    try {
+      const saved = localStorage.getItem('booksmart_rules')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      console.error("Failed to load rules", e)
+      return []
+    }
+  })
+
+  // Persist rules when they change
+  useEffect(() => {
+    localStorage.setItem('booksmart_rules', JSON.stringify(rules))
+  }, [rules])
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics'
 
@@ -93,6 +110,10 @@ function App() {
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTag, setActiveTag] = useState(null)
+  const searchInputRef = useRef(null)
+
+
 
   // Derived state: Apply rules, search, and sort
   const bookmarks = useMemo(() => {
@@ -108,6 +129,11 @@ function App() {
         (b.url || '').toLowerCase().includes(query) ||
         (b.tags || []).some(t => t.toLowerCase().includes(query))
       );
+    }
+
+    // 0.5 Tag Filter
+    if (activeTag) {
+      filtered = filtered.filter(b => b.tags && b.tags.includes(activeTag))
     }
 
     // 1. First pass: Map URLs to find all duplicates
@@ -204,7 +230,25 @@ function App() {
     });
 
     return processed;
-  }, [rawBookmarks, rules, searchQuery]);
+  }, [rawBookmarks, rules, searchQuery, activeTag]);
+
+  // Extract Unique Tags
+  const uniqueTags = useMemo(() => {
+    const tags = new Map()
+    rawBookmarks.forEach(b => {
+      if (b.tags && b.tags.length > 0) {
+        b.tags.forEach(t => {
+          const count = tags.get(t) || 0
+          tags.set(t, count + 1)
+        })
+      }
+    })
+    return Array.from(tags.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+  }, [rawBookmarks])
+
+
 
   // Duplicate Logic
   const duplicateCount = useMemo(() => {
@@ -239,6 +283,7 @@ function App() {
         const text = e.target.result
         const parsed = parseBookmarks(text)
         setRawBookmarks(parsed)
+        setHasFileLoaded(true)
       }
       reader.readAsText(file)
     }
@@ -280,6 +325,18 @@ function App() {
     setRules([])
     setSelectedIds(new Set())
   }
+
+  const closeFile = () => {
+    setHasFileLoaded(false)
+    setRawBookmarks([])
+    setRules([])
+    setSelectedIds(new Set())
+    setLinkHealth({})
+    setSearchQuery('')
+    setActiveTag(null)
+  }
+
+  // Selection Logic
 
   // Selection Logic
   const toggleSelection = (id) => {
@@ -332,6 +389,37 @@ function App() {
     setSelectedIds(new Set())
   }
 
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is typing in an input (except for specific shortcuts if needed later)
+      const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+
+      // Shortcut: "/" to focus search
+      if (e.key === '/' && !isInput) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+
+      // Shortcut: "Delete" to delete selected
+      if (e.key === 'Delete' && selectedIds.size > 0 && !isInput) {
+        e.preventDefault()
+        handleBatchDelete()
+      }
+
+      // Shortcut: "Ctrl+A" or "Cmd+A" to select all
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isInput) {
+        e.preventDefault()
+        // Select all currently visible bookmarks
+        setSelectedIds(new Set(bookmarks.map(b => b.id)))
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedIds, bookmarks, handleBatchDelete])
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       {/* Header */}
@@ -356,6 +444,7 @@ function App() {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
+              ref={searchInputRef}
               placeholder="Search..."
               className="pl-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm"
               value={searchQuery}
@@ -418,6 +507,18 @@ function App() {
             </div>
           )}
 
+          {hasFileLoaded && (
+            <Button
+              onClick={closeFile}
+              variant="ghost"
+              size="icon"
+              className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              title="Close File"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -433,7 +534,7 @@ function App() {
         {/* Sidebar - Mobile Overlay or Desktop Sidebar */}
         <aside
           className={cn(
-            "bg-card border-r flex-col overflow-y-auto transition-all duration-300 ease-in-out z-30",
+            "bg-card border-r flex-col overflow-y-auto transition-all duration-300 ease-in-out z-30 min-h-screen -mb-16",
             // Desktop behavior (LG+ now)
             "lg:static lg:block",
             // Mobile/Tablet behavior (Absolute overlay)
@@ -441,7 +542,30 @@ function App() {
             isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
           )}
         >
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <Tag className="h-5 w-5" /> Tags
+            </h2>
+          </div>
+
+          <div className="mb-6 space-y-1">
+            {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground">No tags found.</p>}
+            {uniqueTags.map(tag => (
+              <button
+                key={tag.name}
+                onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  activeTag === tag.name ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <span>#{tag.name}</span>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mb-6 border-t pt-6">
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Settings className="h-5 w-5" />
               Rules
@@ -503,25 +627,45 @@ function App() {
               <p className="text-sm text-muted-foreground text-center py-4">No rules defined.</p>
             )}
             {rules.map(rule => (
-              <div key={rule.id} className="flex items-center justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group">
-                <div className="flex flex-col overflow-hidden">
-                  <span className="text-xs font-bold text-muted-foreground uppercase">{rule.type}</span>
-                  <div className="flex items-center gap-1 text-sm truncate">
-                    <span className="truncate">"{rule.value}"</span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                    <div className="flex gap-2 items-center truncate">
-                      {rule.targetFolder && <span className="font-medium text-primary truncate">{rule.targetFolder}</span>}
-                      {rule.tags && <span className="text-xs bg-muted px-1 rounded truncate max-w-[80px]">🏷️{rule.tags}</span>}
-                    </div>
+              <div key={rule.id} className="flex items-start justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group gap-2">
+                <div className="flex flex-col w-full min-w-0">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{rule.type}</span>
+
+                  {/* Rule Value */}
+                  <div className="text-sm font-medium break-words leading-tight mb-1.5">
+                    "{rule.value}"
                   </div>
+
+                  {/* Target Folder & Tags */}
+                  {(rule.targetFolder || rule.tags) && (
+                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                      {rule.targetFolder && (
+                        <div className="flex items-start gap-1">
+                          <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                          <span className="font-medium text-primary break-words">{rule.targetFolder}</span>
+                        </div>
+                      )}
+
+                      {rule.tags && (
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {rule.tags.split(',').map(tag => (
+                            <span key={tag} className="bg-background border px-1.5 py-0.5 rounded text-[10px]">
+                              #{tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="h-6 w-6 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
                   onClick={() => deleteRule(rule.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             ))}
@@ -531,7 +675,7 @@ function App() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
 
-          {bookmarks.length === 0 ? (
+          {!hasFileLoaded ? (
             <div className="h-full flex flex-col items-center justify-center p-8">
               <div
                 {...getRootProps()}
@@ -550,6 +694,26 @@ function App() {
                 </p>
                 <Button variant="outline" className="mt-8">Browse Files</Button>
               </div>
+            </div>
+          ) : bookmarks.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+              <div className="bg-muted p-6 rounded-full mb-4">
+                <Search className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No bookmarks found</h3>
+              <p className="text-muted-foreground max-w-sm mb-6">
+                We couldn't find any bookmarks matching your search or filters.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('')
+                  // Reset other filters if we had them
+                  setActiveTag(null)
+                }}
+              >
+                Clear Search
+              </Button>
             </div>
           ) : (
             <div className="space-y-4 max-w-[1600px] mx-auto">
