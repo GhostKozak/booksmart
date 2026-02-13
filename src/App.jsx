@@ -14,6 +14,11 @@ import { exportBookmarks } from './lib/exporter'
 import { Favicon } from './components/Favicon'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
 import { cn, generateUUID } from './lib/utils'
+import { SimpleModal } from './components/ui/SimpleModal'
+import { TaxonomyManager } from './components/TaxonomyManager'
+import { SimpleCombobox } from './components/ui/SimpleCombobox'
+
+
 
 function App() {
   const { theme, setTheme } = useTheme()
@@ -40,6 +45,44 @@ function App() {
   useEffect(() => {
     localStorage.setItem('booksmart_rules', JSON.stringify(rules))
   }, [rules])
+
+  // Taxonomy State (Folders & Tags)
+  const [availableFolders, setAvailableFolders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('booksmart_folders')
+      return saved ? JSON.parse(saved) : ['Work', 'Personal', 'Reading List', 'Dev', 'News']
+    } catch {
+      return ['Work', 'Personal', 'Reading List', 'Dev', 'News']
+    }
+  })
+
+  const [availableTags, setAvailableTags] = useState(() => {
+    try {
+      const saved = localStorage.getItem('booksmart_tags')
+      return saved ? JSON.parse(saved) : ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
+    } catch {
+      return ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
+    }
+  })
+
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('folders') // 'folders' | 'tags'
+
+  const openSettings = (tab = 'folders') => {
+    setSettingsTab(tab)
+    setIsSettingsOpen(true)
+  }
+
+  // Persist Taxonomy
+  useEffect(() => {
+    localStorage.setItem('booksmart_folders', JSON.stringify(availableFolders))
+  }, [availableFolders])
+
+  useEffect(() => {
+    localStorage.setItem('booksmart_tags', JSON.stringify(availableTags))
+  }, [availableTags])
+
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics'
@@ -531,6 +574,16 @@ function App() {
             <Settings className="h-5 w-5" />
           </Button>
 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex mr-2"
+            onClick={() => openSettings('folders')}
+            title="Taxonomy Settings"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+
           <Folder className="h-6 w-6 text-primary shrink-0" />
           <h1 className="font-bold text-xl tracking-tight hidden sm:block">BookSmart</h1>
         </div>
@@ -642,6 +695,10 @@ function App() {
             <h2 className="font-semibold text-lg flex items-center gap-2">
               <Tag className="h-5 w-5" /> Tags
             </h2>
+            {/* Mobile/Tablet Close Button */}
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+              <ArrowRight className="h-4 w-4 rotate-180" />
+            </Button>
           </div>
 
           <div className="mb-6 space-y-1">
@@ -735,9 +792,13 @@ function App() {
               <Settings className="h-5 w-5" />
               Rules
             </h2>
-            {/* Mobile/Tablet Close Button */}
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
-              <ArrowRight className="h-4 w-4 rotate-180" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSettings()}
+              className="h-7 text-xs gap-1"
+            >
+              <Settings className="h-3 w-3" /> Manage
             </Button>
           </div>
 
@@ -766,11 +827,22 @@ function App() {
 
             <div className="space-y-2">
               <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
-              <Input
-                placeholder="e.g. Work > Dev"
+              <SimpleCombobox
+                options={availableFolders}
                 value={newRule.targetFolder}
-                onChange={(e) => setNewRule({ ...newRule, targetFolder: e.target.value })}
+                onChange={(val) => {
+                  setNewRule({ ...newRule, targetFolder: val })
+                  // Auto-add to available folders if created new
+                  if (val && !availableFolders.includes(val)) {
+                    setAvailableFolders(prev => [...prev, val])
+                  }
+                }}
+                placeholder="Select or create folder..."
+                allowCreate={true}
               />
+              <p className="text-[10px] text-muted-foreground">
+                Example: <code>Main &gt; Subfolder</code> for nested structure.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -780,6 +852,24 @@ function App() {
                 value={newRule.tags}
                 onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
               />
+              {/* Quick Add Tags */}
+              <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
+                {availableTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+                      if (!current.includes(tag)) {
+                        const newValue = [...current, tag].join(', ')
+                        setNewRule({ ...newRule, tags: newValue })
+                      }
+                    }}
+                    className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
+                  >
+                    + {tag}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <Button onClick={addRule} className="w-full" size="sm">
@@ -937,6 +1027,21 @@ function App() {
           onClearSelection={() => setSelectedIds(new Set())}
           onOverrideStatus={handleStatusOverride}
         />
+
+        {/* Settings Modal */}
+        <SimpleModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          title="Taxonomy Settings"
+        >
+          <TaxonomyManager
+            folders={availableFolders}
+            setFolders={setAvailableFolders}
+            tags={availableTags}
+            setTags={setAvailableTags}
+            defaultTab={settingsTab}
+          />
+        </SimpleModal>
       </div >
     </div >
   )
