@@ -1,9 +1,9 @@
 import { memo } from 'react'
-import { Check, XCircle, Layers, Loader2, CheckCircle2, HelpCircle, ShieldAlert, ShieldCheck, ArrowRight, History } from 'lucide-react'
+import { Check, XCircle, Layers, Loader2, CheckCircle2, HelpCircle, ShieldAlert, ShieldCheck, ArrowRight, History as HistoryIcon } from 'lucide-react'
 import { Checkbox } from './ui/checkbox'
 import { Button } from './ui/button'
 import { Favicon } from './Favicon'
-import { cn } from '../lib/utils'
+import { cn, getRelativeTime } from '../lib/utils'
 
 export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className }) => {
     // If no bookmark, return null (safety)
@@ -103,7 +103,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                                 }}
                                 title="Search in Archive (Wayback Machine)"
                             >
-                                <History className="h-3 w-3 text-muted-foreground hover:text-primary" />
+                                <HistoryIcon className="h-3 w-3 text-muted-foreground hover:text-primary" />
                             </Button>
                             <Button
                                 variant="ghost"
@@ -161,6 +161,12 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                                     #{tag}
                                 </span>
                             ))}
+                        </div>
+                    )}
+
+                    {bookmark.addDate && (
+                        <div className="text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
+                            <span>Added {getRelativeTime(bookmark.addDate)}</span>
                         </div>
                     )}
 

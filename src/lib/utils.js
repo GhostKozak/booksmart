@@ -15,3 +15,25 @@ export function generateUUID() {
         return v.toString(16);
     });
 }
+
+export function getRelativeTime(timestamp) {
+    if (!timestamp) return '';
+
+    // Netscape format is often just seconds, but let's handle if it's ms
+    let date = new Date(parseInt(timestamp) * 1000);
+    // If year is very small (like 1970) maybe it was already ms? allow fallback
+    if (date.getFullYear() < 1971) {
+        date = new Date(parseInt(timestamp));
+    }
+
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+
+    return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+}

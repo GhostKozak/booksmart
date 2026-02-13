@@ -4,7 +4,7 @@ import { BarChart3, Link2, FolderTree, AlertTriangle, Layers, Activity } from 'l
 import { cn } from '../lib/utils';
 import { Favicon } from './Favicon';
 
-export function AnalyticsDashboard({ bookmarks, linkHealth }) {
+export function AnalyticsDashboard({ bookmarks, linkHealth, onFilterOld }) {
     const stats = useMemo(() => {
         const total = bookmarks.length;
         if (total === 0) return null;
@@ -18,6 +18,14 @@ export function AnalyticsDashboard({ bookmarks, linkHealth }) {
         // Health
         const deadLinks = Object.values(linkHealth).filter(s => s === 'dead').length;
         const checkedLinks = Object.values(linkHealth).filter(s => s !== 'idle').length;
+
+        // Old Bookmarks (> 5 years)
+        const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
+        const oldBookmarksCount = bookmarks.filter(b => {
+            if (!b.addDate) return false;
+            const date = parseInt(b.addDate) * 1000;
+            return date < fiveYearsAgo;
+        }).length;
 
         // Domains
         const domainCounts = {};
@@ -45,7 +53,8 @@ export function AnalyticsDashboard({ bookmarks, linkHealth }) {
             duplicates,
             deadLinks,
             checkedLinks,
-            topDomains
+            topDomains,
+            oldBookmarksCount
         };
     }, [bookmarks, linkHealth]);
 
@@ -111,6 +120,27 @@ export function AnalyticsDashboard({ bookmarks, linkHealth }) {
                         </p>
                     </CardContent>
                 </Card>
+
+                {stats.oldBookmarksCount > 0 && (
+                    <Card className="bg-amber-50/50 dark:bg-amber-950/10 border-amber-200 dark:border-amber-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-amber-800 dark:text-amber-400">Dusty Shelves</CardTitle>
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.oldBookmarksCount}</div>
+                            <p className="text-xs text-amber-600/80 dark:text-amber-500/70 mb-2">
+                                Bookmarks &gt; 5 years old
+                            </p>
+                            <button
+                                onClick={onFilterOld}
+                                className="text-xs font-medium text-amber-800 dark:text-amber-400 hover:underline flex items-center gap-1"
+                            >
+                                Review and clean up <Link2 className="h-3 w-3" />
+                            </button>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             {/* Top Domains Chart */}

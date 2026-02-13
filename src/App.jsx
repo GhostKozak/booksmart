@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -111,6 +111,8 @@ function App() {
   // Search State
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTag, setActiveTag] = useState(null)
+  const [agingFilter, setAgingFilter] = useState(null) // DEPRECATED in favor of smartFilter, but removing lines is easier with multi_replace if I just swap it
+  const [smartFilter, setSmartFilter] = useState(null) // null | 'old' | 'http' | 'untitled'
   const searchInputRef = useRef(null)
 
 
@@ -134,6 +136,33 @@ function App() {
     // 0.5 Tag Filter
     if (activeTag) {
       filtered = filtered.filter(b => b.tags && b.tags.includes(activeTag))
+    }
+
+    // 0.6 Smart Filters
+    if (smartFilter === 'old') {
+      const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(b => {
+        if (!b.addDate) return false;
+        const date = parseInt(b.addDate) * 1000;
+        return date < fiveYearsAgo;
+      });
+    } else if (smartFilter === 'http') {
+      filtered = filtered.filter(b => b.url && b.url.startsWith('http://'));
+    } else if (smartFilter === 'untitled') {
+      filtered = filtered.filter(b => {
+        const title = (b.title || '').trim().toLowerCase();
+        const url = (b.url || '').trim().toLowerCase();
+        return !title || title === 'untitled' || title === 'page' || title === url || url.includes(title);
+      });
+    } else if (smartFilter === 'docs') {
+      filtered = filtered.filter(b => {
+        const url = (b.url || '').toLowerCase();
+        return url.endsWith('.pdf') ||
+          url.endsWith('.doc') || url.endsWith('.docx') ||
+          url.endsWith('.xls') || url.endsWith('.xlsx') ||
+          url.endsWith('.ppt') || url.endsWith('.pptx') ||
+          url.includes('docs.google.com');
+      });
     }
 
     // 1. First pass: Map URLs to find all duplicates
@@ -230,7 +259,7 @@ function App() {
     });
 
     return processed;
-  }, [rawBookmarks, rules, searchQuery, activeTag]);
+  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter]);
 
   // Extract Unique Tags
   const uniqueTags = useMemo(() => {
@@ -247,6 +276,45 @@ function App() {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
   }, [rawBookmarks])
+
+  // Smart Filter Counts
+  const smartCounts = useMemo(() => {
+    const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
+
+    let old = 0;
+    let http = 0;
+    let untitled = 0;
+    let docs = 0;
+
+    rawBookmarks.forEach(b => {
+      // Old
+      if (b.addDate) {
+        const date = parseInt(b.addDate) * 1000;
+        if (date < fiveYearsAgo) old++;
+      }
+
+      // HTTP
+      if (b.url && b.url.startsWith('http://')) http++;
+
+      // Untitled
+      const title = (b.title || '').trim().toLowerCase();
+      const url = (b.url || '').trim().toLowerCase();
+      if (!title || title === 'untitled' || title === 'page' || title === url || url.includes(title)) {
+        untitled++;
+      }
+
+      // Docs
+      if (url.endsWith('.pdf') ||
+        url.endsWith('.doc') || url.endsWith('.docx') ||
+        url.endsWith('.xls') || url.endsWith('.xlsx') ||
+        url.endsWith('.ppt') || url.endsWith('.pptx') ||
+        url.includes('docs.google.com')) {
+        docs++;
+      }
+    });
+
+    return { old, http, untitled, docs };
+  }, [rawBookmarks]);
 
 
 
@@ -334,6 +402,7 @@ function App() {
     setLinkHealth({})
     setSearchQuery('')
     setActiveTag(null)
+    setSmartFilter(null)
   }
 
   // Selection Logic
@@ -374,6 +443,24 @@ function App() {
     setRawBookmarks(updated)
     setSelectedIds(new Set())
   }
+
+  const handleBatchMoveDocs = () => {
+    const updated = rawBookmarks.map(b => {
+      const url = (b.url || '').toLowerCase();
+      const isDoc = url.endsWith('.pdf') ||
+        url.endsWith('.doc') || url.endsWith('.docx') ||
+        url.endsWith('.xls') || url.endsWith('.xlsx') ||
+        url.endsWith('.ppt') || url.endsWith('.pptx') ||
+        url.includes('docs.google.com');
+
+      if (isDoc) {
+        return { ...b, originalFolder: 'References', newFolder: 'References' };
+      }
+      return b;
+    });
+    setRawBookmarks(updated);
+    setSmartFilter(null); // Clear filter after moving
+  };
 
   const handleStatusOverride = (status) => {
     // This only updates local state visually, logic depends on if we store this override
@@ -421,7 +508,7 @@ function App() {
   }, [selectedIds, bookmarks, handleBatchDelete])
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
       {/* Header */}
       <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
         <div className="flex items-center gap-2">
@@ -534,9 +621,9 @@ function App() {
         {/* Sidebar - Mobile Overlay or Desktop Sidebar */}
         <aside
           className={cn(
-            "bg-card border-r flex-col overflow-y-auto transition-all duration-300 ease-in-out z-30 min-h-screen -mb-16",
+            "bg-card border-r flex flex-col transition-all duration-300 ease-in-out z-30 h-full overflow-y-auto",
             // Desktop behavior (LG+ now)
-            "lg:static lg:block",
+            "lg:static lg:flex",
             // Mobile/Tablet behavior (Absolute overlay)
             "absolute inset-y-0 left-0 h-full shadow-2xl lg:shadow-none",
             isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
@@ -563,6 +650,75 @@ function App() {
                 <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
               </button>
             ))}
+          </div>
+
+
+
+          <div className="flex items-center justify-between mb-4 border-t pt-6">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <Archive className="h-5 w-5" /> Smart Filters
+            </h2>
+          </div>
+          <div className="mb-6 space-y-1">
+            {/* Old Bookmarks */}
+            <button
+              onClick={() => setSmartFilter(smartFilter === 'old' ? null : 'old')}
+              className={cn(
+                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                smartFilter === 'old' ? "bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <HistoryIcon className="h-4 w-4 opacity-70" />
+                <span>Dusty Shelves (&gt; 5y)</span>
+              </div>
+              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.old}</span>
+            </button>
+
+            {/* HTTP (Insecure) */}
+            <button
+              onClick={() => setSmartFilter(smartFilter === 'http' ? null : 'http')}
+              className={cn(
+                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                smartFilter === 'http' ? "bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 opacity-70" />
+                <span>Not Secure (HTTP)</span>
+              </div>
+              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.http}</span>
+            </button>
+
+            {/* Untitled */}
+            <button
+              onClick={() => setSmartFilter(smartFilter === 'untitled' ? null : 'untitled')}
+              className={cn(
+                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                smartFilter === 'untitled' ? "bg-orange-100 text-orange-700 font-medium dark:bg-orange-900/30 dark:text-orange-400" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <FileQuestion className="h-4 w-4 opacity-70" />
+                <span>Untitled / Generic</span>
+              </div>
+              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.untitled}</span>
+            </button>
+
+            {/* Docs & PDFs */}
+            <button
+              onClick={() => setSmartFilter(smartFilter === 'docs' ? null : 'docs')}
+              className={cn(
+                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                smartFilter === 'docs' ? "bg-blue-100 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400" : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <File className="h-4 w-4 opacity-70" />
+                <span>Docs & PDFs</span>
+              </div>
+              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.docs}</span>
+            </button>
           </div>
 
           <div className="flex items-center justify-between mb-6 border-t pt-6">
@@ -710,6 +866,7 @@ function App() {
                   setSearchQuery('')
                   // Reset other filters if we had them
                   setActiveTag(null)
+                  setSmartFilter(null)
                 }}
               >
                 Clear Search
@@ -719,13 +876,34 @@ function App() {
             <div className="space-y-4 max-w-[1600px] mx-auto">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({bookmarks.length})</h2>
-                <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
-                  Clear All
-                </Button>
+                <div className="flex gap-2">
+                  {smartFilter === 'docs' && bookmarks.length > 0 && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleBatchMoveDocs}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Folder className="h-4 w-4 mr-2" />
+                      Move {bookmarks.length} to "References"
+                    </Button>
+                  )}
+                  <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
+                    Clear All
+                  </Button>
+                </div>
               </div>
 
               {viewMode === 'analytics' ? (
-                <AnalyticsDashboard bookmarks={bookmarks} linkHealth={linkHealth} />
+                <AnalyticsDashboard
+                  bookmarks={rawBookmarks}
+                  linkHealth={linkHealth}
+                  onFilterOld={() => {
+                    setSmartFilter('old');
+                    setViewMode('list');
+                  }}
+                  oldBookmarksCount={smartCounts ? smartCounts.old : 0}
+                />
               ) : (
                 <div className="h-[calc(100vh-250px)]">
                   {/* Fixed height container for AutoSizer to work. 250px accounts for header, summary rects etc. */}
@@ -750,8 +928,8 @@ function App() {
           onClearSelection={() => setSelectedIds(new Set())}
           onOverrideStatus={handleStatusOverride}
         />
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
 
