@@ -1,6 +1,7 @@
 import { memo } from 'react'
-import { Check, XCircle, Layers, Loader2, CheckCircle2, HelpCircle, ShieldAlert, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Check, XCircle, Layers, Loader2, CheckCircle2, HelpCircle, ShieldAlert, ShieldCheck, ArrowRight, History } from 'lucide-react'
 import { Checkbox } from './ui/checkbox'
+import { Button } from './ui/button'
 import { Favicon } from './Favicon'
 import { cn } from '../lib/utils'
 
@@ -92,6 +93,18 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                             <div className="flex justify-center" title="Network Error (Likely Dead)">
                                 <XCircle className="h-4 w-4 text-red-500" />
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(`https://web.archive.org/web/*/${bookmark.url}`, '_blank');
+                                }}
+                                title="Search in Archive (Wayback Machine)"
+                            >
+                                <History className="h-3 w-3 text-muted-foreground hover:text-primary" />
+                            </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -208,17 +221,31 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                                 {healthStatus === 'checking' && <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />}
                                 {healthStatus === 'alive' && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
                                 {healthStatus === 'dead' && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 -mr-1"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleIgnoreUrl(bookmark.url);
-                                        }}
-                                    >
-                                        <ShieldAlert className="h-4 w-4 text-red-500" />
-                                    </Button>
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 -mr-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                window.open(`https://web.archive.org/web/*/${bookmark.url}`, '_blank');
+                                            }}
+                                            title="Search in Archive"
+                                        >
+                                            <History className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 -mr-1"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleIgnoreUrl(bookmark.url);
+                                            }}
+                                        >
+                                            <ShieldAlert className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                    </>
                                 )}
                                 {healthStatus === 'ignored' && (
                                     <Button
