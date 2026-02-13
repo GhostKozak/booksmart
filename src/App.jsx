@@ -1,10 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
 import { BookmarkList } from './components/BookmarkList'
+import { BookmarkGrid } from './components/BookmarkGrid'
+import { PreviewPane } from './components/PreviewPane'
 import { Button } from './components/ui/button'
 import { Checkbox } from './components/ui/checkbox'
 import { Card } from './components/ui/card'
@@ -85,7 +87,8 @@ function App() {
 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics'
+  const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics' | 'grid'
+  const [previewBookmark, setPreviewBookmark] = useState(null)
 
   // Link Health State
   const [linkHealth, setLinkHealth] = useState({}) // { url: 'idle' | 'checking' | 'alive' | 'dead' }
@@ -658,6 +661,15 @@ function App() {
                   <List className="h-4 w-4" />
                 </Button>
                 <Button
+                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setViewMode('grid')}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+                <Button
                   variant={viewMode === 'analytics' ? 'secondary' : 'ghost'}
                   size="icon"
                   className="h-8 w-8"
@@ -1048,19 +1060,45 @@ function App() {
                   oldBookmarksCount={smartCounts ? smartCounts.old : 0}
                 />
               ) : (
-                <div className="h-[calc(100vh-250px)]">
-                  {/* Fixed height container for AutoSizer to work. 250px accounts for header, summary rects etc. */}
-                  <BookmarkList
-                    bookmarks={bookmarks}
-                    selectedIds={selectedIds}
-                    toggleSelection={toggleSelection}
-                    toggleAll={toggleAll}
-                    linkHealth={linkHealth}
-                    ignoredUrls={ignoredUrls}
-                    toggleIgnoreUrl={toggleIgnoreUrl}
-                  />
+
+                <div className="flex h-[calc(100vh-250px)] gap-4 transition-all duration-300">
+                  {/* Main Content Area */}
+                  <div className={cn("flex-1 min-w-0 h-full", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
+                    {viewMode === 'list' ? (
+                      <BookmarkList
+                        bookmarks={bookmarks}
+                        selectedIds={selectedIds}
+                        toggleSelection={toggleSelection}
+                        toggleAll={toggleAll}
+                        linkHealth={linkHealth}
+                        ignoredUrls={ignoredUrls}
+                        toggleIgnoreUrl={toggleIgnoreUrl}
+                      />
+                    ) : (
+                      <BookmarkGrid
+                        bookmarks={bookmarks}
+                        selectedIds={selectedIds}
+                        toggleSelection={toggleSelection}
+                        onPreview={(b) => {
+                          setPreviewBookmark(b)
+                          setSelectedIds(new Set([b.id]))
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Preview Pane - Only visible when previewBookmark is set */}
+                  {previewBookmark && (
+                    <div className="flex-1 xl:basis-2/5 h-full min-w-0 border rounded-lg overflow-hidden shadow-lg animate-in fade-in slide-in-from-right-4">
+                      <PreviewPane
+                        bookmark={previewBookmark}
+                        onClose={() => setPreviewBookmark(null)}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
+
             </div>
           )}
         </main>
