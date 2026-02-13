@@ -42,6 +42,7 @@ export const parseBookmarks = (htmlContent) => {
                             url: a.href,
                             addDate: a.getAttribute('add_date'),
                             icon: a.getAttribute('icon'),
+                            tags: a.getAttribute('tags') ? a.getAttribute('tags').split(',').map(t => t.trim()) : [],
                             originalFolder: folderPath.join(' > ') || 'Root',
                             newFolder: folderPath.join(' > ') || 'Root', // Default to original
                             status: 'unchanged'
