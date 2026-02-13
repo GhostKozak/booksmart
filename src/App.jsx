@@ -178,7 +178,7 @@ function App() {
     const processed = filtered.map(b => {
       let matchedRule = null;
       let newFolder = b.originalFolder;
-      let tags = [];
+      let ruleTags = [];
 
       // Check duplicate status
       const siblings = urlMap.get(b.url);
@@ -198,16 +198,21 @@ function App() {
         const title = b.title || '';
         const url = b.url || '';
         const contentToCheck = (title + ' ' + url).toLowerCase();
-        const ruleValue = (rule.value || '').toLowerCase();
+        const rawRuleValue = (rule.value || '').toLowerCase();
 
-        if (!ruleValue) continue;
+        if (!rawRuleValue) continue;
 
-        if (rule.type === 'keyword' && contentToCheck.includes(ruleValue)) {
-          match = true;
-        } else if (rule.type === 'domain' && url.toLowerCase().includes(ruleValue)) {
-          match = true;
-        } else if (rule.type === 'exact' && title.toLowerCase() === ruleValue) {
-          match = true;
+        const ruleValues = rawRuleValue.split(',').map(v => v.trim()).filter(Boolean);
+
+        for (const val of ruleValues) {
+          if (rule.type === 'keyword' && contentToCheck.includes(val)) {
+            match = true;
+          } else if (rule.type === 'domain' && url.toLowerCase().includes(val)) {
+            match = true;
+          } else if (rule.type === 'exact' && title.toLowerCase() === val) {
+            match = true;
+          }
+          if (match) break;
         }
 
         if (match) {
@@ -218,16 +223,20 @@ function App() {
           }
           // specific checking if tags exist
           if (rule.tags) {
-            tags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
+            ruleTags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
           }
           break; // First match wins
         }
       }
 
+      const existingTags = b.tags || [];
+      const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
+
       return {
         ...b,
         newFolder: matchedRule ? newFolder : b.originalFolder,
-        tags: tags,
+        tags: allTags, // Use combined tags for filtering
+        ruleTags: ruleTags, // Keep track of which ones are from rules
         status: matchedRule ? 'matched' : 'unchanged',
         isDuplicate,
         hasDuplicate,

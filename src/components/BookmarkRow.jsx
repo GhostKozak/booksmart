@@ -156,11 +156,19 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                     <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
                     {bookmark.tags && bookmark.tags.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
-                            {bookmark.tags.map(tag => (
-                                <span key={tag} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                    #{tag}
-                                </span>
-                            ))}
+                            {bookmark.tags.map(tag => {
+                                const isRuleTag = bookmark.ruleTags?.includes(tag);
+                                return (
+                                    <span key={tag} className={cn(
+                                        "px-1.5 py-0.5 rounded text-[10px] font-medium border",
+                                        isRuleTag
+                                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                            : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                    )}>
+                                        #{tag}
+                                    </span>
+                                )
+                            })}
                         </div>
                     )}
 
@@ -302,11 +310,19 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                     {/* Tags */}
                     {bookmark.tags && bookmark.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-0.5">
-                            {bookmark.tags.map(tag => (
-                                <span key={tag} className="px-1.5 py-0.5 rounded font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                    #{tag}
-                                </span>
-                            ))}
+                            {bookmark.tags.map(tag => {
+                                const isRuleTag = bookmark.ruleTags?.includes(tag);
+                                return (
+                                    <span key={tag} className={cn(
+                                        "px-1.5 py-0.5 rounded font-medium border",
+                                        isRuleTag
+                                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                            : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800"
+                                    )}>
+                                        #{tag}
+                                    </span>
+                                )
+                            })}
                         </div>
                     )}
                 </div>
