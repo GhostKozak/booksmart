@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from './button';
 import { Input } from './input';
+import { useTranslation } from 'react-i18next';
 
 export function SimpleCombobox({
     value,
@@ -12,6 +13,7 @@ export function SimpleCombobox({
     allowCreate = false,
     className
 }) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const containerRef = useRef(null);
@@ -118,7 +120,7 @@ export function SimpleCombobox({
                 <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border rounded-md shadow-md animate-in fade-in-0 zoom-in-95 overflow-hidden">
                     <div className="max-h-60 overflow-y-auto p-1">
                         {filteredOptions.length === 0 && !showCreate && (
-                            <p className="p-2 text-sm text-muted-foreground text-center">No options found.</p>
+                            <p className="p-2 text-sm text-muted-foreground text-center">{t('common.noOptions')}</p>
                         )}
 
                         {isGrouped ? (
@@ -164,7 +166,7 @@ export function SimpleCombobox({
                                 onClick={handleCreate}
                             >
                                 <Plus className="h-3 w-3 mr-2" />
-                                Create "{query}"
+                                {t('common.create')} "{query}"
                             </div>
                         )}
                     </div>

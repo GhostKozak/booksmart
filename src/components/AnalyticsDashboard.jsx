@@ -4,8 +4,10 @@ import { StatCard } from './analytics/StatCard';
 import { OldBookmarksAlert } from './analytics/OldBookmarksAlert';
 import { AccumulationChart } from './analytics/AccumulationChart';
 import { TopDomainsList } from './analytics/TopDomainsList';
+import { useTranslation } from 'react-i18next';
 
 export function AnalyticsDashboard({ bookmarks, linkHealth, onFilterOld }) {
+    const { t } = useTranslation();
     const stats = useAnalyticsData(bookmarks, linkHealth);
 
     if (!stats) return null;
@@ -16,32 +18,32 @@ export function AnalyticsDashboard({ bookmarks, linkHealth, onFilterOld }) {
             {/* Key Metrics Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatCard
-                    title="Total Bookmarks"
+                    title={t('analytics.totalBookmarks')}
                     value={stats.total}
-                    subtext={`Across ${stats.folders} folders`}
+                    subtext={t('analytics.subtext.folders', { count: stats.folders })}
                     icon={Link2}
                 />
 
                 <StatCard
-                    title="Accumulation Rate"
+                    title={t('analytics.accumulationRate')}
                     value={`+${stats.addedThisMonth}`}
-                    subtext="Bookmarks added this month"
+                    subtext={t('analytics.subtext.accumulation')}
                     icon={TrendingUp}
                     valueClassName="text-blue-600 dark:text-blue-400"
                 />
 
                 <StatCard
-                    title="Duplicates"
+                    title={t('analytics.duplicates')}
                     value={stats.duplicates}
-                    subtext="Bookmarks appearing multiple times"
+                    subtext={t('analytics.subtext.duplicates')}
                     icon={Layers}
                     valueClassName="text-yellow-600 dark:text-yellow-400"
                 />
 
                 <StatCard
-                    title="Link Health"
+                    title={t('analytics.linkHealth')}
                     value={stats.deadLinks}
-                    subtext={`Dead links found (${stats.checkedLinks} checked)`}
+                    subtext={t('analytics.subtext.health', { checked: stats.checkedLinks })}
                     icon={Activity}
                     valueClassName="text-red-600 dark:text-red-400"
                 />

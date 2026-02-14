@@ -2,6 +2,7 @@ import { Download, File } from 'lucide-react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
+import { useTranslation, Trans } from 'react-i18next'
 
 export function ExportModal({
     isOpen, onClose,
@@ -10,27 +11,32 @@ export function ExportModal({
     selectedCount,
     onExport
 }) {
+    const { t } = useTranslation()
     return (
         <SimpleModal
             isOpen={isOpen}
             onClose={onClose}
-            title={exportOnlySelected ? `Export ${selectedCount} Selected Bookmarks` : 'Export Bookmarks'}
+            title={exportOnlySelected ? t('modals.export.titleSelected', { count: selectedCount }) : t('modals.export.title')}
         >
             <div className="space-y-4">
                 {exportOnlySelected && (
                     <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm">
                         <Download className="h-4 w-4 text-primary shrink-0" />
-                        <span><strong>{selectedCount}</strong> bookmark selected for export.</span>
+                        <span>
+                            <Trans i18nKey="modals.export.selectedCount" count={selectedCount}>
+                                <strong>{{ count: selectedCount }}</strong> bookmark selected for export.
+                            </Trans>
+                        </span>
                     </div>
                 )}
-                <p className="text-sm text-muted-foreground">Select the format you want to export your bookmarks in.</p>
+                <p className="text-sm text-muted-foreground">{t('modals.export.formatSelect')}</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                        { key: 'html', label: 'HTML (Netscape)', desc: 'Standard format. Best for importing into other browsers or managers.', color: 'bg-orange-100 text-orange-600' },
-                        { key: 'json', label: 'JSON', desc: 'Raw data format. Useful for developers or programmatic access.', color: 'bg-blue-100 text-blue-600' },
-                        { key: 'csv', label: 'CSV', desc: 'Comma-separated values. Perfect for Excel or Google Sheets.', color: 'bg-green-100 text-green-600' },
-                        { key: 'md', label: 'Markdown', desc: 'Formatted text. Great for documentation or notes apps (Obsidian, Notion).', color: 'bg-slate-100 text-slate-600' },
+                        { key: 'html', label: t('modals.export.formats.html.label'), desc: t('modals.export.formats.html.desc'), color: 'bg-orange-100 text-orange-600' },
+                        { key: 'json', label: t('modals.export.formats.json.label'), desc: t('modals.export.formats.json.desc'), color: 'bg-blue-100 text-blue-600' },
+                        { key: 'csv', label: t('modals.export.formats.csv.label'), desc: t('modals.export.formats.csv.desc'), color: 'bg-green-100 text-green-600' },
+                        { key: 'md', label: t('modals.export.formats.md.label'), desc: t('modals.export.formats.md.desc'), color: 'bg-slate-100 text-slate-600' },
                     ].map(fmt => (
                         <div
                             key={fmt.key}
@@ -50,10 +56,10 @@ export function ExportModal({
                 </div>
 
                 <div className="flex justify-end gap-2 mt-6">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
                     <Button onClick={onExport}>
                         <Download className="h-4 w-4 mr-2" />
-                        Download
+                        {t('modals.export.download')}
                     </Button>
                 </div>
             </div>

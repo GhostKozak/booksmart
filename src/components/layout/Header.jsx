@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Upload, Download, Plus, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
@@ -34,19 +35,21 @@ export function Header({
     // Shortcuts
     setIsShortcutsOpen
 }) {
+    const { t } = useTranslation()
+
     return (
         <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
             <div className="flex items-center gap-2">
                 <Logo className="h-7 w-7 shrink-0" />
-                <h1 className="font-bold text-xl tracking-tight hidden sm:block">BookSmart</h1>
+                <h1 className="font-bold text-xl tracking-tight hidden sm:block">{t('app.title')}</h1>
                 <div className="flex items-center gap-1 ml-4 border-l pl-4">
                     {canUndo && (
-                        <Button variant="ghost" size="icon" onClick={undo} title="Undo (Ctrl+Z)">
+                        <Button variant="ghost" size="icon" onClick={undo} title={t('header.undo')}>
                             <Undo2 className="h-4 w-4" />
                         </Button>
                     )}
                     {canRedo && (
-                        <Button variant="ghost" size="icon" onClick={redo} title="Redo (Ctrl+Y)">
+                        <Button variant="ghost" size="icon" onClick={redo} title={t('header.redo')}>
                             <Redo2 className="h-4 w-4" />
                         </Button>
                     )}
@@ -55,7 +58,7 @@ export function Header({
                             variant={isHistoryOpen ? "secondary" : "ghost"}
                             size="icon"
                             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                            title="Version History"
+                            title={t('header.history')}
                             className={cn("ml-1", isHistoryOpen && "bg-muted")}
                         >
                             <HistoryIcon className="h-4 w-4" />
@@ -86,7 +89,7 @@ export function Header({
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             ref={searchInputRef}
-                            placeholder={searchMode === 'regex' ? "e.g. ^https?://.*\\.dev" : "Search bookmarks..."}
+                            placeholder={searchMode === 'regex' ? "e.g. ^https?://.*\\.dev" : t('app.searchPlaceholder')}
                             className={cn(
                                 "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
                                 searchMode === 'regex' && "font-mono text-xs"
@@ -98,7 +101,7 @@ export function Header({
                             <button
                                 onClick={() => setSearchQuery('')}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-full hover:bg-muted"
-                                title="Clear search"
+                                title={t('header.clearSearch')}
                             >
                                 <X className="h-3.5 w-3.5" />
                             </button>
@@ -109,7 +112,7 @@ export function Header({
                         size="icon"
                         onClick={() => setIsAdvancedSearchOpen(!isAdvancedSearchOpen)}
                         className="shrink-0"
-                        title="Advanced Search Filters"
+                        title={t('header.advancedSearch')}
                     >
                         <Filter className="h-4 w-4" />
                     </Button>
@@ -131,7 +134,7 @@ export function Header({
                 {duplicateCount > 0 && (
                     <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2 hidden sm:flex">
                         <Layers className="h-4 w-4" />
-                        <span className="hidden lg:inline">Remove {duplicateCount} Duplicates</span>
+                        <span className="hidden lg:inline">{t('header.removeDuplicates', { count: duplicateCount })}</span>
                         <span className="lg:hidden">{duplicateCount}</span>
                     </Button>
                 )}
@@ -139,7 +142,7 @@ export function Header({
                 {cleanableCount > 0 && (
                     <Button onClick={cleanAllUrls} variant="outline" size="sm" className="gap-2 hidden sm:flex border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
                         <Sparkles className="h-4 w-4" />
-                        <span className="hidden lg:inline">Clean {cleanableCount} URLs</span>
+                        <span className="hidden lg:inline">{t('header.cleanUrls', { count: cleanableCount })}</span>
                         <span className="lg:hidden">{cleanableCount}</span>
                     </Button>
                 )}
@@ -152,7 +155,7 @@ export function Header({
                                 size="icon"
                                 className="h-8 w-8"
                                 onClick={() => setViewMode('list')}
-                                title="List View"
+                                title={t('header.listView')}
                             >
                                 <List className="h-4 w-4" />
                             </Button>
@@ -161,7 +164,7 @@ export function Header({
                                 size="icon"
                                 className="h-8 w-8"
                                 onClick={() => setViewMode('grid')}
-                                title="Grid View"
+                                title={t('header.gridView')}
                             >
                                 <LayoutGrid className="h-4 w-4" />
                             </Button>
@@ -171,7 +174,7 @@ export function Header({
                                     size="icon"
                                     className="h-8 w-8"
                                     onClick={() => setShowThumbnails(!showThumbnails)}
-                                    title={showThumbnails ? "Hide Thumbnails" : "Show Thumbnails"}
+                                    title={showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
                                 >
                                     <Image className="h-4 w-4" />
                                 </Button>
@@ -181,7 +184,7 @@ export function Header({
                                 size="icon"
                                 className="h-8 w-8"
                                 onClick={() => setViewMode('analytics')}
-                                title="Analytics"
+                                title={t('header.analytics')}
                             >
                                 <BarChart3 className="h-4 w-4" />
                             </Button>
@@ -189,12 +192,12 @@ export function Header({
 
                         <Button onClick={checkAllLinks} disabled={isCheckingLinks} variant="outline" size="icon" className="hidden sm:flex gap-2 w-auto px-3">
                             {isCheckingLinks ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-                            <span className="hidden lg:inline">{isCheckingLinks ? 'Checking...' : 'Check Health'}</span>
+                            <span className="hidden lg:inline">{isCheckingLinks ? t('header.checking') : t('header.checkHealth')}</span>
                         </Button>
 
                         <Button onClick={openExportModal} variant="default" size="icon" className="hidden sm:flex gap-2 w-auto px-3 shadow-lg shadow-primary/20">
                             <Download className="h-4 w-4" />
-                            <span className="hidden lg:inline">Export</span>
+                            <span className="hidden lg:inline">{t('header.export')}</span>
                         </Button>
                     </div>
                 )}
@@ -205,7 +208,7 @@ export function Header({
                         variant="ghost"
                         size="icon"
                         className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        title="Close File"
+                        title={t('header.closeFile')}
                     >
                         <LogOut className="h-5 w-5" />
                     </Button>
@@ -216,7 +219,7 @@ export function Header({
                     size="icon"
                     onClick={() => setIsShortcutsOpen(true)}
                     className="rounded-full shrink-0"
-                    title="Keyboard Shortcuts (?)"
+                    title={t('header.shortcuts')}
                 >
                     <HelpCircle className="h-5 w-5" />
                 </Button>
@@ -245,7 +248,7 @@ export function Header({
                         size="icon"
                         className="hidden lg:inline-flex"
                         onClick={() => openSettings('folders')}
-                        title="Settings"
+                        title={t('header.settings')}
                     >
                         <Settings className="h-5 w-5" />
                     </Button>

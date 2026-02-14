@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Folder, FolderInput } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useTranslation } from 'react-i18next';
 
 export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
+    const { t } = useTranslation();
     const [targetFolder, setTargetFolder] = useState('');
     const inputRef = useRef(null);
 
@@ -29,7 +31,7 @@ export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
                         <input
                             ref={inputRef}
                             className="bg-muted px-2 py-1.5 rounded text-sm outline-none w-full border focus:border-primary"
-                            placeholder="New folder name..."
+                            placeholder={t('actionbar.move.placeholder')}
                             value={targetFolder}
                             onChange={(e) => setTargetFolder(e.target.value)}
                             onKeyDown={(e) => {
@@ -56,7 +58,7 @@ export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
                         </div>
                     )}
                     <Button size="sm" className="w-full mt-1" onClick={() => handleSubmit()}>
-                        Move to Folder
+                        {t('actionbar.move.submit')}
                     </Button>
                 </div>
             )}
@@ -67,7 +69,7 @@ export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
                 onClick={onToggle}
             >
                 <FolderInput className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">Move</span>
+                <span className="hidden sm:inline">{t('actionbar.move.button')}</span>
             </Button>
         </div>
     );

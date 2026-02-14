@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Tag } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useTranslation } from 'react-i18next';
 
 export function TagBulkPopover({ allTags, onApply, isOpen, onToggle }) {
+    const { t } = useTranslation();
     const [tagsInput, setTagsInput] = useState('');
     const inputRef = useRef(null);
 
@@ -28,7 +30,7 @@ export function TagBulkPopover({ allTags, onApply, isOpen, onToggle }) {
                         <input
                             ref={inputRef}
                             className="bg-muted px-2 py-1.5 rounded text-sm outline-none w-full border focus:border-primary"
-                            placeholder="Add tags..."
+                            placeholder={t('actionbar.tags.placeholder')}
                             value={tagsInput}
                             onChange={(e) => setTagsInput(e.target.value)}
                             onKeyDown={(e) => {
@@ -61,7 +63,7 @@ export function TagBulkPopover({ allTags, onApply, isOpen, onToggle }) {
                         </div>
                     )}
                     <Button size="sm" className="w-full mt-1" onClick={handleSubmit}>
-                        Apply Tags
+                        {t('actionbar.tags.submit')}
                     </Button>
                 </div>
             )}
@@ -72,7 +74,7 @@ export function TagBulkPopover({ allTags, onApply, isOpen, onToggle }) {
                 onClick={onToggle}
             >
                 <Tag className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">Tags</span>
+                <span className="hidden sm:inline">{t('actionbar.tags.button')}</span>
             </Button>
         </div>
     );

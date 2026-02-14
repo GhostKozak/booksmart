@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Calendar, Search, Regex, Type } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export function AdvancedSearch({
     isOpen,
@@ -12,6 +13,8 @@ export function AdvancedSearch({
     setDateFilter,
     className
 }) {
+    const { t } = useTranslation();
+
     if (!isOpen) return null;
 
     return (
@@ -20,7 +23,7 @@ export function AdvancedSearch({
 
                 {/* Search Modes */}
                 <div className="flex flex-wrap items-center gap-4">
-                    <div className="text-sm font-medium text-muted-foreground w-20">Mode:</div>
+                    <div className="text-sm font-medium text-muted-foreground w-20">{t('header.advanced.mode')}</div>
 
                     <div className="flex items-center gap-2">
                         <Button
@@ -28,10 +31,10 @@ export function AdvancedSearch({
                             size="sm"
                             onClick={() => setSearchMode('simple')}
                             className="h-7 text-xs"
-                            title="Standard exact substring matching"
+                            title={t('header.advanced.modes.simpleTitle')}
                         >
                             <Type className="h-3 w-3 mr-1.5" />
-                            Simple
+                            {t('header.advanced.modes.simple')}
                         </Button>
 
                         <Button
@@ -39,10 +42,10 @@ export function AdvancedSearch({
                             size="sm"
                             onClick={() => setSearchMode('fuzzy')}
                             className="h-7 text-xs"
-                            title="Typo-tolerant matching"
+                            title={t('header.advanced.modes.fuzzyTitle')}
                         >
                             <Search className="h-3 w-3 mr-1.5" />
-                            Fuzzy
+                            {t('header.advanced.modes.fuzzy')}
                         </Button>
 
                         <Button
@@ -50,10 +53,10 @@ export function AdvancedSearch({
                             size="sm"
                             onClick={() => setSearchMode('regex')}
                             className="h-7 text-xs font-mono"
-                            title="Regular Expression matching"
+                            title={t('header.advanced.modes.regexTitle')}
                         >
                             <Regex className="h-3 w-3 mr-1.5" />
-                            Regex
+                            {t('header.advanced.modes.regex')}
                         </Button>
                     </div>
                 </div>
@@ -62,12 +65,12 @@ export function AdvancedSearch({
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pt-2 border-t">
                     <div className="text-sm font-medium text-muted-foreground flex items-center gap-2 w-20">
                         <Calendar className="h-4 w-4" />
-                        Added:
+                        {t('header.advanced.date.added')}
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">From</span>
+                            <span className="text-xs text-muted-foreground">{t('header.advanced.date.from')}</span>
                             <Input
                                 type="date"
                                 className="h-8 w-auto min-w-[130px] text-xs px-2"
@@ -77,7 +80,7 @@ export function AdvancedSearch({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">To</span>
+                            <span className="text-xs text-muted-foreground">{t('header.advanced.date.to')}</span>
                             <Input
                                 type="date"
                                 className="h-8 w-auto min-w-[130px] text-xs px-2"
@@ -93,7 +96,7 @@ export function AdvancedSearch({
                                 className="h-8 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 ml-auto sm:ml-0"
                                 onClick={() => setDateFilter({ start: null, end: null })}
                             >
-                                Clear Date
+                                {t('header.advanced.date.clear')}
                             </Button>
                         )}
                     </div>

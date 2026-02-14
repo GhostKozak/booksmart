@@ -1,22 +1,25 @@
 import { SimpleModal } from '../ui/SimpleModal'
+import { useTranslation } from 'react-i18next'
 
 export function ShortcutsModal({ isOpen, onClose }) {
+    const { t } = useTranslation()
+
     const shortcuts = [
-        { keys: '/', desc: 'Focus search' },
-        { keys: 'Ctrl + A', desc: 'Select all visible' },
-        { keys: 'Delete', desc: 'Delete selected' },
-        { keys: 'Escape', desc: 'Clear selection' },
-        { keys: 'Ctrl + Z', desc: 'Undo' },
-        { keys: 'Ctrl + Y', desc: 'Redo' },
-        { keys: 'Ctrl + Shift + Z', desc: 'Redo (alt)' },
-        { keys: '?', desc: 'Show this help' },
+        { keys: '/', desc: t('modals.shortcuts.focusSearch') },
+        { keys: 'Ctrl + A', desc: t('modals.shortcuts.selectAll') },
+        { keys: 'Delete', desc: t('modals.shortcuts.deleteSelected') },
+        { keys: 'Escape', desc: t('modals.shortcuts.clearSelection') },
+        { keys: 'Ctrl + Z', desc: t('modals.shortcuts.undo') },
+        { keys: 'Ctrl + Y', desc: t('modals.shortcuts.redo') },
+        { keys: 'Ctrl + Shift + Z', desc: t('modals.shortcuts.redoAlt') },
+        { keys: '?', desc: t('modals.shortcuts.help') },
     ]
 
     return (
         <SimpleModal
             isOpen={isOpen}
             onClose={onClose}
-            title="Keyboard Shortcuts"
+            title={t('modals.shortcuts.title')}
         >
             <div className="space-y-1">
                 {shortcuts.map(s => (

@@ -9,12 +9,14 @@ import {
     ResponsiveContainer,
     Cell
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 export function AccumulationChart({ data }) {
+    const { t } = useTranslation();
     return (
         <Card className="col-span-4">
             <CardHeader>
-                <CardTitle>Collection Habits</CardTitle>
+                <CardTitle>{t('analytics.chart.title')}</CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
                 <div className="h-[240px] w-full">
@@ -47,7 +49,7 @@ export function AccumulationChart({ data }) {
                                                             {payload[0].payload.name}
                                                         </span>
                                                         <span className="font-bold text-muted-foreground">
-                                                            {payload[0].value} bookmarks
+                                                            {payload[0].value} {t('analytics.chart.tooltip')}
                                                         </span>
                                                     </div>
                                                 </div>

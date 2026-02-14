@@ -1,6 +1,7 @@
 import { Tag, Folder, Plus, ChevronRight, ChevronDown } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export function SidebarTags({
     uniqueTags,
@@ -12,6 +13,8 @@ export function SidebarTags({
     collapsed,
     onToggle
 }) {
+    const { t } = useTranslation()
+
     return (
         <>
             <div
@@ -20,17 +23,17 @@ export function SidebarTags({
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
                     {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
-                    <Tag className="h-5 w-5" /> Tags
+                    <Tag className="h-5 w-5" /> {t('sidebar.sections.tags')}
                 </h2>
             </div>
 
             {!collapsed && (
                 <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                    {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">No tags found.</p>}
+                    {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">{t('sidebar.noTags')}</p>}
 
                     {/* User Defined Tags */}
                     {availableTags.length > 0 && (
-                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">My Tags</div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">{t('sidebar.myTags')}</div>
                     )}
 
                     {availableTags.map(tag => {
@@ -59,7 +62,7 @@ export function SidebarTags({
                         <>
                             <div className="px-2 pt-2 pb-1">
                                 <div className="border-t border-dashed mb-1" />
-                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Discovered</div>
+                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">{t('sidebar.discovered')}</div>
                             </div>
                             {discoveredTags.map(tag => {
                                 const tagInfo = uniqueTags.find(ut => ut.name === tag.name)
@@ -83,7 +86,7 @@ export function SidebarTags({
                                             size="icon"
                                             className="h-8 w-8 opacity-0 group-hover/item:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
                                             onClick={() => saveToTaxonomy(tag.name, 'tag')}
-                                            title="Add to permanent tags"
+                                            title={t('taxonomy.discovered.addTag')}
                                         >
                                             <Plus className="h-4 w-4" />
                                         </Button>

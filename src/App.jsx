@@ -33,10 +33,14 @@ import { ShortcutsModal } from './components/modals/ShortcutsModal'
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
+import { LanguageSwitcher } from './components/layout/LanguageSwitcher'
+
+import { useTranslation } from 'react-i18next'
 
 const EMPTY_ARRAY = [];
 
 function App() {
+  const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
   const { addCommand, undo, redo, canUndo, canRedo, past, future } = useUndoRedo()
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -227,7 +231,7 @@ function App() {
         downloadBackup(data)
       } catch (e) {
         console.error("Backup failed before clear:", e)
-        alert("Backup failed! Check console. Data was NOT cleared.")
+        alert(t('backup.failed'))
         return
       }
     }
@@ -332,10 +336,12 @@ function App() {
         <SimpleModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
-          title="Settings"
+          title={t('settings.title')}
         >
           {settingsTab === 'backup' ? (
             <BackupSettings />
+          ) : settingsTab === 'general' ? (
+            <LanguageSwitcher />
           ) : (
             <TaxonomyManager
               folders={availableFolders}
@@ -349,12 +355,20 @@ function App() {
           )}
           <div className="flex justify-center gap-2 mt-4 border-t pt-2">
             <Button
-              variant={settingsTab !== 'backup' ? "secondary" : "ghost"}
+              variant={settingsTab === 'general' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('general')}
+              className="text-xs h-7"
+            >
+              {t('settings.tabs.general')}
+            </Button>
+            <Button
+              variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSettingsTab('folders')}
               className="text-xs h-7"
             >
-              Taxonomy
+              {t('sidebar.sections.library')}
             </Button>
             <Button
               variant={settingsTab === 'backup' ? "secondary" : "ghost"}
@@ -362,7 +376,7 @@ function App() {
               onClick={() => setSettingsTab('backup')}
               className="text-xs h-7"
             >
-              Backup & Data
+              {t('settings.tabs.backup')}
             </Button>
           </div>
         </SimpleModal>

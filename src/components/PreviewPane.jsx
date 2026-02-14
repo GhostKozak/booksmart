@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ExternalLink, X, RefreshCw, AlertTriangle } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export function PreviewPane({ bookmark, onClose, className }) {
+    const { t } = useTranslation();
     const [isLoading, setIsLoading] = useState(true);
     // const [hasError, setHasError] = useState(false);
     // Key to force re-render iframe on reload
@@ -24,7 +26,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
             <div className="flex items-center justify-between p-3 border-b bg-card">
                 <div className="flex-1 min-w-0 mr-4">
                     <h3 className="font-semibold text-sm truncate" title={bookmark.title}>
-                        {bookmark.title || 'Untitled'}
+                        {bookmark.title || t('sidebar.smartFilters.untitled')}
                     </h3>
                     <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
                         <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
@@ -33,10 +35,10 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleReload} title="Reload Preview">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleReload} title={t('preview.reload')}>
                         <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} title="Close Preview">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} title={t('preview.close')}>
                         <X className="h-4 w-4" />
                     </Button>
                 </div>
@@ -48,7 +50,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
                         <div className="flex flex-col items-center gap-2">
                             <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-                            <span className="text-sm text-muted-foreground">Loading preview...</span>
+                            <span className="text-sm text-muted-foreground">{t('preview.loading')}</span>
                         </div>
                     </div>
                 )}
@@ -71,10 +73,10 @@ export function PreviewPane({ bookmark, onClose, className }) {
                 <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
                     <div className="bg-background/90 backdrop-blur border rounded-lg shadow-lg p-3 pointer-events-auto max-w-[200px] text-xs">
                         <p className="mb-2 text-muted-foreground">
-                            Content not loading? Some sites block embedding.
+                            {t('preview.error')}
                         </p>
                         <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => window.open(bookmark.url, '_blank')}>
-                            <ExternalLink className="h-3 w-3" /> Open in New Tab
+                            <ExternalLink className="h-3 w-3" /> {t('preview.openExternal')}
                         </Button>
                     </div>
                 </div>

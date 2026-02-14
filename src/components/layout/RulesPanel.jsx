@@ -1,5 +1,6 @@
 import { Settings, Plus, Pencil, Trash2, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react'
 import { Button } from '../ui/button'
+import { useTranslation } from 'react-i18next'
 
 export function RulesPanel({
     rules,
@@ -9,6 +10,8 @@ export function RulesPanel({
     collapsed,
     onToggle
 }) {
+    const { t } = useTranslation()
+
     return (
         <>
             <div
@@ -18,7 +21,7 @@ export function RulesPanel({
                 <h2 className="font-semibold text-lg flex items-center gap-2">
                     {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
                     <Settings className="h-5 w-5" />
-                    Rules
+                    {t('sidebar.rules.title')}
                     <span className="text-xs font-normal text-muted-foreground">({rules.length})</span>
                 </h2>
                 <Button
@@ -30,7 +33,7 @@ export function RulesPanel({
                     }}
                     className="h-7 text-xs gap-1"
                 >
-                    <Plus className="h-3 w-3" /> Add Rule
+                    <Plus className="h-3 w-3" /> {t('sidebar.rules.addRule')}
                 </Button>
             </div>
 
@@ -40,14 +43,14 @@ export function RulesPanel({
                         {rules.length === 0 && (
                             <div className="text-center py-6">
                                 <Settings className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-                                <p className="text-sm text-muted-foreground">No rules defined yet.</p>
+                                <p className="text-sm text-muted-foreground">{t('sidebar.rules.noRules')}</p>
                                 <Button
                                     variant="link"
                                     size="sm"
                                     className="mt-1 text-xs"
                                     onClick={openNewRuleModal}
                                 >
-                                    <Plus className="h-3 w-3 mr-1" /> Create your first rule
+                                    <Plus className="h-3 w-3 mr-1" /> {t('sidebar.rules.createFirst')}
                                 </Button>
                             </div>
                         )}
@@ -88,7 +91,7 @@ export function RulesPanel({
                                         size="icon"
                                         className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
                                         onClick={() => startEditing(rule)}
-                                        title="Edit Rule"
+                                        title={t('sidebar.rules.edit')}
                                     >
                                         <Pencil className="h-3.5 w-3.5" />
                                     </Button>
@@ -97,7 +100,7 @@ export function RulesPanel({
                                         size="icon"
                                         className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
                                         onClick={() => deleteRule(rule.id)}
-                                        title="Delete Rule"
+                                        title={t('sidebar.rules.delete')}
                                     >
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </Button>

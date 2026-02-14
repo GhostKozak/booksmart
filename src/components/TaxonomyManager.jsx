@@ -13,6 +13,7 @@ import {
     arrayMove,
     sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
+import { useTranslation } from 'react-i18next';
 
 import { TaxonomyList } from './taxonomy/TaxonomyList';
 import { DiscoveredTaxonomy } from './taxonomy/DiscoveredTaxonomy';
@@ -26,6 +27,7 @@ export function TaxonomyManager({
     discoveredTags = [],
     defaultTab = 'folders'
 }) {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState(defaultTab);
     const [newItem, setNewItem] = useState('');
 
@@ -35,6 +37,8 @@ export function TaxonomyManager({
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    // ... (rest of logic handles)
 
     const handleAdd = (name) => {
         const value = name || newItem.trim();
@@ -85,6 +89,8 @@ export function TaxonomyManager({
 
     const currentList = activeTab === 'folders' ? folders : tags;
     const discoveredList = activeTab === 'folders' ? discoveredFolders : discoveredTags;
+    const typeLabel = activeTab === 'folders' ? t('taxonomy.folders') : t('taxonomy.tags');
+    const typeKey = activeTab === 'folders' ? t('common.folder') : t('common.tag');
 
     return (
         <div className="space-y-4">
@@ -97,7 +103,7 @@ export function TaxonomyManager({
                     onClick={() => setActiveTab('folders')}
                 >
                     <div className="flex items-center justify-center gap-2">
-                        <Folder className="h-4 w-4" /> Folders
+                        <Folder className="h-4 w-4" /> {t('taxonomy.folders')}
                     </div>
                 </button>
                 <button
@@ -108,7 +114,7 @@ export function TaxonomyManager({
                     onClick={() => setActiveTab('tags')}
                 >
                     <div className="flex items-center justify-center gap-2">
-                        <Tag className="h-4 w-4" /> Tags
+                        <Tag className="h-4 w-4" /> {t('taxonomy.tags')}
                     </div>
                 </button>
             </div>
@@ -117,7 +123,7 @@ export function TaxonomyManager({
                 <Input
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
-                    placeholder={`Add new ${activeTab === 'folders' ? 'folder' : 'tag'}...`}
+                    placeholder={t('taxonomy.addPlaceholder', { type: typeKey })} // "Add new folder..." or "Add new tag..."
                     onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 />
                 <Button onClick={() => handleAdd()} disabled={!newItem.trim()}>
@@ -128,7 +134,7 @@ export function TaxonomyManager({
             <div className="space-y-1 max-h-[400px] overflow-y-auto pr-2 pb-10">
                 {currentList.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                        No {activeTab} defined yet.
+                        {t('taxonomy.noItems', { type: typeLabel })}
                     </p>
                 )}
 
@@ -148,7 +154,7 @@ export function TaxonomyManager({
             </div>
 
             <p className="text-xs text-muted-foreground text-center pt-2 border-t">
-                Drag to reorder. Click the color dot to change color.
+                {t('taxonomy.dragHelp')}
             </p>
         </div>
     );

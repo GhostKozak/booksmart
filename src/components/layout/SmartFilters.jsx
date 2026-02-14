@@ -1,5 +1,6 @@
 import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export function SmartFilters({
     smartFilter,
@@ -9,18 +10,20 @@ export function SmartFilters({
     collapsed,
     onToggle
 }) {
+    const { t } = useTranslation()
+
     const filters = [
-        { key: 'old', label: 'Dusty Shelves (> 5y)', icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
-        { key: 'http', label: 'Not Secure (HTTP)', icon: ShieldAlert, count: smartCounts.http, color: 'red' },
-        { key: 'untitled', label: 'Untitled / Generic', icon: FileQuestion, count: smartCounts.untitled, color: 'orange' },
-        { key: 'docs', label: 'Docs & PDFs', icon: File, count: smartCounts.docs, color: 'blue' },
+        { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
+        { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http, color: 'red' },
+        { key: 'untitled', label: t('sidebar.smartFilters.untitled'), icon: FileQuestion, count: smartCounts.untitled, color: 'orange' },
+        { key: 'docs', label: t('sidebar.smartFilters.docs'), icon: File, count: smartCounts.docs, color: 'blue' },
         { key: 'divider' },
-        { key: 'dead', label: 'Dead Links', icon: XCircle, count: deadLinkCount, color: 'gray' },
-        { key: 'longurl', label: 'Long URLs (200+)', icon: Link, count: smartCounts.longurl, color: 'purple' },
-        { key: 'media', label: 'Media & Videos', icon: Video, count: smartCounts.media, color: 'pink' },
-        { key: 'social', label: 'Social Media', icon: MessageCircle, count: smartCounts.social, color: 'sky' },
-        { key: 'shopping', label: 'Shopping', icon: ShoppingCart, count: smartCounts.shopping, color: 'emerald' },
-        { key: 'news', label: 'News & Articles', icon: Newspaper, count: smartCounts.news, color: 'teal' },
+        { key: 'dead', label: t('sidebar.smartFilters.deadLinks'), icon: XCircle, count: deadLinkCount, color: 'gray' },
+        { key: 'longurl', label: t('sidebar.smartFilters.longUrls'), icon: Link, count: smartCounts.longurl, color: 'purple' },
+        { key: 'media', label: t('sidebar.smartFilters.media'), icon: Video, count: smartCounts.media, color: 'pink' },
+        { key: 'social', label: t('sidebar.smartFilters.social'), icon: MessageCircle, count: smartCounts.social, color: 'sky' },
+        { key: 'shopping', label: t('sidebar.smartFilters.shopping'), icon: ShoppingCart, count: smartCounts.shopping, color: 'emerald' },
+        { key: 'news', label: t('sidebar.smartFilters.news'), icon: Newspaper, count: smartCounts.news, color: 'teal' },
     ]
 
     const colorMap = {
@@ -44,7 +47,7 @@ export function SmartFilters({
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
                     {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
-                    <Archive className="h-5 w-5" /> Smart Filters
+                    <Archive className="h-5 w-5" /> {t('sidebar.sections.smartFilters')}
                 </h2>
             </div>
 

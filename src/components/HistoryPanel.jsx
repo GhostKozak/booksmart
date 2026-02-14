@@ -1,9 +1,11 @@
 import React from 'react';
 import { History, RotateCcw, RotateCw, X } from 'lucide-react';
 import { Button } from './ui/button';
-
+import { useTranslation } from 'react-i18next';
 
 export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) {
+    const { t } = useTranslation();
+
     if (!isOpen) return null;
 
     return (
@@ -11,7 +13,7 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
             <div className="flex items-center justify-between p-3 border-b bg-muted/50">
                 <h3 className="font-semibold text-sm flex items-center gap-2">
                     <History className="h-4 w-4" />
-                    Version History
+                    {t('history.title')}
                 </h3>
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
                     <X className="h-3 w-3" />
@@ -22,14 +24,14 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
                 {/* Future (Redo) */}
                 {future.length > 0 && (
                     <div className="space-y-1">
-                        <h4 className="text-xs font-medium text-muted-foreground px-2 uppercase tracking-wider">Redo (Future)</h4>
+                        <h4 className="text-xs font-medium text-muted-foreground px-2 uppercase tracking-wider">{t('history.redo')}</h4>
                         {future.map((cmd, idx) => (
                             <div
                                 key={`future-${idx}`}
                                 className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-muted/50 rounded-md opacity-60"
                             >
                                 <div className="min-w-[4px] h-4 rounded-full bg-slate-300 dark:bg-slate-700" />
-                                <span className="truncate">{cmd.description || 'Unknown Action'}</span>
+                                <span className="truncate">{cmd.description || t('history.unknown')}</span>
                             </div>
                         ))}
                         <Button
@@ -38,7 +40,7 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
                             className="w-full mt-1 h-7 text-xs"
                             onClick={onRedo}
                         >
-                            <RotateCw className="h-3 w-3 mr-1" /> Redo Next
+                            <RotateCw className="h-3 w-3 mr-1" /> {t('history.redoNext')}
                         </Button>
                     </div>
                 )}
@@ -47,9 +49,9 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
 
                 {/* Past (Undo) */}
                 <div className="space-y-1">
-                    <h4 className="text-xs font-medium text-muted-foreground px-2 uppercase tracking-wider">History (Past)</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground px-2 uppercase tracking-wider">{t('history.past')}</h4>
                     {past.length === 0 ? (
-                        <p className="text-sm text-muted-foreground px-2 py-4 text-center italic">No history yet.</p>
+                        <p className="text-sm text-muted-foreground px-2 py-4 text-center italic">{t('history.noHistory')}</p>
                     ) : (
                         [...past].reverse().map((cmd, idx) => (
                             <div
@@ -57,7 +59,7 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
                                 className="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
                             >
                                 <div className="min-w-[4px] h-4 rounded-full bg-primary" />
-                                <span className="truncate font-medium">{cmd.description || 'Unknown Action'}</span>
+                                <span className="truncate font-medium">{cmd.description || t('history.unknown')}</span>
                             </div>
                         ))
                     )}
@@ -69,7 +71,7 @@ export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) 
                             className="w-full mt-2 h-8"
                             onClick={onUndo}
                         >
-                            <RotateCcw className="h-3.5 w-3.5 mr-2" /> Undo Last Action
+                            <RotateCcw className="h-3.5 w-3.5 mr-2" /> {t('history.undoLast')}
                         </Button>
                     )}
                 </div>

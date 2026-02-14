@@ -6,6 +6,7 @@ import { BookmarkTags } from './BookmarkTags'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn, getRelativeTime } from '../../lib/utils'
 import { Layers } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowDesktop({
     bookmark,
@@ -16,6 +17,7 @@ export function BookmarkRowDesktop({
     availableFolders,
     availableTags
 }) {
+    const { t } = useTranslation();
     return (
         <div className="hidden lg:contents">
             {/* Checkbox */}
@@ -57,14 +59,14 @@ export function BookmarkRowDesktop({
 
                 {bookmark.addDate && (
                     <div className="text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
-                        <span>Added {getRelativeTime(bookmark.addDate)}</span>
+                        <span>{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate) })}</span>
                     </div>
                 )}
 
                 {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
                         <Layers className="h-3 w-3" />
-                        <span>Duplicate in: {bookmark.otherLocations.join(', ')}</span>
+                        <span>{t('bookmarks.row.duplicateIn', { locations: bookmark.otherLocations.join(', ') })}</span>
                     </div>
                 )}
             </div>

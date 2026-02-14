@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Favicon } from '../Favicon';
+import { useTranslation } from 'react-i18next';
 
 export function TopDomainsList({ domains, maxCount }) {
+    const { t } = useTranslation();
     return (
         <Card className="col-span-3">
             <CardHeader>
-                <CardTitle>Top Domains</CardTitle>
+                <CardTitle>{t('analytics.topDomains')}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">

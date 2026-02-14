@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { WifiOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function OfflineIndicator() {
+    const { t } = useTranslation();
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     useEffect(() => {
@@ -23,7 +25,7 @@ export default function OfflineIndicator() {
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] animate-slide-up">
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-amber-500/90 text-white text-sm font-medium shadow-lg backdrop-blur-sm">
                 <WifiOff size={16} className="shrink-0" />
-                <span>Çevrimdışısınız — Verileriniz yerel olarak kayıtlı</span>
+                <span>{t('offline')}</span>
             </div>
         </div>
     );

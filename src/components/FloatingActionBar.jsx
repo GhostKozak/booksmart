@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
 import { MoveBulkPopover } from './actionbar/MoveBulkPopover';
+import { useTranslation } from 'react-i18next';
 
 export function FloatingActionBar({
     selectedCount,
@@ -17,6 +18,7 @@ export function FloatingActionBar({
     onExportSelected,
     onCleanUrls
 }) {
+    const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
 
     if (selectedCount === 0) return null;
@@ -42,7 +44,7 @@ export function FloatingActionBar({
                     onClick={onDelete}
                 >
                     <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                    <span className="hidden sm:inline">Delete</span>
+                    <span className="hidden sm:inline">{t('actionBar.delete')}</span>
                 </Button>
 
                 {/* Add Tags */}
@@ -70,7 +72,7 @@ export function FloatingActionBar({
                             variant="ghost"
                             size="icon"
                             className="h-9 w-9 sm:h-8 sm:w-8 rounded-full shrink-0"
-                            title="Mark as Alive (Safe)"
+                            title={t('actionBar.markAlive')}
                             onClick={() => onOverrideStatus('alive')}
                         >
                             <Check className="h-4 w-4 sm:h-4 sm:w-4 text-emerald-500" />
@@ -79,7 +81,7 @@ export function FloatingActionBar({
                             variant="ghost"
                             size="icon"
                             className="h-9 w-9 sm:h-8 sm:w-8 rounded-full shrink-0"
-                            title="Mark as Dead"
+                            title={t('actionBar.markDead')}
                             onClick={() => onOverrideStatus('dead')}
                         >
                             <XCircle className="h-4 w-4 sm:h-4 sm:w-4 text-red-500" />
@@ -94,10 +96,10 @@ export function FloatingActionBar({
                         size="sm"
                         className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0"
                         onClick={onExportSelected}
-                        title="Export selected bookmarks"
+                        title={t('actionBar.export')}
                     >
                         <Download className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                        <span className="hidden sm:inline">Export</span>
+                        <span className="hidden sm:inline">{t('actionBar.export')}</span>
                     </Button>
                 )}
 
@@ -108,10 +110,10 @@ export function FloatingActionBar({
                         size="sm"
                         className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
                         onClick={onCleanUrls}
-                        title="Clean tracking parameters from selected URLs"
+                        title={t('actionBar.cleanUrls')}
                     >
                         <Sparkles className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                        <span className="hidden sm:inline">Clean URLs</span>
+                        <span className="hidden sm:inline">{t('actionBar.cleanUrls')}</span>
                     </Button>
                 )}
             </div>

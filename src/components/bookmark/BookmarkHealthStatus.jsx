@@ -1,11 +1,14 @@
 import { Loader2, CheckCircle2, XCircle, History as HistoryIcon, ShieldAlert, ShieldCheck, HelpCircle } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false }) {
+    const { t } = useTranslation();
+
     if (status === 'checking') {
         return (
-            <div className="flex justify-center" title="Checking...">
+            <div className="flex justify-center" title={t('bookmarks.health.checking')}>
                 <Loader2 className={cn(mini ? "h-4 w-4" : "h-4 w-4", "text-blue-500 animate-spin")} />
             </div>
         )
@@ -13,7 +16,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
 
     if (status === 'alive') {
         return (
-            <div className="flex justify-center" title="Alive">
+            <div className="flex justify-center" title={t('bookmarks.health.alive')}>
                 <CheckCircle2 className={cn(mini ? "h-4 w-4" : "h-4 w-4", "text-emerald-500")} />
             </div>
         )
@@ -22,7 +25,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
     if (status === 'dead') {
         return (
             <div className="flex items-center gap-1 group">
-                <div className="flex justify-center" title="Network Error (Likely Dead)">
+                <div className="flex justify-center" title={t('bookmarks.health.dead')}>
                     <XCircle className={cn(mini ? "h-4 w-4" : "h-4 w-4", "text-red-500")} />
                 </div>
                 <Button
@@ -33,7 +36,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
                         e.stopPropagation();
                         window.open(`https://web.archive.org/web/*/${url}`, '_blank');
                     }}
-                    title="Search in Archive (Wayback Machine)"
+                    title={t('bookmarks.health.archive')}
                 >
                     <HistoryIcon className={cn(mini ? "h-4 w-4" : "h-3 w-3", "text-muted-foreground hover:text-primary")} />
                 </Button>
@@ -45,7 +48,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
                         e.stopPropagation();
                         onToggleIgnore(url);
                     }}
-                    title="Ignore Error (Whitelist)"
+                    title={t('bookmarks.health.ignore')}
                 >
                     <ShieldAlert className={cn(mini ? "h-4 w-4 text-red-500" : "h-3 w-3 text-muted-foreground hover:text-primary")} />
                 </Button>
@@ -56,7 +59,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
     if (status === 'ignored') {
         return (
             <div className="flex items-center gap-1 group">
-                <div className="flex justify-center" title="Ignored (Whitelisted)">
+                <div className="flex justify-center" title={t('bookmarks.health.ignored')}>
                     <ShieldCheck className={cn(mini ? "h-4 w-4" : "h-4 w-4", "text-blue-500")} />
                 </div>
                 <Button
@@ -67,7 +70,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
                         e.stopPropagation();
                         onToggleIgnore(url);
                     }}
-                    title="Un-ignore"
+                    title={t('bookmarks.health.unignore')}
                 >
                     <XCircle className={cn(mini ? "h-4 w-4 text-blue-500" : "h-3 w-3 text-muted-foreground hover:text-red-500")} />
                 </Button>
@@ -76,7 +79,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
     }
 
     return (
-        <div className="flex justify-center" title="Unknown">
+        <div className="flex justify-center" title={t('bookmarks.status.unknown')}>
             <HelpCircle className={cn(mini ? "h-4 w-4" : "h-4 w-4", "text-muted-foreground/30")} />
         </div>
     )

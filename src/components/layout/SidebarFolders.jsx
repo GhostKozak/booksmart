@@ -1,6 +1,7 @@
 import { Folder, Plus, ChevronRight, ChevronDown } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export function SidebarFolders({
     availableFolders,
@@ -13,6 +14,8 @@ export function SidebarFolders({
     collapsed,
     onToggle
 }) {
+    const { t } = useTranslation()
+
     return (
         <>
             <div
@@ -21,7 +24,7 @@ export function SidebarFolders({
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
                     {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
-                    <Folder className="h-5 w-5" /> Folders
+                    <Folder className="h-5 w-5" /> {t('sidebar.sections.folders')}
                 </h2>
             </div>
 
@@ -29,7 +32,7 @@ export function SidebarFolders({
                 <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
                     {/* User Defined Folders */}
                     {availableFolders.length > 0 && (
-                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">My Folders</div>
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">{t('sidebar.myFolders')}</div>
                     )}
 
                     {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
@@ -57,7 +60,7 @@ export function SidebarFolders({
                         <>
                             <div className="px-2 pt-2 pb-1">
                                 <div className="border-t border-dashed mb-1" />
-                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Discovered</div>
+                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">{t('sidebar.discovered')}</div>
                             </div>
                             {discoveredFolders.map(folder => {
                                 const folderInfo = uniqueFolders.find(uf => uf.name === folder.name)
@@ -81,7 +84,7 @@ export function SidebarFolders({
                                             size="icon"
                                             className="h-8 w-8 opacity-0 group-hover/item:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
                                             onClick={() => saveToTaxonomy(folder.name, 'folder')}
-                                            title="Add to permanent folders"
+                                            title={t('taxonomy.discovered.addFolder')}
                                         >
                                             <Plus className="h-4 w-4" />
                                         </Button>

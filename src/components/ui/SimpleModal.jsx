@@ -2,8 +2,10 @@ import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from './button';
+import { useTranslation } from 'react-i18next';
 
 export function SimpleModal({ isOpen, onClose, title, children, className }) {
+    const { t } = useTranslation();
     useEffect(() => {
         const handleEscape = (e) => {
             if (e.key === 'Escape') onClose();
@@ -35,7 +37,7 @@ export function SimpleModal({ isOpen, onClose, title, children, className }) {
             )}>
                 <div className="flex items-center justify-between px-6 py-4 border-b">
                     <h3 className="text-lg font-semibold">{title}</h3>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full" aria-label={t('common.close')}>
                         <X className="h-4 w-4" />
                     </Button>
                 </div>

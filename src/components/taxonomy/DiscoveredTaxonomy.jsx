@@ -1,8 +1,10 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useTranslation } from 'react-i18next';
 
 export function DiscoveredTaxonomy({ items, onAdd, type }) {
+    const { t } = useTranslation();
     if (!items || items.length === 0) return null;
 
     return (
@@ -10,7 +12,7 @@ export function DiscoveredTaxonomy({ items, onAdd, type }) {
             <div className="flex items-center gap-2 mb-4 px-1">
                 <Plus className="h-3 w-3 text-muted-foreground" />
                 <h3 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                    Discovered in Bookmarks
+                    {t('taxonomy.discovered.title')}
                 </h3>
             </div>
             <div className="grid grid-cols-1 gap-2">
@@ -25,14 +27,16 @@ export function DiscoveredTaxonomy({ items, onAdd, type }) {
                                 style={{ backgroundColor: type === 'folders' ? '#3b82f6' : '#10b981' }}
                             />
                             <span className="text-sm italic text-muted-foreground">{item.name}</span>
-                            <span className="text-[10px] bg-muted px-1 rounded opacity-70">count: {item.count}</span>
+                            <span className="text-[10px] bg-muted px-1 rounded opacity-70">
+                                {t('taxonomy.discovered.count', { count: item.count })}
+                            </span>
                         </div>
                         <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
                             onClick={() => onAdd(item.name)}
-                            title="Add to permanent list"
+                            title={t('taxonomy.discovered.add')}
                         >
                             <Plus className="h-4 w-4" />
                         </Button>

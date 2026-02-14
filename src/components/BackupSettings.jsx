@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Download, Upload, AlertCircle, CheckCircle2, History } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { createBackup, downloadBackup, restoreBackup, getLastAutoBackupTime } from '../lib/backup-manager';
 
 export function BackupSettings() {
+    const { t } = useTranslation();
     const [lastBackupTime, setLastBackupTime] = useState(null);
     const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(false);
     const [isRestoring, setIsRestoring] = useState(false);
@@ -69,8 +71,8 @@ export function BackupSettings() {
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-sm font-medium">Auto-Backup</h3>
-                        <p className="text-xs text-muted-foreground">Automatically save a local snapshot when rules change.</p>
+                        <h3 className="text-sm font-medium">{t('backup.autoBackup.title')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('backup.autoBackup.desc')}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                         <input
@@ -86,39 +88,39 @@ export function BackupSettings() {
                 {lastBackupTime && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">
                         <History className="h-3 w-3" />
-                        Last local snapshot: {lastBackupTime}
+                        {t('backup.lastSnapshot')} {lastBackupTime}
                     </div>
                 )}
             </div>
 
             <div className="border-t pt-4">
-                <h3 className="text-sm font-medium mb-3">Manual Backup</h3>
+                <h3 className="text-sm font-medium mb-3">{t('backup.manual.title')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
                         <div className="flex items-center gap-2 font-medium text-sm">
                             <Download className="h-4 w-4 text-primary" />
-                            Export Configuration
+                            {t('backup.export.title')}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Download all your rules, folders, and tags as a JSON file.
+                            {t('backup.export.desc')}
                         </p>
                         <Button onClick={handleManualBackup} size="sm" className="w-full">
-                            Backup Now
+                            {t('backup.export.button')}
                         </Button>
                     </div>
 
                     <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
                         <div className="flex items-center gap-2 font-medium text-sm">
                             <Upload className="h-4 w-4 text-primary" />
-                            Restore Configuration
+                            {t('backup.restore.title')}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Restore your settings from a previous backup file.
+                            {t('backup.restore.desc')}
                         </p>
                         <div className="relative">
                             <Button variant="outline" size="sm" className="w-full relative overflow-hidden">
                                 <span className="relative z-10 flex items-center gap-2">
-                                    {isRestoring ? "Restoring..." : "Select File..."}
+                                    {isRestoring ? t('backup.restore.restoring') : t('backup.restore.button')}
                                 </span>
                                 <Input
                                     type="file"
@@ -131,12 +133,12 @@ export function BackupSettings() {
                         </div>
                         {restoreStatus === 'success' && (
                             <div className="flex items-center gap-1 text-xs text-green-600 mt-1">
-                                <CheckCircle2 className="h-3 w-3" /> Restored! Reloading...
+                                <CheckCircle2 className="h-3 w-3" /> {t('backup.restore.success')}
                             </div>
                         )}
                         {restoreStatus === 'error' && (
                             <div className="flex items-center gap-1 text-xs text-destructive mt-1">
-                                <AlertCircle className="h-3 w-3" /> Invalid backup file.
+                                <AlertCircle className="h-3 w-3" /> {t('backup.restore.error')}
                             </div>
                         )}
                     </div>
@@ -146,7 +148,9 @@ export function BackupSettings() {
             <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900 p-3 rounded-md flex gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 dark:text-amber-400">
-                    Backups include your Rules, Folders, Tags, and Ignored URLs. They do <strong>not</strong> include your actual bookmarks. Use "Export" on the main page for bookmarks.
+                    <Trans i18nKey="backup.note">
+                        Backups include your Rules, Folders, Tags, and Ignored URLs. They do <strong>not</strong> include your actual bookmarks. Use "Export" on the main page for bookmarks.
+                    </Trans>
                 </p>
             </div>
         </div>
