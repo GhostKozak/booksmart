@@ -30,6 +30,10 @@ import { RuleModal } from './components/modals/RuleModal'
 import { ClearAllModal } from './components/modals/ClearAllModal'
 import { ShortcutsModal } from './components/modals/ShortcutsModal'
 
+// PWA Components
+import OfflineIndicator from './components/OfflineIndicator'
+import PWAUpdatePrompt from './components/PWAUpdatePrompt'
+
 const EMPTY_ARRAY = [];
 
 function App() {
@@ -396,6 +400,9 @@ function App() {
           discoveredFolders={discoveredFolders}
           saveToTaxonomy={saveToTaxonomy}
         />
+
+        <OfflineIndicator />
+        <PWAUpdatePrompt />
       </div>
     </div>
   )
