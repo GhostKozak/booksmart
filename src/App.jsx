@@ -4,6 +4,7 @@ import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Se
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { FloatingActionBar } from './components/FloatingActionBar'
+import { HistoryPanel } from './components/HistoryPanel'
 import { BookmarkList } from './components/BookmarkList'
 import { BookmarkGrid } from './components/BookmarkGrid'
 import { PreviewPane } from './components/PreviewPane'
@@ -31,7 +32,8 @@ const EMPTY_ARRAY = [];
 
 function App() {
   const { theme, setTheme } = useTheme()
-  const { addCommand, undo, redo, canUndo, canRedo } = useUndoRedo();
+  const { addCommand, undo, redo, canUndo, canRedo, past, future } = useUndoRedo();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Initialization & Migration
   useEffect(() => {
@@ -294,18 +296,32 @@ function App() {
     }
   };
 
-  const removeDuplicates = () => {
+  const removeDuplicates = async () => {
     const urls = new Set();
-    const toDelete = [];
-    rawBookmarks.forEach(b => {
+    const toDeleteIds = [];
+
+    // Identify duplicates (keep first instance)
+    const sortedBookmarks = [...rawBookmarks].sort((a, b) => a.addDate - b.addDate);
+
+    sortedBookmarks.forEach(b => {
       if (urls.has(b.url)) {
-        toDelete.push(b.id);
+        toDeleteIds.push(b.id);
       } else {
         urls.add(b.url);
       }
     });
-    if (toDelete.length > 0) {
-      db.bookmarks.bulkDelete(toDelete);
+
+    if (toDeleteIds.length > 0) {
+      // Get the full bookmark objects before deleting so we can restore them
+      const bookmarksToDelete = await db.bookmarks.bulkGet(toDeleteIds);
+
+      await db.bookmarks.bulkDelete(toDeleteIds);
+
+      addCommand({
+        undo: () => db.bookmarks.bulkAdd(bookmarksToDelete),
+        redo: () => db.bookmarks.bulkDelete(toDeleteIds),
+        description: `Remove ${toDeleteIds.length} Duplicate Bookmarks`
+      });
     }
   };
 
@@ -593,7 +609,7 @@ function App() {
     }
   }
 
-  const handleBatchMoveDocs = () => {
+  const handleBatchMoveDocs = async () => {
     // Check/Create "References" folder
     const refFolderExists = availableFolders.some(f => f.name === 'References');
     if (!refFolderExists) {
@@ -614,9 +630,25 @@ function App() {
         url.includes('docs.google.com');
     }
 
-    db.transaction('rw', db.bookmarks, async () => {
-      await db.bookmarks.filter(b => isDoc(b.url)).modify({ originalFolder: 'References', newFolder: 'References' });
-    });
+    const bookmarksToMove = await db.bookmarks.filter(b => isDoc(b.url)).toArray();
+
+    if (bookmarksToMove.length > 0) {
+      const idsToMove = bookmarksToMove.map(b => b.id);
+      const originalStates = bookmarksToMove.map(b => ({ id: b.id, originalFolder: b.originalFolder, newFolder: b.newFolder }));
+
+      await db.bookmarks.where('id').anyOf(idsToMove).modify({ originalFolder: 'References', newFolder: 'References' });
+
+      addCommand({
+        undo: () => db.transaction('rw', db.bookmarks, async () => {
+          for (const state of originalStates) {
+            await db.bookmarks.update(state.id, { originalFolder: state.originalFolder, newFolder: state.newFolder });
+          }
+        }),
+        redo: () => db.bookmarks.where('id').anyOf(idsToMove).modify({ originalFolder: 'References', newFolder: 'References' }),
+        description: `Move ${idsToMove.length} documents to References`
+      });
+    }
+
     setSmartFilter(null);
   };
 
@@ -770,6 +802,24 @@ function App() {
                 <Redo2 className="h-4 w-4" />
               </Button>
             )}
+            <Button
+              variant={isHistoryOpen ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+              title="Version History"
+              className={cn("ml-1", isHistoryOpen && "bg-muted")}
+            >
+              <HistoryIcon className="h-4 w-4" />
+            </Button>
+
+            <HistoryPanel
+              isOpen={isHistoryOpen}
+              onClose={() => setIsHistoryOpen(false)}
+              past={past}
+              future={future}
+              onUndo={undo}
+              onRedo={redo}
+            />
           </div>
         </div>
 

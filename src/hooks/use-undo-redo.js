@@ -56,6 +56,8 @@ export function useUndoRedo() {
         redo,
         canUndo,
         canRedo,
-        clear
+        clear,
+        past,
+        future
     };
 }
