@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -19,6 +19,8 @@ import { cn, generateUUID } from './lib/utils'
 import { SimpleModal } from './components/ui/SimpleModal'
 import { TaxonomyManager } from './components/TaxonomyManager'
 import { SimpleCombobox } from './components/ui/SimpleCombobox'
+import { AdvancedSearch } from './components/AdvancedSearch'
+import Fuse from 'fuse.js'
 
 
 
@@ -159,9 +161,22 @@ function App() {
   // Search State
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTag, setActiveTag] = useState(null)
-  const [agingFilter, setAgingFilter] = useState(null) // DEPRECATED in favor of smartFilter, but removing lines is easier with multi_replace if I just swap it
+
   const [smartFilter, setSmartFilter] = useState(null) // null | 'old' | 'http' | 'untitled'
+
+  // Advanced Search State
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
+  const [searchMode, setSearchMode] = useState('simple') // 'simple' | 'fuzzy' | 'regex'
+  const [dateFilter, setDateFilter] = useState({ start: null, end: null })
+
   const searchInputRef = useRef(null)
+
+  // Initialize Fuse outside of render or memoize it
+  const fuseOptions = useMemo(() => ({
+    keys: ['title', 'url', 'tags', 'originalFolder'],
+    threshold: 0.4, // 0.0 = perfect match, 1.0 = match anything
+    ignoreLocation: true
+  }), [])
 
   // Export State
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
@@ -178,11 +193,60 @@ function App() {
     // 0. Search Filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(b =>
-        (b.title || '').toLowerCase().includes(query) ||
-        (b.url || '').toLowerCase().includes(query) ||
-        (b.tags || []).some(t => t.toLowerCase().includes(query))
-      );
+
+      if (searchMode === 'fuzzy') {
+        const fuse = new Fuse(filtered, fuseOptions);
+        const result = fuse.search(searchQuery);
+        filtered = result.map(r => r.item);
+      } else if (searchMode === 'regex') {
+        try {
+          const regex = new RegExp(searchQuery, 'i');
+          filtered = filtered.filter(b =>
+            regex.test(b.title || '') ||
+            regex.test(b.url || '') ||
+            (b.tags || []).some(t => regex.test(t))
+          );
+        } catch {
+          // Invalid regex, maybe don't filter or show nothing? 
+          // For now, let's treat it as a failed match if regex is invalid, or fallback to simple?
+          // Fallback to simple contains to be user friendly while typing
+          filtered = filtered.filter(b =>
+            (b.title || '').toLowerCase().includes(query) ||
+            (b.url || '').toLowerCase().includes(query)
+          );
+        }
+      } else {
+        // Simple Mode
+        filtered = filtered.filter(b =>
+          (b.title || '').toLowerCase().includes(query) ||
+          (b.url || '').toLowerCase().includes(query) ||
+          (b.tags || []).some(t => t.toLowerCase().includes(query))
+        );
+      }
+    }
+
+    // 0.2 Date Filter
+    if (dateFilter.start || dateFilter.end) {
+      filtered = filtered.filter(b => {
+        if (!b.addDate) return false;
+        const bookmarkDate = parseInt(b.addDate) * 1000;
+
+        // Start Date
+        if (dateFilter.start) {
+          const start = new Date(dateFilter.start).getTime();
+          if (bookmarkDate < start) return false;
+        }
+
+        // End Date
+        if (dateFilter.end) {
+          // Set to end of day
+          const end = new Date(dateFilter.end);
+          end.setHours(23, 59, 59, 999);
+          if (bookmarkDate > end.getTime()) return false;
+        }
+
+        return true;
+      })
     }
 
     // 0.5 Tag Filter
@@ -320,7 +384,7 @@ function App() {
     });
 
     return processed;
-  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter]);
+  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter, searchMode, dateFilter, fuseOptions]);
 
   // Extract Unique Tags
   const uniqueTags = useMemo(() => {
@@ -432,7 +496,7 @@ function App() {
       }
       reader.readAsText(file)
     }
-  }, [])
+  }, [setRawBookmarks, setHasFileLoaded])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -562,11 +626,11 @@ function App() {
   }
 
   // Batch Operations
-  const handleBatchDelete = () => {
+  const handleBatchDelete = useCallback(() => {
     const remaining = rawBookmarks.filter(b => !selectedIds.has(b.id))
     setRawBookmarks(remaining)
     setSelectedIds(new Set())
-  }
+  }, [rawBookmarks, selectedIds, setRawBookmarks])
 
   const handleBatchMove = (targetFolder) => {
     const updated = rawBookmarks.map(b => {
@@ -672,15 +736,40 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-md mx-2 sm:mx-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search..."
-              className="pl-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+        <div className="flex-1 max-w-md mx-2 sm:mx-4 flex flex-col relative z-20">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                placeholder={searchMode === 'regex' ? "Search with Regex..." : "Search..."}
+                className={cn(
+                  "pl-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
+                  searchMode === 'regex' && "font-mono text-xs"
+                )}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button
+              variant={isAdvancedSearchOpen ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => setIsAdvancedSearchOpen(!isAdvancedSearchOpen)}
+              className="shrink-0"
+              title="Advanced Search Filters"
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Advanced Search Panel - Absolute positioned below search bar */}
+          <div className="absolute top-full left-0 right-0 mt-2">
+            <AdvancedSearch
+              isOpen={isAdvancedSearchOpen}
+              searchMode={searchMode}
+              setSearchMode={setSearchMode}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
             />
           </div>
         </div>
