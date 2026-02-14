@@ -51,23 +51,58 @@ function App() {
   }, [rules])
 
   // Taxonomy State (Folders & Tags)
+  // Data Structure: { id: string, name: string, color: string, order: number }
   const [availableFolders, setAvailableFolders] = useState(() => {
     try {
       const saved = localStorage.getItem('booksmart_folders')
-      return saved ? JSON.parse(saved) : ['Work', 'Personal', 'Reading List', 'Dev', 'News']
+      const parsed = saved ? JSON.parse(saved) : ['Work', 'Personal', 'Reading List', 'Dev', 'News']
+
+      // Migration: Convert string[] to object[]
+      if (parsed.length > 0 && typeof parsed[0] === 'string') {
+        return parsed.map((name, index) => ({
+          id: generateUUID(),
+          name,
+          color: '#3b82f6', // Default blue
+          order: index
+        }))
+      }
+      return parsed
     } catch {
-      return ['Work', 'Personal', 'Reading List', 'Dev', 'News']
+      return ['Work', 'Personal', 'Reading List', 'Dev', 'News'].map((name, index) => ({
+        id: generateUUID(),
+        name,
+        color: '#3b82f6',
+        order: index
+      }))
     }
   })
 
   const [availableTags, setAvailableTags] = useState(() => {
     try {
       const saved = localStorage.getItem('booksmart_tags')
-      return saved ? JSON.parse(saved) : ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
+      const parsed = saved ? JSON.parse(saved) : ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
+
+      // Migration: Convert string[] to object[]
+      if (parsed.length > 0 && typeof parsed[0] === 'string') {
+        return parsed.map((name, index) => ({
+          id: generateUUID(),
+          name,
+          color: '#10b981', // Default green
+          order: index
+        }))
+      }
+      return parsed
     } catch {
-      return ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
+      return ['important', 'read-later', 'tutorial', 'tool', 'inspiration'].map((name, index) => ({
+        id: generateUUID(),
+        name,
+        color: '#10b981',
+        order: index
+      }))
     }
   })
+
+  const [activeFolder, setActiveFolder] = useState(null)
 
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -254,6 +289,11 @@ function App() {
       filtered = filtered.filter(b => b.tags && b.tags.includes(activeTag))
     }
 
+    // 0.55 Folder Filter
+    if (activeFolder) {
+      filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)
+    }
+
     // 0.6 Smart Filters
     if (smartFilter === 'old') {
       const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
@@ -384,7 +424,7 @@ function App() {
     });
 
     return processed;
-  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter, searchMode, dateFilter, fuseOptions]);
+  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter, searchMode, dateFilter, fuseOptions, activeFolder]);
 
   // Extract Unique Tags
   const uniqueTags = useMemo(() => {
@@ -895,22 +935,63 @@ function App() {
 
           <div className="mb-6 space-y-1">
             {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground">No tags found.</p>}
-            {uniqueTags.map(tag => (
-              <button
-                key={tag.name}
-                onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
-                className={cn(
-                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                  activeTag === tag.name ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <span>#{tag.name}</span>
-                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
-              </button>
-            ))}
+            {/* 
+                Merge uniqueTags (counts) with availableTags (colors/order). 
+                If a tag exists in availableTags, use its color/order. 
+                Otherwise default.
+            */}
+            {uniqueTags.map(tag => {
+              const config = availableTags.find(t => t.name === tag.name);
+              const color = config ? config.color : '#64748b';
+              return (
+                <button
+                  key={tag.name}
+                  onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                    activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                    <span>#{tag.name}</span>
+                  </div>
+                  <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
+                </button>
+              )
+            })}
           </div>
 
+          <div className="flex items-center justify-between mb-4 border-t pt-6">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <Folder className="h-5 w-5" /> Folders
+            </h2>
+          </div>
 
+          <div className="mb-6 space-y-1">
+            {/* Render available folders sorted by order */}
+            {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
+              // Calculate count for this folder
+              const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length;
+
+              return (
+                <button
+                  key={folder.id}
+                  onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                    activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <Folder className="h-4 w-4" style={{ color: folder.color }} />
+                    <span>{folder.name}</span>
+                  </div>
+                  <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{count}</span>
+                </button>
+              )
+            })}
+          </div>
 
           <div className="flex items-center justify-between mb-4 border-t pt-6">
             <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -1020,13 +1101,18 @@ function App() {
             <div className="space-y-2">
               <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
               <SimpleCombobox
-                options={availableFolders}
+                options={availableFolders.map(f => f.name)}
                 value={newRule.targetFolder}
                 onChange={(val) => {
                   setNewRule({ ...newRule, targetFolder: val })
                   // Auto-add to available folders if created new
-                  if (val && !availableFolders.includes(val)) {
-                    setAvailableFolders(prev => [...prev, val])
+                  if (val && !availableFolders.some(f => f.name === val)) {
+                    setAvailableFolders(prev => [...prev, {
+                      id: generateUUID(),
+                      name: val,
+                      color: '#3b82f6',
+                      order: prev.length
+                    }])
                   }
                 }}
                 placeholder="Select or create folder..."
@@ -1048,17 +1134,17 @@ function App() {
               <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
                 {availableTags.map(tag => (
                   <button
-                    key={tag}
+                    key={tag.id}
                     onClick={() => {
                       const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
-                      if (!current.includes(tag)) {
-                        const newValue = [...current, tag].join(', ')
+                      if (!current.includes(tag.name)) {
+                        const newValue = [...current, tag.name].join(', ')
                         setNewRule({ ...newRule, tags: newValue })
                       }
                     }}
                     className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
                   >
-                    + {tag}
+                    + {tag.name}
                   </button>
                 ))}
               </div>
@@ -1229,6 +1315,7 @@ function App() {
                         linkHealth={linkHealth}
                         ignoredUrls={ignoredUrls}
                         toggleIgnoreUrl={toggleIgnoreUrl}
+                        availableFolders={availableFolders}
                       />
                     ) : (
                       <BookmarkGrid
@@ -1240,6 +1327,7 @@ function App() {
                           setPreviewBookmark(b)
                           setSelectedIds(new Set([b.id]))
                         }}
+                        availableFolders={availableFolders}
                       />
                     )}
                   </div>

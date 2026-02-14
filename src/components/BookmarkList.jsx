@@ -3,7 +3,7 @@ import { Checkbox } from './ui/checkbox'
 import { BookmarkRow } from './BookmarkRow'
 import { cn } from '../lib/utils'
 
-export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl }) {
+export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, availableFolders = [] }) {
 
     // Determine if all visible/loaded bookmarks are selected
     const isAllSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length
@@ -49,6 +49,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                             ignoredUrls={ignoredUrls}
                             toggleIgnoreUrl={toggleIgnoreUrl}
                             className={gridLayout}
+                            availableFolders={availableFolders}
                         />
                     )}
                     overscan={200}

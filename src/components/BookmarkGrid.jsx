@@ -5,13 +5,17 @@ import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
 import { Folder, ExternalLink } from 'lucide-react';
 
-export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails }) {
+export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails, availableFolders = [] }) {
 
     // Define the grid item structure
     // We don't have direct access to "index" in ItemContent unless we wrapper it, but VirtuosoGrid provides data.
     const ItemContent = (index) => {
         const bookmark = bookmarks[index];
         const isSelected = selectedIds.has(bookmark.id);
+
+        const folderName = bookmark.newFolder || bookmark.originalFolder;
+        const folderConfig = availableFolders.find(f => f.name === folderName);
+        const folderColor = folderConfig ? folderConfig.color : null;
 
         return (
             <div className="h-full flex flex-col">
@@ -28,6 +32,7 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                         }
                     }}
                 >
+                    {/* ... (Start of Card content remains same until folder section) ... */}
                     {/* Screenshot Thumbnail - Only show if enabled */}
                     {showThumbnails && (
                         <div className="relative aspect-video w-full bg-muted/30 overflow-hidden border-b">
@@ -91,9 +96,16 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
 
                         <div className="pt-2 mt-auto border-t flex items-center justify-between text-[10px] text-muted-foreground">
                             <div className="flex items-center gap-1 max-w-[70%]">
-                                <Folder className="w-3 h-3 shrink-0" />
-                                <span className="truncate" title={bookmark.newFolder || bookmark.originalFolder}>
-                                    {bookmark.newFolder || bookmark.originalFolder}
+                                <Folder
+                                    className="w-3 h-3 shrink-0"
+                                    style={{ color: folderColor }}
+                                />
+                                <span
+                                    className="truncate"
+                                    title={folderName}
+                                    style={{ color: folderColor }}
+                                >
+                                    {folderName}
                                 </span>
                             </div>
                             {bookmark.addDate && (
@@ -103,6 +115,7 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                             )}
                         </div>
                     </div>
+
                 </Card>
             </div>
         );

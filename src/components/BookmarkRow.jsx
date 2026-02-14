@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { Favicon } from './Favicon'
 import { cn, getRelativeTime } from '../lib/utils'
 
-export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className }) => {
+export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className, availableFolders = [] }) => {
     // If no bookmark, return null (safety)
     if (!bookmark) return null
 
@@ -188,7 +188,14 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
 
                 {/* Original Folder */}
                 <div className="px-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border truncate max-w-full">
+                    <span
+                        className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border truncate max-w-full"
+                        style={{
+                            borderColor: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color + '40',
+                            backgroundColor: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color + '10',
+                            color: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color
+                        }}
+                    >
                         {bookmark.originalFolder}
                     </span>
                 </div>
@@ -200,7 +207,13 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                         bookmark.status === 'matched'
                             ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30"
                             : "bg-muted text-muted-foreground border-transparent"
-                    )}>
+                    )}
+                        style={bookmark.status !== 'matched' ? {
+                            borderColor: availableFolders?.find(f => f.name === bookmark.newFolder)?.color + '40',
+                            backgroundColor: availableFolders?.find(f => f.name === bookmark.newFolder)?.color + '10',
+                            color: availableFolders?.find(f => f.name === bookmark.newFolder)?.color
+                        } : {}}
+                    >
                         {bookmark.newFolder}
                     </span>
                 </div>
