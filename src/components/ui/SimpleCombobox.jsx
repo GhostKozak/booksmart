@@ -19,11 +19,11 @@ export function SimpleCombobox({
 
     // Sync internal query with value when value changes externally
     useEffect(() => {
-        // If we are open, we assume the user is typing, so don't override.
         // If we are closed and the value changed, sync the query.
-        if (!isOpen) {
+        if (!isOpen && value !== query) {
             setQuery(value || '');
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value, isOpen]);
 
     // Handle click outside to close

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { BarChart3, Link2, FolderTree, AlertTriangle, Layers, Activity, TrendingUp } from 'lucide-react';
-import { cn } from '../lib/utils'; // eslint-disable-line no-unused-vars
+
 import { Favicon } from './Favicon';
 import {
     BarChart,

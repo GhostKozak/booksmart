@@ -6,13 +6,13 @@ import { cn } from '../lib/utils';
 
 export function PreviewPane({ bookmark, onClose, className }) {
     const [isLoading, setIsLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
+    // const [hasError, setHasError] = useState(false);
     // Key to force re-render iframe on reload
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleReload = () => {
         setIsLoading(true);
-        setHasError(false);
+        // setHasError(false);
         setRefreshKey(prev => prev + 1);
     };
 
@@ -61,7 +61,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     onLoad={() => setIsLoading(false)}
                     onError={() => {
                         setIsLoading(false);
-                        setHasError(true);
+                        // setHasError(true);
                     }}
                     // Sandbox permissions - strict but allow scripts for better compatibility
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"

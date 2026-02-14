@@ -493,22 +493,12 @@ function App() {
     }
 
     // Proceed to clear
-    db.transaction('rw', db.bookmarks, db.rules, async () => {
+    db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
       await db.bookmarks.clear();
       await db.rules.clear();
-      // Do we clear folders/tags? "Clear All" usually implies everything user data.
-      // Required: "Clear All" clears bookmarks and rules. 
-      // User request implies: "Rules and Settings go away".
-      // So yes, we should clear folders and tags too to be a true "Factory Reset".
-      // BUT, let's keep it safe. The original clearAll only cleared bookmarks and rules.
-      // User said: "User 'Clear All' dediğinde... tüm kurallar ve ayarlar gider." 
-      // So YES, we must clear EVERYTHING.
       await db.folders.clear();
       await db.tags.clear();
       await db.ignoredUrls.clear();
-
-      // Reseed defaults? Or leave empty?
-      // Usually "Clear All" leaves it empty.
     });
     setSelectedIds(new Set())
     setShowBackupModal(false);
@@ -1469,7 +1459,7 @@ function App() {
                         selectedIds={selectedIds}
                         toggleSelection={toggleSelection}
                         onPreview={handlePreview}
-                        showThumbnails={viewMode === 'grid'}
+                        showThumbnails={showThumbnails}
                         availableFolders={availableFolders}
                         availableTags={availableTags}
                       />

@@ -1,6 +1,6 @@
 import { Trash2, FolderInput, X, Loader2, Check, XCircle, Tag, Folder } from 'lucide-react';
 import { Button } from './ui/button';
-import { cn } from '../lib/utils';
+
 import { useState, useRef, useEffect } from 'react';
 
 export function FloatingActionBar({

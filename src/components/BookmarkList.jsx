@@ -32,7 +32,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
     )
 
     // Force a new data reference when metadata changes to trigger Virtuoso refresh
-    const displayData = React.useMemo(() => [...bookmarks], [bookmarks, availableTags, availableFolders])
+    const displayData = React.useMemo(() => [...bookmarks], [bookmarks])
 
     return (
         <div className="bg-card rounded-xl border shadow-sm overflow-hidden h-full flex flex-col">

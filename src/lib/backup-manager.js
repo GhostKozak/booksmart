@@ -99,7 +99,7 @@ export function getAutoBackup() {
     try {
         const raw = localStorage.getItem('booksmart_autosave_config');
         return raw ? JSON.parse(raw) : null;
-    } catch (error) {
+    } catch {
         return null;
     }
 }

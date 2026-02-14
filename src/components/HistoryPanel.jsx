@@ -1,7 +1,7 @@
 import React from 'react';
 import { History, RotateCcw, RotateCw, X } from 'lucide-react';
 import { Button } from './ui/button';
-import { cn } from '../lib/utils';
+
 
 export function HistoryPanel({ isOpen, onClose, past, future, onUndo, onRedo }) {
     if (!isOpen) return null;

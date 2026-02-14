@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Upload, AlertCircle, CheckCircle2, History } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { cn } from '../lib/utils';
+
 import { createBackup, downloadBackup, restoreBackup, getLastAutoBackupTime } from '../lib/backup-manager';
 
 export function BackupSettings() {
