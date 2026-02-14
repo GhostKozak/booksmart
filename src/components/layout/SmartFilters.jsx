@@ -39,7 +39,7 @@ export function SmartFilters({
     return (
         <>
             <div
-                className="flex items-center justify-between mb-4 border-t pt-6 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+                className="flex items-center justify-between mb-1 border-t pt-2 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
                 onClick={onToggle}
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -49,10 +49,10 @@ export function SmartFilters({
             </div>
 
             {!collapsed && (
-                <div className="mb-10 space-y-1 flex-shrink-0 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 animate-in fade-in slide-in-from-top-1 duration-200">
                     {filters.map(filter => {
                         if (filter.key === 'divider') {
-                            return <div key="divider" className="my-2 border-t border-dashed" />
+                            return <div key="divider" className="my-1 border-t border-dashed" />
                         }
 
                         const Icon = filter.icon

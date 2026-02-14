@@ -1,4 +1,5 @@
 import { Upload, Folder, Search } from 'lucide-react'
+import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { BookmarkList } from '../BookmarkList'
 import { BookmarkGrid } from '../BookmarkGrid'
@@ -46,7 +47,7 @@ export function MainContent({
                     >
                         <input {...getInputProps()} />
                         <div className="bg-primary/10 p-6 rounded-full mb-6">
-                            <Upload className="h-12 w-12 text-primary" />
+                            <Logo className="h-16 w-16" />
                         </div>
                         <h3 className="text-2xl font-bold mb-2">Drop your bookmarks here</h3>
                         <p className="text-muted-foreground max-w-md">
@@ -64,7 +65,7 @@ export function MainContent({
             <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
                 <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                     <div className="bg-muted p-6 rounded-full mb-4">
-                        <Search className="h-12 w-12 text-muted-foreground" />
+                        <Logo className="h-12 w-12 grayscale opacity-50" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">No bookmarks found</h3>
                     <p className="text-muted-foreground max-w-sm mb-6">

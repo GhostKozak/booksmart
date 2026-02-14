@@ -16,7 +16,7 @@ export function SidebarFolders({
     return (
         <>
             <div
-                className="flex items-center justify-between mb-4 border-t pt-6 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+                className="flex items-center justify-between mb-1 border-t pt-2 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
                 onClick={onToggle}
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -26,8 +26,12 @@ export function SidebarFolders({
             </div>
 
             {!collapsed && (
-                <div className="mb-6 space-y-1 max-h-[30vh] min-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
                     {/* User Defined Folders */}
+                    {availableFolders.length > 0 && (
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">My Folders</div>
+                    )}
+
                     {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
                         const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length
                         return (
@@ -51,9 +55,9 @@ export function SidebarFolders({
                     {/* Discovered Folders */}
                     {discoveredFolders.length > 0 && (
                         <>
-                            <div className="px-2 pt-4 pb-2">
-                                <div className="border-t border-dashed" />
-                                <div className="text-[10px] uppercase font-bold text-muted-foreground mt-2 px-1">Discovered</div>
+                            <div className="px-2 pt-2 pb-1">
+                                <div className="border-t border-dashed mb-1" />
+                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Discovered</div>
                             </div>
                             {discoveredFolders.map(folder => {
                                 const folderInfo = uniqueFolders.find(uf => uf.name === folder.name)

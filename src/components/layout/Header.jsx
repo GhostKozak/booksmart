@@ -1,4 +1,5 @@
-import { Sun, Moon, Upload, Download, Plus, Folder, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles } from 'lucide-react'
+import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { HistoryPanel } from '../HistoryPanel'
@@ -36,27 +37,7 @@ export function Header({
     return (
         <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
             <div className="flex items-center gap-2">
-                {/* Mobile Menu Button */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="lg:hidden mr-2 -ml-2"
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                >
-                    <Settings className="h-5 w-5" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:inline-flex mr-2"
-                    onClick={() => openSettings('folders')}
-                    title="Taxonomy Settings"
-                >
-                    <Settings className="h-5 w-5" />
-                </Button>
-
-                <Folder className="h-6 w-6 text-primary shrink-0" />
+                <Logo className="h-7 w-7 shrink-0" />
                 <h1 className="font-bold text-xl tracking-tight hidden sm:block">BookSmart</h1>
                 <div className="flex items-center gap-1 ml-4 border-l pl-4">
                     {canUndo && (
@@ -69,15 +50,17 @@ export function Header({
                             <Redo2 className="h-4 w-4" />
                         </Button>
                     )}
-                    <Button
-                        variant={isHistoryOpen ? "secondary" : "ghost"}
-                        size="icon"
-                        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                        title="Version History"
-                        className={cn("ml-1", isHistoryOpen && "bg-muted")}
-                    >
-                        <HistoryIcon className="h-4 w-4" />
-                    </Button>
+                    {(past.length > 0 || future.length > 0) && (
+                        <Button
+                            variant={isHistoryOpen ? "secondary" : "ghost"}
+                            size="icon"
+                            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                            title="Version History"
+                            className={cn("ml-1", isHistoryOpen && "bg-muted")}
+                        >
+                            <HistoryIcon className="h-4 w-4" />
+                        </Button>
+                    )}
 
                     <HistoryPanel
                         isOpen={isHistoryOpen}
@@ -245,6 +228,28 @@ export function Header({
                 >
                     {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
+
+                <div className="flex items-center border-l pl-1 ml-1 sm:pl-2 sm:ml-2">
+                    {/* Mobile Menu Toggle (Moved Right) */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="lg:hidden"
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    >
+                        <Settings className="h-5 w-5" />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hidden lg:inline-flex"
+                        onClick={() => openSettings('folders')}
+                        title="Settings"
+                    >
+                        <Settings className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
         </header>
     )

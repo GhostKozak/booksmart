@@ -15,7 +15,7 @@ export function SidebarTags({
     return (
         <>
             <div
-                className="flex items-center justify-between mb-4 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+                className="flex items-center justify-between mb-1 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
                 onClick={onToggle}
             >
                 <h2 className="font-semibold text-lg flex items-center gap-2">
@@ -25,39 +25,41 @@ export function SidebarTags({
             </div>
 
             {!collapsed && (
-                <div className="mb-6 space-y-1 max-h-[30vh] min-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
                     {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">No tags found.</p>}
 
                     {/* User Defined Tags */}
-                    {uniqueTags
-                        .filter(tag => availableTags.some(t => t.name === tag.name))
-                        .map(tag => {
-                            const config = availableTags.find(t => t.name === tag.name)
-                            const color = config ? config.color : '#64748b'
-                            return (
-                                <button
-                                    key={tag.name}
-                                    onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
-                                    className={cn(
-                                        "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
-                                        activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                                        <span>#{tag.name}</span>
-                                    </div>
-                                    <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
-                                </button>
-                            )
-                        })}
+                    {availableTags.length > 0 && (
+                        <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">My Tags</div>
+                    )}
+
+                    {availableTags.map(tag => {
+                        const tagStats = uniqueTags.find(t => t.name === tag.name)
+                        const count = tagStats ? tagStats.count : 0
+                        return (
+                            <button
+                                key={tag.name}
+                                onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
+                                className={cn(
+                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                                    activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                                )}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#64748b' }} />
+                                    <span>#{tag.name}</span>
+                                </div>
+                                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{count}</span>
+                            </button>
+                        )
+                    })}
 
                     {/* Discovered Tags */}
                     {discoveredTags.length > 0 && (
                         <>
-                            <div className="px-2 pt-4 pb-2">
-                                <div className="border-t border-dashed" />
-                                <div className="text-[10px] uppercase font-bold text-muted-foreground mt-2 px-1">Discovered</div>
+                            <div className="px-2 pt-2 pb-1">
+                                <div className="border-t border-dashed mb-1" />
+                                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Discovered</div>
                             </div>
                             {discoveredTags.map(tag => {
                                 const tagInfo = uniqueTags.find(ut => ut.name === tag.name)

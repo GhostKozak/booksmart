@@ -30,19 +30,20 @@ export function Sidebar({
                 isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
             )}
         >
-            <SidebarTags
-                uniqueTags={uniqueTags}
-                availableTags={availableTags}
-                discoveredTags={discoveredTags}
-                activeTag={activeTag}
-                setActiveTag={setActiveTag}
-                saveToTaxonomy={saveToTaxonomy}
-                collapsed={collapsedSections.tags}
-                onToggle={() => toggleSection('tags')}
-            />
+            <div className="mb-4">
+                <SidebarTags
+                    uniqueTags={uniqueTags}
+                    availableTags={availableTags}
+                    discoveredTags={discoveredTags}
+                    activeTag={activeTag}
+                    setActiveTag={setActiveTag}
+                    saveToTaxonomy={saveToTaxonomy}
+                    collapsed={collapsedSections.tags}
+                    onToggle={() => toggleSection('tags')}
+                />
+            </div>
 
-            {/* Mobile Close Button - rendered inside the first section header in original, 
-           but we put it as a standalone button here */}
+            {/* Mobile Close Button */}
             <Button
                 variant="ghost"
                 size="icon"
@@ -52,35 +53,48 @@ export function Sidebar({
                 <ArrowRight className="h-4 w-4 rotate-180" />
             </Button>
 
-            <SidebarFolders
-                availableFolders={availableFolders}
-                uniqueFolders={uniqueFolders}
-                discoveredFolders={discoveredFolders}
-                bookmarks={bookmarks}
-                activeFolder={activeFolder}
-                setActiveFolder={setActiveFolder}
-                saveToTaxonomy={saveToTaxonomy}
-                collapsed={collapsedSections.folders}
-                onToggle={() => toggleSection('folders')}
-            />
+            <div className="mb-4">
+                <SidebarFolders
+                    availableFolders={availableFolders}
+                    uniqueFolders={uniqueFolders}
+                    discoveredFolders={discoveredFolders}
+                    bookmarks={bookmarks}
+                    activeFolder={activeFolder}
+                    setActiveFolder={setActiveFolder}
+                    saveToTaxonomy={saveToTaxonomy}
+                    collapsed={collapsedSections.folders}
+                    onToggle={() => toggleSection('folders')}
+                />
+            </div>
 
-            <SmartFilters
-                smartFilter={smartFilter}
-                setSmartFilter={setSmartFilter}
-                smartCounts={smartCounts}
-                deadLinkCount={deadLinkCount}
-                collapsed={collapsedSections.filters}
-                onToggle={() => toggleSection('filters')}
-            />
+            <div className="mb-4">
+                <SmartFilters
+                    smartFilter={smartFilter}
+                    setSmartFilter={setSmartFilter}
+                    smartCounts={smartCounts}
+                    deadLinkCount={deadLinkCount}
+                    collapsed={collapsedSections.filters}
+                    onToggle={() => toggleSection('filters')}
+                />
+            </div>
 
-            <RulesPanel
-                rules={rules}
-                startEditing={startEditing}
-                deleteRule={deleteRule}
-                openNewRuleModal={openNewRuleModal}
-                collapsed={collapsedSections.rules}
-                onToggle={() => toggleSection('rules')}
-            />
+            <div className="mb-4">
+                <RulesPanel
+                    rules={rules}
+                    startEditing={startEditing}
+                    deleteRule={deleteRule}
+                    openNewRuleModal={openNewRuleModal}
+                    collapsed={collapsedSections.rules}
+                    onToggle={() => toggleSection('rules')}
+                />
+            </div>
+
+            <div className="mt-auto pt-6 pb-2 px-2 border-t border-border/50">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">
+                    <span>BookSmart v1.2</span>
+                    <span>© 2026</span>
+                </div>
+            </div>
         </aside>
     )
 }
