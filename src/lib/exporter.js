@@ -12,6 +12,13 @@
  * @param {Array} bookmarks - Array of bookmark objects.
  * @returns {string} - The HTML string.
  */
+/**
+ * Exports bookmarks to Netscape HTML format.
+ * Reconstructs the folder structure based on 'newFolder' property.
+ * 
+ * @param {Array} bookmarks - Array of bookmark objects.
+ * @returns {string} - The HTML string.
+ */
 export const exportBookmarks = (bookmarks) => {
     // 1. Initialize Root Node
     const root = {
@@ -92,4 +99,76 @@ export const exportBookmarks = (bookmarks) => {
     html += `</DL><p>`;
 
     return html;
+};
+
+/**
+ * Exports bookmarks to JSON format.
+ * 
+ * @param {Array} bookmarks - Array of bookmark objects.
+ * @returns {string} - The JSON string.
+ */
+export const exportToJson = (bookmarks) => {
+    return JSON.stringify(bookmarks, null, 2);
+};
+
+/**
+ * Exports bookmarks to CSV format.
+ * 
+ * @param {Array} bookmarks - Array of bookmark objects.
+ * @returns {string} - The CSV string.
+ */
+export const exportToCsv = (bookmarks) => {
+    const headers = ['Title', 'URL', 'Folder', 'Tags', 'Date Added'];
+    const rows = bookmarks.map(b => {
+        const title = (b.title || '').replace(/"/g, '""'); // Escape double quotes
+        const url = (b.url || '').replace(/"/g, '""');
+        const folder = (b.newFolder || 'Root').replace(/"/g, '""');
+        const tags = (b.tags || []).join(',').replace(/"/g, '""');
+        const date = b.addDate ? new Date(parseInt(b.addDate) * 1000).toISOString() : '';
+
+        return `"${title}","${url}","${folder}","${tags}","${date}"`;
+    });
+
+    return [headers.join(','), ...rows].join('\n');
+};
+
+/**
+ * Exports bookmarks to Markdown format.
+ * Grouped by folder.
+ * 
+ * @param {Array} bookmarks - Array of bookmark objects.
+ * @returns {string} - The Markdown string.
+ */
+export const exportToMarkdown = (bookmarks) => {
+    // Reuse the tree building logic from HTML export basically, or simpler grouping
+    // Let's do a simple grouping map for markdown
+
+    const folders = {};
+
+    bookmarks.forEach(b => {
+        const folder = b.newFolder || 'Root';
+        if (!folders[folder]) {
+            folders[folder] = [];
+        }
+        folders[folder].push(b);
+    });
+
+    let md = '# Bookmarks Export\n\n';
+
+    // Sort folders alphabetically, but put Root first if exists
+    const sortedFolders = Object.keys(folders).sort();
+
+    sortedFolders.forEach(folder => {
+        md += `## ${folder}\n\n`;
+        folders[folder].forEach(b => {
+            md += `- [${b.title}](${b.url})`;
+            if (b.tags && b.tags.length > 0) {
+                md += ` \`#${b.tags.join(', #')}\``;
+            }
+            md += '\n';
+        });
+        md += '\n';
+    });
+
+    return md;
 };

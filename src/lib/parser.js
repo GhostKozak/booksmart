@@ -68,3 +68,137 @@ export const parseBookmarks = (htmlContent) => {
 
     return bookmarks;
 };
+
+/**
+ * Parses JSON content.
+ * Expected format: Array of bookmark objects.
+ */
+export const parseJson = (jsonContent) => {
+    try {
+        const data = JSON.parse(jsonContent);
+        if (Array.isArray(data)) {
+            return data.map(b => ({
+                ...b,
+                id: b.id || generateUUID(),
+                status: 'unchanged'
+            }));
+        }
+        return [];
+    } catch (e) {
+        console.error("Failed to parse JSON", e);
+        return [];
+    }
+};
+
+/**
+ * Parses CSV content.
+ * Expected headers: Title, URL, Folder, Tags, Date Added
+ */
+export const parseCsv = (csvContent) => {
+    const lines = csvContent.split('\n');
+    const bookmarks = [];
+
+    // Simple CSV parser (doesn't handle newlines in quotes perfectly but good enough for now)
+    // We assume the export format we generated: "Title","URL","Folder","Tags","Date Added"
+
+    // Skip header likely
+    const startIndex = lines[0].toLowerCase().includes('title') ? 1 : 0;
+
+    for (let i = startIndex; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        // Naive split by comma, but handling quotes would be better.
+        // Let's use a regex for splitting CSV lines respecting quotes
+        const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+
+        if (!parts || parts.length < 2) continue;
+
+        const clean = (str) => {
+            if (!str) return '';
+            str = str.trim();
+            if (str.startsWith('"') && str.endsWith('"')) {
+                str = str.slice(1, -1);
+            }
+            return str.replace(/""/g, '"');
+        };
+
+        const title = clean(parts[0]);
+        const url = clean(parts[1]);
+        const folder = clean(parts[2]) || 'Root';
+        const tags = clean(parts[3]).split(',').map(t => t.trim()).filter(Boolean);
+        const dateStr = clean(parts[4]);
+
+        // Try to parse date
+        let addDate = Date.now();
+        if (dateStr) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                addDate = Math.floor(d.getTime() / 1000);
+            }
+        }
+
+        if (url) {
+            bookmarks.push({
+                id: generateUUID(),
+                title: title || url,
+                url,
+                addDate,
+                tags,
+                originalFolder: folder,
+                newFolder: folder,
+                status: 'unchanged'
+            });
+        }
+    }
+    return bookmarks;
+};
+
+/**
+ * Parses Markdown content.
+ * Expected format: 
+ * ## Folder Name
+ * - [Title](URL) `#tag1` `#tag2`
+ */
+export const parseMarkdown = (mdContent) => {
+    const lines = mdContent.split('\n');
+    const bookmarks = [];
+    let currentFolder = 'Root';
+
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/;
+    const tagRegex = /`#([^`]+)`/g;
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        if (trimmed.startsWith('## ')) {
+            currentFolder = trimmed.substring(3).trim();
+        } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            const match = trimmed.match(linkRegex);
+            if (match) {
+                const title = match[1];
+                const url = match[2];
+
+                const tags = [];
+                let tagMatch;
+                while ((tagMatch = tagRegex.exec(trimmed)) !== null) {
+                    tags.push(tagMatch[1]);
+                }
+
+                bookmarks.push({
+                    id: generateUUID(),
+                    title,
+                    url,
+                    addDate: Math.floor(Date.now() / 1000), // Markdown usually doesn't have dates, default to now
+                    tags,
+                    originalFolder: currentFolder,
+                    newFolder: currentFolder,
+                    status: 'unchanged'
+                });
+            }
+        }
+    });
+
+    return bookmarks;
+};

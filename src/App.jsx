@@ -11,8 +11,8 @@ import { Button } from './components/ui/button'
 import { Checkbox } from './components/ui/checkbox'
 import { Card } from './components/ui/card'
 import { Input } from './components/ui/input'
-import { parseBookmarks } from './lib/parser'
-import { exportBookmarks } from './lib/exporter'
+import { parseBookmarks, parseJson, parseCsv, parseMarkdown } from './lib/parser'
+import { exportBookmarks, exportToJson, exportToCsv, exportToMarkdown } from './lib/exporter'
 import { Favicon } from './components/Favicon'
 import { AnalyticsDashboard } from './components/AnalyticsDashboard'
 import { cn, generateUUID } from './lib/utils'
@@ -162,6 +162,10 @@ function App() {
   const [agingFilter, setAgingFilter] = useState(null) // DEPRECATED in favor of smartFilter, but removing lines is easier with multi_replace if I just swap it
   const [smartFilter, setSmartFilter] = useState(null) // null | 'old' | 'http' | 'untitled'
   const searchInputRef = useRef(null)
+
+  // Export State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [exportFormat, setExportFormat] = useState('html') // 'html', 'json', 'csv', 'md'
 
 
 
@@ -406,9 +410,25 @@ function App() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const text = e.target.result
-        const parsed = parseBookmarks(text)
-        setRawBookmarks(parsed)
-        setHasFileLoaded(true)
+        let parsed = [];
+
+        if (file.name.endsWith('.json')) {
+          parsed = parseJson(text);
+        } else if (file.name.endsWith('.csv')) {
+          parsed = parseCsv(text);
+        } else if (file.name.endsWith('.md')) {
+          parsed = parseMarkdown(text);
+        } else {
+          parsed = parseBookmarks(text);
+        }
+
+        if (parsed.length > 0) {
+          setRawBookmarks(parsed)
+          setHasFileLoaded(true)
+        } else {
+          // Maybe show an error toast here if empty or failed
+          console.error("No bookmarks found or parse error")
+        }
       }
       reader.readAsText(file)
     }
@@ -416,21 +436,56 @@ function App() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'text/html': ['.html'] }
+    accept: {
+      'text/html': ['.html'],
+      'application/json': ['.json'],
+      'text/csv': ['.csv'],
+      'text/markdown': ['.md']
+    }
   })
 
   // Export
-  const handleExport = () => {
-    const html = exportBookmarks(bookmarks)
-    const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'bookmarks_organized.html'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  const openExportModal = () => setIsExportModalOpen(true)
+
+  const performExport = () => {
+    let content = '';
+    let type = '';
+    let extension = '';
+
+    switch (exportFormat) {
+      case 'json':
+        content = exportToJson(bookmarks);
+        type = 'application/json';
+        extension = 'json';
+        break;
+      case 'csv':
+        content = exportToCsv(bookmarks);
+        type = 'text/csv';
+        extension = 'csv';
+        break;
+      case 'md':
+        content = exportToMarkdown(bookmarks);
+        type = 'text/markdown';
+        extension = 'md';
+        break;
+      case 'html':
+      default:
+        content = exportBookmarks(bookmarks);
+        type = 'text/html';
+        extension = 'html';
+        break;
+    }
+
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookmarks_organized.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setIsExportModalOpen(false);
   }
 
   // Manage Rules
@@ -697,7 +752,7 @@ function App() {
                 <span className="hidden lg:inline">{isCheckingLinks ? 'Checking...' : 'Check Health'}</span>
               </Button>
 
-              <Button onClick={handleExport} variant="default" size="icon" className="hidden sm:flex gap-2 w-auto px-3 shadow-lg shadow-primary/20">
+              <Button onClick={openExportModal} variant="default" size="icon" className="hidden sm:flex gap-2 w-auto px-3 shadow-lg shadow-primary/20">
                 <Download className="h-4 w-4" />
                 <span className="hidden lg:inline">Export</span>
               </Button>
@@ -1013,7 +1068,7 @@ function App() {
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Drop your bookmarks here</h3>
                 <p className="text-muted-foreground max-w-md">
-                  Drag and drop your exported Netscape HTML bookmark file to get started.
+                  Drag and drop your exported Netscape HTML (Recomended), JSON, CSV, or Markdown files to get started.
                 </p>
                 <Button variant="outline" className="mt-8">Browse Files</Button>
               </div>
@@ -1136,6 +1191,82 @@ function App() {
             setTags={setAvailableTags}
             defaultTab={settingsTab}
           />
+        </SimpleModal>
+        {/* Export Modal */}
+        <SimpleModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          title="Export Bookmarks"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Select the format you want to export your bookmarks in.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div
+                className={cn(
+                  "cursor-pointer border rounded-lg p-4 transition-all hover:bg-muted/50",
+                  exportFormat === 'html' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                )}
+                onClick={() => setExportFormat('html')}
+              >
+                <div className="flex items-center gap-2 font-semibold mb-1">
+                  <div className="bg-orange-100 text-orange-600 p-1.5 rounded-md"><File className="h-4 w-4" /></div>
+                  HTML (Netscape)
+                </div>
+                <p className="text-xs text-muted-foreground">Standard format. Best for importing into other browsers or managers.</p>
+              </div>
+
+              <div
+                className={cn(
+                  "cursor-pointer border rounded-lg p-4 transition-all hover:bg-muted/50",
+                  exportFormat === 'json' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                )}
+                onClick={() => setExportFormat('json')}
+              >
+                <div className="flex items-center gap-2 font-semibold mb-1">
+                  <div className="bg-blue-100 text-blue-600 p-1.5 rounded-md"><File className="h-4 w-4" /></div>
+                  JSON
+                </div>
+                <p className="text-xs text-muted-foreground">Raw data format. Useful for developers or programmatic access.</p>
+              </div>
+
+              <div
+                className={cn(
+                  "cursor-pointer border rounded-lg p-4 transition-all hover:bg-muted/50",
+                  exportFormat === 'csv' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                )}
+                onClick={() => setExportFormat('csv')}
+              >
+                <div className="flex items-center gap-2 font-semibold mb-1">
+                  <div className="bg-green-100 text-green-600 p-1.5 rounded-md"><File className="h-4 w-4" /></div>
+                  CSV
+                </div>
+                <p className="text-xs text-muted-foreground">Comma-separated values. Perfect for Excel or Google Sheets.</p>
+              </div>
+
+              <div
+                className={cn(
+                  "cursor-pointer border rounded-lg p-4 transition-all hover:bg-muted/50",
+                  exportFormat === 'md' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                )}
+                onClick={() => setExportFormat('md')}
+              >
+                <div className="flex items-center gap-2 font-semibold mb-1">
+                  <div className="bg-slate-100 text-slate-600 p-1.5 rounded-md"><File className="h-4 w-4" /></div>
+                  Markdown
+                </div>
+                <p className="text-xs text-muted-foreground">Formatted text. Great for documentation or notes apps (Obsidian, Notion).</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setIsExportModalOpen(false)}>Cancel</Button>
+              <Button onClick={performExport}>
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </div>
         </SimpleModal>
       </div >
     </div >
