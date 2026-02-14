@@ -19,7 +19,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
             <div className="flex justify-center z-20">
                 <Checkbox
                     checked={isAllSelected}
-                    onChange={toggleAll}
+                    onCheckedChange={toggleAll}
                     className="bg-card z-20"
                 />
             </div>

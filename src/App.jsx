@@ -79,15 +79,12 @@ function App() {
 
   // Auto-Backup Effect
   useEffect(() => {
-    const autoBackup = async () => {
-      const timer = setTimeout(() => {
-        if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
-          saveAutoBackup();
-        }
-      }, 2000);
-      return () => clearTimeout(timer);
-    };
-    autoBackup();
+    const timer = setTimeout(() => {
+      if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
+        saveAutoBackup();
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
   }, [rules, availableFolders, availableTags, ignoredUrlsList]);
 
   // Taxonomy Auto-Sync Effect REMOVED - We now use "Discovered" logic
@@ -493,7 +490,7 @@ function App() {
     }
 
     // Proceed to clear
-    db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
+    await db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
       await db.bookmarks.clear();
       await db.rules.clear();
       await db.folders.clear();
@@ -603,7 +600,7 @@ function App() {
     // Check/Create "References" folder
     const refFolderExists = availableFolders.some(f => f.name === 'References');
     if (!refFolderExists) {
-      db.folders.add({
+      await db.folders.add({
         id: generateUUID(),
         name: 'References',
         color: '#3b82f6',
@@ -748,11 +745,23 @@ function App() {
         // Select all currently visible bookmarks
         setSelectedIds(new Set(bookmarks.map(b => b.id)))
       }
+
+      // Shortcut: Ctrl+Z to undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey && !isInput) {
+        e.preventDefault()
+        undo()
+      }
+
+      // Shortcut: Ctrl+Y or Ctrl+Shift+Z to redo
+      if (!isInput && ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && (e.key === 'z' || e.key === 'Z'))))) {
+        e.preventDefault()
+        redo()
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIds, bookmarks, handleBatchDelete])
+  }, [selectedIds, bookmarks, handleBatchDelete, undo, redo])
 
   return (
     <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
@@ -814,20 +823,36 @@ function App() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-md mx-2 sm:mx-4 flex flex-col relative z-20">
+        <div className="flex-1 max-w-md mx-2 sm:mx-4 flex flex-col relative z-20"
+          onBlur={(e) => {
+            // Close advanced search when focus leaves the entire search container
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              setIsAdvancedSearchOpen(false);
+            }
+          }}
+        >
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
-                placeholder={searchMode === 'regex' ? "Search with Regex..." : "Search..."}
+                placeholder={searchMode === 'regex' ? "e.g. ^https?://.*\\.dev" : "Search bookmarks..."}
                 className={cn(
-                  "pl-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
+                  "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
                   searchMode === 'regex' && "font-mono text-xs"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-full hover:bg-muted"
+                  title="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
             <Button
               variant={isAdvancedSearchOpen ? "secondary" : "ghost"}
@@ -1378,7 +1403,7 @@ function App() {
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Drop your bookmarks here</h3>
                 <p className="text-muted-foreground max-w-md">
-                  Drag and drop your exported Netscape HTML (Recomended), JSON, CSV, or Markdown files to get started.
+                  Drag and drop your exported Netscape HTML (Recommended), JSON, CSV, or Markdown files to get started.
                 </p>
                 <Button variant="outline" className="mt-8">Browse Files</Button>
               </div>
@@ -1396,8 +1421,9 @@ function App() {
                 variant="outline"
                 onClick={() => {
                   setSearchQuery('')
-                  // Reset other filters if we had them
+                  // Reset all filters
                   setActiveTag(null)
+                  setActiveFolder(null)
                   setSmartFilter(null)
                 }}
               >

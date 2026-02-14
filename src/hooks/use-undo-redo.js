@@ -14,36 +14,44 @@ export function useUndoRedo() {
     }, []);
 
     const undo = useCallback(async () => {
-        if (!canUndo) return;
+        let commandToRun = null;
+        setPast((currentPast) => {
+            if (currentPast.length === 0) return currentPast;
+            commandToRun = currentPast[currentPast.length - 1];
+            return currentPast.slice(0, -1);
+        });
 
-        const command = past[past.length - 1];
-        const newPast = past.slice(0, past.length - 1);
-
-        try {
-            await command.undo();
-            setPast(newPast);
-            setFuture((prev) => [command, ...prev]);
-        } catch (error) {
-            console.error("Undo failed:", error);
-            // Optionally keep the command in past if it failed? Or discard?
-            // tailored for simple usage: if it fails, maybe we are out of sync.
+        if (commandToRun) {
+            try {
+                await commandToRun.undo();
+                setFuture((prev) => [commandToRun, ...prev]);
+            } catch (error) {
+                console.error("Undo failed:", error);
+                // Restore the command back to past since undo failed
+                setPast((prev) => [...prev, commandToRun]);
+            }
         }
-    }, [past, canUndo]);
+    }, []);
 
     const redo = useCallback(async () => {
-        if (!canRedo) return;
+        let commandToRun = null;
+        setFuture((currentFuture) => {
+            if (currentFuture.length === 0) return currentFuture;
+            commandToRun = currentFuture[0];
+            return currentFuture.slice(1);
+        });
 
-        const command = future[0];
-        const newFuture = future.slice(1);
-
-        try {
-            await command.redo();
-            setFuture(newFuture);
-            setPast((prev) => [...prev, command]);
-        } catch (error) {
-            console.error("Redo failed:", error);
+        if (commandToRun) {
+            try {
+                await commandToRun.redo();
+                setPast((prev) => [...prev, commandToRun]);
+            } catch (error) {
+                console.error("Redo failed:", error);
+                // Restore the command back to future since redo failed
+                setFuture((prev) => [commandToRun, ...prev]);
+            }
         }
-    }, [future, canRedo]);
+    }, []);
 
     const clear = useCallback(() => {
         setPast([]);

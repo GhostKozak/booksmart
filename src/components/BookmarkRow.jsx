@@ -44,7 +44,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                 <div className="flex justify-center">
                     <Checkbox
                         checked={isSelected}
-                        onChange={() => toggleSelection(bookmark.id)}
+                        onCheckedChange={() => toggleSelection(bookmark.id)}
                         className="bg-card z-20"
                     />
                 </div>
@@ -200,34 +200,44 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
 
                 {/* Original Folder */}
                 <div className="px-2">
-                    <span
-                        className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border truncate max-w-full"
-                        style={{
-                            borderColor: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color + '40',
-                            backgroundColor: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color + '10',
-                            color: availableFolders?.find(f => f.name === bookmark.originalFolder)?.color
-                        }}
-                    >
-                        {bookmark.originalFolder}
-                    </span>
+                    {(() => {
+                        const origColor = availableFolders?.find(f => f.name === bookmark.originalFolder)?.color;
+                        return (
+                            <span
+                                className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border truncate max-w-full"
+                                style={origColor ? {
+                                    borderColor: origColor + '40',
+                                    backgroundColor: origColor + '10',
+                                    color: origColor
+                                } : {}}
+                            >
+                                {bookmark.originalFolder}
+                            </span>
+                        );
+                    })()}
                 </div>
 
                 {/* New Folder */}
                 <div className="px-2">
-                    <span className={cn(
-                        "inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium truncate max-w-full",
-                        bookmark.status === 'matched'
-                            ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30"
-                            : "bg-muted text-muted-foreground border-transparent"
-                    )}
-                        style={bookmark.status !== 'matched' ? {
-                            borderColor: availableFolders?.find(f => f.name === bookmark.newFolder)?.color + '40',
-                            backgroundColor: availableFolders?.find(f => f.name === bookmark.newFolder)?.color + '10',
-                            color: availableFolders?.find(f => f.name === bookmark.newFolder)?.color
-                        } : {}}
-                    >
-                        {bookmark.newFolder}
-                    </span>
+                    {(() => {
+                        const newColor = availableFolders?.find(f => f.name === bookmark.newFolder)?.color;
+                        return (
+                            <span className={cn(
+                                "inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium truncate max-w-full",
+                                bookmark.status === 'matched'
+                                    ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30"
+                                    : "bg-muted text-muted-foreground border-transparent"
+                            )}
+                                style={bookmark.status !== 'matched' && newColor ? {
+                                    borderColor: newColor + '40',
+                                    backgroundColor: newColor + '10',
+                                    color: newColor
+                                } : {}}
+                            >
+                                {bookmark.newFolder}
+                            </span>
+                        );
+                    })()}
                 </div>
             </div>
 
@@ -237,7 +247,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                 <div className="flex items-start gap-3">
                     <Checkbox
                         checked={isSelected}
-                        onChange={() => toggleSelection(bookmark.id)}
+                        onCheckedChange={() => toggleSelection(bookmark.id)}
                         className="mt-1 bg-card shrink-0 z-20"
                     />
 

@@ -157,7 +157,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
 };
 
 export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails, availableFolders = [], availableTags = [] }) {
-    console.log("BookmarkGrid rendering, showThumbnails:", showThumbnails);
+
 
     // Define the grid item structure
     // We don't have direct access to "index" in ItemContent unless we wrapper it, but VirtuosoGrid provides data.

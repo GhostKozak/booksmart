@@ -12,7 +12,6 @@ db.version(1).stores({
 });
 
 // Migration logic
-// Migration logic
 let isMigrating = false;
 
 export async function migrateFromLocalStorage() {
@@ -70,7 +69,6 @@ export async function migrateFromLocalStorage() {
     }
 }
 
-// Helper to seed defaults if empty (and not migrated)
 // Helper to seed defaults if empty (and not migrated)
 export async function seedDefaults() {
     const folderCount = await db.folders.count();

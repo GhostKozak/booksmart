@@ -183,7 +183,7 @@ export function FloatingActionBar({
                                 </div>
                             )}
                             <Button size="sm" className="w-full mt-1" onClick={() => handleMoveSubmit()}>
-                                Move to New Check
+                                Move to Folder
                             </Button>
                         </div>
                     )}
