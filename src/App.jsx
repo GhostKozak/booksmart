@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
-import { useHistory } from './hooks/use-history'
+import { useUndoRedo } from './hooks/use-undo-redo'
 import { FloatingActionBar } from './components/FloatingActionBar'
 import { BookmarkList } from './components/BookmarkList'
 import { BookmarkGrid } from './components/BookmarkGrid'
@@ -21,86 +21,43 @@ import { TaxonomyManager } from './components/TaxonomyManager'
 import { SimpleCombobox } from './components/ui/SimpleCombobox'
 import { AdvancedSearch } from './components/AdvancedSearch'
 import Fuse from 'fuse.js'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 
-
+const EMPTY_ARRAY = [];
 
 function App() {
   const { theme, setTheme } = useTheme()
-  // History-aware state for bookmarks
-  const { state: rawBookmarks, set: setRawBookmarks, undo, redo, canUndo, canRedo } = useHistory([])
+  const { addCommand, undo, redo, canUndo, canRedo } = useUndoRedo();
+
+  // Initialization & Migration
+  useEffect(() => {
+    const init = async () => {
+      await migrateFromLocalStorage();
+      await deduplicateTaxonomy();
+      await seedDefaults();
+    };
+    init();
+  }, []);
+
+  // Data from IndexedDB
+  const rawBookmarks = useLiveQuery(() => db.bookmarks.toArray()) || EMPTY_ARRAY;
+  const rules = useLiveQuery(() => db.rules.toArray()) || EMPTY_ARRAY;
+  const availableFolders = useLiveQuery(() => db.folders.orderBy('order').toArray()) || EMPTY_ARRAY;
+  const availableTags = useLiveQuery(() => db.tags.orderBy('order').toArray()) || EMPTY_ARRAY;
+
+  // Ignored URLs
+  const ignoredUrlsList = useLiveQuery(() => db.ignoredUrls.toArray()) || EMPTY_ARRAY;
+  const ignoredUrls = useMemo(() => new Set(ignoredUrlsList.map(i => i.url)), [ignoredUrlsList]);
 
   // Selection State
   const [selectedIds, setSelectedIds] = useState(new Set())
 
   // Persistent File State
-  const [hasFileLoaded, setHasFileLoaded] = useState(false)
-
-  const [rules, setRules] = useState(() => {
-    try {
-      const saved = localStorage.getItem('booksmart_rules')
-      return saved ? JSON.parse(saved) : []
-    } catch (e) {
-      console.error("Failed to load rules", e)
-      return []
-    }
-  })
-
-  // Persist rules when they change
-  useEffect(() => {
-    localStorage.setItem('booksmart_rules', JSON.stringify(rules))
-  }, [rules])
-
-  // Taxonomy State (Folders & Tags)
-  // Data Structure: { id: string, name: string, color: string, order: number }
-  const [availableFolders, setAvailableFolders] = useState(() => {
-    try {
-      const saved = localStorage.getItem('booksmart_folders')
-      const parsed = saved ? JSON.parse(saved) : ['Work', 'Personal', 'Reading List', 'Dev', 'News']
-
-      // Migration: Convert string[] to object[]
-      if (parsed.length > 0 && typeof parsed[0] === 'string') {
-        return parsed.map((name, index) => ({
-          id: generateUUID(),
-          name,
-          color: '#3b82f6', // Default blue
-          order: index
-        }))
-      }
-      return parsed
-    } catch {
-      return ['Work', 'Personal', 'Reading List', 'Dev', 'News'].map((name, index) => ({
-        id: generateUUID(),
-        name,
-        color: '#3b82f6',
-        order: index
-      }))
-    }
-  })
-
-  const [availableTags, setAvailableTags] = useState(() => {
-    try {
-      const saved = localStorage.getItem('booksmart_tags')
-      const parsed = saved ? JSON.parse(saved) : ['important', 'read-later', 'tutorial', 'tool', 'inspiration']
-
-      // Migration: Convert string[] to object[]
-      if (parsed.length > 0 && typeof parsed[0] === 'string') {
-        return parsed.map((name, index) => ({
-          id: generateUUID(),
-          name,
-          color: '#10b981', // Default green
-          order: index
-        }))
-      }
-      return parsed
-    } catch {
-      return ['important', 'read-later', 'tutorial', 'tool', 'inspiration'].map((name, index) => ({
-        id: generateUUID(),
-        name,
-        color: '#10b981',
-        order: index
-      }))
-    }
-  })
+  // We determine if we have data based on bookmarks length, but keeping this state 
+  // to track if we just loaded a file might be useful, or we can derive it.
+  // For now, let's treat "hasFileLoaded" as "hasBookmarks" or keep it simplified.
+  const hasFileLoaded = rawBookmarks.length > 0;
 
   const [activeFolder, setActiveFolder] = useState(null)
 
@@ -113,14 +70,37 @@ function App() {
     setIsSettingsOpen(true)
   }
 
-  // Persist Taxonomy
-  useEffect(() => {
-    localStorage.setItem('booksmart_folders', JSON.stringify(availableFolders))
-  }, [availableFolders])
+  // Taxonomy Helpers
+  const setAvailableFolders = async (newFolders) => {
+    // Sync logic: Identify deletions and updates/adds
+    // For simplicity with drag and drop reordering, we can clear and add if we suspect full reorder
+    // But better to just update.
+    // NOTE: This basic strategy assumes 'newFolders' is the desired state.
 
-  useEffect(() => {
-    localStorage.setItem('booksmart_tags', JSON.stringify(availableTags))
-  }, [availableTags])
+    await db.transaction('rw', db.folders, async () => {
+      const existingIds = new Set((await db.folders.toArray()).map(f => f.id));
+      const newIds = new Set(newFolders.map(f => f.id));
+
+      // Deletions
+      const toDelete = [...existingIds].filter(id => !newIds.has(id));
+      if (toDelete.length > 0) await db.folders.bulkDelete(toDelete);
+
+      // Upserts (Updates + Inserts)
+      await db.folders.bulkPut(newFolders);
+    });
+  }
+
+  const setAvailableTags = async (newTags) => {
+    await db.transaction('rw', db.tags, async () => {
+      const existingIds = new Set((await db.tags.toArray()).map(f => f.id));
+      const newIds = new Set(newTags.map(f => f.id));
+
+      const toDelete = [...existingIds].filter(id => !newIds.has(id));
+      if (toDelete.length > 0) await db.tags.bulkDelete(toDelete);
+
+      await db.tags.bulkPut(newTags);
+    });
+  }
 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -160,29 +140,14 @@ function App() {
     setIsCheckingLinks(false)
   }
 
-  // Ignored URLs State (Persisted)
-  const [ignoredUrls, setIgnoredUrls] = useState(() => {
-    try {
-      const saved = localStorage.getItem('ignoredUrls')
-      return saved ? new Set(JSON.parse(saved)) : new Set()
-    } catch (e) {
-      console.error("Failed to load ignored rules", e)
-      return new Set()
-    }
-  })
-
+  // Ignored URLs
   const toggleIgnoreUrl = useCallback((url) => {
-    setIgnoredUrls(prev => {
-      const next = new Set(prev)
-      if (next.has(url)) {
-        next.delete(url)
-      } else {
-        next.add(url)
-      }
-      localStorage.setItem('ignoredUrls', JSON.stringify([...next]))
-      return next
-    })
-  }, [])
+    if (ignoredUrls.has(url)) {
+      db.ignoredUrls.where('url').equals(url).delete();
+    } else {
+      db.ignoredUrls.add({ url });
+    }
+  }, [ignoredUrls])
 
   // Rule State
   const [newRule, setNewRule] = useState({
@@ -498,13 +463,18 @@ function App() {
   }, [rawBookmarks]);
 
   const removeDuplicates = () => {
-    const seen = new Set();
-    const unique = rawBookmarks.filter(b => {
-      if (seen.has(b.url)) return false;
-      seen.add(b.url);
-      return true;
+    const urls = new Set();
+    const toDelete = [];
+    rawBookmarks.forEach(b => {
+      if (urls.has(b.url)) {
+        toDelete.push(b.id);
+      } else {
+        urls.add(b.url);
+      }
     });
-    setRawBookmarks(unique);
+    if (toDelete.length > 0) {
+      db.bookmarks.bulkDelete(toDelete);
+    }
   };
 
   // File Upload
@@ -512,7 +482,7 @@ function App() {
     const file = acceptedFiles[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target.result
         let parsed = [];
 
@@ -527,16 +497,20 @@ function App() {
         }
 
         if (parsed.length > 0) {
-          setRawBookmarks(parsed)
-          setHasFileLoaded(true)
+          // Clear and replace strategy for file load
+          await db.transaction('rw', db.bookmarks, async () => {
+            // For now, let's append? Or clear? 
+            // Logic in original was `setRawBookmarks(parsed)`, which replaces.
+            await db.bookmarks.clear();
+            await db.bookmarks.bulkAdd(parsed);
+          });
         } else {
-          // Maybe show an error toast here if empty or failed
           console.error("No bookmarks found or parse error")
         }
       }
       reader.readAsText(file)
     }
-  }, [setRawBookmarks, setHasFileLoaded])
+  }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -593,13 +567,32 @@ function App() {
   }
 
   // Manage Rules
-  const addRule = () => {
+  const addRule = async () => {
     if (newRule.value && (newRule.targetFolder || newRule.tags)) {
+      const ruleToAdd = { ...newRule, id: generateUUID() };
+
       if (editingRuleId) {
-        setRules(rules.map(r => r.id === editingRuleId ? { ...newRule, id: editingRuleId } : r))
+        // Update
+        const originalRule = rules.find(r => r.id === editingRuleId);
+        if (originalRule) {
+          await db.rules.update(editingRuleId, newRule);
+
+          addCommand({
+            undo: () => db.rules.update(editingRuleId, originalRule),
+            redo: () => db.rules.update(editingRuleId, newRule),
+            description: 'Update Rule'
+          });
+        }
         setEditingRuleId(null)
       } else {
-        setRules([...rules, { ...newRule, id: generateUUID() }])
+        // Add
+        await db.rules.add(ruleToAdd);
+
+        addCommand({
+          undo: () => db.rules.delete(ruleToAdd.id),
+          redo: () => db.rules.add(ruleToAdd),
+          description: 'Add Rule'
+        });
       }
       setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
     }
@@ -620,23 +613,39 @@ function App() {
     setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
   }
 
-  const deleteRule = (id) => {
-    setRules(rules.filter(r => r.id !== id))
+  const deleteRule = async (id) => {
+    const ruleToDelete = rules.find(r => r.id === id);
+    if (!ruleToDelete) return;
+
+    await db.rules.delete(id);
+
+    addCommand({
+      undo: () => db.rules.add(ruleToDelete),
+      redo: () => db.rules.delete(id),
+      description: 'Delete Rule'
+    });
+
     if (editingRuleId === id) {
       cancelEditing()
     }
   }
 
   const clearAll = () => {
-    setRawBookmarks([])
-    setRules([])
+    // Clear bookmarks and rules? 
+    // Original cleared bookmarks, rules, selectedIds.
+    db.transaction('rw', db.bookmarks, db.rules, async () => {
+      await db.bookmarks.clear();
+      await db.rules.clear();
+    });
     setSelectedIds(new Set())
   }
 
   const closeFile = () => {
-    setHasFileLoaded(false)
-    setRawBookmarks([])
-    setRules([])
+    // "Close File" effectively meant clearing the session in prev version.
+    db.transaction('rw', db.bookmarks, db.rules, async () => {
+      await db.bookmarks.clear();
+      await db.rules.clear();
+    });
     setSelectedIds(new Set())
     setLinkHealth({})
     setSearchQuery('')
@@ -666,39 +675,78 @@ function App() {
   }
 
   // Batch Operations
-  const handleBatchDelete = useCallback(() => {
-    const remaining = rawBookmarks.filter(b => !selectedIds.has(b.id))
-    setRawBookmarks(remaining)
-    setSelectedIds(new Set())
-  }, [rawBookmarks, selectedIds, setRawBookmarks])
+  const handleBatchDelete = useCallback(async () => {
+    const idsToDelete = [...selectedIds];
+    if (idsToDelete.length > 0) {
+      const bookmarksToDelete = await db.bookmarks.bulkGet(idsToDelete);
 
-  const handleBatchMove = (targetFolder) => {
-    const updated = rawBookmarks.map(b => {
-      if (selectedIds.has(b.id)) {
-        return { ...b, originalFolder: targetFolder, newFolder: targetFolder }
-      }
-      return b
-    })
-    setRawBookmarks(updated)
-    setSelectedIds(new Set())
+      await db.bookmarks.bulkDelete(idsToDelete);
+
+      addCommand({
+        undo: () => db.bookmarks.bulkAdd(bookmarksToDelete),
+        redo: () => db.bookmarks.bulkDelete(idsToDelete),
+        description: `Delete ${idsToDelete.length} bookmarks`
+      });
+
+      setSelectedIds(new Set())
+    }
+  }, [selectedIds, addCommand])
+
+  const handleBatchMove = async (targetFolder) => {
+    const idsToMove = [...selectedIds];
+    if (idsToMove.length > 0) {
+      // Capture state before move
+      const bookmarksToMove = await db.bookmarks.bulkGet(idsToMove);
+      // Map of ID -> originalFolder (to revert)
+      // Actually we just revert the whole object or just the fields?
+      // Reverting specific fields is safer.
+      const originalStates = bookmarksToMove.map(b => ({ id: b.id, originalFolder: b.originalFolder, newFolder: b.newFolder }));
+
+      await db.transaction('rw', db.bookmarks, async () => {
+        await db.bookmarks.where('id').anyOf(idsToMove).modify({ originalFolder: targetFolder, newFolder: targetFolder });
+      });
+
+      addCommand({
+        undo: () => db.transaction('rw', db.bookmarks, async () => {
+          // We have to update each one because they might have been in different folders
+          // Bulk put is easiest if we have the full objects, but we only captured state.
+          // Let's use bulkPut with merged back data if we had full objects, but here we iterate.
+          // Optimization: group by folder?
+          // Simple:
+          for (const state of originalStates) {
+            await db.bookmarks.update(state.id, { originalFolder: state.originalFolder, newFolder: state.newFolder });
+          }
+        }),
+        redo: () => db.bookmarks.where('id').anyOf(idsToMove).modify({ originalFolder: targetFolder, newFolder: targetFolder }),
+        description: `Move ${idsToMove.length} bookmarks`
+      });
+
+      setSelectedIds(new Set())
+    }
   }
 
   const handleBatchMoveDocs = () => {
-    const updated = rawBookmarks.map(b => {
-      const url = (b.url || '').toLowerCase();
-      const isDoc = url.endsWith('.pdf') ||
+    // Find docs
+    // Implementation with Dexie:
+    // We can use the collection modify logic again, but we need criteria.
+    // Dexie filtering in 'modify' is efficient.
+
+    const isDoc = (url) => {
+      url = (url || '').toLowerCase();
+      return url.endsWith('.pdf') ||
         url.endsWith('.doc') || url.endsWith('.docx') ||
         url.endsWith('.xls') || url.endsWith('.xlsx') ||
         url.endsWith('.ppt') || url.endsWith('.pptx') ||
         url.includes('docs.google.com');
+    }
 
-      if (isDoc) {
-        return { ...b, originalFolder: 'References', newFolder: 'References' };
-      }
-      return b;
+    db.transaction('rw', db.bookmarks, async () => {
+      // Since we can't easily do string "endsWith" in indexedDB query easily for multiple extensions
+      // we might iterate or use filter.
+      // For 10k items, filter in JS is fine.
+      await db.bookmarks.filter(b => isDoc(b.url)).modify({ originalFolder: 'References', newFolder: 'References' });
     });
-    setRawBookmarks(updated);
-    setSmartFilter(null); // Clear filter after moving
+    setSmartFilter(null);
   };
 
   const handleStatusOverride = (status) => {
@@ -773,6 +821,18 @@ function App() {
 
           <Folder className="h-6 w-6 text-primary shrink-0" />
           <h1 className="font-bold text-xl tracking-tight hidden sm:block">BookSmart</h1>
+          <div className="flex items-center gap-1 ml-4 border-l pl-4">
+            {canUndo && (
+              <Button variant="ghost" size="icon" onClick={undo} title="Undo (Ctrl+Z)">
+                <Undo2 className="h-4 w-4" />
+              </Button>
+            )}
+            {canRedo && (
+              <Button variant="ghost" size="icon" onClick={redo} title="Redo (Ctrl+Y)">
+                <Redo2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -815,14 +875,7 @@ function App() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-4">
-          <div className="hidden sm:flex items-center gap-1 border-r pr-4 mr-2">
-            <Button variant="ghost" size="icon" disabled={!canUndo} onClick={undo} title="Undo (Ctrl+Z)">
-              <Undo2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Shift+Z)">
-              <Redo2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* Undo/Redo removed as it requires complex DB transaction history management */}
 
           {/* Mobile: Collapse Actions into a unified menu or simplify */}
           {duplicateCount > 0 && (
@@ -1107,12 +1160,12 @@ function App() {
                   setNewRule({ ...newRule, targetFolder: val })
                   // Auto-add to available folders if created new
                   if (val && !availableFolders.some(f => f.name === val)) {
-                    setAvailableFolders(prev => [...prev, {
+                    db.folders.add({
                       id: generateUUID(),
                       name: val,
                       color: '#3b82f6',
-                      order: prev.length
-                    }])
+                      order: availableFolders.length
+                    });
                   }
                 }}
                 placeholder="Select or create folder..."
