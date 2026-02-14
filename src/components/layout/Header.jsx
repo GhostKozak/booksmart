@@ -1,6 +1,6 @@
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Upload, Download, Plus, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2 } from 'lucide-react'
+import { Sun, Moon, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -43,8 +43,20 @@ export function Header({
     return (
         <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
             <div className="flex items-center gap-2">
+
+
+
                 <Logo className="h-7 w-7 shrink-0" />
                 <h1 className="font-bold text-xl tracking-tight hidden sm:block">{t('app.title')}</h1>
+                {/* Mobile Menu Toggle */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden h-8 w-8 ml-1"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                >
+                    <TextAlignStart className="h-5 w-5" />
+                </Button>
                 <div className="flex items-center gap-1 ml-4 border-l pl-4">
                     {canUndo && (
                         <Button variant="ghost" size="icon" onClick={undo} title={t('header.undo')}>
@@ -249,24 +261,15 @@ export function Header({
                 </DropdownMenu>
 
                 <div className="flex items-center border-l pl-1 ml-1 sm:pl-2 sm:ml-2">
-                    {/* Mobile Menu Toggle (Moved Right) */}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="lg:hidden"
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    >
-                        <Settings className="h-5 w-5" />
-                    </Button>
 
                     <Button
                         variant="ghost"
-                        className="hidden lg:inline-flex gap-2"
+                        className="gap-2 px-2 sm:px-4"
                         onClick={openExportModal}
                         title={t('header.export')}
                     >
                         <Download className="h-5 w-5" />
-                        {t('header.export')}
+                        <span className="hidden lg:inline">{t('header.export')}</span>
                     </Button>
                 </div>
             </div>
