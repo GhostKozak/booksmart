@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useHistory } from './hooks/use-history'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -88,6 +88,7 @@ function App() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics' | 'grid'
+  const [showThumbnails, setShowThumbnails] = useState(false)
   const [previewBookmark, setPreviewBookmark] = useState(null)
 
   // Link Health State
@@ -669,6 +670,17 @@ function App() {
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
+                {viewMode === 'grid' && (
+                  <Button
+                    variant={showThumbnails ? 'secondary' : 'ghost'}
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setShowThumbnails(!showThumbnails)}
+                    title={showThumbnails ? "Hide Thumbnails" : "Show Thumbnails"}
+                  >
+                    <Image className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant={viewMode === 'analytics' ? 'secondary' : 'ghost'}
                   size="icon"
@@ -1079,6 +1091,7 @@ function App() {
                         bookmarks={bookmarks}
                         selectedIds={selectedIds}
                         toggleSelection={toggleSelection}
+                        showThumbnails={showThumbnails}
                         onPreview={(b) => {
                           setPreviewBookmark(b)
                           setSelectedIds(new Set([b.id]))
