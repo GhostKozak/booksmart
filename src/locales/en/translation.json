@@ -39,7 +39,11 @@
         "export": "Export",
         "closeFile": "Close File",
         "shortcuts": "Keyboard Shortcuts (?)",
-        "settings": "Settings"
+        "settings": "Settings",
+        "maintenance": "Maintenance",
+        "view": "View Options",
+        "tools": "Tools",
+        "system": "System"
     },
     "sidebar": {
         "allBookmarks": "All Bookmarks",
@@ -132,11 +136,11 @@
             "download": "Download",
             "copy": "Copy to Clipboard"
         },
-        "clear": {
+        "clearAll": {
             "title": "Clear All Data",
-            "warning": "This will delete all bookmarks, folders, tags, and rules. This action cannot be undone.",
-            "confirm": "Yes, Clear All",
-            "cancel": "Cancel"
+            "content": "This will delete <strong>ALL</strong> Bookmarks, Rules, Custom Folders, Tags, and Settings.<br /><br />This action cannot be undone unless you have a backup.",
+            "backupAndClear": "Backup and Clear",
+            "clearEverything": "Clear Everything"
         },
         "shortcuts": {
             "title": "Keyboard Shortcuts",
@@ -223,7 +227,12 @@
             "button": "Tags",
             "placeholder": "Add tags...",
             "submit": "Apply Tags"
-        }
+        },
+        "delete": "Delete",
+        "markAlive": "Mark as Alive",
+        "markDead": "Mark as Dead",
+        "export": "Export Selected",
+        "cleanUrls": "Clean URLs"
     },
     "preview": {
         "reload": "Reload Preview",
@@ -252,6 +261,22 @@
         "row": {
             "added": "Added {{time}}",
             "duplicateIn": "Duplicate in: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Drop your bookmarks here",
+            "desc": "Drag and drop your exported Netscape HTML (Recommended), JSON, CSV, or Markdown files to get started.",
+            "browse": "Browse Files"
+        },
+        "empty": {
+            "title": "No bookmarks found",
+            "desc": "We couldn't find any bookmarks matching your search or filters.",
+            "clearSearch": "Clear Search"
+        },
+        "header": {
+            "title": "Your Bookmarks",
+            "moveDocs": "Move {{count}} to \"References\""
         }
     }
 }

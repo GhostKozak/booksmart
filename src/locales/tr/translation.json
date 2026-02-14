@@ -39,7 +39,11 @@
         "export": "Dışa Aktar",
         "closeFile": "Dosyayı Kapat",
         "shortcuts": "Klavye Kısayolları (?)",
-        "settings": "Ayarlar"
+        "settings": "Ayarlar",
+        "maintenance": "Bakım",
+        "view": "Görünüm",
+        "tools": "Araçlar",
+        "system": "Sistem"
     },
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
@@ -132,11 +136,11 @@
             "download": "İndir",
             "copy": "Panoya Kopyala"
         },
-        "clear": {
+        "clearAll": {
             "title": "Tüm Verileri Temizle",
-            "warning": "Bu işlem tüm yer imlerini, klasörleri, etiketleri ve kuralları silecek. Geri alınamaz.",
-            "confirm": "Evet, Hepsini Temizle",
-            "cancel": "İptal"
+            "content": "Bu işlem <strong>TÜM</strong> Yer İmlerini, Kuralları, Özel Klasörleri, Etiketleri ve Ayarları silecek.<br /><br />Bir yedeğiniz yoksa bu işlem geri alınamaz.",
+            "backupAndClear": "Yedekle ve Temizle",
+            "clearEverything": "Hepsini Temizle"
         },
         "shortcuts": {
             "title": "Klavye Kısayolları",
@@ -223,7 +227,12 @@
             "button": "Etiketler",
             "placeholder": "Etiket ekle...",
             "submit": "Etiketleri Uygula"
-        }
+        },
+        "delete": "Sil",
+        "markAlive": "Çalışıyor Olarak İşaretle",
+        "markDead": "Ölü Olarak İşaretle",
+        "export": "Seçilenleri Dışa Aktar",
+        "cleanUrls": "URL'leri Temizle"
     },
     "preview": {
         "reload": "Önizlemeyi Yenile",
@@ -252,6 +261,22 @@
         "row": {
             "added": "Eklendi {{time}}",
             "duplicateIn": "Şurada kopya: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Yer imlerinizi buraya bırakın",
+            "desc": "Başlamak için dışa aktarılan Netscape HTML (Önerilen), JSON, CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
+            "browse": "Dosyalara Göz At"
+        },
+        "empty": {
+            "title": "Yer imi bulunamadı",
+            "desc": "Aramanızla veya filtrelerinizle eşleşen herhangi bir yer imi bulamadık.",
+            "clearSearch": "Aramayı Temizle"
+        },
+        "header": {
+            "title": "Yer İmleriniz",
+            "moveDocs": "{{count}} adeti \"References\" klasörüne taşı"
         }
     }
 }

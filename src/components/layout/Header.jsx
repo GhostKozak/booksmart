@@ -1,5 +1,6 @@
+import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Upload, Download, Plus, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2 } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -27,7 +28,7 @@ export function Header({
     checkAllLinks, isCheckingLinks,
     openExportModal,
     // File
-    hasFileLoaded, closeFile, bookmarkCount,
+    hasFileLoaded, closeFile, bookmarkCount, clearAll,
     // Settings
     openSettings,
     // Sidebar
@@ -35,7 +36,9 @@ export function Header({
     // Shortcuts
     setIsShortcutsOpen
 }) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
+
+    const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
 
     return (
         <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
@@ -131,106 +134,119 @@ export function Header({
             </div>
 
             <div className="flex items-center gap-1 sm:gap-4">
-                {duplicateCount > 0 && (
-                    <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2 hidden sm:flex">
-                        <Layers className="h-4 w-4" />
-                        <span className="hidden lg:inline">{t('header.removeDuplicates', { count: duplicateCount })}</span>
-                        <span className="lg:hidden">{duplicateCount}</span>
-                    </Button>
-                )}
+                <DropdownMenu
+                    trigger={
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <MoreVertical className="h-5 w-5" />
+                        </Button>
+                    }
+                >
+                    <DropdownLabel>{t('common.actions')}</DropdownLabel>
 
-                {cleanableCount > 0 && (
-                    <Button onClick={cleanAllUrls} variant="outline" size="sm" className="gap-2 hidden sm:flex border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
-                        <Sparkles className="h-4 w-4" />
-                        <span className="hidden lg:inline">{t('header.cleanUrls', { count: cleanableCount })}</span>
-                        <span className="lg:hidden">{cleanableCount}</span>
-                    </Button>
-                )}
-
-                {bookmarkCount > 0 && (
-                    <div className="flex gap-1 sm:gap-2">
-                        <div className="flex bg-muted/50 p-1 rounded-lg border mr-0 sm:mr-2 shrink-0">
-                            <Button
-                                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => setViewMode('list')}
-                                title={t('header.listView')}
-                            >
-                                <List className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => setViewMode('grid')}
-                                title={t('header.gridView')}
-                            >
-                                <LayoutGrid className="h-4 w-4" />
-                            </Button>
-                            {viewMode === 'grid' && (
-                                <Button
-                                    variant={showThumbnails ? 'secondary' : 'ghost'}
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => setShowThumbnails(!showThumbnails)}
-                                    title={showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
-                                >
-                                    <Image className="h-4 w-4" />
-                                </Button>
+                    {hasMaintenanceActions && (
+                        <>
+                            <DropdownLabel>{t('header.maintenance')}</DropdownLabel>
+                            {duplicateCount > 0 && (
+                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50">
+                                    <Layers className="h-4 w-4 mr-2" />
+                                    {t('header.removeDuplicates', { count: duplicateCount })}
+                                </DropdownItem>
                             )}
-                            <Button
-                                variant={viewMode === 'analytics' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() => setViewMode('analytics')}
-                                title={t('header.analytics')}
-                            >
-                                <BarChart3 className="h-4 w-4" />
-                            </Button>
-                        </div>
+                            {cleanableCount > 0 && (
+                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400">
+                                    <Sparkles className="h-4 w-4 mr-2" />
+                                    {t('header.cleanUrls', { count: cleanableCount })}
+                                </DropdownItem>
+                            )}
+                            <DropdownSeparator />
+                        </>
+                    )}
 
-                        <Button onClick={checkAllLinks} disabled={isCheckingLinks} variant="outline" size="icon" className="hidden sm:flex gap-2 w-auto px-3">
-                            {isCheckingLinks ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-                            <span className="hidden lg:inline">{isCheckingLinks ? t('header.checking') : t('header.checkHealth')}</span>
-                        </Button>
+                    {bookmarkCount > 0 && (
+                        <>
+                            <DropdownLabel>{t('header.view')}</DropdownLabel>
+                            <DropdownItem onClick={() => setViewMode('list')} className={viewMode === 'list' ? "bg-accent" : ""}>
+                                <List className="h-4 w-4 mr-2" />
+                                {t('header.listView')}
+                            </DropdownItem>
 
-                        <Button onClick={openExportModal} variant="default" size="icon" className="hidden sm:flex gap-2 w-auto px-3 shadow-lg shadow-primary/20">
-                            <Download className="h-4 w-4" />
-                            <span className="hidden lg:inline">{t('header.export')}</span>
-                        </Button>
-                    </div>
-                )}
+                            <DropdownItem onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? "bg-accent" : ""}>
+                                <LayoutGrid className="h-4 w-4 mr-2" />
+                                {t('header.gridView')}
+                            </DropdownItem>
 
-                {hasFileLoaded && (
-                    <Button
-                        onClick={closeFile}
-                        variant="ghost"
-                        size="icon"
-                        className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        title={t('header.closeFile')}
-                    >
-                        <LogOut className="h-5 w-5" />
-                    </Button>
-                )}
+                            {viewMode === 'grid' && (
+                                <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)}>
+                                    <Image className="h-4 w-4 mr-2" />
+                                    {showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
+                                </DropdownItem>
+                            )}
 
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsShortcutsOpen(true)}
-                    className="rounded-full shrink-0"
-                    title={t('header.shortcuts')}
-                >
-                    <HelpCircle className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="rounded-full shrink-0"
-                >
-                    {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                </Button>
+                            <DropdownItem onClick={() => setViewMode('analytics')} className={viewMode === 'analytics' ? "bg-accent" : ""}>
+                                <BarChart3 className="h-4 w-4 mr-2" />
+                                {t('header.analytics')}
+                            </DropdownItem>
+
+                            <DropdownSeparator />
+
+                        </>
+                    )}
+
+                    <DropdownLabel>{t('settings.language.label')}</DropdownLabel>
+                    <DropdownItem onClick={() => i18n.changeLanguage('tr')} className={i18n.language.startsWith('tr') ? "bg-accent" : ""}>
+                        <span className="mr-2 text-lg">🇹🇷</span>
+                        Türkçe
+                    </DropdownItem>
+                    <DropdownItem onClick={() => i18n.changeLanguage('en')} className={i18n.language.startsWith('en') ? "bg-accent" : ""}>
+                        <span className="mr-2 text-lg">🇺🇸</span>
+                        English
+                    </DropdownItem>
+
+                    <DropdownSeparator />
+
+                    <DropdownLabel>{t('header.tools')}</DropdownLabel>
+                    <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks}>
+                        {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Activity className="h-4 w-4 mr-2" />}
+                        {isCheckingLinks ? t('header.checking') : t('header.checkHealth')}
+                    </DropdownItem>
+
+                    <DropdownSeparator />
+
+                    <DropdownItem onClick={() => setIsShortcutsOpen(true)}>
+                        <HelpCircle className="h-4 w-4 mr-2" />
+                        {t('header.shortcuts')}
+                    </DropdownItem>
+
+                    <DropdownSeparator />
+
+                    <DropdownLabel>{t('header.system')}</DropdownLabel>
+                    <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+                        {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+                        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                    </DropdownItem>
+
+                    <DropdownSeparator />
+
+                    <DropdownItem onClick={() => openSettings('folders')}>
+                        <Settings className="h-4 w-4 mr-2" />
+                        {t('header.settings')}
+                    </DropdownItem>
+
+                    {hasFileLoaded && (
+                        <>
+                            <DropdownSeparator />
+                            <DropdownItem onClick={closeFile}>
+                                <LogOut className="h-4 w-4 mr-2" />
+                                {t('header.closeFile')}
+                            </DropdownItem>
+
+                            <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                {t('common.clearAll')}
+                            </DropdownItem>
+                        </>
+                    )}
+                </DropdownMenu>
 
                 <div className="flex items-center border-l pl-1 ml-1 sm:pl-2 sm:ml-2">
                     {/* Mobile Menu Toggle (Moved Right) */}
@@ -245,15 +261,15 @@ export function Header({
 
                     <Button
                         variant="ghost"
-                        size="icon"
-                        className="hidden lg:inline-flex"
-                        onClick={() => openSettings('folders')}
-                        title={t('header.settings')}
+                        className="hidden lg:inline-flex gap-2"
+                        onClick={openExportModal}
+                        title={t('header.export')}
                     >
-                        <Settings className="h-5 w-5" />
+                        <Download className="h-5 w-5" />
+                        {t('header.export')}
                     </Button>
                 </div>
             </div>
-        </header>
+        </header >
     )
 }

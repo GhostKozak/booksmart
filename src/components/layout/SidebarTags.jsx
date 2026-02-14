@@ -29,7 +29,6 @@ export function SidebarTags({
 
             {!collapsed && (
                 <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                    {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">{t('sidebar.noTags')}</p>}
 
                     {/* User Defined Tags */}
                     {availableTags.length > 0 && (

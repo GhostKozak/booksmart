@@ -6,6 +6,7 @@ import { BookmarkGrid } from '../BookmarkGrid'
 import { PreviewPane } from '../PreviewPane'
 import { AnalyticsDashboard } from '../AnalyticsDashboard'
 import { cn } from '../../lib/utils'
+import { useTranslation } from 'react-i18next'
 
 export function MainContent({
     hasFileLoaded,
@@ -34,6 +35,7 @@ export function MainContent({
     clearAll, setSmartFilter, setViewMode,
     setSearchQuery, setActiveTag, setActiveFolder
 }) {
+    const { t } = useTranslation()
     if (!hasFileLoaded) {
         return (
             <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
@@ -49,11 +51,11 @@ export function MainContent({
                         <div className="bg-primary/10 p-6 rounded-full mb-6">
                             <Logo className="h-16 w-16" />
                         </div>
-                        <h3 className="text-2xl font-bold mb-2">Drop your bookmarks here</h3>
+                        <h3 className="text-2xl font-bold mb-2">{t('main.dropzone.title')}</h3>
                         <p className="text-muted-foreground max-w-md">
-                            Drag and drop your exported Netscape HTML (Recommended), JSON, CSV, or Markdown files to get started.
+                            {t('main.dropzone.desc')}
                         </p>
-                        <Button variant="outline" className="mt-8">Browse Files</Button>
+                        <Button variant="outline" className="mt-8">{t('main.dropzone.browse')}</Button>
                     </div>
                 </div>
             </main>
@@ -67,9 +69,9 @@ export function MainContent({
                     <div className="bg-muted p-6 rounded-full mb-4">
                         <Logo className="h-12 w-12 grayscale opacity-50" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">No bookmarks found</h3>
+                    <h3 className="text-xl font-semibold mb-2">{t('main.empty.title')}</h3>
                     <p className="text-muted-foreground max-w-sm mb-6">
-                        We couldn't find any bookmarks matching your search or filters.
+                        {t('main.empty.desc')}
                     </p>
                     <Button
                         variant="outline"
@@ -80,7 +82,7 @@ export function MainContent({
                             setSmartFilter(null)
                         }}
                     >
-                        Clear Search
+                        {t('main.empty.clearSearch')}
                     </Button>
                 </div>
             </main>
@@ -91,7 +93,7 @@ export function MainContent({
         <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
             <div className="space-y-4 max-w-[1600px] mx-auto">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({displayBookmarks.length})</h2>
+                    <h2 className="text-2xl font-bold tracking-tight">{t('main.header.title')} ({displayBookmarks.length})</h2>
                     <div className="flex gap-2">
                         {smartFilter === 'docs' && displayBookmarks.length > 0 && (
                             <Button
@@ -101,12 +103,9 @@ export function MainContent({
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                                 <Folder className="h-4 w-4 mr-2" />
-                                Move {displayBookmarks.length} to "References"
+                                {t('main.header.moveDocs', { count: displayBookmarks.length })}
                             </Button>
                         )}
-                        <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
-                            Clear All
-                        </Button>
                     </div>
                 </div>
 

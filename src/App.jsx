@@ -33,7 +33,6 @@ import { ShortcutsModal } from './components/modals/ShortcutsModal'
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
-import { LanguageSwitcher } from './components/layout/LanguageSwitcher'
 
 import { useTranslation } from 'react-i18next'
 
@@ -284,6 +283,7 @@ function App() {
         openSettings={openSettings}
         isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
         setIsShortcutsOpen={setIsShortcutsOpen}
+        clearAll={clearAll}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
@@ -340,8 +340,6 @@ function App() {
         >
           {settingsTab === 'backup' ? (
             <BackupSettings />
-          ) : settingsTab === 'general' ? (
-            <LanguageSwitcher />
           ) : (
             <TaxonomyManager
               folders={availableFolders}
@@ -354,14 +352,6 @@ function App() {
             />
           )}
           <div className="flex justify-center gap-2 mt-4 border-t pt-2">
-            <Button
-              variant={settingsTab === 'general' ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSettingsTab('general')}
-              className="text-xs h-7"
-            >
-              {t('settings.tabs.general')}
-            </Button>
             <Button
               variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
               size="sm"
