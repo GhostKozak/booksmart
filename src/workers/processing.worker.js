@@ -12,6 +12,40 @@ function isDoc(url) {
         url.includes('docs.google.com');
 }
 
+const MEDIA_DOMAINS = [
+    'youtube.com', 'youtu.be', 'vimeo.com', 'twitch.tv', 'dailymotion.com',
+    'netflix.com', 'disneyplus.com', 'hulu.com', 'spotify.com', 'soundcloud.com',
+    'podcasts.apple.com', 'music.apple.com', 'bandcamp.com', 'tiktok.com'
+];
+
+const SOCIAL_DOMAINS = [
+    'twitter.com', 'x.com', 'reddit.com', 'facebook.com', 'instagram.com',
+    'linkedin.com', 'mastodon.social', 'threads.net', 'bsky.app',
+    'discord.com', 'discord.gg', 'telegram.org', 't.me', 'pinterest.com'
+];
+
+const SHOPPING_DOMAINS = [
+    'amazon.com', 'amazon.co', 'amazon.de', 'amazon.co.uk', 'amazon.com.tr',
+    'ebay.com', 'etsy.com', 'aliexpress.com', 'walmart.com', 'target.com',
+    'trendyol.com', 'hepsiburada.com', 'n11.com', 'gittigidiyor.com',
+    'shopify.com', 'bestbuy.com', 'newegg.com', 'banggood.com'
+];
+
+const NEWS_DOMAINS = [
+    'medium.com', 'substack.com', 'dev.to', 'hashnode.dev', 'hackernoon.com',
+    'techcrunch.com', 'theverge.com', 'arstechnica.com', 'wired.com',
+    'bbc.com', 'bbc.co.uk', 'cnn.com', 'reuters.com', 'nytimes.com',
+    'theguardian.com', 'washingtonpost.com', 'hurriyet.com.tr', 'sozcu.com.tr'
+];
+
+function domainMatch(url, domains) {
+    url = (url || '').toLowerCase();
+    return domains.some(d => {
+        // Match domain exactly or as subdomain
+        return url.includes('://' + d) || url.includes('.' + d);
+    });
+}
+
 // --- Main Processing Logic ---
 
 const processData = ({
@@ -130,6 +164,16 @@ const processData = ({
         });
     } else if (smartFilter === 'docs') {
         filtered = filtered.filter(b => isDoc(b.url));
+    } else if (smartFilter === 'longurl') {
+        filtered = filtered.filter(b => (b.url || '').length >= 200);
+    } else if (smartFilter === 'media') {
+        filtered = filtered.filter(b => domainMatch(b.url, MEDIA_DOMAINS));
+    } else if (smartFilter === 'social') {
+        filtered = filtered.filter(b => domainMatch(b.url, SOCIAL_DOMAINS));
+    } else if (smartFilter === 'shopping') {
+        filtered = filtered.filter(b => domainMatch(b.url, SHOPPING_DOMAINS));
+    } else if (smartFilter === 'news') {
+        filtered = filtered.filter(b => domainMatch(b.url, NEWS_DOMAINS));
     }
 
     // 6. Duplicate Detection Setup
@@ -271,6 +315,12 @@ const processData = ({
     let http = 0;
     let untitled = 0;
     let docs = 0;
+    let longurl = 0;
+    let media = 0;
+    let social = 0;
+    let shopping = 0;
+    let news = 0;
+
 
     bookmarks.forEach(b => {
         if (b.addDate) {
@@ -289,8 +339,14 @@ const processData = ({
         if (isDoc(url)) {
             docs++;
         }
+
+        if ((b.url || '').length >= 200) longurl++;
+        if (domainMatch(b.url, MEDIA_DOMAINS)) media++;
+        if (domainMatch(b.url, SOCIAL_DOMAINS)) social++;
+        if (domainMatch(b.url, SHOPPING_DOMAINS)) shopping++;
+        if (domainMatch(b.url, NEWS_DOMAINS)) news++;
     });
-    const smartCounts = { old, http, untitled, docs };
+    const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news };
 
     // Duplicate Count
     const urls = new Set();

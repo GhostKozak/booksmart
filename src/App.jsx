@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter, ChevronRight, ChevronDown, Sparkles } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter, ChevronRight, ChevronDown, Sparkles, Link, Video, MessageCircle, ShoppingCart, Newspaper } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -164,6 +164,7 @@ function App() {
     tags: ''
   })
   const [editingRuleId, setEditingRuleId] = useState(null)
+  const [isRuleModalOpen, setIsRuleModalOpen] = useState(false)
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('')
@@ -211,7 +212,20 @@ function App() {
   const [bookmarks, setBookmarks] = useState([])
   const [uniqueTags, setUniqueTags] = useState([])
   const [uniqueFolders, setUniqueFolders] = useState([])
-  const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0 })
+  const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0, longurl: 0, media: 0, social: 0, shopping: 0, news: 0 })
+
+  // Dead link count (derived from linkHealth state)
+  const deadLinkCount = useMemo(() => {
+    return Object.values(linkHealth).filter(s => s === 'dead').length
+  }, [linkHealth])
+
+  // Apply dead link filter on top of worker-processed bookmarks
+  const displayBookmarks = useMemo(() => {
+    if (smartFilter === 'dead') {
+      return bookmarks.filter(b => linkHealth[b.url] === 'dead')
+    }
+    return bookmarks
+  }, [bookmarks, smartFilter, linkHealth])
   const [duplicateCount, setDuplicateCount] = useState(0)
   const workerRef = useRef(null)
 
@@ -535,6 +549,7 @@ function App() {
         });
       }
       setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
+      setIsRuleModalOpen(false)
     }
   }
 
@@ -546,11 +561,13 @@ function App() {
       targetFolder: rule.targetFolder || '',
       tags: rule.tags || ''
     })
+    setIsRuleModalOpen(true)
   }
 
   const cancelEditing = () => {
     setEditingRuleId(null)
     setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
+    setIsRuleModalOpen(false)
   }
 
   const deleteRule = async (id) => {
@@ -627,10 +644,10 @@ function App() {
   }
 
   const toggleAll = () => {
-    if (selectedIds.size === bookmarks.length) {
+    if (selectedIds.size === displayBookmarks.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(bookmarks.map(b => b.id)))
+      setSelectedIds(new Set(displayBookmarks.map(b => b.id)))
     }
   }
 
@@ -1118,7 +1135,7 @@ function App() {
           </div>
 
           {!collapsedSections.tags && (
-            <div className="mb-6 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="mb-6 space-y-1 max-h-[30vh] min-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
               {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">No tags found.</p>}
               {/* 
                 Merge uniqueTags (counts) with availableTags (colors/order). 
@@ -1201,7 +1218,7 @@ function App() {
           </div>
 
           {!collapsedSections.folders && (
-            <div className="mb-6 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="mb-6 space-y-1 max-h-[30vh] min-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
               {/* User Defined Folders */}
               {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
                 const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length;
@@ -1335,6 +1352,99 @@ function App() {
                 </div>
                 <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.docs}</span>
               </button>
+
+              {/* Divider */}
+              <div className="my-2 border-t border-dashed" />
+
+              {/* Dead Links */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'dead' ? null : 'dead')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'dead' ? "bg-gray-200 text-gray-800 font-medium dark:bg-gray-700/50 dark:text-gray-200" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 opacity-70" />
+                  <span>Dead Links</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{deadLinkCount}</span>
+              </button>
+
+              {/* Long URLs */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'longurl' ? null : 'longurl')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'longurl' ? "bg-purple-100 text-purple-700 font-medium dark:bg-purple-900/30 dark:text-purple-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Link className="h-4 w-4 opacity-70" />
+                  <span>Long URLs (200+)</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.longurl}</span>
+              </button>
+
+              {/* Media & Videos */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'media' ? null : 'media')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'media' ? "bg-pink-100 text-pink-700 font-medium dark:bg-pink-900/30 dark:text-pink-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 opacity-70" />
+                  <span>Media & Videos</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.media}</span>
+              </button>
+
+              {/* Social Media */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'social' ? null : 'social')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'social' ? "bg-sky-100 text-sky-700 font-medium dark:bg-sky-900/30 dark:text-sky-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 opacity-70" />
+                  <span>Social Media</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.social}</span>
+              </button>
+
+              {/* Shopping */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'shopping' ? null : 'shopping')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'shopping' ? "bg-emerald-100 text-emerald-700 font-medium dark:bg-emerald-900/30 dark:text-emerald-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4 opacity-70" />
+                  <span>Shopping</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.shopping}</span>
+              </button>
+
+              {/* News & Articles */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'news' ? null : 'news')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'news' ? "bg-teal-100 text-teal-700 font-medium dark:bg-teal-900/30 dark:text-teal-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Newspaper className="h-4 w-4 opacity-70" />
+                  <span>News & Articles</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.news}</span>
+              </button>
             </div>
           )}
 
@@ -1346,108 +1456,43 @@ function App() {
               {collapsedSections.rules ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
               <Settings className="h-5 w-5" />
               Rules
+              <span className="text-xs font-normal text-muted-foreground">({rules.length})</span>
             </h2>
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) => { e.stopPropagation(); openSettings(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingRuleId(null);
+                setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' });
+                setIsRuleModalOpen(true);
+              }}
               className="h-7 text-xs gap-1"
             >
-              <Settings className="h-3 w-3" /> Manage
+              <Plus className="h-3 w-3" /> Add Rule
             </Button>
           </div>
 
           {!collapsedSections.rules && (
             <div className="animate-in fade-in slide-in-from-top-1 duration-200 pb-10">
-              <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Type</label>
-                  <select
-                    className="w-full bg-background border rounded-md h-9 px-3 text-sm focus:ring-2 focus:ring-primary"
-                    value={newRule.type}
-                    onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
-                  >
-                    <option value="keyword">Keyword</option>
-                    <option value="domain">Domain</option>
-                    <option value="exact">Exact Title</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Value</label>
-                  <Input
-                    placeholder="e.g. 'github', 'youtube'"
-                    value={newRule.value}
-                    onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
-                  <SimpleCombobox
-                    options={[
-                      { label: "User Defined", options: availableFolders.map(f => f.name) },
-                      { label: "Suggested (Discovered)", options: discoveredFolders.map(f => f.name) }
-                    ]}
-                    value={newRule.targetFolder}
-                    onChange={(val) => {
-                      setNewRule({ ...newRule, targetFolder: val })
-                      // Auto-add to available folders if it was a discovered one or new
-                      if (val && !availableFolders.some(f => f.name === val)) {
-                        saveToTaxonomy(val, 'folder');
-                      }
-                    }}
-                    placeholder="Select or create folder..."
-                    allowCreate={true}
-                  />
-                  <p className="text-[10px] text-muted-foreground">
-                    Example: <code>Main &gt; Subfolder</code> for nested structure.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Tags (Comma separated)</label>
-                  <Input
-                    placeholder="e.g. news, tech, read-later"
-                    value={newRule.tags}
-                    onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
-                  />
-                  {/* Quick Add Tags */}
-                  <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
-                    {availableTags.map(tag => (
-                      <button
-                        key={tag.id}
-                        onClick={() => {
-                          const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
-                          if (!current.includes(tag.name)) {
-                            const newValue = [...current, tag.name].join(', ')
-                            setNewRule({ ...newRule, tags: newValue })
-                          }
-                        }}
-                        className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
-                      >
-                        + {tag.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button onClick={addRule} className="flex-1" size="sm">
-                    {editingRuleId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    {editingRuleId ? 'Update Rule' : 'Add Rule'}
-                  </Button>
-                  {editingRuleId && (
-                    <Button onClick={cancelEditing} variant="outline" size="sm" className="px-3">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </Card>
-
               <div className="space-y-2">
                 {rules.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4">No rules defined.</p>
+                  <div className="text-center py-6">
+                    <Settings className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+                    <p className="text-sm text-muted-foreground">No rules defined yet.</p>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="mt-1 text-xs"
+                      onClick={() => {
+                        setEditingRuleId(null);
+                        setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' });
+                        setIsRuleModalOpen(true);
+                      }}
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Create your first rule
+                    </Button>
+                  </div>
                 )}
                 {rules.map(rule => (
                   <div key={rule.id} className="flex items-start justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group gap-2">
@@ -1532,7 +1577,7 @@ function App() {
                 <Button variant="outline" className="mt-8">Browse Files</Button>
               </div>
             </div>
-          ) : bookmarks.length === 0 ? (
+          ) : displayBookmarks.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center p-8 text-center">
               <div className="bg-muted p-6 rounded-full mb-4">
                 <Search className="h-12 w-12 text-muted-foreground" />
@@ -1557,9 +1602,9 @@ function App() {
           ) : (
             <div className="space-y-4 max-w-[1600px] mx-auto">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({bookmarks.length})</h2>
+                <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({displayBookmarks.length})</h2>
                 <div className="flex gap-2">
-                  {smartFilter === 'docs' && bookmarks.length > 0 && (
+                  {smartFilter === 'docs' && displayBookmarks.length > 0 && (
                     <Button
                       variant="default"
                       size="sm"
@@ -1567,7 +1612,7 @@ function App() {
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
                       <Folder className="h-4 w-4 mr-2" />
-                      Move {bookmarks.length} to "References"
+                      Move {displayBookmarks.length} to "References"
                     </Button>
                   )}
                   <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
@@ -1593,7 +1638,7 @@ function App() {
                   <div className={cn("flex-1 min-w-0 h-full", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
                     {viewMode === 'list' ? (
                       <BookmarkList
-                        bookmarks={bookmarks}
+                        bookmarks={displayBookmarks}
                         selectedIds={selectedIds}
                         toggleSelection={toggleSelection}
                         toggleAll={toggleAll}
@@ -1605,7 +1650,7 @@ function App() {
                       />
                     ) : (
                       <BookmarkGrid
-                        bookmarks={bookmarks}
+                        bookmarks={displayBookmarks}
                         selectedIds={selectedIds}
                         toggleSelection={toggleSelection}
                         onPreview={handlePreview}
@@ -1848,6 +1893,96 @@ function App() {
               <Button onClick={performExport}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
+              </Button>
+            </div>
+          </div>
+        </SimpleModal>
+
+        {/* Rule Create/Edit Modal */}
+        <SimpleModal
+          isOpen={isRuleModalOpen}
+          onClose={cancelEditing}
+          title={editingRuleId ? 'Edit Rule' : 'New Rule'}
+        >
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Type</label>
+              <select
+                className="w-full bg-background border rounded-md h-9 px-3 text-sm focus:ring-2 focus:ring-primary"
+                value={newRule.type}
+                onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
+              >
+                <option value="keyword">Keyword</option>
+                <option value="domain">Domain</option>
+                <option value="exact">Exact Title</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Value</label>
+              <Input
+                placeholder="e.g. 'github', 'youtube'"
+                value={newRule.value}
+                onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
+              <SimpleCombobox
+                options={[
+                  { label: "User Defined", options: availableFolders.map(f => f.name) },
+                  { label: "Suggested (Discovered)", options: discoveredFolders.map(f => f.name) }
+                ]}
+                value={newRule.targetFolder}
+                onChange={(val) => {
+                  setNewRule({ ...newRule, targetFolder: val })
+                  if (val && !availableFolders.some(f => f.name === val)) {
+                    saveToTaxonomy(val, 'folder');
+                  }
+                }}
+                placeholder="Select or create folder..."
+                allowCreate={true}
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Example: <code>Main &gt; Subfolder</code> for nested structure.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Tags (Comma separated)</label>
+              <Input
+                placeholder="e.g. news, tech, read-later"
+                value={newRule.tags}
+                onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
+              />
+              {/* Quick Add Tags */}
+              <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
+                {availableTags.map(tag => (
+                  <button
+                    key={tag.id}
+                    onClick={() => {
+                      const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+                      if (!current.includes(tag.name)) {
+                        const newValue = [...current, tag.name].join(', ')
+                        setNewRule({ ...newRule, tags: newValue })
+                      }
+                    }}
+                    className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
+                  >
+                    + {tag.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button onClick={addRule} className="flex-1" size="sm">
+                {editingRuleId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                {editingRuleId ? 'Update Rule' : 'Add Rule'}
+              </Button>
+              <Button onClick={cancelEditing} variant="outline" size="sm" className="px-4">
+                Cancel
               </Button>
             </div>
           </div>
