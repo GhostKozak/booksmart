@@ -23,6 +23,8 @@ import { AdvancedSearch } from './components/AdvancedSearch'
 import Fuse from 'fuse.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
+import { BackupSettings } from './components/BackupSettings'
+import { saveAutoBackup, createBackup, downloadBackup } from './lib/backup-manager'
 import ProcessingWorker from './workers/processing.worker.js?worker'
 
 const EMPTY_ARRAY = [];
@@ -63,13 +65,32 @@ function App() {
   const [activeFolder, setActiveFolder] = useState(null)
 
 
+  const [showBackupModal, setShowBackupModal] = useState(false)
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [settingsTab, setSettingsTab] = useState('folders') // 'folders' | 'tags'
+  const [settingsTab, setSettingsTab] = useState('folders') // 'folders' | 'tags' | 'backup'
 
   const openSettings = (tab = 'folders') => {
     setSettingsTab(tab)
     setIsSettingsOpen(true)
   }
+
+  // Auto-Backup Effect
+  useEffect(() => {
+    const autoBackup = async () => {
+      // Check if feature is enabled inside the manager or here? 
+      // Manager has `saveAutoBackup` which checks nothing, so we check here or let it be.
+      // Logic: If rules, folders, or tags change, trigger auto-save.
+      // We debounce this to avoid thrashing.
+      const timer = setTimeout(() => {
+        if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
+          saveAutoBackup();
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    };
+    autoBackup();
+  }, [rules, availableFolders, availableTags, ignoredUrlsList]);
 
   // Taxonomy Helpers
   const setAvailableFolders = async (newFolders) => {
@@ -397,14 +418,44 @@ function App() {
     }
   }
 
-  const clearAll = () => {
-    // Clear bookmarks and rules? 
-    // Original cleared bookmarks, rules, selectedIds.
+  const confirmClearAll = async (shouldBackup) => {
+    if (shouldBackup) {
+      try {
+        const data = await createBackup();
+        downloadBackup(data);
+        // Small delay to ensure download starts before clearing?
+      } catch (e) {
+        console.error("Backup failed before clear:", e);
+        // Should we stop? Let's alert.
+        alert("Backup failed! Check console. Data was NOT cleared.");
+        return;
+      }
+    }
+
+    // Proceed to clear
     db.transaction('rw', db.bookmarks, db.rules, async () => {
       await db.bookmarks.clear();
       await db.rules.clear();
+      // Do we clear folders/tags? "Clear All" usually implies everything user data.
+      // Required: "Clear All" clears bookmarks and rules. 
+      // User request implies: "Rules and Settings go away".
+      // So yes, we should clear folders and tags too to be a true "Factory Reset".
+      // BUT, let's keep it safe. The original clearAll only cleared bookmarks and rules.
+      // User said: "User 'Clear All' dediğinde... tüm kurallar ve ayarlar gider." 
+      // So YES, we must clear EVERYTHING.
+      await db.folders.clear();
+      await db.tags.clear();
+      await db.ignoredUrls.clear();
+
+      // Reseed defaults? Or leave empty?
+      // Usually "Clear All" leaves it empty.
     });
     setSelectedIds(new Set())
+    setShowBackupModal(false);
+  }
+
+  const clearAll = () => {
+    setShowBackupModal(true);
   }
 
   const closeFile = () => {
@@ -1179,15 +1230,93 @@ function App() {
         <SimpleModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
-          title="Taxonomy Settings"
+          title="Settings"
         >
-          <TaxonomyManager
-            folders={availableFolders}
-            setFolders={setAvailableFolders}
-            tags={availableTags}
-            setTags={setAvailableTags}
-            defaultTab={settingsTab}
-          />
+          {settingsTab === 'backup' ? (
+            <BackupSettings />
+          ) : (
+            <TaxonomyManager
+              folders={availableFolders}
+              setFolders={setAvailableFolders}
+              tags={availableTags}
+              setTags={setAvailableTags}
+              defaultTab={settingsTab}
+            />
+          )}
+
+          {/* Navigation Tabs (if not already inside TaxonomyManager, but TaxonomyManager has its own tabs...)
+               We should lift the tabs UP to the Modal level or switch logic.
+               TaxonomyManager has 'folders' and 'tags' internal state. 
+               Let's modify TaxonomyManager to accept activeTab prop or 
+               just render headers here. 
+               
+               Actually, TaxonomyManager renders its own tabs. 
+               We should probably just have a top-level switcher.
+           */}
+          <div className="flex justify-center gap-2 mt-4 border-t pt-2">
+            <Button
+              variant={settingsTab !== 'backup' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('folders')}
+              className="text-xs h-7"
+            >
+              Taxonomy
+            </Button>
+            <Button
+              variant={settingsTab === 'backup' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('backup')}
+              className="text-xs h-7"
+            >
+              Backup & Data
+            </Button>
+          </div>
+        </SimpleModal>
+
+        {/* Clear All Confirmation Modal */}
+        <SimpleModal
+          isOpen={showBackupModal}
+          onClose={() => setShowBackupModal(false)}
+          title="⚠ Warning: Clear All Data"
+        >
+          <div className="space-y-4">
+            <div className="bg-destructive/10 text-destructive p-3 rounded-md flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+              <p className="text-sm">
+                This will delete <strong>ALL</strong> Bookmarks, Rules, Custom Folders, Tags, and Settings.
+                <br /><br />
+                This action cannot be undone unless you have a backup.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowBackupModal(false)}>
+                Cancel
+              </Button>
+              <div className="col-span-2 grid grid-cols-2 gap-3">
+                <div className="col-span-2 sm:col-span-1">
+                  <Button
+                    variant="default"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => confirmClearAll(true)}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Backup & Clear
+                  </Button>
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => confirmClearAll(false)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear Everything
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </SimpleModal>
         {/* Export Modal */}
         <SimpleModal
