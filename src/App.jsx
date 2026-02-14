@@ -199,6 +199,10 @@ function App() {
   // Export State
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [exportFormat, setExportFormat] = useState('html') // 'html', 'json', 'csv', 'md'
+  const [exportOnlySelected, setExportOnlySelected] = useState(false)
+
+  // Shortcuts Modal
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
 
 
 
@@ -368,32 +372,44 @@ function App() {
   })
 
   // Export
-  const openExportModal = () => setIsExportModalOpen(true)
+  const openExportModal = () => {
+    setExportOnlySelected(false)
+    setIsExportModalOpen(true)
+  }
+
+  const openExportSelectedModal = () => {
+    setExportOnlySelected(true)
+    setIsExportModalOpen(true)
+  }
 
   const performExport = () => {
+    const dataToExport = exportOnlySelected
+      ? bookmarks.filter(b => selectedIds.has(b.id))
+      : bookmarks;
+
     let content = '';
     let type = '';
     let extension = '';
 
     switch (exportFormat) {
       case 'json':
-        content = exportToJson(bookmarks);
+        content = exportToJson(dataToExport);
         type = 'application/json';
         extension = 'json';
         break;
       case 'csv':
-        content = exportToCsv(bookmarks);
+        content = exportToCsv(dataToExport);
         type = 'text/csv';
         extension = 'csv';
         break;
       case 'md':
-        content = exportToMarkdown(bookmarks);
+        content = exportToMarkdown(dataToExport);
         type = 'text/markdown';
         extension = 'md';
         break;
       case 'html':
       default:
-        content = exportBookmarks(bookmarks);
+        content = exportBookmarks(dataToExport);
         type = 'text/html';
         extension = 'html';
         break;
@@ -403,12 +419,13 @@ function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bookmarks_organized.${extension}`;
+    a.download = `bookmarks_${exportOnlySelected ? 'selected' : 'organized'}.${extension}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setIsExportModalOpen(false);
+    if (exportOnlySelected) setSelectedIds(new Set());
   }
 
   // Manage Rules
@@ -757,6 +774,18 @@ function App() {
         e.preventDefault()
         redo()
       }
+
+      // Shortcut: Escape to clear selection
+      if (e.key === 'Escape' && selectedIds.size > 0 && !isInput) {
+        e.preventDefault()
+        setSelectedIds(new Set())
+      }
+
+      // Shortcut: "?" to show keyboard shortcuts
+      if (e.key === '?' && !isInput) {
+        e.preventDefault()
+        setIsShortcutsOpen(true)
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -956,6 +985,15 @@ function App() {
             </Button>
           )}
 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsShortcutsOpen(true)}
+            className="rounded-full shrink-0"
+            title="Keyboard Shortcuts (?)"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -1516,6 +1554,7 @@ function App() {
           allTags={availableTags}
           onOverrideStatus={handleStatusOverride}
           onAddTags={handleBatchAddTags}
+          onExportSelected={openExportSelectedModal}
         />
 
         {/* Settings Modal */}
@@ -1612,13 +1651,51 @@ function App() {
             </div>
           </div>
         </SimpleModal>
+        {/* Keyboard Shortcuts Modal */}
+        <SimpleModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+          title="Keyboard Shortcuts"
+        >
+          <div className="space-y-1">
+            {[
+              { keys: '/', desc: 'Focus search' },
+              { keys: 'Ctrl + A', desc: 'Select all visible' },
+              { keys: 'Delete', desc: 'Delete selected' },
+              { keys: 'Escape', desc: 'Clear selection' },
+              { keys: 'Ctrl + Z', desc: 'Undo' },
+              { keys: 'Ctrl + Y', desc: 'Redo' },
+              { keys: 'Ctrl + Shift + Z', desc: 'Redo (alt)' },
+              { keys: '?', desc: 'Show this help' },
+            ].map(s => (
+              <div key={s.keys} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <span className="text-sm text-foreground">{s.desc}</span>
+                <div className="flex gap-1">
+                  {s.keys.split(' + ').map((k, i) => (
+                    <span key={i}>
+                      <kbd className="px-2 py-1 text-xs font-mono font-semibold bg-muted border rounded-md shadow-sm">{k}</kbd>
+                      {i < s.keys.split(' + ').length - 1 && <span className="text-muted-foreground mx-0.5">+</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SimpleModal>
+
         {/* Export Modal */}
         <SimpleModal
           isOpen={isExportModalOpen}
           onClose={() => setIsExportModalOpen(false)}
-          title="Export Bookmarks"
+          title={exportOnlySelected ? `Export ${selectedIds.size} Selected Bookmarks` : 'Export Bookmarks'}
         >
           <div className="space-y-4">
+            {exportOnlySelected && (
+              <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm">
+                <Download className="h-4 w-4 text-primary shrink-0" />
+                <span><strong>{selectedIds.size}</strong> bookmark selected for export.</span>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">Select the format you want to export your bookmarks in.</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

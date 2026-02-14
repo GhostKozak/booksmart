@@ -1,4 +1,4 @@
-import { Trash2, FolderInput, X, Loader2, Check, XCircle, Tag, Folder } from 'lucide-react';
+import { Trash2, FolderInput, X, Loader2, Check, XCircle, Tag, Folder, Download } from 'lucide-react';
 import { Button } from './ui/button';
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,7 +11,8 @@ export function FloatingActionBar({
     allFolders,
     allTags,
     onOverrideStatus,
-    onAddTags
+    onAddTags,
+    onExportSelected
 }) {
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [isTagOpen, setIsTagOpen] = useState(false);
@@ -223,6 +224,20 @@ export function FloatingActionBar({
                             <XCircle className="h-4 w-4 sm:h-4 sm:w-4 text-red-500" />
                         </Button>
                     </div>
+                )}
+
+                {/* Export Selected */}
+                {onExportSelected && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0 border-l ml-1"
+                        onClick={onExportSelected}
+                        title="Export selected bookmarks"
+                    >
+                        <Download className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        <span className="hidden sm:inline">Export</span>
+                    </Button>
                 )}
             </div>
         </div>
