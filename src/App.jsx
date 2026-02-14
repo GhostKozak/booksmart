@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter, ChevronRight, ChevronDown } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter, ChevronRight, ChevronDown, Sparkles } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -27,6 +27,7 @@ import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from '
 import { BackupSettings } from './components/BackupSettings'
 import { saveAutoBackup, createBackup, downloadBackup } from './lib/backup-manager'
 import ProcessingWorker from './workers/processing.worker.js?worker'
+import { cleanUrl, countCleanableUrls } from './lib/url-cleaner'
 
 const EMPTY_ARRAY = [];
 
@@ -324,6 +325,83 @@ function App() {
         description: `Remove ${toDeleteIds.length} Duplicate Bookmarks`
       });
     }
+  };
+
+  // URL Cleaning
+  const cleanableCount = useMemo(() => countCleanableUrls(rawBookmarks), [rawBookmarks]);
+
+  const cleanAllUrls = async () => {
+    const updates = [];
+    const originalStates = [];
+
+    for (const b of rawBookmarks) {
+      const { cleaned, changed } = cleanUrl(b.url);
+      if (changed) {
+        originalStates.push({ id: b.id, url: b.url });
+        updates.push({ id: b.id, url: cleaned });
+      }
+    }
+
+    if (updates.length === 0) return;
+
+    await db.transaction('rw', db.bookmarks, async () => {
+      for (const u of updates) {
+        await db.bookmarks.update(u.id, { url: u.url });
+      }
+    });
+
+    addCommand({
+      undo: () => db.transaction('rw', db.bookmarks, async () => {
+        for (const s of originalStates) {
+          await db.bookmarks.update(s.id, { url: s.url });
+        }
+      }),
+      redo: () => db.transaction('rw', db.bookmarks, async () => {
+        for (const u of updates) {
+          await db.bookmarks.update(u.id, { url: u.url });
+        }
+      }),
+      description: `Clean ${updates.length} URLs (remove tracking params)`
+    });
+  };
+
+  const cleanSelectedUrls = async () => {
+    const selectedBookmarks = await db.bookmarks.bulkGet([...selectedIds]);
+    const updates = [];
+    const originalStates = [];
+
+    for (const b of selectedBookmarks) {
+      if (!b) continue;
+      const { cleaned, changed } = cleanUrl(b.url);
+      if (changed) {
+        originalStates.push({ id: b.id, url: b.url });
+        updates.push({ id: b.id, url: cleaned });
+      }
+    }
+
+    if (updates.length === 0) return;
+
+    await db.transaction('rw', db.bookmarks, async () => {
+      for (const u of updates) {
+        await db.bookmarks.update(u.id, { url: u.url });
+      }
+    });
+
+    addCommand({
+      undo: () => db.transaction('rw', db.bookmarks, async () => {
+        for (const s of originalStates) {
+          await db.bookmarks.update(s.id, { url: s.url });
+        }
+      }),
+      redo: () => db.transaction('rw', db.bookmarks, async () => {
+        for (const u of updates) {
+          await db.bookmarks.update(u.id, { url: u.url });
+        }
+      }),
+      description: `Clean ${updates.length} selected URLs (remove tracking params)`
+    });
+
+    setSelectedIds(new Set());
   };
 
   // File Upload
@@ -915,6 +993,14 @@ function App() {
               <Layers className="h-4 w-4" />
               <span className="hidden lg:inline">Remove {duplicateCount} Duplicates</span>
               <span className="lg:hidden">{duplicateCount}</span>
+            </Button>
+          )}
+
+          {cleanableCount > 0 && (
+            <Button onClick={cleanAllUrls} variant="outline" size="sm" className="gap-2 hidden sm:flex border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden lg:inline">Clean {cleanableCount} URLs</span>
+              <span className="lg:hidden">{cleanableCount}</span>
             </Button>
           )}
 
@@ -1555,6 +1641,7 @@ function App() {
           onOverrideStatus={handleStatusOverride}
           onAddTags={handleBatchAddTags}
           onExportSelected={openExportSelectedModal}
+          onCleanUrls={cleanSelectedUrls}
         />
 
         {/* Settings Modal */}

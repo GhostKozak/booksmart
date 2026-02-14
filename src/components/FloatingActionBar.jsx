@@ -1,4 +1,4 @@
-import { Trash2, FolderInput, X, Loader2, Check, XCircle, Tag, Folder, Download } from 'lucide-react';
+import { Trash2, FolderInput, X, Loader2, Check, XCircle, Tag, Folder, Download, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 
 import { useState, useRef, useEffect } from 'react';
@@ -12,7 +12,8 @@ export function FloatingActionBar({
     allTags,
     onOverrideStatus,
     onAddTags,
-    onExportSelected
+    onExportSelected,
+    onCleanUrls
 }) {
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [isTagOpen, setIsTagOpen] = useState(false);
@@ -231,12 +232,26 @@ export function FloatingActionBar({
                     <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0 border-l ml-1"
+                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0"
                         onClick={onExportSelected}
                         title="Export selected bookmarks"
                     >
                         <Download className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                         <span className="hidden sm:inline">Export</span>
+                    </Button>
+                )}
+
+                {/* Clean URLs */}
+                {onCleanUrls && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                        onClick={onCleanUrls}
+                        title="Clean tracking parameters from selected URLs"
+                    >
+                        <Sparkles className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        <span className="hidden sm:inline">Clean URLs</span>
                     </Button>
                 )}
             </div>
