@@ -259,7 +259,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                                             }}
                                             title="Search in Archive"
                                         >
-                                            <History className="h-4 w-4 text-muted-foreground" />
+                                            <HistoryIcon className="h-4 w-4 text-muted-foreground" />
                                         </Button>
                                         <Button
                                             variant="ghost"

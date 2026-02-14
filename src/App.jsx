@@ -23,6 +23,7 @@ import { AdvancedSearch } from './components/AdvancedSearch'
 import Fuse from 'fuse.js'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
+import ProcessingWorker from './workers/processing.worker.js?worker'
 
 const EMPTY_ARRAY = [];
 
@@ -112,32 +113,16 @@ function App() {
   const [linkHealth, setLinkHealth] = useState({}) // { url: 'idle' | 'checking' | 'alive' | 'dead' }
   const [isCheckingLinks, setIsCheckingLinks] = useState(false)
 
-  const checkLink = async (url) => {
-    try {
-      setLinkHealth(prev => ({ ...prev, [url]: 'checking' }))
-      // We use no-cors to avoid CORS errors block.
-      // If it doesn't throw, it means DNS/Connection is fine (Likely Alive).
-      // If it throws, it's likely a Network Error (Dead).
-      await fetch(url, { mode: 'no-cors', method: 'HEAD' })
-      setLinkHealth(prev => ({ ...prev, [url]: 'alive' }))
-    } catch (error) {
-      console.error(`Dead link detected: ${url}`, error)
-      setLinkHealth(prev => ({ ...prev, [url]: 'dead' }))
-    }
-  }
+
 
   const checkAllLinks = async () => {
+    if (!workerRef.current) {
+      console.warn("Worker not initialized");
+      return;
+    }
     setIsCheckingLinks(true)
     const urls = [...new Set(bookmarks.map(b => b.url))]
-
-    // Concurrency control (batch of 5)
-    const batchSize = 5
-    for (let i = 0; i < urls.length; i += batchSize) {
-      const batch = urls.slice(i, i + batchSize)
-      await Promise.all(batch.map(url => checkLink(url)))
-    }
-
-    setIsCheckingLinks(false)
+    workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls } })
   }
 
   // Ignored URLs
@@ -184,283 +169,65 @@ function App() {
 
 
 
-  // Derived state: Apply rules, search, and sort
-  const bookmarks = useMemo(() => {
-    if (rawBookmarks.length === 0) return [];
+  // Worker State
+  const [bookmarks, setBookmarks] = useState([])
+  const [uniqueTags, setUniqueTags] = useState([])
+  const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0 })
+  const [duplicateCount, setDuplicateCount] = useState(0)
+  const workerRef = useRef(null)
 
-    let filtered = rawBookmarks;
-
-    // 0. Search Filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-
-      if (searchMode === 'fuzzy') {
-        const fuse = new Fuse(filtered, fuseOptions);
-        const result = fuse.search(searchQuery);
-        filtered = result.map(r => r.item);
-      } else if (searchMode === 'regex') {
-        try {
-          const regex = new RegExp(searchQuery, 'i');
-          filtered = filtered.filter(b =>
-            regex.test(b.title || '') ||
-            regex.test(b.url || '') ||
-            (b.tags || []).some(t => regex.test(t))
-          );
-        } catch {
-          // Invalid regex, maybe don't filter or show nothing? 
-          // For now, let's treat it as a failed match if regex is invalid, or fallback to simple?
-          // Fallback to simple contains to be user friendly while typing
-          filtered = filtered.filter(b =>
-            (b.title || '').toLowerCase().includes(query) ||
-            (b.url || '').toLowerCase().includes(query)
-          );
-        }
-      } else {
-        // Simple Mode
-        filtered = filtered.filter(b =>
-          (b.title || '').toLowerCase().includes(query) ||
-          (b.url || '').toLowerCase().includes(query) ||
-          (b.tags || []).some(t => t.toLowerCase().includes(query))
-        );
-      }
+  // Initialize Worker
+  useEffect(() => {
+    try {
+      // Vite handles ?worker imports by returning a constructor
+      workerRef.current = new ProcessingWorker()
+    } catch (e) {
+      console.error("Failed to initialize worker:", e);
+      // Fallback or alert user?
     }
 
-    // 0.2 Date Filter
-    if (dateFilter.start || dateFilter.end) {
-      filtered = filtered.filter(b => {
-        if (!b.addDate) return false;
-        const bookmarkDate = parseInt(b.addDate) * 1000;
-
-        // Start Date
-        if (dateFilter.start) {
-          const start = new Date(dateFilter.start).getTime();
-          if (bookmarkDate < start) return false;
-        }
-
-        // End Date
-        if (dateFilter.end) {
-          // Set to end of day
-          const end = new Date(dateFilter.end);
-          end.setHours(23, 59, 59, 999);
-          if (bookmarkDate > end.getTime()) return false;
-        }
-
-        return true;
-      })
-    }
-
-    // 0.5 Tag Filter
-    if (activeTag) {
-      filtered = filtered.filter(b => b.tags && b.tags.includes(activeTag))
-    }
-
-    // 0.55 Folder Filter
-    if (activeFolder) {
-      filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)
-    }
-
-    // 0.6 Smart Filters
-    if (smartFilter === 'old') {
-      const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(b => {
-        if (!b.addDate) return false;
-        const date = parseInt(b.addDate) * 1000;
-        return date < fiveYearsAgo;
-      });
-    } else if (smartFilter === 'http') {
-      filtered = filtered.filter(b => b.url && b.url.startsWith('http://'));
-    } else if (smartFilter === 'untitled') {
-      filtered = filtered.filter(b => {
-        const title = (b.title || '').trim().toLowerCase();
-        const url = (b.url || '').trim().toLowerCase();
-        return !title || title === 'untitled' || title === 'page' || title === url || url.includes(title);
-      });
-    } else if (smartFilter === 'docs') {
-      filtered = filtered.filter(b => {
-        const url = (b.url || '').toLowerCase();
-        return url.endsWith('.pdf') ||
-          url.endsWith('.doc') || url.endsWith('.docx') ||
-          url.endsWith('.xls') || url.endsWith('.xlsx') ||
-          url.endsWith('.ppt') || url.endsWith('.pptx') ||
-          url.includes('docs.google.com');
-      });
-    }
-
-    // 1. First pass: Map URLs to find all duplicates
-    const urlMap = new Map();
-    filtered.forEach(b => {
-      const u = b.url;
-      if (!urlMap.has(u)) {
-        urlMap.set(u, []);
-      }
-      urlMap.get(u).push({ id: b.id, folder: b.originalFolder });
-    });
-
-    const processed = filtered.map(b => {
-      let matchedRule = null;
-      let newFolder = b.originalFolder;
-      let ruleTags = [];
-
-      // Check duplicate status
-      const siblings = urlMap.get(b.url);
-      const isMulti = siblings && siblings.length > 1;
-      const indexInSiblings = siblings ? siblings.findIndex(s => s.id === b.id) : 0;
-      const isDuplicate = isMulti && indexInSiblings > 0; // It's a duplicate (2nd+ instance)
-      const hasDuplicate = isMulti && indexInSiblings === 0; // It's the original (1st instance) but has duplicates
-
-      // Get locations of other instances
-      const otherLocations = isMulti
-        ? siblings.filter(s => s.id !== b.id).map(s => s.folder)
-        : [];
-
-      for (const rule of rules) {
-        let match = false;
-        // Safety check for null values
-        const title = b.title || '';
-        const url = b.url || '';
-        const contentToCheck = (title + ' ' + url).toLowerCase();
-        const rawRuleValue = (rule.value || '').toLowerCase();
-
-        if (!rawRuleValue) continue;
-
-        const ruleValues = rawRuleValue.split(',').map(v => v.trim()).filter(Boolean);
-
-        for (const val of ruleValues) {
-          if (rule.type === 'keyword' && contentToCheck.includes(val)) {
-            match = true;
-          } else if (rule.type === 'domain' && url.toLowerCase().includes(val)) {
-            match = true;
-          } else if (rule.type === 'exact' && title.toLowerCase() === val) {
-            match = true;
-          }
-          if (match) break;
-        }
-
-        if (match) {
-          matchedRule = rule;
-          // Only update folder if targetFolder is set
-          if (rule.targetFolder) {
-            newFolder = rule.targetFolder;
-          }
-          // specific checking if tags exist
-          if (rule.tags) {
-            ruleTags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
-          }
-          break; // First match wins
+    if (workerRef.current) {
+      workerRef.current.onmessage = (e) => {
+        const { type, payload } = e.data
+        if (type === 'DATA_PROCESSED') {
+          setBookmarks(payload.processedBookmarks)
+          setUniqueTags(payload.uniqueTags)
+          setSmartCounts(payload.smartCounts)
+          setDuplicateCount(payload.duplicateCount)
+        } else if (type === 'LINK_STATUS_UPDATE') {
+          setLinkHealth(prev => {
+            const next = { ...prev }
+            payload.forEach(item => {
+              next[item.url] = item.status
+            })
+            return next
+          })
+        } else if (type === 'LINKS_CHECKED_COMPLETE') {
+          setIsCheckingLinks(false)
         }
       }
+      return () => workerRef.current.terminate()
+    }
+  }, [])
 
-      const existingTags = b.tags || [];
-      const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
-
-      return {
-        ...b,
-        newFolder: matchedRule ? newFolder : b.originalFolder,
-        tags: allTags, // Use combined tags for filtering
-        ruleTags: ruleTags, // Keep track of which ones are from rules
-        status: matchedRule ? 'matched' : 'unchanged',
-        isDuplicate,
-        hasDuplicate,
-        otherLocations
-      };
-    });
-
-    // Sort priority:
-    // 1. Duplicates (actual duplicates or items with duplicates)
-    // 2. Matched Rules
-    // 3. Others
-    processed.sort((a, b) => {
-      const aDup = a.isDuplicate || a.hasDuplicate;
-      const bDup = b.isDuplicate || b.hasDuplicate;
-
-      if (aDup && !bDup) return -1;
-      if (!aDup && bDup) return 1;
-
-      if (a.status === 'matched' && b.status !== 'matched') return -1;
-      if (a.status !== 'matched' && b.status === 'matched') return 1;
-
-      // Sub-sort duplicates: Original first, then duplicates
-      if (aDup && bDup) {
-        if (a.hasDuplicate && b.isDuplicate) return -1;
-        if (a.isDuplicate && b.hasDuplicate) return 1;
-      }
-
-      return 0;
-    });
-
-    return processed;
-  }, [rawBookmarks, rules, searchQuery, activeTag, smartFilter, searchMode, dateFilter, fuseOptions, activeFolder]);
-
-  // Extract Unique Tags
-  const uniqueTags = useMemo(() => {
-    const tags = new Map()
-    rawBookmarks.forEach(b => {
-      if (b.tags && b.tags.length > 0) {
-        b.tags.forEach(t => {
-          const count = tags.get(t) || 0
-          tags.set(t, count + 1)
-        })
+  // Send Data to Worker
+  useEffect(() => {
+    if (!workerRef.current) return
+    workerRef.current.postMessage({
+      type: 'PROCESS_DATA',
+      payload: {
+        bookmarks: rawBookmarks,
+        rules,
+        searchQuery,
+        searchMode,
+        activeTag,
+        activeFolder,
+        smartFilter,
+        dateFilter,
+        fuseOptions
       }
     })
-    return Array.from(tags.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-  }, [rawBookmarks])
-
-  // Smart Filter Counts
-  const smartCounts = useMemo(() => {
-    const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-
-    let old = 0;
-    let http = 0;
-    let untitled = 0;
-    let docs = 0;
-
-    rawBookmarks.forEach(b => {
-      // Old
-      if (b.addDate) {
-        const date = parseInt(b.addDate) * 1000;
-        if (date < fiveYearsAgo) old++;
-      }
-
-      // HTTP
-      if (b.url && b.url.startsWith('http://')) http++;
-
-      // Untitled
-      const title = (b.title || '').trim().toLowerCase();
-      const url = (b.url || '').trim().toLowerCase();
-      if (!title || title === 'untitled' || title === 'page' || title === url || url.includes(title)) {
-        untitled++;
-      }
-
-      // Docs
-      if (url.endsWith('.pdf') ||
-        url.endsWith('.doc') || url.endsWith('.docx') ||
-        url.endsWith('.xls') || url.endsWith('.xlsx') ||
-        url.endsWith('.ppt') || url.endsWith('.pptx') ||
-        url.includes('docs.google.com')) {
-        docs++;
-      }
-    });
-
-    return { old, http, untitled, docs };
-  }, [rawBookmarks]);
-
-
-
-  // Duplicate Logic
-  const duplicateCount = useMemo(() => {
-    const urls = new Set();
-    let duplicates = 0;
-    rawBookmarks.forEach(b => {
-      if (urls.has(b.url)) {
-        duplicates++;
-      } else {
-        urls.add(b.url);
-      }
-    });
-    return duplicates;
-  }, [rawBookmarks]);
+  }, [rawBookmarks, rules, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, fuseOptions])
 
   const removeDuplicates = () => {
     const urls = new Set();
