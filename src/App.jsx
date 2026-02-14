@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter } from 'lucide-react'
+import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, Tag, LogOut, Archive, ShieldAlert, FileQuestion, History as HistoryIcon, Save, Pencil, X, LayoutGrid, Image, Filter, ChevronRight, ChevronDown } from 'lucide-react'
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { FloatingActionBar } from './components/FloatingActionBar'
@@ -78,10 +78,6 @@ function App() {
   // Auto-Backup Effect
   useEffect(() => {
     const autoBackup = async () => {
-      // Check if feature is enabled inside the manager or here? 
-      // Manager has `saveAutoBackup` which checks nothing, so we check here or let it be.
-      // Logic: If rules, folders, or tags change, trigger auto-save.
-      // We debounce this to avoid thrashing.
       const timer = setTimeout(() => {
         if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
           saveAutoBackup();
@@ -91,6 +87,8 @@ function App() {
     };
     autoBackup();
   }, [rules, availableFolders, availableTags, ignoredUrlsList]);
+
+  // Taxonomy Auto-Sync Effect REMOVED - We now use "Discovered" logic
 
   // Taxonomy Helpers
   const setAvailableFolders = async (newFolders) => {
@@ -129,6 +127,9 @@ function App() {
   const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics' | 'grid'
   const [showThumbnails, setShowThumbnails] = useState(false)
   const [previewBookmark, setPreviewBookmark] = useState(null)
+  const handlePreview = useCallback((bookmark) => {
+    setPreviewBookmark(bookmark);
+  }, []);
 
   // Link Health State
   const [linkHealth, setLinkHealth] = useState({}) // { url: 'idle' | 'checking' | 'alive' | 'dead' }
@@ -170,6 +171,18 @@ function App() {
 
   const [smartFilter, setSmartFilter] = useState(null) // null | 'old' | 'http' | 'untitled'
 
+  // Sidebar Accordion State
+  const [collapsedSections, setCollapsedSections] = useState({
+    tags: false,
+    folders: false,
+    filters: false,
+    rules: false
+  })
+
+  const toggleSection = (section) => {
+    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
   // Advanced Search State
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
   const [searchMode, setSearchMode] = useState('simple') // 'simple' | 'fuzzy' | 'regex'
@@ -193,6 +206,7 @@ function App() {
   // Worker State
   const [bookmarks, setBookmarks] = useState([])
   const [uniqueTags, setUniqueTags] = useState([])
+  const [uniqueFolders, setUniqueFolders] = useState([])
   const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0 })
   const [duplicateCount, setDuplicateCount] = useState(0)
   const workerRef = useRef(null)
@@ -213,6 +227,7 @@ function App() {
         if (type === 'DATA_PROCESSED') {
           setBookmarks(payload.processedBookmarks)
           setUniqueTags(payload.uniqueTags)
+          setUniqueFolders(payload.uniqueFolders)
           setSmartCounts(payload.smartCounts)
           setDuplicateCount(payload.duplicateCount)
         } else if (type === 'LINK_STATUS_UPDATE') {
@@ -249,6 +264,35 @@ function App() {
       }
     })
   }, [rawBookmarks, rules, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, fuseOptions])
+
+  // Derived Discovery State
+  const discoveredTags = useMemo(() => {
+    const existingNames = new Set(availableTags.map(t => t.name));
+    return uniqueTags.filter(t => !existingNames.has(t.name));
+  }, [uniqueTags, availableTags]);
+
+  const discoveredFolders = useMemo(() => {
+    const existingNames = new Set(availableFolders.map(f => f.name));
+    return uniqueFolders.filter(f => !existingNames.has(f.name));
+  }, [uniqueFolders, availableFolders]);
+
+  const saveToTaxonomy = async (name, type) => {
+    if (type === 'tag') {
+      await db.tags.add({
+        id: generateUUID(),
+        name,
+        color: '#10b981',
+        order: availableTags.length
+      });
+    } else {
+      await db.folders.add({
+        id: generateUUID(),
+        name,
+        color: '#3b82f6',
+        order: availableFolders.length
+      });
+    }
+  };
 
   const removeDuplicates = () => {
     const urls = new Set();
@@ -513,11 +557,22 @@ function App() {
   const handleBatchMove = async (targetFolder) => {
     const idsToMove = [...selectedIds];
     if (idsToMove.length > 0) {
-      // Capture state before move
+      // Check if folder exists in availableFolders
+      // Note: availableFolders is from useLiveQuery, might be slightly stale if we just added, but good enough.
+      // Better to check DB directly or just add if unique.
+      // We can use put used with a specific key.
+
+      const folderExists = availableFolders.some(f => f.name === targetFolder);
+      if (targetFolder && !folderExists) {
+        await db.folders.add({
+          id: generateUUID(),
+          name: targetFolder,
+          color: '#64748b',
+          order: availableFolders.length
+        });
+      }
+
       const bookmarksToMove = await db.bookmarks.bulkGet(idsToMove);
-      // Map of ID -> originalFolder (to revert)
-      // Actually we just revert the whole object or just the fields?
-      // Reverting specific fields is safer.
       const originalStates = bookmarksToMove.map(b => ({ id: b.id, originalFolder: b.originalFolder, newFolder: b.newFolder }));
 
       await db.transaction('rw', db.bookmarks, async () => {
@@ -526,11 +581,6 @@ function App() {
 
       addCommand({
         undo: () => db.transaction('rw', db.bookmarks, async () => {
-          // We have to update each one because they might have been in different folders
-          // Bulk put is easiest if we have the full objects, but we only captured state.
-          // Let's use bulkPut with merged back data if we had full objects, but here we iterate.
-          // Optimization: group by folder?
-          // Simple:
           for (const state of originalStates) {
             await db.bookmarks.update(state.id, { originalFolder: state.originalFolder, newFolder: state.newFolder });
           }
@@ -544,10 +594,16 @@ function App() {
   }
 
   const handleBatchMoveDocs = () => {
-    // Find docs
-    // Implementation with Dexie:
-    // We can use the collection modify logic again, but we need criteria.
-    // Dexie filtering in 'modify' is efficient.
+    // Check/Create "References" folder
+    const refFolderExists = availableFolders.some(f => f.name === 'References');
+    if (!refFolderExists) {
+      db.folders.add({
+        id: generateUUID(),
+        name: 'References',
+        color: '#3b82f6',
+        order: availableFolders.length
+      });
+    }
 
     const isDoc = (url) => {
       url = (url || '').toLowerCase();
@@ -559,9 +615,6 @@ function App() {
     }
 
     db.transaction('rw', db.bookmarks, async () => {
-      // Since we can't easily do string "endsWith" in indexedDB query easily for multiple extensions
-      // we might iterate or use filter.
-      // For 10k items, filter in JS is fine.
       await db.bookmarks.filter(b => isDoc(b.url)).modify({ originalFolder: 'References', newFolder: 'References' });
     });
     setSmartFilter(null);
@@ -579,6 +632,73 @@ function App() {
     })
     setLinkHealth(newHealth)
     setSelectedIds(new Set())
+  }
+
+  const handleBatchAddTags = async (tagsString) => {
+    const newTags = tagsString.split(',').map(t => t.trim()).filter(Boolean);
+    if (newTags.length === 0) return;
+
+    const idsToUpdate = [...selectedIds];
+    if (idsToUpdate.length > 0) {
+      const bookmarksToUpdate = await db.bookmarks.bulkGet(idsToUpdate);
+      const originalStates = bookmarksToUpdate.map(b => ({ id: b.id, tags: b.tags }));
+
+      await db.transaction('rw', db.bookmarks, db.tags, async () => {
+        // Add new tags to db.tags with a distinct color if they don't exist
+        const distinctColor = '#10b981'; // Emerald-500 for user-added tags
+        const allExistingTags = await db.tags.toArray();
+        const existingTagNames = new Set(allExistingTags.map(t => t.name));
+
+        const tagsToCreate = newTags.filter(t => !existingTagNames.has(t));
+        if (tagsToCreate.length > 0) {
+          await db.tags.bulkAdd(tagsToCreate.map(t => ({
+            id: generateUUID(),
+            name: t,
+            color: distinctColor,
+            order: allExistingTags.length
+          })));
+        }
+
+        const updates = bookmarksToUpdate.map(bookmark => {
+          // Handle both array and string (legacy) formats safeley
+          let currentTags = [];
+          if (Array.isArray(bookmark.tags)) {
+            currentTags = bookmark.tags;
+          } else if (typeof bookmark.tags === 'string') {
+            currentTags = bookmark.tags.split(',').map(t => t.trim()).filter(Boolean);
+          }
+
+          const mergedTags = [...new Set([...currentTags, ...newTags])];
+          return { ...bookmark, tags: mergedTags }; // Store as Array
+        });
+        await db.bookmarks.bulkPut(updates);
+      });
+
+      addCommand({
+        undo: () => db.transaction('rw', db.bookmarks, async () => {
+          for (const state of originalStates) {
+            await db.bookmarks.update(state.id, { tags: state.tags });
+          }
+        }),
+        redo: () => db.transaction('rw', db.bookmarks, async () => {
+          const bookmarks = await db.bookmarks.bulkGet(idsToUpdate);
+          const updates = bookmarks.map(bookmark => {
+            let currentTags = [];
+            if (Array.isArray(bookmark.tags)) {
+              currentTags = bookmark.tags;
+            } else if (typeof bookmark.tags === 'string') {
+              currentTags = bookmark.tags.split(',').map(t => t.trim()).filter(Boolean);
+            }
+            const mergedTags = [...new Set([...currentTags, ...newTags])];
+            return { ...bookmark, tags: mergedTags };
+          });
+          await db.bookmarks.bulkPut(updates);
+        }),
+        description: `Add tags to ${idsToUpdate.length} bookmarks`
+      });
+
+      setSelectedIds(new Set());
+    }
   }
 
 
@@ -794,306 +914,410 @@ function App() {
             isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
           )}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div
+            className="flex items-center justify-between mb-4 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+            onClick={() => toggleSection('tags')}
+          >
             <h2 className="font-semibold text-lg flex items-center gap-2">
+              {collapsedSections.tags ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
               <Tag className="h-5 w-5" /> Tags
             </h2>
             {/* Mobile/Tablet Close Button */}
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(false); }}>
               <ArrowRight className="h-4 w-4 rotate-180" />
             </Button>
           </div>
 
-          <div className="mb-6 space-y-1">
-            {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground">No tags found.</p>}
-            {/* 
+          {!collapsedSections.tags && (
+            <div className="mb-6 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+              {uniqueTags.length === 0 && <p className="text-sm text-muted-foreground px-2">No tags found.</p>}
+              {/* 
                 Merge uniqueTags (counts) with availableTags (colors/order). 
                 If a tag exists in availableTags, use its color/order. 
                 Otherwise default.
             */}
-            {uniqueTags.map(tag => {
-              const config = availableTags.find(t => t.name === tag.name);
-              const color = config ? config.color : '#64748b';
-              return (
-                <button
-                  key={tag.name}
-                  onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
-                  className={cn(
-                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
-                    activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                    <span>#{tag.name}</span>
-                  </div>
-                  <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
-                </button>
-              )
-            })}
-          </div>
+              {/* User Defined Tags */}
+              {uniqueTags
+                .filter(tag => availableTags.some(t => t.name === tag.name))
+                .map(tag => {
+                  const config = availableTags.find(t => t.name === tag.name);
+                  const color = config ? config.color : '#64748b';
+                  return (
+                    <button
+                      key={tag.name}
+                      onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
+                      className={cn(
+                        "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                        activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                        <span>#{tag.name}</span>
+                      </div>
+                      <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tag.count}</span>
+                    </button>
+                  )
+                })}
 
-          <div className="flex items-center justify-between mb-4 border-t pt-6">
+              {/* Discovered Tags Divider & List */}
+              {discoveredTags.length > 0 && (
+                <>
+                  <div className="px-2 pt-4 pb-2">
+                    <div className="border-t border-dashed" />
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground mt-2 px-1">Discovered</div>
+                  </div>
+                  {discoveredTags.map(tag => {
+                    const tagInfo = uniqueTags.find(ut => ut.name === tag.name);
+                    return (
+                      <div key={tag.name} className="flex items-center gap-1 group/item">
+                        <button
+                          onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
+                          className={cn(
+                            "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent italic opacity-70",
+                            activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-slate-400" />
+                            <span>#{tag.name}</span>
+                          </div>
+                          <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{tagInfo?.count || 0}</span>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover/item:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
+                          onClick={() => saveToTaxonomy(tag.name, 'tag')}
+                          title="Add to permanent tags"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </>
+              )}
+            </div>
+          )}
+
+          <div
+            className="flex items-center justify-between mb-4 border-t pt-6 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+            onClick={() => toggleSection('folders')}
+          >
             <h2 className="font-semibold text-lg flex items-center gap-2">
+              {collapsedSections.folders ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
               <Folder className="h-5 w-5" /> Folders
             </h2>
           </div>
 
-          <div className="mb-6 space-y-1">
-            {/* Render available folders sorted by order */}
-            {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
-              // Calculate count for this folder
-              const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length;
+          {!collapsedSections.folders && (
+            <div className="mb-6 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+              {/* User Defined Folders */}
+              {[...availableFolders].sort((a, b) => (a.order || 0) - (b.order || 0)).map(folder => {
+                const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length;
+                return (
+                  <button
+                    key={folder.id}
+                    onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
+                    className={cn(
+                      "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                      activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Folder className="h-4 w-4" style={{ color: folder.color }} />
+                      <span>{folder.name}</span>
+                    </div>
+                    <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{count}</span>
+                  </button>
+                )
+              })}
 
-              return (
-                <button
-                  key={folder.id}
-                  onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
-                  className={cn(
-                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
-                    activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Folder className="h-4 w-4" style={{ color: folder.color }} />
-                    <span>{folder.name}</span>
+              {/* Discovered Folders Divider & List */}
+              {discoveredFolders.length > 0 && (
+                <>
+                  <div className="px-2 pt-4 pb-2">
+                    <div className="border-t border-dashed" />
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground mt-2 px-1">Discovered</div>
                   </div>
-                  <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{count}</span>
-                </button>
-              )
-            })}
-          </div>
+                  {discoveredFolders.map(folder => {
+                    const folderInfo = uniqueFolders.find(uf => uf.name === folder.name);
+                    return (
+                      <div key={folder.name} className="flex items-center gap-1 group/item">
+                        <button
+                          onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
+                          className={cn(
+                            "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent italic opacity-70",
+                            activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Folder className="h-4 w-4 text-slate-400" />
+                            <span>{folder.name}</span>
+                          </div>
+                          <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{folderInfo?.count || 0}</span>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover/item:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
+                          onClick={() => saveToTaxonomy(folder.name, 'folder')}
+                          title="Add to permanent folders"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </>
+              )}
+            </div>
+          )}
 
-          <div className="flex items-center justify-between mb-4 border-t pt-6">
+          <div
+            className="flex items-center justify-between mb-4 border-t pt-6 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+            onClick={() => toggleSection('filters')}
+          >
             <h2 className="font-semibold text-lg flex items-center gap-2">
+              {collapsedSections.filters ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
               <Archive className="h-5 w-5" /> Smart Filters
             </h2>
           </div>
-          <div className="mb-6 space-y-1">
-            {/* Old Bookmarks */}
-            <button
-              onClick={() => setSmartFilter(smartFilter === 'old' ? null : 'old')}
-              className={cn(
-                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                smartFilter === 'old' ? "bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400" : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <HistoryIcon className="h-4 w-4 opacity-70" />
-                <span>Dusty Shelves (&gt; 5y)</span>
-              </div>
-              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.old}</span>
-            </button>
 
-            {/* HTTP (Insecure) */}
-            <button
-              onClick={() => setSmartFilter(smartFilter === 'http' ? null : 'http')}
-              className={cn(
-                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                smartFilter === 'http' ? "bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400" : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 opacity-70" />
-                <span>Not Secure (HTTP)</span>
-              </div>
-              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.http}</span>
-            </button>
+          {!collapsedSections.filters && (
+            <div className="mb-10 space-y-1 flex-shrink-0 animate-in fade-in slide-in-from-top-1 duration-200">
+              {/* Old Bookmarks */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'old' ? null : 'old')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'old' ? "bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <HistoryIcon className="h-4 w-4 opacity-70" />
+                  <span>Dusty Shelves (&gt; 5y)</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.old}</span>
+              </button>
 
-            {/* Untitled */}
-            <button
-              onClick={() => setSmartFilter(smartFilter === 'untitled' ? null : 'untitled')}
-              className={cn(
-                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                smartFilter === 'untitled' ? "bg-orange-100 text-orange-700 font-medium dark:bg-orange-900/30 dark:text-orange-400" : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <FileQuestion className="h-4 w-4 opacity-70" />
-                <span>Untitled / Generic</span>
-              </div>
-              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.untitled}</span>
-            </button>
+              {/* HTTP (Insecure) */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'http' ? null : 'http')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'http' ? "bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 opacity-70" />
+                  <span>Not Secure (HTTP)</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.http}</span>
+              </button>
 
-            {/* Docs & PDFs */}
-            <button
-              onClick={() => setSmartFilter(smartFilter === 'docs' ? null : 'docs')}
-              className={cn(
-                "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                smartFilter === 'docs' ? "bg-blue-100 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400" : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <File className="h-4 w-4 opacity-70" />
-                <span>Docs & PDFs</span>
-              </div>
-              <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.docs}</span>
-            </button>
-          </div>
+              {/* Untitled */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'untitled' ? null : 'untitled')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'untitled' ? "bg-orange-100 text-orange-700 font-medium dark:bg-orange-900/30 dark:text-orange-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <FileQuestion className="h-4 w-4 opacity-70" />
+                  <span>Untitled / Generic</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.untitled}</span>
+              </button>
 
-          <div className="flex items-center justify-between mb-6 border-t pt-6">
+              {/* Docs & PDFs */}
+              <button
+                onClick={() => setSmartFilter(smartFilter === 'docs' ? null : 'docs')}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
+                  smartFilter === 'docs' ? "bg-blue-100 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <File className="h-4 w-4 opacity-70" />
+                  <span>Docs & PDFs</span>
+                </div>
+                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{smartCounts.docs}</span>
+              </button>
+            </div>
+          )}
+
+          <div
+            className="flex items-center justify-between mb-6 border-t pt-6 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+            onClick={() => toggleSection('rules')}
+          >
             <h2 className="font-semibold text-lg flex items-center gap-2">
+              {collapsedSections.rules ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
               <Settings className="h-5 w-5" />
               Rules
             </h2>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => openSettings()}
+              onClick={(e) => { e.stopPropagation(); openSettings(); }}
               className="h-7 text-xs gap-1"
             >
               <Settings className="h-3 w-3" /> Manage
             </Button>
           </div>
 
-          <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Type</label>
-              <select
-                className="w-full bg-background border rounded-md h-9 px-3 text-sm focus:ring-2 focus:ring-primary"
-                value={newRule.type}
-                onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
-              >
-                <option value="keyword">Keyword</option>
-                <option value="domain">Domain</option>
-                <option value="exact">Exact Title</option>
-              </select>
-            </div>
+          {!collapsedSections.rules && (
+            <div className="animate-in fade-in slide-in-from-top-1 duration-200 pb-10">
+              <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Type</label>
+                  <select
+                    className="w-full bg-background border rounded-md h-9 px-3 text-sm focus:ring-2 focus:ring-primary"
+                    value={newRule.type}
+                    onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
+                  >
+                    <option value="keyword">Keyword</option>
+                    <option value="domain">Domain</option>
+                    <option value="exact">Exact Title</option>
+                  </select>
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Value</label>
-              <Input
-                placeholder="e.g. 'github', 'youtube'"
-                value={newRule.value}
-                onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Value</label>
+                  <Input
+                    placeholder="e.g. 'github', 'youtube'"
+                    value={newRule.value}
+                    onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
-              <SimpleCombobox
-                options={availableFolders.map(f => f.name)}
-                value={newRule.targetFolder}
-                onChange={(val) => {
-                  setNewRule({ ...newRule, targetFolder: val })
-                  // Auto-add to available folders if created new
-                  if (val && !availableFolders.some(f => f.name === val)) {
-                    db.folders.add({
-                      id: generateUUID(),
-                      name: val,
-                      color: '#3b82f6',
-                      order: availableFolders.length
-                    });
-                  }
-                }}
-                placeholder="Select or create folder..."
-                allowCreate={true}
-              />
-              <p className="text-[10px] text-muted-foreground">
-                Example: <code>Main &gt; Subfolder</code> for nested structure.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Tags (Comma separated)</label>
-              <Input
-                placeholder="e.g. news, tech, read-later"
-                value={newRule.tags}
-                onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
-              />
-              {/* Quick Add Tags */}
-              <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
-                {availableTags.map(tag => (
-                  <button
-                    key={tag.id}
-                    onClick={() => {
-                      const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
-                      if (!current.includes(tag.name)) {
-                        const newValue = [...current, tag.name].join(', ')
-                        setNewRule({ ...newRule, tags: newValue })
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
+                  <SimpleCombobox
+                    options={[
+                      { label: "User Defined", options: availableFolders.map(f => f.name) },
+                      { label: "Suggested (Discovered)", options: discoveredFolders.map(f => f.name) }
+                    ]}
+                    value={newRule.targetFolder}
+                    onChange={(val) => {
+                      setNewRule({ ...newRule, targetFolder: val })
+                      // Auto-add to available folders if it was a discovered one or new
+                      if (val && !availableFolders.some(f => f.name === val)) {
+                        saveToTaxonomy(val, 'folder');
                       }
                     }}
-                    className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
-                  >
-                    + {tag.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    placeholder="Select or create folder..."
+                    allowCreate={true}
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Example: <code>Main &gt; Subfolder</code> for nested structure.
+                  </p>
+                </div>
 
-            <div className="flex gap-2">
-              <Button onClick={addRule} className="flex-1" size="sm">
-                {editingRuleId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                {editingRuleId ? 'Update Rule' : 'Add Rule'}
-              </Button>
-              {editingRuleId && (
-                <Button onClick={cancelEditing} variant="outline" size="sm" className="px-3">
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </Card>
-
-          <div className="space-y-2">
-            {rules.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No rules defined.</p>
-            )}
-            {rules.map(rule => (
-              <div key={rule.id} className="flex items-start justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group gap-2">
-                <div className="flex flex-col w-full min-w-0">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{rule.type}</span>
-
-                  {/* Rule Value */}
-                  <div className="text-sm font-medium break-words leading-tight mb-1.5">
-                    "{rule.value}"
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Tags (Comma separated)</label>
+                  <Input
+                    placeholder="e.g. news, tech, read-later"
+                    value={newRule.tags}
+                    onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
+                  />
+                  {/* Quick Add Tags */}
+                  <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
+                    {availableTags.map(tag => (
+                      <button
+                        key={tag.id}
+                        onClick={() => {
+                          const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+                          if (!current.includes(tag.name)) {
+                            const newValue = [...current, tag.name].join(', ')
+                            setNewRule({ ...newRule, tags: newValue })
+                          }
+                        }}
+                        className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full hover:bg-secondary/80 transition-colors"
+                      >
+                        + {tag.name}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Target Folder & Tags */}
-                  {(rule.targetFolder || rule.tags) && (
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                      {rule.targetFolder && (
-                        <div className="flex items-start gap-1">
-                          <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                          <span className="font-medium text-primary break-words">{rule.targetFolder}</span>
-                        </div>
-                      )}
+                <div className="flex gap-2">
+                  <Button onClick={addRule} className="flex-1" size="sm">
+                    {editingRuleId ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    {editingRuleId ? 'Update Rule' : 'Add Rule'}
+                  </Button>
+                  {editingRuleId && (
+                    <Button onClick={cancelEditing} variant="outline" size="sm" className="px-3">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </Card>
 
-                      {rule.tags && (
-                        <div className="flex flex-wrap gap-1 mt-0.5">
-                          {rule.tags.split(',').map(tag => (
-                            <span key={tag} className="bg-background border px-1.5 py-0.5 rounded text-[10px]">
-                              #{tag.trim()}
-                            </span>
-                          ))}
+              <div className="space-y-2">
+                {rules.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">No rules defined.</p>
+                )}
+                {rules.map(rule => (
+                  <div key={rule.id} className="flex items-start justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group gap-2">
+                    <div className="flex flex-col w-full min-w-0">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{rule.type}</span>
+
+                      {/* Rule Value */}
+                      <div className="text-sm font-medium break-words leading-tight mb-1.5">
+                        "{rule.value}"
+                      </div>
+
+                      {/* Target Folder & Tags */}
+                      {(rule.targetFolder || rule.tags) && (
+                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                          {rule.targetFolder && (
+                            <div className="flex items-start gap-1">
+                              <ArrowRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                              <span className="font-medium text-primary break-words">{rule.targetFolder}</span>
+                            </div>
+                          )}
+
+                          {rule.tags && (
+                            <div className="flex flex-wrap gap-1 mt-0.5">
+                              {rule.tags.split(',').map(tag => (
+                                <span key={tag} className="bg-background border px-1.5 py-0.5 rounded text-[10px]">
+                                  #{tag.trim()}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
 
-                <div className="flex flex-col gap-1 shrink-0 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                    onClick={() => startEditing(rule)}
-                    title="Edit Rule"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => deleteRule(rule.id)}
-                    title="Delete Rule"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+                    <div className="flex flex-col gap-1 shrink-0 -mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        onClick={() => startEditing(rule)}
+                        title="Edit Rule"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => deleteRule(rule.id)}
+                        title="Delete Rule"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </aside>
 
         {/* Main Content */}
@@ -1187,18 +1411,17 @@ function App() {
                         ignoredUrls={ignoredUrls}
                         toggleIgnoreUrl={toggleIgnoreUrl}
                         availableFolders={availableFolders}
+                        availableTags={availableTags}
                       />
                     ) : (
                       <BookmarkGrid
                         bookmarks={bookmarks}
                         selectedIds={selectedIds}
                         toggleSelection={toggleSelection}
-                        showThumbnails={showThumbnails}
-                        onPreview={(b) => {
-                          setPreviewBookmark(b)
-                          setSelectedIds(new Set([b.id]))
-                        }}
+                        onPreview={handlePreview}
+                        showThumbnails={viewMode === 'grid'}
                         availableFolders={availableFolders}
+                        availableTags={availableTags}
                       />
                     )}
                   </div>
@@ -1223,7 +1446,10 @@ function App() {
           onDelete={handleBatchDelete}
           onMove={handleBatchMove}
           onClearSelection={() => setSelectedIds(new Set())}
+          allFolders={availableFolders}
+          allTags={availableTags}
           onOverrideStatus={handleStatusOverride}
+          onAddTags={handleBatchAddTags}
         />
 
         {/* Settings Modal */}
@@ -1240,6 +1466,8 @@ function App() {
               setFolders={setAvailableFolders}
               tags={availableTags}
               setTags={setAvailableTags}
+              discoveredFolders={discoveredFolders}
+              discoveredTags={discoveredTags}
               defaultTab={settingsTab}
             />
           )}

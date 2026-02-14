@@ -19,9 +19,9 @@ export function SimpleCombobox({
 
     // Sync internal query with value when value changes externally
     useEffect(() => {
-        // Only reset query if we're not currently editing it to avoid jumping
+        // If we are open, we assume the user is typing, so don't override.
+        // If we are closed and the value changed, sync the query.
         if (!isOpen) {
-            // If value matches an option, use that. Otherwise use value as is.
             setQuery(value || '');
         }
     }, [value, isOpen]);
@@ -43,11 +43,21 @@ export function SimpleCombobox({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [value, query]);
 
+    const isGrouped = options.length > 0 && typeof options[0] === 'object' && options[0].label;
+
     const filteredOptions = useMemo(() => {
         if (!query) return options;
         const lowerQuery = query.toLowerCase();
+
+        if (isGrouped) {
+            return options.map(group => ({
+                ...group,
+                options: group.options.filter(opt => opt.toLowerCase().includes(lowerQuery))
+            })).filter(group => group.options.length > 0);
+        }
+
         return options.filter(opt => opt.toLowerCase().includes(lowerQuery));
-    }, [options, query]);
+    }, [options, query, isGrouped]);
 
     const handleInputChange = (e) => {
         setQuery(e.target.value);
@@ -66,7 +76,8 @@ export function SimpleCombobox({
         }
     };
 
-    const exactMatch = options.some(opt => opt.toLowerCase() === query.trim().toLowerCase());
+    const allOptions = isGrouped ? options.flatMap(g => g.options) : options;
+    const exactMatch = allOptions.some(opt => opt.toLowerCase() === query.trim().toLowerCase());
     const showCreate = allowCreate && query.trim() && !exactMatch;
 
     return (
@@ -110,19 +121,42 @@ export function SimpleCombobox({
                             <p className="p-2 text-sm text-muted-foreground text-center">No options found.</p>
                         )}
 
-                        {filteredOptions.map((option) => (
-                            <div
-                                key={option}
-                                className={cn(
-                                    "flex items-center justify-between px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
-                                    value === option && "bg-accent text-accent-foreground font-medium"
-                                )}
-                                onClick={() => handleSelect(option)}
-                            >
-                                <span>{option}</span>
-                                {value === option && <Check className="h-4 w-4" />}
-                            </div>
-                        ))}
+                        {isGrouped ? (
+                            filteredOptions.map((group) => (
+                                <div key={group.label}>
+                                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted/30 sticky top-0 z-10 backdrop-blur-sm">
+                                        {group.label}
+                                    </div>
+                                    {group.options.map((option) => (
+                                        <div
+                                            key={option}
+                                            className={cn(
+                                                "flex items-center justify-between px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                                value === option && "bg-accent text-accent-foreground font-medium"
+                                            )}
+                                            onClick={() => handleSelect(option)}
+                                        >
+                                            <span>{option}</span>
+                                            {value === option && <Check className="h-4 w-4" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))
+                        ) : (
+                            filteredOptions.map((option) => (
+                                <div
+                                    key={option}
+                                    className={cn(
+                                        "flex items-center justify-between px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                        value === option && "bg-accent text-accent-foreground font-medium"
+                                    )}
+                                    onClick={() => handleSelect(option)}
+                                >
+                                    <span>{option}</span>
+                                    {value === option && <Check className="h-4 w-4" />}
+                                </div>
+                            ))
+                        )}
 
                         {showCreate && (
                             <div

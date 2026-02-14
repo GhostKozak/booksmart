@@ -32,7 +32,7 @@ const COLORS = [
     '#64748b', // Slate
 ];
 
-function SortableItem({ id, item, onDelete, onColorChange, type }) {
+function SortableItem({ id, item, onDelete, onColorChange }) {
     const {
         attributes,
         listeners,
@@ -123,11 +123,12 @@ export function TaxonomyManager({
     setFolders,
     tags = [],
     setTags,
+    discoveredFolders = [],
+    discoveredTags = [],
     defaultTab = 'folders'
 }) {
     const [activeTab, setActiveTab] = useState(defaultTab); // 'folders' | 'tags'
     const [newItem, setNewItem] = useState('');
-    const [activeId, setActiveId] = useState(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -168,16 +169,11 @@ export function TaxonomyManager({
         setFn(list.map(item => item.id === id ? { ...item, color } : item));
     }
 
-    const handleDragStart = (event) => {
-        setActiveId(event.active.id);
-    };
-
     const handleDragEnd = (event) => {
         const { active, over } = event;
 
-        if (active.id !== over?.id) {
+        if (active && over && active.id !== over.id) {
             const setFn = activeTab === 'folders' ? setFolders : setTags;
-            const list = activeTab === 'folders' ? folders : tags;
 
             setFn((items) => {
                 const oldIndex = items.findIndex(i => i.id === active.id);
@@ -187,10 +183,10 @@ export function TaxonomyManager({
                 return newItems.map((item, idx) => ({ ...item, order: idx }));
             });
         }
-        setActiveId(null);
     };
 
     const currentList = activeTab === 'folders' ? folders : tags;
+    const discoveredList = activeTab === 'folders' ? discoveredFolders : discoveredTags;
 
     return (
         <div className="space-y-4">
@@ -241,7 +237,6 @@ export function TaxonomyManager({
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
                 >
                     <SortableContext
@@ -262,6 +257,58 @@ export function TaxonomyManager({
 
                     {/* Placeholder for overlay if needed for smoother visual */}
                 </DndContext>
+
+                {/* Discovered / Suggested Items */}
+                {discoveredList.length > 0 && (
+                    <div className="mt-8 border-t pt-6">
+                        <div className="flex items-center gap-2 mb-4 px-1">
+                            <Plus className="h-3 w-3 text-muted-foreground" />
+                            <h3 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+                                Discovered in Bookmarks
+                            </h3>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            {discoveredList.map((item) => (
+                                <div
+                                    key={item.name}
+                                    className="flex items-center justify-between p-2 rounded-md bg-muted/30 border border-dashed hover:bg-muted/50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className="w-3 h-3 rounded-full opacity-50"
+                                            style={{ backgroundColor: activeTab === 'folders' ? '#3b82f6' : '#10b981' }}
+                                        />
+                                        <span className="text-sm italic text-muted-foreground">{item.name}</span>
+                                        <span className="text-[10px] bg-muted px-1 rounded opacity-70">count: {item.count}</span>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
+                                        onClick={() => {
+                                            const setFn = activeTab === 'folders' ? setFolders : setTags;
+                                            const list = activeTab === 'folders' ? folders : tags;
+                                            const defaultColor = activeTab === 'folders' ? '#3b82f6' : '#10b981';
+
+                                            if (!list.some(i => i.name.toLowerCase() === item.name.toLowerCase())) {
+                                                const newItemObj = {
+                                                    id: generateUUID(),
+                                                    name: item.name,
+                                                    color: defaultColor,
+                                                    order: list.length
+                                                };
+                                                setFn([...list, newItemObj]);
+                                            }
+                                        }}
+                                        title="Add to permanent list"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <p className="text-xs text-muted-foreground text-center pt-2 border-t">

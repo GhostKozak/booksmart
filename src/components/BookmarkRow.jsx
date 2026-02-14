@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { Favicon } from './Favicon'
 import { cn, getRelativeTime } from '../lib/utils'
 
-export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className, availableFolders = [] }) => {
+export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className, availableFolders = [], availableTags = [] }) => {
     // If no bookmark, return null (safety)
     if (!bookmark) return null
 
@@ -45,7 +45,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                     <Checkbox
                         checked={isSelected}
                         onChange={() => toggleSelection(bookmark.id)}
-                        className="bg-card"
+                        className="bg-card z-20"
                     />
                 </div>
 
@@ -158,13 +158,25 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                         <div className="flex gap-1 mt-1 flex-wrap">
                             {bookmark.tags.map(tag => {
                                 const isRuleTag = bookmark.ruleTags?.includes(tag);
+                                const tagConfig = availableTags?.find(t => t.name === tag);
+                                const customColor = tagConfig ? tagConfig.color : null;
+
+                                // Dynamic style if custom color exists, else fallback to classes
+                                const style = customColor ? {
+                                    backgroundColor: customColor + '15', // 10% opacity
+                                    color: customColor,
+                                    borderColor: customColor + '40' // 25% opacity
+                                } : {};
+
                                 return (
-                                    <span key={tag} className={cn(
-                                        "px-1.5 py-0.5 rounded text-[10px] font-medium border",
-                                        isRuleTag
-                                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                                            : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                                    )}>
+                                    <span key={tag}
+                                        style={style}
+                                        className={cn(
+                                            "px-1.5 py-0.5 rounded text-[10px] font-medium border",
+                                            !customColor && (isRuleTag
+                                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                                : "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800")
+                                        )}>
                                         #{tag}
                                     </span>
                                 )
@@ -226,7 +238,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
                     <Checkbox
                         checked={isSelected}
                         onChange={() => toggleSelection(bookmark.id)}
-                        className="mt-1 bg-card shrink-0"
+                        className="mt-1 bg-card shrink-0 z-20"
                     />
 
                     <Favicon url={bookmark.url} className="w-5 h-5 mt-0.5 shrink-0" />
@@ -350,6 +362,8 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
         prevProps.bookmark === nextProps.bookmark &&
         prevProps.selectedIds === nextProps.selectedIds &&
         prevProps.linkHealth === nextProps.linkHealth &&
+        prevProps.availableTags === nextProps.availableTags &&
+        prevProps.availableFolders === nextProps.availableFolders &&
         // Check if ignore status changed for this SPECIFIC url
         (prevProps.ignoredUrls?.has(prevProps.bookmark.url) === nextProps.ignoredUrls?.has(nextProps.bookmark.url))
     )

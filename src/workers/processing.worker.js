@@ -38,11 +38,12 @@ const processData = ({
         } else if (searchMode === 'regex') {
             try {
                 const regex = new RegExp(searchQuery, 'i');
-                filtered = filtered.filter(b =>
-                    regex.test(b.title || '') ||
-                    regex.test(b.url || '') ||
-                    (b.tags || []).some(t => regex.test(t))
-                );
+                filtered = filtered.filter(b => {
+                    const bTags = Array.isArray(b.tags) ? b.tags : (typeof b.tags === 'string' ? b.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
+                    return regex.test(b.title || '') ||
+                        regex.test(b.url || '') ||
+                        bTags.some(t => regex.test(t));
+                });
             } catch {
                 // Fallback to simple contains
                 filtered = filtered.filter(b =>
@@ -52,11 +53,12 @@ const processData = ({
             }
         } else {
             // Simple Mode
-            filtered = filtered.filter(b =>
-                (b.title || '').toLowerCase().includes(query) ||
-                (b.url || '').toLowerCase().includes(query) ||
-                (b.tags || []).some(t => t.toLowerCase().includes(query))
-            );
+            filtered = filtered.filter(b => {
+                const bTags = Array.isArray(b.tags) ? b.tags : (typeof b.tags === 'string' ? b.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
+                return (b.title || '').toLowerCase().includes(query) ||
+                    (b.url || '').toLowerCase().includes(query) ||
+                    bTags.some(t => t.toLowerCase().includes(query));
+            });
         }
     }
 
@@ -191,7 +193,10 @@ const processData = ({
             }
         }
 
-        const existingTags = b.tags || [];
+        let existingTags = b.tags || [];
+        if (typeof existingTags === 'string') {
+            existingTags = existingTags.split(',').map(t => t.trim()).filter(Boolean);
+        }
         const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
 
         return {
@@ -225,25 +230,38 @@ const processData = ({
         return 0;
     });
 
-    // 9. Statistics Calculation (on original full dataset or filtered? 
-    // App.jsx calculated these on `rawBookmarks` (all of them), 
-    // separate from the filtered view. 
-    // Should we pass ALL bookmarks for stats, and FILTERED for view?
-    // The worker receives `bookmarks` (all).
-    // `processed` is the result of filtering.
-    // We need to calculate stats on `bookmarks` to match App.jsx behavior.
-
-    // Unique Tags
+    // 9. Statistics Calculation
     const tagsMap = new Map();
+    const foldersMap = new Map();
+
     bookmarks.forEach(b => {
-        if (b.tags && b.tags.length > 0) {
-            b.tags.forEach(t => {
+        // Tags
+        let tags = b.tags;
+        if (typeof tags === 'string') {
+            tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+        if (Array.isArray(tags) && tags.length > 0) {
+            tags.forEach(t => {
                 const count = tagsMap.get(t) || 0;
                 tagsMap.set(t, count + 1);
             });
         }
+        // Folders
+        if (b.originalFolder) {
+            const count = foldersMap.get(b.originalFolder) || 0;
+            foldersMap.set(b.originalFolder, count + 1);
+        }
+        if (b.newFolder && b.newFolder !== b.originalFolder) {
+            const count = foldersMap.get(b.newFolder) || 0;
+            foldersMap.set(b.newFolder, count + 1);
+        }
     });
+
     const uniqueTags = Array.from(tagsMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+    const uniqueFolders = Array.from(foldersMap.entries())
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
@@ -288,6 +306,7 @@ const processData = ({
     return {
         processedBookmarks: processed,
         uniqueTags,
+        uniqueFolders, // New: Add unique folders
         smartCounts,
         duplicateCount
     };

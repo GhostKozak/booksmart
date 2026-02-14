@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { VirtuosoGrid } from 'react-virtuoso';
 import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
@@ -5,36 +6,44 @@ import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
 import { Folder, ExternalLink } from 'lucide-react';
 
-export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails, availableFolders = [] }) {
+export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails, availableFolders = [], availableTags = [] }) {
 
     // Define the grid item structure
     // We don't have direct access to "index" in ItemContent unless we wrapper it, but VirtuosoGrid provides data.
-    const ItemContent = (index) => {
+    const ItemContent = (index, context) => {
         const bookmark = bookmarks[index];
-        const isSelected = selectedIds.has(bookmark.id);
+        // Ensure context is available, fallback to empty object if undefined (safety)
+        const ctx = context || {};
+        const isSelected = ctx.selectedIds?.has(bookmark.id);
 
         const folderName = bookmark.newFolder || bookmark.originalFolder;
-        const folderConfig = availableFolders.find(f => f.name === folderName);
+        const folderConfig = ctx.availableFolders?.find(f => f.name === folderName);
         const folderColor = folderConfig ? folderConfig.color : null;
 
         return (
             <div className="h-full flex flex-col">
                 <Card
                     className={cn(
-                        "h-full flex flex-col transition-all duration-200 cursor-pointer hover:shadow-md border overflow-hidden group",
+                        "h-full flex flex-col transition-all duration-200 cursor-pointer hover:shadow-md border overflow-hidden group relative",
                         isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
                     )}
                     onClick={(e) => {
                         if (e.ctrlKey || e.metaKey) {
-                            toggleSelection(bookmark.id);
+                            ctx.toggleSelection(bookmark.id);
                         } else {
-                            onPreview(bookmark);
+                            // onPreview is not in context passed below, need to pass it or use closure?
+                            // Virtuoso recommends context for everything used in itemContent.
+                            // However, ItemContent is defined INSIDE the component here, so it closes over onPreview.
+                            // BUT, if onPreview changes, ItemContent reference might change.
+                            // Let's assume onPreview is stable or wrapped.
+                            // Wait, if we use context, we should use context for everything to be safe.
+                            ctx.onPreview(bookmark);
                         }
                     }}
                 >
                     {/* ... (Start of Card content remains same until folder section) ... */}
                     {/* Screenshot Thumbnail - Only show if enabled */}
-                    {showThumbnails && (
+                    {ctx.showThumbnails && (
                         <div className="relative aspect-video w-full bg-muted/30 overflow-hidden border-b">
                             <img
                                 src={`https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
@@ -63,9 +72,9 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                             <div className="absolute top-2 right-2">
                                 <Checkbox
                                     checked={isSelected}
-                                    onCheckedChange={() => toggleSelection(bookmark.id)}
+                                    onCheckedChange={() => ctx.toggleSelection(bookmark.id)}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="bg-background/80 backdrop-blur-sm shadow-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                    className="bg-background/80 backdrop-blur-sm shadow-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground z-20 relative"
                                 />
                             </div>
                         </div>
@@ -84,15 +93,46 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                                     {bookmark.url}
                                 </p>
                             </div>
-                            {!showThumbnails && (
+                            {!ctx.showThumbnails && (
                                 <Checkbox
                                     checked={isSelected}
-                                    onCheckedChange={() => toggleSelection(bookmark.id)}
+                                    onCheckedChange={() => ctx.toggleSelection(bookmark.id)}
                                     onClick={(e) => e.stopPropagation()}
                                     className="shrink-0 mt-0.5"
                                 />
                             )}
                         </div>
+
+                        {bookmark.tags && bookmark.tags.length > 0 && (
+                            <div className="flex gap-1 flex-wrap overflow-hidden h-5">
+                                {bookmark.tags.slice(0, 3).map(tag => {
+                                    const tagConfig = ctx.availableTags?.find(t => t.name === tag);
+                                    const customColor = tagConfig ? tagConfig.color : null;
+
+                                    const style = customColor ? {
+                                        backgroundColor: customColor + '15',
+                                        color: customColor,
+                                        borderColor: customColor + '40'
+                                    } : {};
+
+                                    return (
+                                        <span key={tag}
+                                            style={style}
+                                            className={cn(
+                                                "px-1 py-0.5 rounded-[3px] text-[8px] font-medium border whitespace-nowrap",
+                                                !customColor && "bg-purple-100/50 text-purple-700/70 border-purple-200/50 dark:bg-purple-900/10 dark:text-purple-400/70 dark:border-purple-800/30"
+                                            )}>
+                                            #{tag}
+                                        </span>
+                                    )
+                                })}
+                                {bookmark.tags.length > 3 && (
+                                    <span className="text-[8px] text-muted-foreground self-center opacity-60">
+                                        +{bookmark.tags.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
                         <div className="pt-2 mt-auto border-t flex items-center justify-between text-[10px] text-muted-foreground">
                             <div className="flex items-center gap-1 max-w-[70%]">
@@ -121,10 +161,22 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
         );
     };
 
+    // Force a new data reference when metadata changes to trigger Virtuoso refresh
+    const displayData = React.useMemo(() => [...bookmarks], [bookmarks, availableTags, availableFolders])
+
     return (
         <VirtuosoGrid
             style={{ height: '100%' }}
-            totalCount={bookmarks.length}
+            totalCount={displayData.length}
+            context={{
+                selectedIds,
+                toggleSelection,
+                onPreview,
+                showThumbnails,
+                availableFolders,
+                availableTags // Although not used here yet (no tags in grid), passing for consistency/future
+            }}
+            data={displayData}
             itemContent={ItemContent}
             // Responsive grid layout using Tailwind classes in a wrapper isn't enough for VirtuosoGrid, 
             // it needs a component structure or fixed item dimensions.
