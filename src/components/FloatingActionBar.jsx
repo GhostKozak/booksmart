@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Trash2, Check, XCircle, Download, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Check, XCircle, Download, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
@@ -117,6 +117,31 @@ export function FloatingActionBar({
                         <Sparkles className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                         <span className="hidden sm:inline">{t('actionbar.cleanUrls')}</span>
                     </Button>
+                )}
+
+                {/* Magic Sort (AI) */}
+                {onMagicSort && (
+                    <div className="border-l pl-2 ml-1 sm:ml-0">
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md transition-all"
+                            onClick={onMagicSort}
+                            disabled={isProcessingAI}
+                        >
+                            {isProcessingAI ? (
+                                <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    <span className="hidden sm:inline">{t('actionbar.sorting', 'Sorting...')}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-xs">✨</span>
+                                    <span className="hidden sm:inline">{t('actionbar.magicSort', 'Magic Sort')}</span>
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 )}
             </div>
         </div>
