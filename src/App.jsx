@@ -8,6 +8,7 @@ import { useUndoRedo } from './hooks/use-undo-redo'
 import { useBookmarkWorker } from './hooks/use-bookmark-worker'
 import { useBookmarkOperations } from './hooks/use-bookmark-operations'
 import { useRuleManager } from './hooks/use-rule-manager'
+import { useMagicSort } from './hooks/use-magic-sort'
 import { useFileUpload } from './hooks/use-file-upload'
 import { useExport } from './hooks/use-export'
 import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
@@ -32,6 +33,7 @@ import { ExportModal } from './components/modals/ExportModal'
 import { RuleModal } from './components/modals/RuleModal'
 import { ClearAllModal } from './components/modals/ClearAllModal'
 import { ShortcutsModal } from './components/modals/ShortcutsModal'
+import { AISettings } from './components/AISettings'
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -197,6 +199,11 @@ function App() {
     selectedIds, setSelectedIds
   })
 
+  const magicSort = useMagicSort({
+    selectedIds, setSelectedIds,
+    rawBookmarks, openSettings
+  })
+
   useKeyboardShortcuts({
     selectedIds, setSelectedIds,
     bookmarks: worker.bookmarks,
@@ -272,55 +279,12 @@ function App() {
 
   // ── Render ──
 
-  // AI Magic Sort
-  const [isProcessingAI, setIsProcessingAI] = useState(false)
-
-  const handleMagicSort = async () => {
-    const apiKey = localStorage.getItem("bs_api_key")
-    const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
-
-    if (!apiKey) {
-      setIsSettingsOpen(true)
-      return
-    }
-
-    setIsProcessingAI(true)
-    try {
-      const selectedBookmarks = worker.bookmarks.filter(b => selectedIds.has(b.id))
-      const results = await categorizeBookmarks(selectedBookmarks, apiKey, model, (processed, total) => {
-        // Optional: Update a progress state here if we want detailed feedback
-      })
-
-      // Update bookmarks with suggestions
-      const updated = rawBookmarks.map(b => {
-        if (results[b.id]) {
-          return { ...b, suggestedFolder: results[b.id], newFolder: results[b.id], status: 'matched' }
-        }
-        return b
-      })
-
-      // Update in DB
-      await db.transaction('rw', db.bookmarks, async () => {
-        await db.bookmarks.bulkPut(updated)
-      })
-
-      setSelectedIds(new Set())
-    } catch (error) {
-      alert("AI Classification Failed: " + error.message)
-      if (error.message.includes("API Key") || error.message.includes("401")) {
-        setIsSettingsOpen(true)
-      }
-    } finally {
-      setIsProcessingAI(false)
-    }
-  }
-
   return (
     <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        onSave={() => handleMagicSort()}
+        onSave={() => magicSort.handleMagicSort()}
       />
       <Header
         theme={theme} setTheme={setTheme}
@@ -388,8 +352,8 @@ function App() {
           onAddTags={operations.handleBatchAddTags}
           onExportSelected={exporter.openExportSelectedModal}
           onCleanUrls={operations.cleanSelectedUrls}
-          onMagicSort={handleMagicSort}
-          isProcessingAI={isProcessingAI}
+          onMagicSort={magicSort.handleMagicSort}
+          isProcessingAI={magicSort.isProcessingAI}
         />
 
         {/* Settings Modal */}
@@ -400,6 +364,8 @@ function App() {
         >
           {settingsTab === 'backup' ? (
             <BackupSettings />
+          ) : settingsTab === 'ai' ? (
+            <AISettings />
           ) : (
             <TaxonomyManager
               folders={availableFolders}
@@ -419,6 +385,14 @@ function App() {
               className="text-xs h-7"
             >
               {t('sidebar.sections.library')}
+            </Button>
+            <Button
+              variant={settingsTab === 'ai' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('ai')}
+              className="text-xs h-7"
+            >
+              {t('settings.tabs.ai', 'AI')}
             </Button>
             <Button
               variant={settingsTab === 'backup' ? "secondary" : "ghost"}
