@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#41D1FF"/>
+      <stop offset="100%" stop-color="#BD34FE"/>
+    </linearGradient>
+    <linearGradient id="pageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8eaff"/>
+      <stop offset="100%" stop-color="#c7caff"/>
+    </linearGradient>
+  </defs>
+  <!-- Full background (maskable safe zone friendly) -->
+  <rect width="512" height="512" fill="#0a0f1a"/>
+  <!-- Book body - centered in safe zone (inner 80% = 410px, centered at 256) -->
+  <g transform="translate(256,270)">
+    <!-- Left page -->
+    <path d="M-16,-90 Q-16,-96 -24,-96 L-110,-96 Q-118,-96 -118,-90 L-118,68 Q-118,76 -110,76 L-24,76 Q-16,76 -16,68 Z" fill="url(#pageGrad)" opacity="0.9"/>
+    <!-- Right page -->
+    <path d="M16,-90 Q16,-96 24,-96 L110,-96 Q118,-96 118,-90 L118,68 Q118,76 110,76 L24,76 Q16,76 16,68 Z" fill="url(#pageGrad)" opacity="0.95"/>
+    <!-- Book spine -->
+    <rect x="-16" y="-96" width="32" height="172" rx="4" fill="url(#grad)" opacity="0.85"/>
+    <!-- Lines on left page -->
+    <line x1="-100" y1="-62" x2="-38" y2="-62" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="-100" y1="-40" x2="-46" y2="-40" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="-100" y1="-18" x2="-54" y2="-18" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="-100" y1="4" x2="-42" y2="4" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="-100" y1="26" x2="-50" y2="26" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <!-- Lines on right page -->
+    <line x1="38" y1="-62" x2="100" y2="-62" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="38" y1="-40" x2="92" y2="-40" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="38" y1="-18" x2="84" y2="-18" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="38" y1="4" x2="96" y2="4" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="38" y1="26" x2="88" y2="26" stroke="#8b8fb0" stroke-width="4.5" stroke-linecap="round"/>
+    <!-- Bookmark ribbon -->
+    <path d="M64,-96 L64,-128 L80,-114 L96,-128 L96,-96" fill="url(#grad)" opacity="0.95"/>
+  </g>
+  <!-- Smart sparkle -->
+  <g transform="translate(340,120)">
+    <path d="M0,-22 L5,-5 L22,0 L5,5 L0,22 L-5,5 L-22,0 L-5,-5 Z" fill="url(#grad)" opacity="0.9"/>
+  </g>
+  <g transform="translate(155,145)">
+    <path d="M0,-14 L3,-3 L14,0 L3,3 L0,14 L-3,3 L-14,0 L-3,-3 Z" fill="#41D1FF" opacity="0.6"/>
+  </g>
+</svg>

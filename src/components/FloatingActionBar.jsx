@@ -1,7 +1,10 @@
-import { Trash2, FolderInput, X, Loader2, Check, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, Check, XCircle, Download, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
-import { cn } from '../lib/utils';
-import { useState } from 'react';
+import { SelectionInfo } from './actionbar/SelectionInfo';
+import { TagBulkPopover } from './actionbar/TagBulkPopover';
+import { MoveBulkPopover } from './actionbar/MoveBulkPopover';
+import { useTranslation } from 'react-i18next';
 
 export function FloatingActionBar({
     selectedCount,
@@ -9,143 +12,111 @@ export function FloatingActionBar({
     onMove,
     onClearSelection,
     allFolders,
+    allTags,
     onOverrideStatus,
+    onAddTags,
+    onExportSelected,
+    onCleanUrls,
     onMagicSort,
     isProcessingAI
 }) {
-    const [isMoveOpen, setIsMoveOpen] = useState(false);
-    const [targetFolder, setTargetFolder] = useState('');
+    const { t } = useTranslation();
+    const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
 
     if (selectedCount === 0) return null;
 
-    return (
-        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-card border shadow-2xl rounded-full px-6 py-3 flex items-center gap-4 z-50 animate-in slide-in-from-bottom-5 duration-300">
-            <div className="flex items-center gap-2 border-r pr-4">
-                <div className="bg-primary text-primary-foreground text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                    {selectedCount}
-                </div>
-                <span className="text-sm font-medium">Selected</span>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-full -ml-1 hover:bg-muted"
-                    onClick={onClearSelection}
-                >
-                    <X className="h-3 w-3" />
-                </Button>
-            </div>
+    const togglePopover = (type) => {
+        setActivePopover(activePopover === type ? null : type);
+    };
 
-            <div className="flex items-center gap-2">
+    return (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-card/95 backdrop-blur-sm border shadow-2xl rounded-full px-4 py-2 flex items-center gap-2 sm:gap-4 z-50 animate-in slide-in-from-bottom-5 duration-300 w-[90vw] max-w-fit justify-between sm:justify-center">
+
+            <SelectionInfo
+                count={selectedCount}
+                onClear={onClearSelection}
+            />
+
+            <div className="flex items-center gap-1 sm:gap-2 mx-auto sm:mx-0 relative">
                 {/* Delete */}
                 <Button
                     variant="destructive"
                     size="sm"
-                    className="rounded-full gap-2 h-8 px-4"
+                    className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0"
                     onClick={onDelete}
                 >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
+                    <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                    <span className="hidden sm:inline">{t('actionbar.delete')}</span>
                 </Button>
 
+                {/* Add Tags */}
+                {onAddTags && (
+                    <TagBulkPopover
+                        allTags={allTags}
+                        onApply={onAddTags}
+                        isOpen={activePopover === 'tag'}
+                        onToggle={() => togglePopover('tag')}
+                    />
+                )}
+
                 {/* Move */}
-                <div className="relative">
-                    {isMoveOpen ? (
-                        <div className="flex items-center gap-2 bg-popover border rounded-full p-1 animate-in zoom-in-95 duration-200 absolute bottom-full mb-2 left-0 min-w-[200px] shadow-lg">
-                            <input
-                                autoFocus
-                                className="bg-transparent text-sm px-2 outline-none w-full"
-                                placeholder="Folder name..."
-                                value={targetFolder}
-                                onChange={(e) => setTargetFolder(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && targetFolder.trim()) {
-                                        onMove(targetFolder);
-                                        setIsMoveOpen(false);
-                                        setTargetFolder('');
-                                    }
-                                }}
-                            />
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6 rounded-full"
-                                onClick={() => {
-                                    if (targetFolder.trim()) {
-                                        onMove(targetFolder);
-                                        setIsMoveOpen(false);
-                                        setTargetFolder('');
-                                    }
-                                }}
-                            >
-                                <Check className="h-3 w-3 text-green-500" />
-                            </Button>
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6 rounded-full"
-                                onClick={() => setIsMoveOpen(false)}
-                            >
-                                <X className="h-3 w-3" />
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="rounded-full gap-2 h-8 px-4 border"
-                            onClick={() => setIsMoveOpen(true)}
-                        >
-                            <FolderInput className="h-3.5 w-3.5" />
-                            Move
-                        </Button>
-                    )}
-                </div>
+                <MoveBulkPopover
+                    allFolders={allFolders}
+                    onMove={onMove}
+                    isOpen={activePopover === 'move'}
+                    onToggle={() => togglePopover('move')}
+                />
 
-                {/* Magic Sort */}
-                <div className="border-l pl-2 ml-2">
-                    <Button
-                        variant="default"
-                        size="sm"
-                        className="rounded-full gap-2 h-8 px-4 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-md transition-all"
-                        onClick={onMagicSort}
-                        disabled={isProcessingAI}
-                    >
-                        {isProcessingAI ? (
-                            <>
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                Sorting...
-                            </>
-                        ) : (
-                            <>
-                                <span className="text-xs">✨</span>
-                                Magic Sort
-                            </>
-                        )}
-                    </Button>
-                </div>
-
-                {/* Status Override - Only useful if we track specific statuses */}
+                {/* Status Override */}
                 {onOverrideStatus && (
-                    <div className="flex gap-1 border-l pl-2">
+                    <div className="flex gap-1 border-l pl-2 ml-1 sm:ml-0">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full"
-                            title="Mark as Alive (Safe)"
+                            className="h-9 w-9 sm:h-8 sm:w-8 rounded-full shrink-0"
+                            title={t('actionbar.markAlive')}
                             onClick={() => onOverrideStatus('alive')}
                         >
-                            <Check className="h-4 w-4 text-emerald-500" />
+                            <Check className="h-4 w-4 sm:h-4 sm:w-4 text-emerald-500" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full"
-                            title="Mark as Dead"
+                            className="h-9 w-9 sm:h-8 sm:w-8 rounded-full shrink-0"
+                            title={t('actionbar.markDead')}
                             onClick={() => onOverrideStatus('dead')}
                         >
-                            <XCircle className="h-4 w-4 text-red-500" />
+                            <XCircle className="h-4 w-4 sm:h-4 sm:w-4 text-red-500" />
                         </Button>
                     </div>
+                )}
+
+                {/* Export Selected */}
+                {onExportSelected && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0"
+                        onClick={onExportSelected}
+                        title={t('actionbar.export')}
+                    >
+                        <Download className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        <span className="hidden sm:inline">{t('actionbar.export')}</span>
+                    </Button>
+                )}
+
+                {/* Clean URLs */}
+                {onCleanUrls && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                        onClick={onCleanUrls}
+                        title={t('actionbar.cleanUrls')}
+                    >
+                        <Sparkles className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        <span className="hidden sm:inline">{t('actionbar.cleanUrls')}</span>
+                    </Button>
                 )}
             </div>
         </div>

@@ -1,0 +1,282 @@
+{
+    "app": {
+        "title": "BookSmart",
+        "searchPlaceholder": "Yer imlerinde ara...",
+        "addBookmark": "Yer İmi Ekle"
+    },
+    "header": {
+        "undo": "Geri Al (Ctrl+Z)",
+        "redo": "Yinele (Ctrl+Y)",
+        "history": "Sürüm Geçmişi",
+        "advancedSearch": "Gelişmiş Arama Filtreleri",
+        "advanced": {
+            "mode": "Mod",
+            "modes": {
+                "simple": "Basit",
+                "simpleTitle": "Tam eşleşme veya basit metin",
+                "fuzzy": "Bulanık",
+                "fuzzyTitle": "Yaklaşık eşleşme (yazım hatası toleranslı)",
+                "regex": "Regex",
+                "regexTitle": "Düzenli İfade"
+            },
+            "date": {
+                "added": "Eklendi",
+                "from": "Başlangıç",
+                "to": "Bitiş",
+                "clear": "Temizle"
+            }
+        },
+        "clearSearch": "Aramayı Temizle",
+        "removeDuplicates": "{{count}} Yinelemeyi Kaldır",
+        "cleanUrls": "{{count}} URL'yi Temizle",
+        "listView": "Liste Görünümü",
+        "gridView": "Izgara Görünümü",
+        "analytics": "Analiz",
+        "showThumbnails": "Küçük Resimleri Göster",
+        "hideThumbnails": "Küçük Resimleri Gizle",
+        "checkHealth": "Sağlık Kontrolü",
+        "checking": "Kontrol ediliyor...",
+        "export": "Dışa Aktar",
+        "closeFile": "Dosyayı Kapat",
+        "shortcuts": "Klavye Kısayolları (?)",
+        "settings": "Ayarlar",
+        "maintenance": "Bakım",
+        "view": "Görünüm",
+        "tools": "Araçlar",
+        "system": "Sistem"
+    },
+    "sidebar": {
+        "allBookmarks": "Tüm Yer İmleri",
+        "uncategorized": "Kategorisiz",
+        "myFolders": "Klasörlerim",
+        "myTags": "Etiketlerim",
+        "discovered": "Keşfedilenler",
+        "noTags": "Etiket bulunamadı.",
+        "sections": {
+            "library": "Kütüphane",
+            "tags": "Etiketler",
+            "folders": "Klasörler",
+            "smartFilters": "Akıllı Filtreler",
+            "rules": "Kurallar"
+        },
+        "smartFilters": {
+            "duplicates": "Yinelenenler",
+            "deadLinks": "Ölü Linkler",
+            "longUrls": "Uzun URL'ler (200+)",
+            "media": "Medya & Videolar",
+            "social": "Sosyal Medya",
+            "shopping": "Alışveriş",
+            "news": "Haberler & Makaleler",
+            "old": "Tozlu Raflar (> 5y)",
+            "http": "Güvenli Değil (HTTP)",
+            "untitled": "Başlıksız / Genel",
+            "docs": "Belgeler & PDF'ler"
+        },
+        "rules": {
+            "title": "Kurallar",
+            "addRule": "Kural Ekle",
+            "noRules": "Henüz kural tanımlanmadı.",
+            "createFirst": "İlk kuralınızı oluşturun",
+            "edit": "Kuralı Düzenle",
+            "delete": "Kuralı Sil"
+        }
+    },
+    "settings": {
+        "title": "Ayarlar",
+        "tabs": {
+            "general": "Genel",
+            "folders": "Klasörler",
+            "tags": "Etiketler",
+            "backup": "Yedekleme & Veri",
+            "rules": "Kurallar"
+        },
+        "language": {
+            "label": "Dil",
+            "select": "Dil Seçin"
+        }
+    },
+    "common": {
+        "save": "Kaydet",
+        "cancel": "İptal",
+        "delete": "Sil",
+        "edit": "Düzenle",
+        "create": "Oluştur",
+        "actions": "İşlemler",
+        "clearAll": "Tümünü Temizle",
+        "close": "Kapat",
+        "folder": "klasör",
+        "tag": "etiket"
+    },
+    "modals": {
+        "rules": {
+            "newTitle": "Yeni Kural",
+            "editTitle": "Kuralı Düzenle",
+            "type": "Tür",
+            "value": "Değer",
+            "targetFolder": "Hedef Klasör",
+            "tags": "Etiketleri Uygula",
+            "update": "Kuralı Güncelle",
+            "add": "Kural Ekle",
+            "example": "Örnek: İç içe yapı için <1>Ana &gt; Alt Klasör</1>.",
+            "types": {
+                "keyword": "Anahtar Kelime",
+                "domain": "Alan Adı",
+                "exact": "Tam Eşleşme"
+            },
+            "placeholders": {
+                "value": "örn: youtube.com veya 'ders'",
+                "folder": "Klasör seçin veya oluşturun...",
+                "tags": "Virgülle ayırarak etiketleri girin..."
+            }
+        },
+        "export": {
+            "title": "Yapılandırmayı Dışa Aktar",
+            "format": "Biçim",
+            "include": "Dahil Et",
+            "download": "İndir",
+            "copy": "Panoya Kopyala"
+        },
+        "clearAll": {
+            "title": "Tüm Verileri Temizle",
+            "content": "Bu işlem <strong>TÜM</strong> Yer İmlerini, Kuralları, Özel Klasörleri, Etiketleri ve Ayarları silecek.<br /><br />Bir yedeğiniz yoksa bu işlem geri alınamaz.",
+            "backupAndClear": "Yedekle ve Temizle",
+            "clearEverything": "Hepsini Temizle"
+        },
+        "shortcuts": {
+            "title": "Klavye Kısayolları",
+            "focusSearch": "Aramaya Odaklan",
+            "selectAll": "Tümünü Seç",
+            "deleteSelected": "Seçilenleri Sil",
+            "clearSelection": "Seçimi Temizle",
+            "undo": "Geri Al",
+            "redo": "Yinele",
+            "redoAlt": "Yinele (Alt)",
+            "help": "Kısayolları Göster"
+        }
+    },
+    "backup": {
+        "autoBackup": {
+            "title": "Otomatik Yedekleme",
+            "desc": "Kurallar değiştiğinde otomatik olarak yerel bir anlık görüntü kaydeder."
+        },
+        "lastSnapshot": "Son yerel anlık görüntü:",
+        "manual": {
+            "title": "Manuel Yedekleme"
+        },
+        "export": {
+            "title": "Yapılandırmayı Dışa Aktar",
+            "desc": "Tüm kurallarınızı, klasörlerinizi ve etiketlerinizi bir JSON dosyası olarak indirin.",
+            "button": "Şimdi Yedekle"
+        },
+        "restore": {
+            "title": "Yapılandırmayı Geri Yükle",
+            "desc": "Ayarlarınızı önceki bir yedekleme dosyasından geri yükleyin.",
+            "button": "Dosya Seç...",
+            "restoring": "Geri yükleniyor...",
+            "success": "Geri yüklendi! Yeniden yükleniyor...",
+            "error": "Geçersiz yedekleme dosyası."
+        },
+        "failed": "Yedekleme başarısız! Konsolu kontrol edin. Veriler silinmedi.",
+        "note": "Yedeklemeler Kurallarınızı, Klasörlerinizi, Etiketlerinizi ve Yoksayılan URL'lerinizi içerir. Gerçek yer imlerinizi <1>içermez</1>. Yer imleri için ana sayfadaki \"Dışa Aktar\"ı kullanın."
+    },
+    "taxonomy": {
+        "folders": "Klasörler",
+        "tags": "Etiketler",
+        "addPlaceholder": "Yeni {{type}} ekle...",
+        "noItems": "Henüz {{type}} tanımlanmadı.",
+        "dragHelp": "Yeniden sıralamak için sürükleyin. Rengi değiştirmek için renk noktasına tıklayın.",
+        "discovered": {
+            "title": "Yer İmlerinde Keşfedilenler",
+            "add": "Kalıcı listeye ekle",
+            "addFolder": "Kalıcı klasörlere ekle",
+            "addTag": "Kalıcı etiketlere ekle",
+            "count": "{{count}} adet"
+        }
+    },
+    "pwa": {
+        "updateAvailable": "Yeni sürüm mevcut!",
+        "updateDesc": "Güncellemek için yenileyin.",
+        "updateButton": "Güncelle",
+        "close": "Kapat"
+    },
+    "analytics": {
+        "totalBookmarks": "Toplam Yer İmi",
+        "accumulationRate": "Birikim Hızı",
+        "duplicates": "Kopyalar",
+        "linkHealth": "Bağlantı Sağlığı",
+        "subtext": {
+            "folders": "{{count}} klasörde",
+            "accumulation": "Bu ay eklenen yer imleri",
+            "duplicates": "Birden çok kez görünen yer imleri",
+            "health": "Ölü bağlantı bulundu ({{checked}} kontrol edildi)"
+        },
+        "chart": {
+            "title": "Toplama Alışkanlıkları",
+            "tooltip": "yer imi"
+        },
+        "topDomains": "En İyi Alan Adları"
+    },
+    "actionbar": {
+        "selected": "Seçildi",
+        "move": {
+            "button": "Taşı",
+            "placeholder": "Yeni klasör adı...",
+            "submit": "Klasöre Taşı"
+        },
+        "tags": {
+            "button": "Etiketler",
+            "placeholder": "Etiket ekle...",
+            "submit": "Etiketleri Uygula"
+        },
+        "delete": "Sil",
+        "markAlive": "Çalışıyor Olarak İşaretle",
+        "markDead": "Ölü Olarak İşaretle",
+        "export": "Seçilenleri Dışa Aktar",
+        "cleanUrls": "URL'leri Temizle"
+    },
+    "preview": {
+        "reload": "Önizlemeyi Yenile",
+        "close": "Önizlemeyi Kapat",
+        "loading": "Önizleme yükleniyor...",
+        "error": "İçerik yüklenemiyor mu? Bazı siteler yerleştirmeyi engeller.",
+        "openExternal": "Yeni Sekmede Aç"
+    },
+    "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
+    "bookmarks": {
+        "status": {
+            "duplicate": "Kopya (Silinecek)",
+            "original": "Orijinal (Kopyaları var)",
+            "matched": "Kural Eşleşti",
+            "unknown": "Bilinmiyor"
+        },
+        "health": {
+            "checking": "Kontrol ediliyor...",
+            "alive": "Çalışıyor",
+            "dead": "Ağ Hatası (Muhtemelen Ölü)",
+            "archive": "Arşivde Ara (Wayback Machine)",
+            "ignore": "Hatayı Yoksay (Beyaz Liste)",
+            "ignored": "Yoksayıldı (Beyaz Listede)",
+            "unignore": "Yoksaymayı Kaldır"
+        },
+        "row": {
+            "added": "Eklendi {{time}}",
+            "duplicateIn": "Şurada kopya: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Yer imlerinizi buraya bırakın",
+            "desc": "Başlamak için dışa aktarılan Netscape HTML (Önerilen), JSON, CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
+            "browse": "Dosyalara Göz At"
+        },
+        "empty": {
+            "title": "Yer imi bulunamadı",
+            "desc": "Aramanızla veya filtrelerinizle eşleşen herhangi bir yer imi bulamadık.",
+            "clearSearch": "Aramayı Temizle"
+        },
+        "header": {
+            "title": "Yer İmleriniz",
+            "moveDocs": "{{count}} adeti \"References\" klasörüne taşı"
+        }
+    }
+}

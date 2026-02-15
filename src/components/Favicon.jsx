@@ -9,7 +9,7 @@ export function Favicon({ url, className = "w-4 h-4" }) {
     const getDomain = (url) => {
         try {
             return new URL(url).hostname;
-        } catch (e) {
+        } catch {
             return null;
         }
     };

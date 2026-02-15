@@ -1,298 +1,270 @@
-import { useState, useMemo, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { Sun, Moon, Upload, Download, Plus, Trash2, Folder, File, ArrowRight, Settings, Check, AlertCircle, Layers, XCircle, Activity, Loader2, CheckCircle2, HelpCircle, BarChart3, List, Undo2, Redo2 } from 'lucide-react'
+/*
+ * BookSmart - Copyright (C) 2026 BookSmart Contributors
+ * Licensed under the GNU GPLv3 or later.
+ */
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useTheme } from './hooks/use-theme'
-import { useHistory } from './hooks/use-history'
+import { useUndoRedo } from './hooks/use-undo-redo'
+import { useBookmarkWorker } from './hooks/use-bookmark-worker'
+import { useBookmarkOperations } from './hooks/use-bookmark-operations'
+import { useRuleManager } from './hooks/use-rule-manager'
+import { useFileUpload } from './hooks/use-file-upload'
+import { useExport } from './hooks/use-export'
+import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
+import { generateUUID } from './lib/utils'
+import { saveAutoBackup, createBackup, downloadBackup } from './lib/backup-manager'
+
+// Layout Components
+import { Header } from './components/layout/Header'
+import { Sidebar } from './components/layout/Sidebar'
+import { MainContent } from './components/layout/MainContent'
+
+// Existing Components
 import { FloatingActionBar } from './components/FloatingActionBar'
+import { TaxonomyManager } from './components/TaxonomyManager'
+import { BackupSettings } from './components/BackupSettings'
+import { SimpleModal } from './components/ui/SimpleModal'
 import { Button } from './components/ui/button'
-import { Checkbox } from './components/ui/checkbox'
-import { Card } from './components/ui/card'
-import { Input } from './components/ui/input'
-import { parseBookmarks } from './lib/parser'
-import { exportBookmarks } from './lib/exporter'
-import { Favicon } from './components/Favicon'
-import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { SettingsModal } from './components/SettingsModal'
+
+// Modal Components
+import { ExportModal } from './components/modals/ExportModal'
+import { RuleModal } from './components/modals/RuleModal'
+import { ClearAllModal } from './components/modals/ClearAllModal'
+import { ShortcutsModal } from './components/modals/ShortcutsModal'
 import { categorizeBookmarks } from './services/ai-service'
-import { cn } from './lib/utils'
+
+// PWA Components
+import OfflineIndicator from './components/OfflineIndicator'
+import PWAUpdatePrompt from './components/PWAUpdatePrompt'
+
+import { useTranslation } from 'react-i18next'
+
+const EMPTY_ARRAY = [];
 
 function App() {
+  const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
-  // History-aware state for bookmarks
-  const { state: rawBookmarks, set: setRawBookmarks, undo, redo, canUndo, canRedo } = useHistory([])
+  const { addCommand, undo, redo, canUndo, canRedo, past, future } = useUndoRedo()
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
-  // Selection State
-  const [selectedIds, setSelectedIds] = useState(new Set())
-
-  const [rules, setRules] = useState([])
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [viewMode, setViewMode] = useState('list') // 'list' | 'analytics'
-
-  // Link Health State
-  const [linkHealth, setLinkHealth] = useState({}) // { url: 'idle' | 'checking' | 'alive' | 'dead' }
-  const [isCheckingLinks, setIsCheckingLinks] = useState(false)
-
-  const checkLink = async (url) => {
-    try {
-      setLinkHealth(prev => ({ ...prev, [url]: 'checking' }))
-      // We use no-cors to avoid CORS errors block.
-      // If it doesn't throw, it means DNS/Connection is fine (Likely Alive).
-      // If it throws, it's likely a Network Error (Dead).
-      await fetch(url, { mode: 'no-cors', method: 'HEAD' })
-      setLinkHealth(prev => ({ ...prev, [url]: 'alive' }))
-    } catch (error) {
-      console.error(`Dead link detected: ${url}`, error)
-      setLinkHealth(prev => ({ ...prev, [url]: 'dead' }))
+  // Initialization & Migration
+  useEffect(() => {
+    const init = async () => {
+      await migrateFromLocalStorage()
+      await deduplicateTaxonomy()
+      await seedDefaults()
     }
-  }
-
-  const checkAllLinks = async () => {
-    setIsCheckingLinks(true)
-    const urls = [...new Set(bookmarks.map(b => b.url))]
-
-    // Concurrency control (batch of 5)
-    const batchSize = 5
-    for (let i = 0; i < urls.length; i += batchSize) {
-      const batch = urls.slice(i, i + batchSize)
-      await Promise.all(batch.map(url => checkLink(url)))
-    }
-
-    setIsCheckingLinks(false)
-  }
-
-  // Rule State
-  const [newRule, setNewRule] = useState({
-    type: 'keyword', // keyword, domain, exact
-    value: '',
-    targetFolder: '',
-    tags: ''
-  })
-
-  // Derived state: Apply rules and sort
-  const bookmarks = useMemo(() => {
-    if (rawBookmarks.length === 0) return [];
-
-    // 1. First pass: Map URLs to find all duplicates
-    const urlMap = new Map();
-    rawBookmarks.forEach(b => {
-      const u = b.url;
-      if (!urlMap.has(u)) {
-        urlMap.set(u, []);
-      }
-      urlMap.get(u).push({ id: b.id, folder: b.originalFolder });
-    });
-
-    const processed = rawBookmarks.map(b => {
-      let matchedRule = null;
-      let newFolder = b.originalFolder;
-      let tags = [];
-
-      // Check duplicate status
-      const siblings = urlMap.get(b.url);
-      const isMulti = siblings.length > 1;
-      const indexInSiblings = siblings.findIndex(s => s.id === b.id);
-      const isDuplicate = isMulti && indexInSiblings > 0; // It's a duplicate (2nd+ instance)
-      const hasDuplicate = isMulti && indexInSiblings === 0; // It's the original (1st instance) but has duplicates
-
-      // Get locations of other instances
-      const otherLocations = isMulti
-        ? siblings.filter(s => s.id !== b.id).map(s => s.folder)
-        : [];
-
-      for (const rule of rules) {
-        let match = false;
-        // Safety check for null values
-        const title = b.title || '';
-        const url = b.url || '';
-        const contentToCheck = (title + ' ' + url).toLowerCase();
-        const ruleValue = (rule.value || '').toLowerCase();
-
-        if (!ruleValue) continue;
-
-        if (rule.type === 'keyword' && contentToCheck.includes(ruleValue)) {
-          match = true;
-        } else if (rule.type === 'domain' && url.toLowerCase().includes(ruleValue)) {
-          match = true;
-        } else if (rule.type === 'exact' && title.toLowerCase() === ruleValue) {
-          match = true;
-        }
-
-        if (match) {
-          matchedRule = rule;
-          // Only update folder if targetFolder is set
-          if (rule.targetFolder) {
-            newFolder = rule.targetFolder;
-          }
-          // specific checking if tags exist
-          if (rule.tags) {
-            tags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
-          }
-          break; // First match wins
-        }
-      }
-
-      return {
-        ...b,
-        newFolder: matchedRule ? newFolder : b.originalFolder,
-        tags: tags,
-        status: matchedRule ? 'matched' : 'unchanged',
-        isDuplicate,
-        hasDuplicate,
-        otherLocations
-      };
-    });
-
-    // Sort priority:
-    // 1. Duplicates (actual duplicates or items with duplicates)
-    // 2. Matched Rules
-    // 3. Others
-    processed.sort((a, b) => {
-      const aDup = a.isDuplicate || a.hasDuplicate;
-      const bDup = b.isDuplicate || b.hasDuplicate;
-
-      if (aDup && !bDup) return -1;
-      if (!aDup && bDup) return 1;
-
-      if (a.status === 'matched' && b.status !== 'matched') return -1;
-      if (a.status !== 'matched' && b.status === 'matched') return 1;
-
-      // Sub-sort duplicates: Original first, then duplicates
-      if (aDup && bDup) {
-        if (a.hasDuplicate && b.isDuplicate) return -1;
-        if (a.isDuplicate && b.hasDuplicate) return 1;
-      }
-
-      return 0;
-    });
-
-    return processed;
-  }, [rawBookmarks, rules]);
-
-  // Duplicate Logic
-  const duplicateCount = useMemo(() => {
-    const urls = new Set();
-    let duplicates = 0;
-    rawBookmarks.forEach(b => {
-      if (urls.has(b.url)) {
-        duplicates++;
-      } else {
-        urls.add(b.url);
-      }
-    });
-    return duplicates;
-  }, [rawBookmarks]);
-
-  const removeDuplicates = () => {
-    const seen = new Set();
-    const unique = rawBookmarks.filter(b => {
-      if (seen.has(b.url)) return false;
-      seen.add(b.url);
-      return true;
-    });
-    setRawBookmarks(unique);
-  };
-
-  // File Upload
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const text = e.target.result
-        const parsed = parseBookmarks(text)
-        setRawBookmarks(parsed)
-      }
-      reader.readAsText(file)
-    }
+    init()
   }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'text/html': ['.html'] }
-  })
+  // Data from IndexedDB
+  const rawBookmarks = useLiveQuery(() => db.bookmarks.toArray()) || EMPTY_ARRAY
+  const rules = useLiveQuery(() => db.rules.toArray()) || EMPTY_ARRAY
+  const availableFolders = useLiveQuery(() => db.folders.orderBy('order').toArray()) || EMPTY_ARRAY
+  const availableTags = useLiveQuery(() => db.tags.orderBy('order').toArray()) || EMPTY_ARRAY
 
-  // Export
-  const handleExport = () => {
-    const html = exportBookmarks(bookmarks)
-    const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'bookmarks_organized.html'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  // Ignored URLs
+  const ignoredUrlsList = useLiveQuery(() => db.ignoredUrls.toArray()) || EMPTY_ARRAY
+  const ignoredUrls = useMemo(() => new Set(ignoredUrlsList.map(i => i.url)), [ignoredUrlsList])
+
+  // UI State
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [activeFolder, setActiveFolder] = useState(null)
+  const [activeTag, setActiveTag] = useState(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [viewMode, setViewMode] = useState('list')
+  const [showThumbnails, setShowThumbnails] = useState(false)
+  const [previewBookmark, setPreviewBookmark] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [smartFilter, setSmartFilter] = useState(null)
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
+  const [searchMode, setSearchMode] = useState('simple')
+  const [dateFilter, setDateFilter] = useState({ start: null, end: null })
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
+  const [showBackupModal, setShowBackupModal] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('folders')
+
+  const searchInputRef = useRef(null)
+
+  // Sidebar Accordion
+  const [collapsedSections, setCollapsedSections] = useState({
+    tags: false, folders: false, filters: false, rules: false
+  })
+  const toggleSection = (section) => {
+    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
 
-  // Manage Rules
-  const addRule = () => {
-    if (newRule.value && (newRule.targetFolder || newRule.tags)) {
-      setRules([...rules, { ...newRule, id: crypto.randomUUID() }])
-      setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
+  const hasFileLoaded = rawBookmarks.length > 0
+
+  const openSettings = (tab = 'folders') => {
+    setSettingsTab(tab)
+    setIsSettingsOpen(true)
+  }
+
+  // Fuse options for search
+  const fuseOptions = useMemo(() => ({
+    keys: ['title', 'url', 'tags', 'originalFolder'],
+    threshold: 0.4,
+    ignoreLocation: true
+  }), [])
+
+  // Auto-Backup Effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
+        saveAutoBackup()
+      }
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [rules, availableFolders, availableTags, ignoredUrlsList])
+
+  // Preview handler
+  const handlePreview = useCallback((bookmark) => {
+    setPreviewBookmark(bookmark)
+  }, [])
+
+  // Ignored URL toggle
+  const toggleIgnoreUrl = useCallback((url) => {
+    if (ignoredUrls.has(url)) {
+      db.ignoredUrls.where('url').equals(url).delete()
+    } else {
+      db.ignoredUrls.add({ url })
+    }
+  }, [ignoredUrls])
+
+  // Taxonomy Helpers
+  const setAvailableFolders = async (newFolders) => {
+    await db.transaction('rw', db.folders, async () => {
+      const existingIds = new Set((await db.folders.toArray()).map(f => f.id))
+      const newIds = new Set(newFolders.map(f => f.id))
+      const toDelete = [...existingIds].filter(id => !newIds.has(id))
+      if (toDelete.length > 0) await db.folders.bulkDelete(toDelete)
+      await db.folders.bulkPut(newFolders)
+    })
+  }
+
+  const setAvailableTags = async (newTags) => {
+    await db.transaction('rw', db.tags, async () => {
+      const existingIds = new Set((await db.tags.toArray()).map(f => f.id))
+      const newIds = new Set(newTags.map(f => f.id))
+      const toDelete = [...existingIds].filter(id => !newIds.has(id))
+      if (toDelete.length > 0) await db.tags.bulkDelete(toDelete)
+      await db.tags.bulkPut(newTags)
+    })
+  }
+
+  const saveToTaxonomy = async (name, type) => {
+    if (type === 'tag') {
+      await db.tags.add({ id: generateUUID(), name, color: '#10b981', order: availableTags.length })
+    } else {
+      await db.folders.add({ id: generateUUID(), name, color: '#3b82f6', order: availableFolders.length })
     }
   }
 
-  const deleteRule = (id) => {
-    setRules(rules.filter(r => r.id !== id))
-  }
+  // ── Custom Hooks ──
 
-  const clearAll = () => {
-    setRawBookmarks([])
-    setRules([])
-    setSelectedIds(new Set())
-  }
+  const worker = useBookmarkWorker({
+    rawBookmarks, rules, searchQuery, searchMode,
+    activeTag, activeFolder, smartFilter, dateFilter, fuseOptions
+  })
+
+  const operations = useBookmarkOperations({
+    rawBookmarks,
+    bookmarks: worker.bookmarks,
+    addCommand,
+    selectedIds, setSelectedIds,
+    availableFolders, availableTags,
+    linkHealth: worker.linkHealth,
+    setLinkHealth: worker.setLinkHealth,
+    setSmartFilter
+  })
+
+  const ruleManager = useRuleManager({ rules, addCommand, availableFolders, saveToTaxonomy })
+
+  const fileUpload = useFileUpload()
+
+  const exporter = useExport({
+    bookmarks: worker.bookmarks,
+    selectedIds, setSelectedIds
+  })
+
+  useKeyboardShortcuts({
+    selectedIds, setSelectedIds,
+    bookmarks: worker.bookmarks,
+    handleBatchDelete: operations.handleBatchDelete,
+    undo, redo,
+    searchInputRef,
+    setIsShortcutsOpen
+  })
+
+  // ── Derived State ──
+
+  const discoveredTags = useMemo(() => {
+    const existingNames = new Set(availableTags.map(t => t.name))
+    return worker.uniqueTags.filter(t => !existingNames.has(t.name))
+  }, [worker.uniqueTags, availableTags])
+
+  const discoveredFolders = useMemo(() => {
+    const existingNames = new Set(availableFolders.map(f => f.name))
+    return worker.uniqueFolders.filter(f => !existingNames.has(f.name))
+  }, [worker.uniqueFolders, availableFolders])
 
   // Selection Logic
   const toggleSelection = (id) => {
     const newSelected = new Set(selectedIds)
-    if (newSelected.has(id)) {
-      newSelected.delete(id)
-    } else {
-      newSelected.add(id)
-    }
+    if (newSelected.has(id)) { newSelected.delete(id) } else { newSelected.add(id) }
     setSelectedIds(newSelected)
   }
 
   const toggleAll = () => {
-    if (selectedIds.size === bookmarks.length) {
+    if (selectedIds.size === worker.displayBookmarks.length) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(bookmarks.map(b => b.id)))
+      setSelectedIds(new Set(worker.displayBookmarks.map(b => b.id)))
     }
   }
 
-  // Batch Operations
-  const handleBatchDelete = () => {
-    const remaining = rawBookmarks.filter(b => !selectedIds.has(b.id))
-    setRawBookmarks(remaining)
+  // Clear / Close
+  const confirmClearAll = async (shouldBackup) => {
+    if (shouldBackup) {
+      try {
+        const data = await createBackup()
+        downloadBackup(data)
+      } catch (e) {
+        console.error("Backup failed before clear:", e)
+        alert(t('backup.failed'))
+        return
+      }
+    }
+    await db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
+      await db.bookmarks.clear()
+      await db.rules.clear()
+      await db.folders.clear()
+      await db.tags.clear()
+      await db.ignoredUrls.clear()
+    })
     setSelectedIds(new Set())
+    setShowBackupModal(false)
   }
 
-  const handleBatchMove = (targetFolder) => {
-    const updated = rawBookmarks.map(b => {
-      if (selectedIds.has(b.id)) {
-        return { ...b, originalFolder: targetFolder, newFolder: targetFolder }
-      }
-      return b
+  const clearAll = () => setShowBackupModal(true)
+
+  const closeFile = () => {
+    db.transaction('rw', db.bookmarks, db.rules, async () => {
+      await db.bookmarks.clear()
+      await db.rules.clear()
     })
-    setRawBookmarks(updated)
     setSelectedIds(new Set())
+    worker.setLinkHealth({})
+    setSearchQuery('')
+    setActiveTag(null)
+    setSmartFilter(null)
   }
 
-  const handleStatusOverride = (status) => {
-    // This only updates local state visually, logic depends on if we store this override
-    // For now, let's just update the linkHealth to reflect this manual override
-    const newHealth = { ...linkHealth }
-    selectedIds.forEach(id => {
-      const bookmark = bookmarks.find(b => b.id === id)
-      if (bookmark) {
-        newHealth[bookmark.url] = status
-      }
-    })
-    setLinkHealth(newHealth)
-    setSelectedIds(new Set())
-  }
+  // ── Render ──
 
   // AI Magic Sort
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -335,357 +307,151 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={() => handleMagicSort()}
+    <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
+      <Header
+        theme={theme} setTheme={setTheme}
+        canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
+        past={past} future={future}
+        isHistoryOpen={isHistoryOpen} setIsHistoryOpen={setIsHistoryOpen}
+        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        searchMode={searchMode} searchInputRef={searchInputRef}
+        isAdvancedSearchOpen={isAdvancedSearchOpen} setIsAdvancedSearchOpen={setIsAdvancedSearchOpen}
+        setSearchMode={setSearchMode} dateFilter={dateFilter} setDateFilter={setDateFilter}
+        viewMode={viewMode} setViewMode={setViewMode}
+        showThumbnails={showThumbnails} setShowThumbnails={setShowThumbnails}
+        duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
+        cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
+        checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
+        openExportModal={exporter.openExportModal}
+        hasFileLoaded={hasFileLoaded} closeFile={closeFile}
+        bookmarkCount={worker.bookmarks.length}
+        openSettings={openSettings}
+        isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        setIsShortcutsOpen={setIsShortcutsOpen}
+        clearAll={clearAll}
       />
-      {/* Header */}
-      <header className="border-b h-16 flex items-center justify-between px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <Folder className="h-6 w-6 text-primary" />
-          <h1 className="font-bold text-xl tracking-tight">BookSmart</h1>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 border-r pr-4 mr-2">
-            <Button variant="ghost" size="icon" disabled={!canUndo} onClick={undo} title="Undo (Ctrl+Z)">
-              <Undo2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" disabled={!canRedo} onClick={redo} title="Redo (Ctrl+Shift+Z)">
-              <Redo2 className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="flex flex-1 overflow-hidden relative">
+        <Sidebar
+          isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+          collapsedSections={collapsedSections} toggleSection={toggleSection}
+          uniqueTags={worker.uniqueTags} availableTags={availableTags}
+          discoveredTags={discoveredTags} activeTag={activeTag} setActiveTag={setActiveTag}
+          availableFolders={availableFolders} uniqueFolders={worker.uniqueFolders}
+          discoveredFolders={discoveredFolders} bookmarks={worker.bookmarks}
+          activeFolder={activeFolder} setActiveFolder={setActiveFolder}
+          smartFilter={smartFilter} setSmartFilter={setSmartFilter}
+          smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
+          rules={rules} startEditing={ruleManager.startEditing}
+          deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
+          saveToTaxonomy={saveToTaxonomy}
+        />
 
-          {duplicateCount > 0 && (
-            <Button onClick={removeDuplicates} variant="destructive" size="sm" className="gap-2">
-              <Layers className="h-4 w-4" />
-              Remove {duplicateCount} Duplicates
-            </Button>
-          )}
+        <MainContent
+          hasFileLoaded={hasFileLoaded}
+          displayBookmarks={worker.displayBookmarks}
+          rawBookmarks={rawBookmarks}
+          getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps}
+          isDragActive={fileUpload.isDragActive}
+          viewMode={viewMode} showThumbnails={showThumbnails}
+          selectedIds={selectedIds} toggleSelection={toggleSelection} toggleAll={toggleAll}
+          linkHealth={worker.linkHealth} ignoredUrls={ignoredUrls} toggleIgnoreUrl={toggleIgnoreUrl}
+          availableFolders={availableFolders} availableTags={availableTags}
+          smartFilter={smartFilter} smartCounts={worker.smartCounts}
+          handleBatchMoveDocs={operations.handleBatchMoveDocs}
+          previewBookmark={previewBookmark} handlePreview={handlePreview} setPreviewBookmark={setPreviewBookmark}
+          clearAll={clearAll} setSmartFilter={setSmartFilter} setViewMode={setViewMode}
+          setSearchQuery={setSearchQuery} setActiveTag={setActiveTag} setActiveFolder={setActiveFolder}
+        />
 
-          {bookmarks.length > 0 && (
-            <div className="flex gap-2">
-              <div className="flex bg-muted/50 p-1 rounded-lg border mr-2">
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setViewMode('list')}
-                  title="List View"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'analytics' ? 'secondary' : 'ghost'}
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setViewMode('analytics')}
-                  title="Analytics"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Button onClick={checkAllLinks} disabled={isCheckingLinks} variant="outline" className="gap-2">
-                {isCheckingLinks ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-                {isCheckingLinks ? 'Checking...' : 'Check Health'}
-              </Button>
-              <Button onClick={handleExport} variant="default" className="gap-2 shadow-lg shadow-primary/20">
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
-            </div>
-          )}
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-        </div>
-      </header>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside
-          className={cn(
-            "border-r bg-card/30 flex-col overflow-y-auto transition-all duration-300 ease-in-out",
-            isSidebarOpen ? "w-80 p-4" : "w-0 p-0 overflow-hidden"
-          )}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-semibold text-lg flex items-center gap-2">
-              <Layers className="h-5 w-5" />
-              Rules
-            </h2>
-            <Button variant="ghost" size="sm" onClick={() => setIsSettingsOpen(true)} title="AI Settings">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <Card className="p-4 mb-6 space-y-4 border-dashed border-2">
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Type</label>
-              <select
-                className="w-full bg-background border rounded-md h-9 px-3 text-sm focus:ring-2 focus:ring-primary"
-                value={newRule.type}
-                onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
-              >
-                <option value="keyword">Keyword</option>
-                <option value="domain">Domain</option>
-                <option value="exact">Exact Title</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Value</label>
-              <Input
-                placeholder="e.g. 'github', 'youtube'"
-                value={newRule.value}
-                onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Target Folder (Optional)</label>
-              <Input
-                placeholder="e.g. Work > Dev"
-                value={newRule.targetFolder}
-                onChange={(e) => setNewRule({ ...newRule, targetFolder: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">Tags (Comma separated)</label>
-              <Input
-                placeholder="e.g. news, tech, read-later"
-                value={newRule.tags}
-                onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
-              />
-            </div>
-
-            <Button onClick={addRule} className="w-full" size="sm">
-              <Plus className="h-4 w-4 mr-2" /> Add Rule
-            </Button>
-          </Card>
-
-          <div className="space-y-2">
-            {rules.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No rules defined.</p>
-            )}
-            {rules.map(rule => (
-              <div key={rule.id} className="flex items-center justify-between p-3 rounded-md bg-accent/50 hover:bg-accent border group">
-                <div className="flex flex-col overflow-hidden">
-                  <span className="text-xs font-bold text-muted-foreground uppercase">{rule.type}</span>
-                  <div className="flex items-center gap-1 text-sm truncate">
-                    <span className="truncate">"{rule.value}"</span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                    <div className="flex gap-2 items-center truncate">
-                      {rule.targetFolder && <span className="font-medium text-primary truncate">{rule.targetFolder}</span>}
-                      {rule.tags && <span className="text-xs bg-muted px-1 rounded truncate max-w-[80px]">🏷️{rule.tags}</span>}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => deleteRule(rule.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
-
-          {bookmarks.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center p-8">
-              <div
-                {...getRootProps()}
-                className={cn(
-                  "border-4 border-dashed rounded-3xl p-16 flex flex-col items-center justify-center text-center transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 max-w-2xl w-full",
-                  isDragActive ? "border-primary bg-primary/10 scale-105" : "border-muted-foreground/25"
-                )}
-              >
-                <input {...getInputProps()} />
-                <div className="bg-primary/10 p-6 rounded-full mb-6">
-                  <Upload className="h-12 w-12 text-primary" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Drop your bookmarks here</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Drag and drop your exported Netscape HTML bookmark file to get started.
-                </p>
-                <Button variant="outline" className="mt-8">Browse Files</Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 max-w-6xl mx-auto">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold tracking-tight">Your Bookmarks ({bookmarks.length})</h2>
-                <Button variant="ghost" onClick={clearAll} className="text-muted-foreground">
-                  Clear All
-                </Button>
-              </div>
-
-              {viewMode === 'analytics' ? (
-                <AnalyticsDashboard bookmarks={bookmarks} linkHealth={linkHealth} />
-              ) : (
-                <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-muted/50 text-muted-foreground font-medium uppercase text-xs">
-                        <tr>
-                          <th className="px-4 py-3 w-12 text-center">
-                            <Checkbox
-                              checked={bookmarks.length > 0 && selectedIds.size === bookmarks.length}
-                              onChange={toggleAll}
-                              className="bg-card"
-                            />
-                          </th>
-                          <th className="px-4 py-3 w-12 text-center">Status</th>
-                          <th className="px-4 py-3 w-12 text-center">Health</th>
-                          <th className="px-4 py-3 max-w-[300px]">Title / URL</th>
-                          <th className="px-4 py-3">Original Folder</th>
-                          <th className="px-4 py-3">New Folder</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {bookmarks.map(bookmark => (
-                          <tr key={bookmark.id} className={cn(
-                            "transition-colors duration-200",
-                            selectedIds.has(bookmark.id) ? "bg-primary/5" : "",
-                            !selectedIds.has(bookmark.id) && bookmark.isDuplicate
-                              ? "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
-                              : !selectedIds.has(bookmark.id) && bookmark.hasDuplicate
-                                ? "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
-                                : !selectedIds.has(bookmark.id) && bookmark.status === 'matched'
-                                  ? "bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
-                                  : "hover:bg-muted/30"
-                          )}>
-                            <td className="px-4 py-3 text-center">
-                              <Checkbox
-                                checked={selectedIds.has(bookmark.id)}
-                                onChange={() => toggleSelection(bookmark.id)}
-                                className="bg-card"
-                              />
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {bookmark.isDuplicate ? (
-                                <div className="flex justify-center" title="Duplicate (Will be removed)">
-                                  <div className="w-6 h-6 rounded-full bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
-                                    <XCircle className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : bookmark.hasDuplicate ? (
-                                <div className="flex justify-center" title="Original (Has duplicates)">
-                                  <div className="w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 flex items-center justify-center">
-                                    <Layers className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : bookmark.status === 'matched' ? (
-                                <div className="flex justify-center">
-                                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                    <Check className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex justify-center">
-                                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                                  </div>
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              {linkHealth[bookmark.url] === 'checking' ? (
-                                <div className="flex justify-center" title="Checking...">
-                                  <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-                                </div>
-                              ) : linkHealth[bookmark.url] === 'alive' ? (
-                                <div className="flex justify-center" title="Alive">
-                                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                                </div>
-                              ) : linkHealth[bookmark.url] === 'dead' ? (
-                                <div className="flex justify-center" title="Network Error (Likely Dead)">
-                                  <XCircle className="h-4 w-4 text-red-500" />
-                                </div>
-                              ) : (
-                                <div className="flex justify-center" title="Unknown">
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground/30" />
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 max-w-[300px]">
-                              <div className="flex flex-col">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
-                                  <span className={cn(
-                                    "font-medium truncate",
-                                    bookmark.status === 'matched' && "text-emerald-700 dark:text-emerald-300"
-                                  )} title={bookmark.title}>{bookmark.title}</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
-                                {bookmark.tags && bookmark.tags.length > 0 && (
-                                  <div className="flex gap-1 mt-1 flex-wrap">
-                                    {bookmark.tags.map(tag => (
-                                      <span key={tag} className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                        #{tag}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
-                                  <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                                    <Layers className="h-3 w-3" />
-                                    <span>Duplicate in: {bookmark.otherLocations.join(', ')}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="inline-flex items-center px-2 py-1 rounded-md bg-muted text-xs text-muted-foreground border">
-                                {bookmark.originalFolder}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={cn(
-                                "inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium",
-                                bookmark.status === 'matched'
-                                  ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30"
-                                  : "bg-muted text-muted-foreground border-transparent"
-                              )}>
-                                {bookmark.newFolder}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </main>
         <FloatingActionBar
           selectedCount={selectedIds.size}
-          onDelete={handleBatchDelete}
-          onMove={handleBatchMove}
+          onDelete={operations.handleBatchDelete}
+          onMove={operations.handleBatchMove}
           onClearSelection={() => setSelectedIds(new Set())}
-          onOverrideStatus={handleStatusOverride}
-          onMagicSort={handleMagicSort}
-          isProcessingAI={isProcessingAI}
+          allFolders={availableFolders}
+          allTags={availableTags}
+          onOverrideStatus={operations.handleStatusOverride}
+          onAddTags={operations.handleBatchAddTags}
+          onExportSelected={exporter.openExportSelectedModal}
+          onCleanUrls={operations.cleanSelectedUrls}
         />
+
+        {/* Settings Modal */}
+        <SimpleModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          title={t('settings.title')}
+        >
+          {settingsTab === 'backup' ? (
+            <BackupSettings />
+          ) : (
+            <TaxonomyManager
+              folders={availableFolders}
+              setFolders={setAvailableFolders}
+              tags={availableTags}
+              setTags={setAvailableTags}
+              discoveredFolders={discoveredFolders}
+              discoveredTags={discoveredTags}
+              defaultTab={settingsTab}
+            />
+          )}
+          <div className="flex justify-center gap-2 mt-4 border-t pt-2">
+            <Button
+              variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('folders')}
+              className="text-xs h-7"
+            >
+              {t('sidebar.sections.library')}
+            </Button>
+            <Button
+              variant={settingsTab === 'backup' ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setSettingsTab('backup')}
+              className="text-xs h-7"
+            >
+              {t('settings.tabs.backup')}
+            </Button>
+          </div>
+        </SimpleModal>
+
+        <ClearAllModal
+          isOpen={showBackupModal}
+          onClose={() => setShowBackupModal(false)}
+          onConfirm={confirmClearAll}
+        />
+
+        <ShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
+
+        <ExportModal
+          isOpen={exporter.isExportModalOpen}
+          onClose={() => exporter.setIsExportModalOpen(false)}
+          exportFormat={exporter.exportFormat}
+          setExportFormat={exporter.setExportFormat}
+          exportOnlySelected={exporter.exportOnlySelected}
+          selectedCount={selectedIds.size}
+          onExport={exporter.performExport}
+        />
+
+        <RuleModal
+          isOpen={ruleManager.isRuleModalOpen}
+          onClose={ruleManager.cancelEditing}
+          editingRuleId={ruleManager.editingRuleId}
+          newRule={ruleManager.newRule}
+          setNewRule={ruleManager.setNewRule}
+          onSave={ruleManager.addRule}
+          availableFolders={availableFolders}
+          availableTags={availableTags}
+          discoveredFolders={discoveredFolders}
+          saveToTaxonomy={saveToTaxonomy}
+        />
+
+        <OfflineIndicator />
+        <PWAUpdatePrompt />
       </div>
     </div>
   )

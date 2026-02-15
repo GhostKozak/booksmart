@@ -1,0 +1,282 @@
+{
+    "app": {
+        "title": "BookSmart",
+        "searchPlaceholder": "Search bookmarks...",
+        "addBookmark": "Add Bookmark"
+    },
+    "header": {
+        "undo": "Undo (Ctrl+Z)",
+        "redo": "Redo (Ctrl+Y)",
+        "history": "Version History",
+        "advancedSearch": "Advanced Search Filters",
+        "advanced": {
+            "mode": "Mode",
+            "modes": {
+                "simple": "Simple",
+                "simpleTitle": "Exact match or simple text",
+                "fuzzy": "Fuzzy",
+                "fuzzyTitle": "Approximate match (typo tolerant)",
+                "regex": "Regex",
+                "regexTitle": "Regular Expression"
+            },
+            "date": {
+                "added": "Added",
+                "from": "From",
+                "to": "To",
+                "clear": "Clear"
+            }
+        },
+        "clearSearch": "Clear search",
+        "removeDuplicates": "Remove {{count}} Duplicates",
+        "cleanUrls": "Clean {{count}} URLs",
+        "listView": "List View",
+        "gridView": "Grid View",
+        "analytics": "Analytics",
+        "showThumbnails": "Show Thumbnails",
+        "hideThumbnails": "Hide Thumbnails",
+        "checkHealth": "Check Health",
+        "checking": "Checking...",
+        "export": "Export",
+        "closeFile": "Close File",
+        "shortcuts": "Keyboard Shortcuts (?)",
+        "settings": "Settings",
+        "maintenance": "Maintenance",
+        "view": "View Options",
+        "tools": "Tools",
+        "system": "System"
+    },
+    "sidebar": {
+        "allBookmarks": "All Bookmarks",
+        "uncategorized": "Uncategorized",
+        "myFolders": "My Folders",
+        "myTags": "My Tags",
+        "discovered": "Discovered",
+        "noTags": "No tags found.",
+        "sections": {
+            "library": "Library",
+            "tags": "Tags",
+            "folders": "Folders",
+            "smartFilters": "Smart Filters",
+            "rules": "Rules"
+        },
+        "smartFilters": {
+            "duplicates": "Duplicates",
+            "deadLinks": "Dead Links",
+            "longUrls": "Long URLs (200+)",
+            "media": "Media & Videos",
+            "social": "Social Media",
+            "shopping": "Shopping",
+            "news": "News & Articles",
+            "old": "Dusty Shelves (> 5y)",
+            "http": "Not Secure (HTTP)",
+            "untitled": "Untitled / Generic",
+            "docs": "Docs & PDFs"
+        },
+        "rules": {
+            "title": "Rules",
+            "addRule": "Add Rule",
+            "noRules": "No rules defined yet.",
+            "createFirst": "Create your first rule",
+            "edit": "Edit Rule",
+            "delete": "Delete Rule"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "tabs": {
+            "general": "General",
+            "folders": "Folders",
+            "tags": "Tags",
+            "backup": "Backup & Data",
+            "rules": "Rules"
+        },
+        "language": {
+            "label": "Language",
+            "select": "Select Language"
+        }
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "create": "Create",
+        "actions": "Actions",
+        "clearAll": "Clear All",
+        "close": "Close",
+        "folder": "folder",
+        "tag": "tag"
+    },
+    "modals": {
+        "rules": {
+            "newTitle": "New Rule",
+            "editTitle": "Edit Rule",
+            "type": "Type",
+            "value": "Value",
+            "targetFolder": "Target Folder",
+            "tags": "Apply Tags",
+            "update": "Update Rule",
+            "add": "Add Rule",
+            "example": "Example: <1>Main &gt; Subfolder</1> for nested structure.",
+            "types": {
+                "keyword": "Keyword",
+                "domain": "Domain",
+                "exact": "Exact Match"
+            },
+            "placeholders": {
+                "value": "e.g., youtube.com or 'tutorial'",
+                "folder": "Select or create folder...",
+                "tags": "Enter tags separated by commas..."
+            }
+        },
+        "export": {
+            "title": "Export Configuration",
+            "format": "Format",
+            "include": "Include",
+            "download": "Download",
+            "copy": "Copy to Clipboard"
+        },
+        "clearAll": {
+            "title": "Clear All Data",
+            "content": "This will delete <strong>ALL</strong> Bookmarks, Rules, Custom Folders, Tags, and Settings.<br /><br />This action cannot be undone unless you have a backup.",
+            "backupAndClear": "Backup and Clear",
+            "clearEverything": "Clear Everything"
+        },
+        "shortcuts": {
+            "title": "Keyboard Shortcuts",
+            "focusSearch": "Focus Search",
+            "selectAll": "Select All",
+            "deleteSelected": "Delete Selected",
+            "clearSelection": "Clear Selection",
+            "undo": "Undo",
+            "redo": "Redo",
+            "redoAlt": "Redo (Alt)",
+            "help": "Show Shortcuts"
+        }
+    },
+    "backup": {
+        "autoBackup": {
+            "title": "Auto-Backup",
+            "desc": "Automatically save a local snapshot when rules change."
+        },
+        "lastSnapshot": "Last local snapshot:",
+        "manual": {
+            "title": "Manual Backup"
+        },
+        "export": {
+            "title": "Export Configuration",
+            "desc": "Download all your rules, folders, and tags as a JSON file.",
+            "button": "Backup Now"
+        },
+        "restore": {
+            "title": "Restore Configuration",
+            "desc": "Restore your settings from a previous backup file.",
+            "button": "Select File...",
+            "restoring": "Restoring...",
+            "success": "Restored! Reloading...",
+            "error": "Invalid backup file."
+        },
+        "failed": "Backup failed! Check console. Data was NOT cleared.",
+        "note": "Backups include your Rules, Folders, Tags, and Ignored URLs. They do <1>not</1> include your actual bookmarks. Use \"Export\" on the main page for bookmarks."
+    },
+    "taxonomy": {
+        "folders": "Folders",
+        "tags": "Tags",
+        "addPlaceholder": "Add new {{type}}...",
+        "noItems": "No {{type}} defined yet.",
+        "dragHelp": "Drag to reorder. Click the color dot to change color.",
+        "discovered": {
+            "title": "Discovered in Bookmarks",
+            "add": "Add to permanent list",
+            "addFolder": "Add to permanent folders",
+            "addTag": "Add to permanent tags",
+            "count": "count: {{count}}"
+        }
+    },
+    "pwa": {
+        "updateAvailable": "New version available!",
+        "updateDesc": "Refresh to update.",
+        "updateButton": "Update",
+        "close": "Close"
+    },
+    "analytics": {
+        "totalBookmarks": "Total Bookmarks",
+        "accumulationRate": "Accumulation Rate",
+        "duplicates": "Duplicates",
+        "linkHealth": "Link Health",
+        "subtext": {
+            "folders": "Across {{count}} folders",
+            "accumulation": "Bookmarks added this month",
+            "duplicates": "Bookmarks appearing multiple times",
+            "health": "Dead links found ({{checked}} checked)"
+        },
+        "chart": {
+            "title": "Collection Habits",
+            "tooltip": "bookmarks"
+        },
+        "topDomains": "Top Domains"
+    },
+    "actionbar": {
+        "selected": "Selected",
+        "move": {
+            "button": "Move",
+            "placeholder": "New folder name...",
+            "submit": "Move to Folder"
+        },
+        "tags": {
+            "button": "Tags",
+            "placeholder": "Add tags...",
+            "submit": "Apply Tags"
+        },
+        "delete": "Delete",
+        "markAlive": "Mark as Alive",
+        "markDead": "Mark as Dead",
+        "export": "Export Selected",
+        "cleanUrls": "Clean URLs"
+    },
+    "preview": {
+        "reload": "Reload Preview",
+        "close": "Close Preview",
+        "loading": "Loading preview...",
+        "error": "Content not loading? Some sites block embedding.",
+        "openExternal": "Open in New Tab"
+    },
+    "offline": "You are offline — Data is saved locally",
+    "bookmarks": {
+        "status": {
+            "duplicate": "Duplicate (Will be removed)",
+            "original": "Original (Has duplicates)",
+            "matched": "Matched Rule-Based",
+            "unknown": "Unknown"
+        },
+        "health": {
+            "checking": "Checking...",
+            "alive": "Alive",
+            "dead": "Network Error (Likely Dead)",
+            "archive": "Search in Archive (Wayback Machine)",
+            "ignore": "Ignore Error (Whitelist)",
+            "ignored": "Ignored (Whitelisted)",
+            "unignore": "Un-ignore"
+        },
+        "row": {
+            "added": "Added {{time}}",
+            "duplicateIn": "Duplicate in: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Drop your bookmarks here",
+            "desc": "Drag and drop your exported Netscape HTML (Recommended), JSON, CSV, or Markdown files to get started.",
+            "browse": "Browse Files"
+        },
+        "empty": {
+            "title": "No bookmarks found",
+            "desc": "We couldn't find any bookmarks matching your search or filters.",
+            "clearSearch": "Clear Search"
+        },
+        "header": {
+            "title": "Your Bookmarks",
+            "moveDocs": "Move {{count}} to \"References\""
+        }
+    }
+}
