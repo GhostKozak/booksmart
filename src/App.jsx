@@ -1,3 +1,7 @@
+/*
+ * BookSmart - Copyright (C) 2026 BookSmart Contributors
+ * Licensed under the GNU GPLv3 or later.
+ */
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
