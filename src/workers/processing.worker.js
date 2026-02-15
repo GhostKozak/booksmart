@@ -189,7 +189,7 @@ const processData = ({
     // 7. Rule Application & Processing
     const processed = filtered.map(b => {
         let matchedRule = null;
-        let newFolder = b.originalFolder;
+        let newFolder = b.newFolder || b.originalFolder;
         let ruleTags = [];
 
         // Check duplicate status
@@ -245,7 +245,9 @@ const processData = ({
 
         return {
             ...b,
-            newFolder: matchedRule ? newFolder : b.originalFolder,
+            ...b,
+            // If rule matched, use rule folder. Otherwise keep existing newFolder or fall back to original.
+            newFolder: matchedRule && newFolder ? newFolder : (b.newFolder || b.originalFolder),
             tags: allTags,
             ruleTags: ruleTags,
             status: matchedRule ? 'matched' : 'unchanged',

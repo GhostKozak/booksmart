@@ -2,8 +2,8 @@ import Dexie from 'dexie';
 
 export const db = new Dexie('BookSmartDB');
 
-db.version(1).stores({
-    bookmarks: '++id, url, title, originalFolder, newFolder, *tags, addDate', // Indexes
+db.version(2).stores({
+    bookmarks: '++id, url, title, originalFolder, newFolder, *tags, *ruleTags, addDate', // Indexes
     folders: 'id, name, order',
     tags: 'id, name, order',
     rules: 'id, type, value, targetFolder, *tags',
