@@ -78,7 +78,7 @@ export function BookmarkRowMobile({
                         </>
                     ) : (
                         <BookmarkFolderBadge
-                            folderName={bookmark.originalFolder}
+                            folderName={bookmark.newFolder || bookmark.originalFolder}
                             availableFolders={availableFolders}
                             className="bg-muted/50 whitespace-normal text-left"
                         />

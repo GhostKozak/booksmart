@@ -5,7 +5,7 @@ import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { Layers } from 'lucide-react'
+import { ArrowDownUpIcon, ArrowRight, ArrowRightLeft, Layers } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowDesktop({
@@ -20,7 +20,7 @@ export function BookmarkRowDesktop({
     const { t } = useTranslation();
     return (
         <div className="hidden lg:contents">
-            {/* Checkbox */}
+            {/* Checkbox (Col 1) */}
             <div className="flex justify-center">
                 <Checkbox
                     checked={isSelected}
@@ -29,17 +29,7 @@ export function BookmarkRowDesktop({
                 />
             </div>
 
-            {/* Status Icon */}
-            <BookmarkStatusIcon bookmark={bookmark} />
-
-            {/* Health Icon */}
-            <BookmarkHealthStatus
-                url={bookmark.url}
-                status={healthStatus}
-                onToggleIgnore={toggleIgnoreUrl}
-            />
-
-            {/* Title / URL */}
+            {/* Title / URL (Col 2) */}
             <div className="flex flex-col min-w-0 pr-4 py-2">
                 <div className="flex items-center gap-2 min-w-0">
                     <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
@@ -71,22 +61,41 @@ export function BookmarkRowDesktop({
                 )}
             </div>
 
-            {/* Original Folder */}
-            <div className="px-2">
-                <BookmarkFolderBadge
-                    folderName={bookmark.originalFolder}
-                    availableFolders={availableFolders}
-                />
+            {/* Folder Location (Col 3) */}
+            <div className="px-2 flex items-center gap-2">
+                {bookmark.newFolder && bookmark.newFolder !== bookmark.originalFolder ? (
+                    <>
+                        <BookmarkFolderBadge
+                            folderName={bookmark.originalFolder}
+                            availableFolders={availableFolders}
+                            className="opacity-50 shrink-0"
+                        />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                        <BookmarkFolderBadge
+                            folderName={bookmark.newFolder}
+                            availableFolders={availableFolders}
+                            isMatched={bookmark.status === 'matched'}
+                            className="shrink-0"
+                        />
+                    </>
+                ) : (
+                    <BookmarkFolderBadge
+                        folderName={bookmark.newFolder || bookmark.originalFolder}
+                        availableFolders={availableFolders}
+                        isMatched={bookmark.status === 'matched'}
+                    />
+                )}
             </div>
 
-            {/* New Folder */}
-            <div className="px-2">
-                <BookmarkFolderBadge
-                    folderName={bookmark.newFolder}
-                    availableFolders={availableFolders}
-                    isMatched={bookmark.status === 'matched'}
-                />
-            </div>
+            {/* Status Icon (Col 4) */}
+            <BookmarkStatusIcon bookmark={bookmark} />
+
+            {/* Health Icon (Col 5) */}
+            <BookmarkHealthStatus
+                url={bookmark.url}
+                status={healthStatus}
+                onToggleIgnore={toggleIgnoreUrl}
+            />
         </div>
     )
 }

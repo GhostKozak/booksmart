@@ -152,6 +152,19 @@
             "redo": "Redo",
             "redoAlt": "Redo (Alt)",
             "help": "Show Shortcuts"
+        },
+        "sortConf": {
+            "title": "Confirm Changes",
+            "summary": "Please review the proposed changes before applying them.",
+            "confirm": "Apply Changes",
+            "stats": {
+                "bookmarks": "Bookmarks",
+                "folders": "Folder Moves"
+            },
+            "cols": {
+                "title": "Title",
+                "changes": "Changes"
+            }
         }
     },
     "backup": {
@@ -232,7 +245,10 @@
         "markAlive": "Mark as Alive",
         "markDead": "Mark as Dead",
         "export": "Export Selected",
-        "cleanUrls": "Clean URLs"
+        "cleanUrls": "Clean URLs",
+        "autoSort": "Auto Sort (Local)",
+        "sorting": "Sorting...",
+        "magicSort": "Magic Sort"
     },
     "preview": {
         "reload": "Reload Preview",

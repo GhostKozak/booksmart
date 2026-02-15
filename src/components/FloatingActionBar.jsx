@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Check, XCircle, Download, Sparkles, Loader2 } from 'lucide-react';
+import { Trash2, Check, XCircle, Download, Sparkles, Loader2, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
@@ -17,6 +17,7 @@ export function FloatingActionBar({
     onAddTags,
     onExportSelected,
     onCleanUrls,
+    onAutoSort,
     onMagicSort,
     isProcessingAI
 }) {
@@ -117,6 +118,22 @@ export function FloatingActionBar({
                         <Sparkles className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                         <span className="hidden sm:inline">{t('actionbar.cleanUrls')}</span>
                     </Button>
+                )}
+
+                {/* Auto Sort (Local) */}
+                {onAutoSort && (
+                    <div className="border-l pl-2 ml-1 sm:ml-0">
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all"
+                            onClick={onAutoSort}
+                            disabled={isProcessingAI} // Disable if AI is running to avoid conflicts
+                        >
+                            <Zap className="h-4 w-4 sm:h-3.5 sm:w-3.5 fill-current" />
+                            <span className="hidden sm:inline">{t('actionbar.autoSort', 'Auto Sort')}</span>
+                        </Button>
+                    </div>
                 )}
 
                 {/* Magic Sort (AI) */}

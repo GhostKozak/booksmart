@@ -152,6 +152,19 @@
             "redo": "Yinele",
             "redoAlt": "Yinele (Alt)",
             "help": "Kısayolları Göster"
+        },
+        "sortConf": {
+            "title": "Değişiklikleri Onayla",
+            "summary": "Lütfen uygulamadan önce önerilen değişiklikleri gözden geçirin.",
+            "confirm": "Değişiklikleri Uygula",
+            "stats": {
+                "bookmarks": "Yer İmi",
+                "folders": "Klasör Taşıma"
+            },
+            "cols": {
+                "title": "Başlık",
+                "changes": "Değişiklikler"
+            }
         }
     },
     "backup": {
@@ -232,7 +245,10 @@
         "markAlive": "Çalışıyor Olarak İşaretle",
         "markDead": "Ölü Olarak İşaretle",
         "export": "Seçilenleri Dışa Aktar",
-        "cleanUrls": "URL'leri Temizle"
+        "cleanUrls": "URL'leri Temizle",
+        "autoSort": "Otomatik Sırala (Yerel)",
+        "sorting": "Sıralanıyor...",
+        "magicSort": "Sihirli Sırala"
     },
     "preview": {
         "reload": "Önizlemeyi Yenile",

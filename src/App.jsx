@@ -9,6 +9,7 @@ import { useBookmarkWorker } from './hooks/use-bookmark-worker'
 import { useBookmarkOperations } from './hooks/use-bookmark-operations'
 import { useRuleManager } from './hooks/use-rule-manager'
 import { useMagicSort } from './hooks/use-magic-sort'
+import { useAutoCategorize } from './hooks/use-auto-categorize'
 import { useFileUpload } from './hooks/use-file-upload'
 import { useExport } from './hooks/use-export'
 import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
@@ -35,6 +36,8 @@ import { RuleModal } from './components/modals/RuleModal'
 import { ClearAllModal } from './components/modals/ClearAllModal'
 import { ShortcutsModal } from './components/modals/ShortcutsModal'
 import { AISettings } from './components/AISettings'
+import { SortConfirmationModal } from './components/modals/SortConfirmationModal'
+
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -165,6 +168,63 @@ function App() {
     }
   }
 
+
+  // Sort Confirmation State
+  const [pendingSortUpdates, setPendingSortUpdates] = useState(null)
+
+  const handleSortPreview = (updates) => {
+    setPendingSortUpdates(updates)
+  }
+
+  const applySortUpdates = async () => {
+    if (!pendingSortUpdates) return
+
+    // Capture previous state for undo
+    const previousState = await db.bookmarks.bulkGet(pendingSortUpdates.map(u => u.id))
+
+    const updatesToApply = pendingSortUpdates.map(u => ({
+      ...u,
+      // originalFolder: u.originalFolder, // Keep original
+      newFolder: u.newFolder,            // COMMIT the new folder!
+      tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])], // Commit the tags
+      ruleTags: [], // Clear temporary rule tags
+      status: 'idle', // Reset status
+      suggestedFolder: null // Clear suggestion only
+    }))
+
+    const execute = async () => {
+      await db.bookmarks.bulkPut(updatesToApply)
+    }
+
+    const revert = async () => {
+      await db.bookmarks.bulkPut(previousState)
+    }
+
+    await execute()
+
+    addCommand({
+      undo: revert,
+      redo: execute,
+      description: t('actionbar.magicSort')
+    })
+
+    console.log(`Applied ${updatesToApply.length} sort updates.`)
+
+    // Check if we need to add to taxonomy (folders/tags)
+    // This logic was partly in auto-categorize, moving it here to be central
+    const foldersToAdd = new Set()
+    pendingSortUpdates.forEach(u => {
+      if (u.newFolder) foldersToAdd.add(u.newFolder)
+    })
+
+    // We rely on the app's TaxonomyManager to pick these up via 'deduplicateTaxonomy' or just 'discovered' logic
+    // But for immediate UI feedback on "My Folders", we might want to ensure they exist if we want them to be permanent?
+    // For now, let's stick to the existing behavior where they appear as "Discovered" if not explicitly added.
+
+    setSelectedIds(new Set())
+    setPendingSortUpdates(null)
+  }
+
   // ── Custom Hooks ──
 
   const worker = useBookmarkWorker({
@@ -194,7 +254,14 @@ function App() {
 
   const magicSort = useMagicSort({
     selectedIds, setSelectedIds,
-    rawBookmarks, openSettings
+    rawBookmarks, openSettings,
+    onSortPreview: handleSortPreview
+  })
+
+  const autoCategorize = useAutoCategorize({
+    selectedIds, setSelectedIds,
+    rawBookmarks,
+    onSortPreview: handleSortPreview
   })
 
   useKeyboardShortcuts({
@@ -341,8 +408,9 @@ function App() {
           onAddTags={operations.handleBatchAddTags}
           onExportSelected={exporter.openExportSelectedModal}
           onCleanUrls={operations.cleanSelectedUrls}
+          onAutoSort={autoCategorize.handleAutoCategorize}
           onMagicSort={magicSort.handleMagicSort}
-          isProcessingAI={magicSort.isProcessingAI}
+          isProcessingAI={magicSort.isProcessingAI || autoCategorize.isProcessingLocal}
         />
 
         {/* Settings Modal */}
@@ -426,6 +494,13 @@ function App() {
           availableTags={availableTags}
           discoveredFolders={discoveredFolders}
           saveToTaxonomy={saveToTaxonomy}
+        />
+
+        <SortConfirmationModal
+          isOpen={!!pendingSortUpdates}
+          onClose={() => setPendingSortUpdates(null)}
+          onConfirm={applySortUpdates}
+          updates={pendingSortUpdates || []}
         />
 
         <OfflineIndicator />

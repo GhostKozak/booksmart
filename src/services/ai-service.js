@@ -96,8 +96,11 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId) {
     }));
 
     const systemPrompt = `You are a bookmark organizer. Analyze the following list of bookmarks. 
-  Return a JSON object where the key is the ID and the value is a short, concise category name (e.g., 'Development', 'News', 'Shopping', 'Entertainment', 'Tools', 'Reading'). 
-  Use Title Case for categories. Do not return any explanations, just the JSON.`;
+  Return a JSON object where the key is the ID and the value is an object containing:
+  - "folder": A short, concise category name (e.g., 'Development', 'News', 'Shopping', 'Entertainment', 'Tools', 'Reading'). Use Title Case.
+  - "tags": An array of specific, lowercase tags (e.g., ['react', 'tutorial'], ['shoes', 'ecommerce']).
+  
+  Do not return any explanations, just the JSON.`;
 
     if (provider === 'openai') {
         return callOpenAI(simplified, apiKey, modelId, systemPrompt);
@@ -134,7 +137,9 @@ async function callOpenAI(bookmarks, apiKey, model, systemPrompt) {
 
     const data = await response.json();
     try {
-        return JSON.parse(data.choices[0].message.content);
+        const text = data.choices[0].message.content;
+        const cleanedText = cleanJsonString(text);
+        return JSON.parse(cleanedText);
     } catch (e) {
         console.error("Failed to parse OpenAI response", e);
         return {};
@@ -170,11 +175,23 @@ async function callGemini(bookmarks, apiKey, model, systemPrompt) {
     const data = await response.json();
     try {
         const text = data.candidates[0].content.parts[0].text;
-        return JSON.parse(text);
+        const cleanedText = cleanJsonString(text);
+        return JSON.parse(cleanedText);
     } catch (e) {
         console.error("Failed to parse Gemini response", e);
+        console.log("Raw text:", data.candidates?.[0]?.content?.parts?.[0]?.text);
         return {};
     }
+}
+
+function cleanJsonString(text) {
+    if (!text) return "{}";
+    let cleaned = text.trim();
+    // Remove markdown code blocks if present
+    if (cleaned.startsWith('```')) {
+        cleaned = cleaned.replace(/^```(?:json)?/, '').replace(/```$/, '');
+    }
+    return cleaned.trim();
 }
 
 async function callOpenRouter(bookmarks, apiKey, model, systemPrompt) {
@@ -203,7 +220,9 @@ async function callOpenRouter(bookmarks, apiKey, model, systemPrompt) {
 
     const data = await response.json();
     try {
-        return JSON.parse(data.choices[0].message.content);
+        const text = data.choices[0].message.content;
+        const cleanedText = cleanJsonString(text);
+        return JSON.parse(cleanedText);
     } catch (e) {
         console.error("Failed to parse OpenRouter response", e);
         return {};

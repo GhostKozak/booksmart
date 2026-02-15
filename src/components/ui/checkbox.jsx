@@ -25,7 +25,7 @@ const Checkbox = React.forwardRef(({ className, checked, onChange, onCheckedChan
             {...props}
         >
             {checked && (
-                <Check className="h-4 w-4 stroke-[3px] text-white" />
+                <Check className="h-4 w-4 stroke-[3px] text-current" />
             )}
         </button>
     );
