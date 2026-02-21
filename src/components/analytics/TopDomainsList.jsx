@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 export function TopDomainsList({ domains, maxCount }) {
     const { t } = useTranslation();
     return (
-        <Card className="col-span-3">
+        <Card className="col-span-1 md:col-span-3">
             <CardHeader>
                 <CardTitle>{t('analytics.topDomains')}</CardTitle>
             </CardHeader>

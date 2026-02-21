@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 export function AccumulationChart({ data }) {
     const { t } = useTranslation();
     return (
-        <Card className="col-span-4">
+        <Card className="col-span-1 md:col-span-4">
             <CardHeader>
                 <CardTitle>{t('analytics.chart.title')}</CardTitle>
             </CardHeader>
