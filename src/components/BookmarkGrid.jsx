@@ -188,9 +188,7 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
 
 
     // Define the grid item structure
-    // We don't have direct access to "index" in ItemContent unless we wrapper it, but VirtuosoGrid provides data.
-    const ItemContent = (index, context) => {
-        const bookmark = bookmarks[index];
+    const ItemContent = (index, bookmark, context) => {
         const ctx = context || {};
         const isSelected = ctx.selectedIds?.has(bookmark.id);
 
