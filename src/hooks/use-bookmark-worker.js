@@ -10,6 +10,7 @@ export function useBookmarkWorker({
     activeFolder,
     smartFilter,
     dateFilter,
+    sortBy,
     fuseOptions
 }) {
     const [bookmarks, setBookmarks] = useState([])
@@ -90,10 +91,11 @@ export function useBookmarkWorker({
                 activeFolder,
                 smartFilter,
                 dateFilter,
+                sortBy,
                 fuseOptions
             }
         })
-    }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, fuseOptions])
+    }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, sortBy, fuseOptions])
 
     const checkAllLinks = useCallback(async () => {
         if (!workerRef.current) {

@@ -46,7 +46,17 @@
         "system": "System",
         "lightMode": "Light Mode",
         "darkMode": "Dark Mode",
-        "regexPlaceholder": "e.g. ^https?://.*\\.dev"
+        "regexPlaceholder": "e.g. ^https?://.*\\.dev",
+        "sort": {
+            "label": "Sort By",
+            "default": "Default",
+            "titleAz": "Title (A → Z)",
+            "titleZa": "Title (Z → A)",
+            "dateNew": "Date (Newest)",
+            "dateOld": "Date (Oldest)",
+            "domain": "Domain",
+            "folder": "Folder"
+        }
     },
     "sidebar": {
         "allBookmarks": "All Bookmarks",

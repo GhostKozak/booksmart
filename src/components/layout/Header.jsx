@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart } from 'lucide-react'
+import { Sun, Moon, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -23,6 +23,8 @@ export function Header({
     setSearchMode, dateFilter, setDateFilter,
     // View mode
     viewMode, setViewMode, showThumbnails, setShowThumbnails,
+    // Sorting
+    sortBy, setSortBy,
     // Actions
     duplicateCount, removeDuplicates,
     cleanableCount, cleanAllUrls,
@@ -225,6 +227,30 @@ export function Header({
                                 <BarChart3 className="h-4 w-4 mr-2" />
                                 {t('header.analytics')}
                             </DropdownItem>
+
+                            <DropdownSeparator />
+
+                            <DropdownLabel>
+                                <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 inline" />
+                                {t('header.sort.label')}
+                            </DropdownLabel>
+                            {[
+                                { key: 'default', label: t('header.sort.default') },
+                                { key: 'title-az', label: t('header.sort.titleAz') },
+                                { key: 'title-za', label: t('header.sort.titleZa') },
+                                { key: 'date-new', label: t('header.sort.dateNew') },
+                                { key: 'date-old', label: t('header.sort.dateOld') },
+                                { key: 'domain', label: t('header.sort.domain') },
+                                { key: 'folder', label: t('header.sort.folder') },
+                            ].map(opt => (
+                                <DropdownItem
+                                    key={opt.key}
+                                    onClick={() => setSortBy(opt.key)}
+                                    className={sortBy === opt.key ? "bg-accent" : ""}
+                                >
+                                    {opt.label}
+                                </DropdownItem>
+                            ))}
 
                             <DropdownSeparator />
 

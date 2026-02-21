@@ -21,6 +21,7 @@ export function useUIState() {
     const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
     const [dateFilter, setDateFilter] = useState({ start: null, end: null })
     const [smartFilter, setSmartFilter] = useState(null)
+    const [sortBy, setSortBy] = useState('default')
     const searchInputRef = useRef(null)
 
     // Navigation
@@ -56,6 +57,7 @@ export function useUIState() {
         isAdvancedSearchOpen, setIsAdvancedSearchOpen,
         dateFilter, setDateFilter,
         smartFilter, setSmartFilter,
+        sortBy, setSortBy,
         searchInputRef,
 
         // Navigation

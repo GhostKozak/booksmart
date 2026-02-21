@@ -84,7 +84,8 @@ function App() {
     rawBookmarks, rules,
     searchQuery: ui.searchQuery, searchMode: ui.searchMode,
     activeTag: ui.activeTag, activeFolder: ui.activeFolder,
-    smartFilter: ui.smartFilter, dateFilter: ui.dateFilter, fuseOptions
+    smartFilter: ui.smartFilter, dateFilter: ui.dateFilter,
+    sortBy: ui.sortBy, fuseOptions
   })
 
   // ── Taxonomy ──
@@ -182,6 +183,7 @@ function App() {
         setSearchMode={ui.setSearchMode} dateFilter={ui.dateFilter} setDateFilter={ui.setDateFilter}
         viewMode={ui.viewMode} setViewMode={ui.setViewMode}
         showThumbnails={ui.showThumbnails} setShowThumbnails={ui.setShowThumbnails}
+        sortBy={ui.sortBy} setSortBy={ui.setSortBy}
         duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
         cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
         checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}

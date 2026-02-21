@@ -58,6 +58,7 @@ const processData = ({
     activeFolder,
     smartFilter,
     dateFilter,
+    sortBy,
     fuseOptions
 }) => {
     let filtered = bookmarks;
@@ -309,6 +310,38 @@ const processData = ({
 
         return 0;
     });
+
+    // 8b. User-requested Sorting
+    if (sortBy && sortBy !== 'default') {
+        const getDomain = (url) => {
+            try { return new URL(url).hostname.replace('www.', ''); } catch { return url || ''; }
+        };
+
+        processed.sort((a, b) => {
+            switch (sortBy) {
+                case 'title-az':
+                    return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+                case 'title-za':
+                    return (b.title || '').localeCompare(a.title || '', undefined, { sensitivity: 'base' });
+                case 'date-new': {
+                    const aDate = parseInt(a.addDate) || 0;
+                    const bDate = parseInt(b.addDate) || 0;
+                    return bDate - aDate;
+                }
+                case 'date-old': {
+                    const aDate = parseInt(a.addDate) || 0;
+                    const bDate = parseInt(b.addDate) || 0;
+                    return aDate - bDate;
+                }
+                case 'domain':
+                    return getDomain(a.url).localeCompare(getDomain(b.url));
+                case 'folder':
+                    return (a.newFolder || a.originalFolder || '').localeCompare(b.newFolder || b.originalFolder || '');
+                default:
+                    return 0;
+            }
+        });
+    }
 
     // 9. Statistics Calculation
     const tagsMap = new Map();

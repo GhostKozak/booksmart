@@ -46,7 +46,17 @@
         "system": "Sistem",
         "lightMode": "Açık Mod",
         "darkMode": "Koyu Mod",
-        "regexPlaceholder": "örn: ^https?://.*\\.dev"
+        "regexPlaceholder": "örn: ^https?://.*\\.dev",
+        "sort": {
+            "label": "Sırala",
+            "default": "Varsayılan",
+            "titleAz": "Başlık (A → Z)",
+            "titleZa": "Başlık (Z → A)",
+            "dateNew": "Tarih (En Yeni)",
+            "dateOld": "Tarih (En Eski)",
+            "domain": "Alan Adı",
+            "folder": "Klasör"
+        }
     },
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
