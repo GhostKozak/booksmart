@@ -146,9 +146,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          recharts: ['recharts'],
-          dndkit: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-          vendor: ['react', 'react-dom', 'dexie', 'dexie-react-hooks'],
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-db': ['dexie', 'dexie-react-hooks'],
+          'vendor-i18n': ['i18next', 'i18next-browser-languagedetector', 'react-i18next'],
+          'vendor-recharts': ['recharts'],
+          'vendor-dndkit': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          'vendor-utils': ['fuse.js', 'date-fns', 'lucide-react'],
         }
       }
     }
