@@ -5,6 +5,7 @@ import { SidebarTags } from './SidebarTags'
 import { SidebarFolders } from './SidebarFolders'
 import { SmartFilters } from './SmartFilters'
 import { RulesPanel } from './RulesPanel'
+import packageJson from '../../../package.json'
 
 export function Sidebar({
     isSidebarOpen, setIsSidebarOpen,
@@ -91,7 +92,15 @@ export function Sidebar({
 
             <div className="mt-auto pt-6 pb-2 px-2 border-t border-border/50">
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">
-                    <span>BookSmart v1.2</span>
+                    <a
+                        href="https://github.com/GhostKozak/booksmart"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-foreground transition-colors"
+                        title="View on GitHub"
+                    >
+                        BookSmart v{packageJson.version}
+                    </a>
                     <span>© 2026</span>
                 </div>
             </div>

@@ -4,6 +4,11 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 
 ![BookSmart Screenshot](/images/homepage_screenshot.png)
 
+## 🤖 AI-Native Development
+
+This project was developed entirely using Artificial Intelligence within the AntiGravity IDE.
+
+
 ## ✨ Features
 
 - **📂 Privacy First**: 100% local processing. No data ever leaves your browser.
@@ -59,7 +64,7 @@ To run the project locally:
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/booksmart.git
+    git clone https://github.com/GhostKozak/booksmart.git
     cd booksmart
     ```
 
