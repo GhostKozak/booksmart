@@ -36,7 +36,7 @@ export function BookmarkRowMobile({
                     <div className="flex items-start justify-between gap-2">
                         <span className={cn(
                             "font-medium text-sm break-words leading-snug",
-                            bookmark.status === 'matched' && "text-emerald-700 dark:text-emerald-300",
+                            (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )}>{bookmark.title}</span>
 
@@ -52,7 +52,7 @@ export function BookmarkRowMobile({
                             </Button>
                             {bookmark.isDuplicate && <XCircle className="h-4 w-4 text-red-500" />}
                             {bookmark.hasDuplicate && <Layers className="h-4 w-4 text-yellow-500" />}
-                            {bookmark.status === 'matched' && <Check className="h-4 w-4 text-emerald-500" />}
+                            {(bookmark.status === 'matched' || bookmark.status === 'conflict') && <Check className="h-4 w-4 text-emerald-500" />}
 
                             <BookmarkHealthStatus
                                 url={bookmark.url}

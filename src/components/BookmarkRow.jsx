@@ -17,7 +17,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
         rowBgClass = "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
     } else if (bookmark.hasDuplicate) {
         rowBgClass = "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
-    } else if (bookmark.status === 'matched') {
+    } else if (bookmark.status === 'matched' || bookmark.status === 'conflict') {
         rowBgClass = "bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
     } else {
         rowBgClass = "hover:bg-muted/30"

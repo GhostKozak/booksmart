@@ -51,6 +51,7 @@ function domainMatch(url, domains) {
 const processData = ({
     bookmarks,
     rules,
+    resolvedConflicts,
     searchQuery,
     searchMode,
     activeTag,
@@ -188,9 +189,10 @@ const processData = ({
 
     // 7. Rule Application & Processing
     const processed = filtered.map(b => {
-        let matchedRule = null;
+        let matchedRules = [];
         let newFolder = b.newFolder || b.originalFolder;
         let ruleTags = [];
+        let conflictingFolders = [];
 
         // Check duplicate status
         const siblings = urlMap.get(b.url);
@@ -203,6 +205,7 @@ const processData = ({
             ? siblings.filter(s => s.id !== b.id).map(s => s.folder)
             : [];
 
+        // Collect ALL matching rules (no break on first match)
         for (const rule of rules) {
             let match = false;
             const title = b.title || '';
@@ -226,14 +229,41 @@ const processData = ({
             }
 
             if (match) {
-                matchedRule = rule;
-                if (rule.targetFolder) {
-                    newFolder = rule.targetFolder;
-                }
+                matchedRules.push(rule);
+                // Merge tags from all matching rules
                 if (rule.tags) {
-                    ruleTags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
+                    const tags = rule.tags.split(',').map(t => t.trim()).filter(Boolean);
+                    ruleTags.push(...tags);
                 }
-                break;
+            }
+        }
+
+        // Deduplicate rule tags
+        ruleTags = Array.from(new Set(ruleTags));
+
+        // Detect folder conflicts
+        const rulesWithFolders = matchedRules.filter(r => r.targetFolder);
+        const uniqueFolderTargets = [...new Set(rulesWithFolders.map(r => r.targetFolder))];
+
+        let isConflict = false;
+
+        if (uniqueFolderTargets.length === 1) {
+            // Only one folder target across all matching rules — no conflict
+            newFolder = uniqueFolderTargets[0];
+        } else if (uniqueFolderTargets.length > 1) {
+            // Check if this conflict has been resolved by the user
+            const resolvedFolder = resolvedConflicts && resolvedConflicts[b.id];
+            if (resolvedFolder) {
+                // User already resolved this conflict — use their choice
+                newFolder = resolvedFolder;
+            } else {
+                // Unresolved conflict
+                isConflict = true;
+                conflictingFolders = rulesWithFolders.map(r => ({
+                    folder: r.targetFolder,
+                    ruleType: r.type,
+                    ruleValue: r.value
+                }));
             }
         }
 
@@ -243,14 +273,16 @@ const processData = ({
         }
         const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
 
+        const hasMatch = matchedRules.length > 0;
+
         return {
             ...b,
-            ...b,
-            // If rule matched, use rule folder. Otherwise keep existing newFolder or fall back to original.
-            newFolder: matchedRule && newFolder ? newFolder : (b.newFolder || b.originalFolder),
+            newFolder: hasMatch ? newFolder : b.originalFolder,
             tags: allTags,
             ruleTags: ruleTags,
-            status: matchedRule ? 'matched' : 'unchanged',
+            matchedRules: matchedRules.map(r => ({ type: r.type, value: r.value, targetFolder: r.targetFolder, tags: r.tags })),
+            conflictingFolders,
+            status: hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged',
             isDuplicate,
             hasDuplicate,
             otherLocations
@@ -265,8 +297,10 @@ const processData = ({
         if (aDup && !bDup) return -1;
         if (!aDup && bDup) return 1;
 
-        if (a.status === 'matched' && b.status !== 'matched') return -1;
-        if (a.status !== 'matched' && b.status === 'matched') return 1;
+        const aRuleMatch = a.status === 'matched' || a.status === 'conflict';
+        const bRuleMatch = b.status === 'matched' || b.status === 'conflict';
+        if (aRuleMatch && !bRuleMatch) return -1;
+        if (!aRuleMatch && bRuleMatch) return 1;
 
         if (aDup && bDup) {
             if (a.hasDuplicate && b.isDuplicate) return -1;

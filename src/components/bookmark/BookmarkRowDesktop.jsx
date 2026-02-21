@@ -37,7 +37,7 @@ export function BookmarkRowDesktop({
                     <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
                     <span className={cn(
                         "font-medium truncate",
-                        bookmark.status === 'matched' && "text-emerald-700 dark:text-emerald-300",
+                        (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                         healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                     )} title={bookmark.title}>{bookmark.title}</span>
                 </div>
@@ -76,7 +76,7 @@ export function BookmarkRowDesktop({
                         <BookmarkFolderBadge
                             folderName={bookmark.newFolder}
                             availableFolders={availableFolders}
-                            isMatched={bookmark.status === 'matched'}
+                            isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
                             className="shrink-0"
                         />
                     </>
@@ -84,7 +84,7 @@ export function BookmarkRowDesktop({
                     <BookmarkFolderBadge
                         folderName={bookmark.newFolder || bookmark.originalFolder}
                         availableFolders={availableFolders}
-                        isMatched={bookmark.status === 'matched'}
+                        isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
                     />
                 )}
             </div>

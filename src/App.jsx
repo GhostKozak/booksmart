@@ -32,6 +32,7 @@ import { Button } from './components/ui/button'
 // Modal Components
 import { ExportModal } from './components/modals/ExportModal'
 import { RuleModal } from './components/modals/RuleModal'
+import { RuleConflictModal } from './components/modals/RuleConflictModal'
 import { ClearAllModal } from './components/modals/ClearAllModal'
 import { ShortcutsModal } from './components/modals/ShortcutsModal'
 import { AISettings } from './components/AISettings'
@@ -96,6 +97,7 @@ function App() {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
   const [showBackupModal, setShowBackupModal] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState('folders')
 
   const searchInputRef = useRef(null)
@@ -259,6 +261,15 @@ function App() {
     selectedIds, setSelectedIds
   })
 
+  // Guard exports — block when conflicts exist
+  const guardedExport = useCallback((exportFn) => {
+    if (worker.ruleConflicts.length > 0) {
+      setIsConflictModalOpen(true)
+      return
+    }
+    exportFn()
+  }, [worker.ruleConflicts])
+
   const magicSort = useMagicSort({
     selectedIds, setSelectedIds,
     rawBookmarks, openSettings,
@@ -367,7 +378,7 @@ function App() {
         duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
         cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
         checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
-        openExportModal={exporter.openExportModal}
+        openExportModal={() => guardedExport(exporter.openExportModal)}
         hasFileLoaded={hasFileLoaded} closeFile={closeFile}
         bookmarkCount={worker.bookmarks.length}
         openSettings={openSettings}
@@ -417,7 +428,7 @@ function App() {
           allTags={availableTags}
           onOverrideStatus={operations.handleStatusOverride}
           onAddTags={operations.handleBatchAddTags}
-          onExportSelected={exporter.openExportSelectedModal}
+          onExportSelected={() => guardedExport(exporter.openExportSelectedModal)}
           onCleanUrls={operations.cleanSelectedUrls}
           onAutoSort={autoCategorize.handleAutoCategorize}
           onMagicSort={magicSort.handleMagicSort}
@@ -506,6 +517,47 @@ function App() {
           discoveredFolders={discoveredFolders}
           saveToTaxonomy={saveToTaxonomy}
         />
+
+        <RuleConflictModal
+          isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
+          onClose={() => setIsConflictModalOpen(false)}
+          conflict={worker.ruleConflicts[0] || null}
+          availableFolders={availableFolders}
+          discoveredFolders={discoveredFolders}
+          onResolve={(id, folder) => {
+            worker.resolveConflict(id, folder)
+            // If there are more conflicts, keep modal open; otherwise close
+            if (worker.ruleConflicts.length <= 1) {
+              setIsConflictModalOpen(false)
+            }
+          }}
+          onSkip={() => setIsConflictModalOpen(false)}
+        />
+
+        {/* Non-intrusive conflict notification */}
+        {worker.ruleConflicts.length > 0 && !isConflictModalOpen && selectedIds.size === 0 && (
+          <div className="fixed left-1/2 -translate-x-1/2 bottom-4 z-40 animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-amber-500/15 border border-amber-500/30 backdrop-blur-sm shadow-lg">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-amber-700 dark:text-amber-300">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                  <path d="M12 9v4" /><path d="M12 17h.01" />
+                </svg>
+                <span className="font-medium whitespace-nowrap">
+                  {worker.ruleConflicts.length} {t('modals.ruleConflict.notificationText', { count: worker.ruleConflicts.length })}
+                </span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs rounded-full border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 px-2.5 sm:px-3"
+                onClick={() => setIsConflictModalOpen(true)}
+              >
+                {t('modals.ruleConflict.resolve')}
+              </Button>
+            </div>
+          </div>
+        )}
 
         <SortConfirmationModal
           isOpen={!!pendingSortUpdates}

@@ -19,6 +19,9 @@ export function useBookmarkWorker({
     const [duplicateCount, setDuplicateCount] = useState(0)
     const [linkHealth, setLinkHealth] = useState({})
     const [isCheckingLinks, setIsCheckingLinks] = useState(false)
+    const [ruleConflicts, setRuleConflicts] = useState([])
+    // In-memory map: { bookmarkId: chosenFolder } — NOT persisted to DB
+    const [resolvedConflicts, setResolvedConflicts] = useState({})
     const workerRef = useRef(null)
 
     // Dead link count
@@ -51,6 +54,11 @@ export function useBookmarkWorker({
                     setUniqueFolders(payload.uniqueFolders)
                     setSmartCounts(payload.smartCounts)
                     setDuplicateCount(payload.duplicateCount)
+
+                    // Extract unresolved rule conflicts
+                    const conflicts = payload.processedBookmarks
+                        .filter(b => b.conflictingFolders && b.conflictingFolders.length > 0)
+                    setRuleConflicts(conflicts)
                 } else if (type === 'LINK_STATUS_UPDATE') {
                     setLinkHealth(prev => {
                         const next = { ...prev }
@@ -67,7 +75,7 @@ export function useBookmarkWorker({
         }
     }, [])
 
-    // Send Data to Worker
+    // Send Data to Worker — includes resolvedConflicts so worker applies them
     useEffect(() => {
         if (!workerRef.current) return
         workerRef.current.postMessage({
@@ -75,6 +83,7 @@ export function useBookmarkWorker({
             payload: {
                 bookmarks: rawBookmarks,
                 rules,
+                resolvedConflicts,
                 searchQuery,
                 searchMode,
                 activeTag,
@@ -84,7 +93,7 @@ export function useBookmarkWorker({
                 fuseOptions
             }
         })
-    }, [rawBookmarks, rules, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, fuseOptions])
+    }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, fuseOptions])
 
     const checkAllLinks = useCallback(async () => {
         if (!workerRef.current) {
@@ -95,6 +104,18 @@ export function useBookmarkWorker({
         const urls = [...new Set(bookmarks.map(b => b.url))]
         workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls } })
     }, [bookmarks])
+
+    const resolveConflict = useCallback((bookmarkId, chosenFolder) => {
+        // Store in memory only — NOT in DB
+        // This way, when rules are deleted, the worker won't find a match
+        // and the bookmark will revert to originalFolder automatically
+        setResolvedConflicts(prev => ({ ...prev, [bookmarkId]: chosenFolder }))
+    }, [])
+
+    const skipConflict = useCallback(() => {
+        // No-op: conflict stays in the list so the notification bar keeps showing.
+        // The modal close is handled by isConflictModalOpen state in App.jsx.
+    }, [])
 
     return {
         bookmarks,
@@ -107,6 +128,9 @@ export function useBookmarkWorker({
         setLinkHealth,
         isCheckingLinks,
         deadLinkCount,
-        checkAllLinks
+        checkAllLinks,
+        ruleConflicts,
+        resolveConflict,
+        skipConflict
     }
 }

@@ -129,9 +129,25 @@
             },
             "placeholders": {
                 "value": "e.g., youtube.com or 'tutorial'",
+                "value_keyword": "e.g., tutorial, react, news",
+                "value_domain": "e.g., youtube.com, github.com",
+                "value_exact": "e.g., https://example.com/page",
                 "folder": "Select or create folder...",
                 "tags": "Enter tags separated by commas..."
             }
+        },
+        "ruleConflict": {
+            "title": "Rule Conflict Detected",
+            "description": "Multiple rules matched this bookmark with different folder targets. Tags have been merged automatically.",
+            "chooseFolder": "Choose Target Folder",
+            "fromRule": "From rule: {{rule}}",
+            "otherFolder": "Choose another folder...",
+            "mergedTags": "Merged Tags",
+            "tagsAutoMerged": "Tags from all matching rules are merged automatically.",
+            "apply": "Apply",
+            "skip": "Skip",
+            "resolve": "Resolve",
+            "notificationText": "rule conflict(s) found"
         },
         "export": {
             "title": "Export Bookmarks",
@@ -297,6 +313,7 @@
             "duplicate": "Duplicate (Will be removed)",
             "original": "Original (Has duplicates)",
             "matched": "Matched Rule-Based",
+            "conflict": "Rule Conflict",
             "unknown": "Unknown"
         },
         "health": {

@@ -40,7 +40,7 @@ export function RuleModal({
                 <div className="space-y-2">
                     <label className="text-xs font-medium text-muted-foreground">{t('modals.rules.value')}</label>
                     <Input
-                        placeholder={t('modals.rules.placeholders.value')}
+                        placeholder={t(`modals.rules.placeholders.value_${newRule.type || 'keyword'}`)}
                         value={newRule.value}
                         onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
                     />

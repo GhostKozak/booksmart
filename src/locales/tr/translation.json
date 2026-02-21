@@ -129,9 +129,25 @@
             },
             "placeholders": {
                 "value": "örn: youtube.com veya 'ders'",
+                "value_keyword": "örn: ders, react, haber",
+                "value_domain": "örn: youtube.com, github.com",
+                "value_exact": "örn: https://example.com/sayfa",
                 "folder": "Klasör seçin veya oluşturun...",
                 "tags": "Virgülle ayırarak etiketleri girin..."
             }
+        },
+        "ruleConflict": {
+            "title": "Kural Çakışması Tespit Edildi",
+            "description": "Bu yer imi için birden fazla kural farklı klasör hedefleriyle eşleşti. Etiketler otomatik olarak birleştirildi.",
+            "chooseFolder": "Hedef Klasörü Seçin",
+            "fromRule": "Kuraldan: {{rule}}",
+            "otherFolder": "Başka bir klasör seçin...",
+            "mergedTags": "Birleştirilmiş Etiketler",
+            "tagsAutoMerged": "Tüm eşleşen kurallardan gelen etiketler otomatik birleştirilir.",
+            "apply": "Uygula",
+            "skip": "Atla",
+            "resolve": "Çöz",
+            "notificationText": "kural çakışması bulundu"
         },
         "export": {
             "title": "Yer İmlerini Dışa Aktar",
@@ -296,6 +312,7 @@
             "duplicate": "Kopya (Silinecek)",
             "original": "Orijinal (Kopyaları var)",
             "matched": "Kural Eşleşti",
+            "conflict": "Kural Çakışması",
             "unknown": "Bilinmiyor"
         },
         "health": {
