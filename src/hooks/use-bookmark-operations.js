@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useMemo, useCallback } from 'react'
 import { db } from '../db'
 import { generateUUID } from '../lib/utils'
 import { cleanUrl, countCleanableUrls } from '../lib/url-cleaner'
@@ -10,7 +10,6 @@ export function useBookmarkOperations({
     selectedIds,
     setSelectedIds,
     availableFolders,
-    availableTags,
     linkHealth,
     setLinkHealth,
     setSmartFilter

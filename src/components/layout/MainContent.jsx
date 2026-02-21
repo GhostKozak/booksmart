@@ -32,7 +32,7 @@ export function MainContent({
     // Preview
     previewBookmark, handlePreview, setPreviewBookmark,
     // Actions
-    clearAll, setSmartFilter, setViewMode,
+    setSmartFilter, setViewMode,
     setSearchQuery, setActiveTag, setActiveFolder
 }) {
     const { t } = useTranslation()

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { cn } from '../../lib/utils';
 
+// eslint-disable-next-line no-unused-vars
 export function StatCard({ title, value, subtext, icon: Icon, valueClassName }) {
     return (
         <Card>

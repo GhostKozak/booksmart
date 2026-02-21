@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 
-export function useAnalyticsData(bookmarks, linkHealth) {
+export function useAnalyticsData(bookmarks, linkHealth, oldBookmarksCount) {
+    const now = useMemo(() => new Date(), []);
+
     const stats = useMemo(() => {
         const total = bookmarks.length;
         if (total === 0) return null;
 
-        // Folders
+        // Folders (using a simple set as it's quick)
         const folders = new Set(bookmarks.map(b => b.originalFolder)).size;
 
         // Duplicates
@@ -14,14 +16,6 @@ export function useAnalyticsData(bookmarks, linkHealth) {
         // Health
         const deadLinks = Object.values(linkHealth).filter(s => s === 'dead').length;
         const checkedLinks = Object.values(linkHealth).filter(s => s !== 'idle').length;
-
-        // Old Bookmarks (> 5 years)
-        const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-        const oldBookmarksCount = bookmarks.filter(b => {
-            if (!b.addDate) return false;
-            const date = parseInt(b.addDate) * 1000;
-            return date < fiveYearsAgo;
-        }).length;
 
         // Domains
         const domainCounts = {};
@@ -44,7 +38,6 @@ export function useAnalyticsData(bookmarks, linkHealth) {
             }));
 
         // Accumulation Velocity (Last 12 Months)
-        const now = new Date();
         const months = {};
         // Initialize last 12 months
         for (let i = 11; i >= 0; i--) {
@@ -81,7 +74,7 @@ export function useAnalyticsData(bookmarks, linkHealth) {
             accumulationData,
             addedThisMonth
         };
-    }, [bookmarks, linkHealth]);
+    }, [bookmarks, linkHealth, oldBookmarksCount, now]);
 
     return stats;
 }

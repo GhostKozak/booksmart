@@ -6,9 +6,9 @@ import { AccumulationChart } from './analytics/AccumulationChart';
 import { TopDomainsList } from './analytics/TopDomainsList';
 import { useTranslation } from 'react-i18next';
 
-export function AnalyticsDashboard({ bookmarks, linkHealth, onFilterOld }) {
+export function AnalyticsDashboard({ bookmarks, linkHealth, onFilterOld, oldBookmarksCount }) {
     const { t } = useTranslation();
-    const stats = useAnalyticsData(bookmarks, linkHealth);
+    const stats = useAnalyticsData(bookmarks, linkHealth, oldBookmarksCount);
 
     if (!stats) return null;
 

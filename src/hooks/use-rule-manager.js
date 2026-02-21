@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { db } from '../db'
 import { generateUUID } from '../lib/utils'
 
-export function useRuleManager({ rules, addCommand, availableFolders, saveToTaxonomy }) {
+export function useRuleManager({ rules, addCommand }) {
     const [newRule, setNewRule] = useState({
         type: 'keyword',
         value: '',

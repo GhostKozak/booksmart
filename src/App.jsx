@@ -175,13 +175,13 @@ function App() {
     bookmarks: worker.bookmarks,
     addCommand,
     selectedIds, setSelectedIds,
-    availableFolders, availableTags,
+    availableFolders,
     linkHealth: worker.linkHealth,
     setLinkHealth: worker.setLinkHealth,
     setSmartFilter
   })
 
-  const ruleManager = useRuleManager({ rules, addCommand, availableFolders, saveToTaxonomy })
+  const ruleManager = useRuleManager({ rules, addCommand })
 
   const fileUpload = useFileUpload()
 
