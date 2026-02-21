@@ -13,7 +13,7 @@ export function OldBookmarksList({ bookmarks }) {
             <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    {t('analytics.oldItems.title', 'Oldest Treasures')}
+                    {t('analytics.oldItems.title')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 pt-2">
@@ -25,11 +25,11 @@ export function OldBookmarksList({ bookmarks }) {
                             <div key={bookmark.id} className="group flex items-start justify-between gap-4 p-2 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-muted-foreground/10">
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                                        {bookmark.title || 'Untitled'}
+                                        {bookmark.title || t('common.untitled')}
                                     </h4>
                                     <div className="flex items-center gap-2 mt-1 min-w-0">
                                         <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none shrink-0">
-                                            {date ? format(date, 'MMM d, yyyy') : 'Unknown date'}
+                                            {date ? format(date, 'MMM d, yyyy') : t('common.unknownDate')}
                                         </span>
                                         <span className="text-[10px] text-muted-foreground truncate opacity-70 block min-w-0 break-all">
                                             {bookmark.url}

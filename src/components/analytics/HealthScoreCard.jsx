@@ -27,7 +27,7 @@ export function HealthScoreCard({ healthScore }) {
         <Card className="col-span-1 md:col-span-2 flex flex-col justify-between min-h-[300px] md:min-h-[345px]">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0 relative">
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <CardTitle className="truncate text-lg sm:text-xl">{t('analytics.healthScore.title', 'Collection Health')}</CardTitle>
+                    <CardTitle className="truncate text-lg sm:text-xl">{t('analytics.healthScore.title')}</CardTitle>
                     <button
                         className="p-1 -m-1 text-muted-foreground/40 hover:text-primary transition-colors focus:outline-none shrink-0"
                         onClick={(e) => {
@@ -55,11 +55,11 @@ export function HealthScoreCard({ healthScore }) {
 
                 <div className="w-full space-y-3 text-sm">
                     <div className="flex justify-between items-center px-4 py-2 bg-muted/40 rounded-md">
-                        <span className="text-muted-foreground">{t('analytics.healthScore.brokenLinks', 'Broken Links')}</span>
+                        <span className="text-muted-foreground">{t('analytics.healthScore.brokenLinks')}</span>
                         <span className="font-medium font-mono text-foreground">{(brokenRatio * 100).toFixed(1)}%</span>
                     </div>
                     <div className="flex justify-between items-center px-4 py-2 bg-muted/40 rounded-md">
-                        <span className="text-muted-foreground">{t('analytics.healthScore.duplicates', 'Duplicates')}</span>
+                        <span className="text-muted-foreground">{t('analytics.healthScore.duplicates')}</span>
                         <span className="font-medium font-mono text-foreground">{(duplicateRatio * 100).toFixed(1)}%</span>
                     </div>
                 </div>

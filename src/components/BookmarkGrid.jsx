@@ -98,7 +98,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
-                                {bookmark.title || 'Untitled'}
+                                {bookmark.title || t('common.untitled')}
                             </h3>
                             <p className="text-[10px] text-muted-foreground line-clamp-1 break-all opacity-80">
                                 {bookmark.url}

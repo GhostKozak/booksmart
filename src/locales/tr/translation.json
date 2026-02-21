@@ -35,9 +35,10 @@
         "showThumbnails": "Küçük Resimleri Göster",
         "hideThumbnails": "Küçük Resimleri Gizle",
         "checkHealth": "Sağlık Kontrolü",
+        "checkHeart": "Kontrol ❤️",
         "checking": "Kontrol ediliyor...",
         "export": "Dışa Aktar",
-        "closeFile": "Dosyayı Kapat",
+        "closeFile": "Klasörü Kapat",
         "shortcuts": "Klavye Kısayolları (?)",
         "settings": "Ayarlar",
         "maintenance": "Bakım",
@@ -111,6 +112,12 @@
         "ai": {
             "title": "Yapay Zeka Ayarları",
             "model": "YZ Modeli",
+            "provider": "Sağlayıcı",
+            "providers": {
+                "openai": "OpenAI",
+                "google": "Google Gemini",
+                "openrouter": "OpenRouter (Claude, Llama, vb.)"
+            },
             "apiKey": "API Anahtarı",
             "saved": "Kaydedildi!",
             "save": "YZ Ayarlarını Kaydet",
@@ -134,10 +141,24 @@
         "create": "Oluştur",
         "actions": "İşlemler",
         "clearAll": "Tümünü Temizle",
+        "selectAll": "Tümünü Seç",
         "close": "Kapat",
         "folder": "klasör",
         "tag": "etiket",
-        "noOptions": "Seçenek bulunamadı"
+        "noOptions": "Seçenek bulunamadı",
+        "untitled": "Başlıksız",
+        "uncategorized": "Kategorize Edilmemiş",
+        "unknownDate": "Bilinmeyen tarih",
+        "relativeTime": {
+            "justNow": "az önce",
+            "minutesAgo": "{{count}} dk önce",
+            "hoursAgo": "{{count}} s önce",
+            "daysAgo": "{{count}} g önce",
+            "monthsAgo": "{{count}} ay önce",
+            "yearsAgo": "{{count}} y önce"
+        },
+        "bookmarks_one": "yer imi",
+        "bookmarks_other": "yer imi"
     },
     "modals": {
         "rules": {
@@ -181,7 +202,8 @@
         "export": {
             "title": "Yer İmlerini Dışa Aktar",
             "titleSelected": "Seçilenleri Dışa Aktar ({{count}})",
-            "selectedCount": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
+            "selectedCount_one": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
+            "selectedCount_other": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
             "formatSelect": "Dışa aktarma formatını seçin:",
             "formats": {
                 "html": {
@@ -313,7 +335,8 @@
         },
         "tagCloud": {
             "title": "Etiket Bulutu",
-            "noTags": "Koleksiyonunuzda henüz etiket bulunamadı."
+            "noTags": "Koleksiyonunuzda henüz etiket bulunamadı.",
+            "tooltip": "{{tag}}: {{count}} {{label}}"
         },
         "healthScore": {
             "title": "Koleksiyon Sağlığı",

@@ -38,7 +38,7 @@ export function BookmarkRowMobile({
                             "font-medium text-sm break-words leading-snug",
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
-                        )}>{bookmark.title}</span>
+                        )}>{bookmark.title || t('common.untitled')}</span>
 
                         <div className="flex items-center gap-1 shrink-0">
                             <Button

@@ -46,17 +46,17 @@ export function AISettings() {
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
                     >
-                        <optgroup label="OpenAI">
+                        <optgroup label={t('settings.ai.providers.openai')}>
                             {openaiModels.map(model => (
                                 <option key={model.id} value={model.id}>{model.name}</option>
                             ))}
                         </optgroup>
-                        <optgroup label="Google Gemini">
+                        <optgroup label={t('settings.ai.providers.google')}>
                             {geminiModels.map(model => (
                                 <option key={model.id} value={model.id}>{model.name}</option>
                             ))}
                         </optgroup>
-                        <optgroup label="OpenRouter (Claude, Llama, etc.)">
+                        <optgroup label={t('settings.ai.providers.openrouter')}>
                             {openrouterModels.map(model => (
                                 <option key={model.id} value={model.id}>{model.name}</option>
                             ))}

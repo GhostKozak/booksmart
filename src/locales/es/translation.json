@@ -35,9 +35,10 @@
         "showThumbnails": "Mostrar miniaturas",
         "hideThumbnails": "Ocultar miniaturas",
         "checkHealth": "Comprobar estado",
+        "checkHeart": "Comprobar ❤️",
         "checking": "Comprobando...",
-        "export": "Exportar",
-        "closeFile": "Cerrar Archivo",
+        "export": "Exportar marcadores",
+        "closeFile": "Cerrar Carpeta",
         "shortcuts": "Atajos de teclado (?)",
         "settings": "Ajustes",
         "maintenance": "Mantenimiento",
@@ -111,6 +112,12 @@
         "ai": {
             "title": "Ajustes de IA",
             "model": "Modelo de IA",
+            "provider": "Proveedor",
+            "providers": {
+                "openai": "OpenAI",
+                "google": "Google Gemini",
+                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+            },
             "apiKey": "Clave de API",
             "saved": "¡Guardado!",
             "save": "Guardar ajustes de IA",
@@ -134,10 +141,24 @@
         "create": "Crear",
         "actions": "Acciones",
         "clearAll": "Borrar todo",
+        "selectAll": "Seleccionar todo",
         "close": "Cerrar",
         "folder": "carpeta",
         "tag": "etiqueta",
-        "noOptions": "No se encontraron opciones"
+        "noOptions": "No se encontraron opciones",
+        "untitled": "Sin título",
+        "uncategorized": "Sin clasificar",
+        "unknownDate": "Fecha desconocida",
+        "relativeTime": {
+            "justNow": "ahora mismo",
+            "minutesAgo": "hace {{count}}m",
+            "hoursAgo": "hace {{count}}h",
+            "daysAgo": "hace {{count}}d",
+            "monthsAgo": "hace {{count}} meses",
+            "yearsAgo": "hace {{count}}a"
+        },
+        "bookmarks_one": "marcador",
+        "bookmarks_other": "marcadores"
     },
     "modals": {
         "rules": {
@@ -306,6 +327,27 @@
         "chart": {
             "title": "Hábitos de Colección",
             "tooltip": "marcadores"
+        },
+        "timeframe": {
+            "week": "Semanal",
+            "month": "Mensual",
+            "year": "Anual"
+        },
+        "tagCloud": {
+            "title": "Nube de etiquetas",
+            "noTags": "Aún no se han encontrado etiquetas en su colección.",
+            "tooltip": "{{tag}}: {{count}} {{label}}"
+        },
+        "healthScore": {
+            "title": "Salud de la colección",
+            "brokenLinks": "Enlaces rotos",
+            "duplicates": "Duplicados",
+            "checkRequired": "Aún no se ha realizado el control de salud",
+            "accuracyDisclaimer": "Los controles de salud de los enlaces pueden no ser 100% exactos debido a las protecciones del servidor (por ejemplo, Cloudflare) o problemas de conexión temporales."
+        },
+        "oldItems": {
+            "title": "Tesoros más antiguos",
+            "added": "Añadido"
         },
         "topDomains": "Dominios Principales",
         "oldAlert": {

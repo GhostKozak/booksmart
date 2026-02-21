@@ -38,7 +38,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
             <div className="flex items-center justify-between p-3 border-b bg-card">
                 <div className="flex-1 min-w-0 mr-4">
                     <h3 className="font-semibold text-sm truncate" title={bookmark.title}>
-                        {bookmark.title || t('sidebar.smartFilters.untitled')}
+                        {bookmark.title || t('common.untitled')}
                     </h3>
                     <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
                         <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">

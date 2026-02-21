@@ -34,10 +34,11 @@
         "analytics": "Analytics",
         "showThumbnails": "Show Thumbnails",
         "hideThumbnails": "Hide Thumbnails",
-        "checkHealth": "Check Health",
+        "checkHealth": "Health Check",
+        "checkHeart": "Check ❤️",
         "checking": "Checking...",
-        "export": "Export",
-        "closeFile": "Close File",
+        "export": "Export Bookmarks",
+        "closeFile": "Close Folder",
         "shortcuts": "Keyboard Shortcuts (?)",
         "settings": "Settings",
         "maintenance": "Maintenance",
@@ -111,6 +112,12 @@
         "ai": {
             "title": "AI Settings",
             "model": "AI Model",
+            "provider": "Provider",
+            "providers": {
+                "openai": "OpenAI",
+                "google": "Google Gemini",
+                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+            },
             "apiKey": "API Key",
             "saved": "Saved!",
             "save": "Save AI Settings",
@@ -134,10 +141,24 @@
         "create": "Create",
         "actions": "Actions",
         "clearAll": "Clear All",
+        "selectAll": "Select All",
         "close": "Close",
         "folder": "folder",
         "tag": "tag",
-        "noOptions": "No options found"
+        "noOptions": "No options found",
+        "untitled": "Untitled",
+        "uncategorized": "Uncategorized",
+        "unknownDate": "Unknown date",
+        "relativeTime": {
+            "justNow": "just now",
+            "minutesAgo": "{{count}}m ago",
+            "hoursAgo": "{{count}}h ago",
+            "daysAgo": "{{count}}d ago",
+            "monthsAgo": "{{count}}mo ago",
+            "yearsAgo": "{{count}}y ago"
+        },
+        "bookmarks_one": "bookmark",
+        "bookmarks_other": "bookmarks"
     },
     "modals": {
         "rules": {
@@ -314,7 +335,8 @@
         },
         "tagCloud": {
             "title": "Tag Cloud",
-            "noTags": "No tags found in your collection yet."
+            "noTags": "No tags found in your collection yet.",
+            "tooltip": "{{tag}}: {{count}} {{label}}"
         },
         "healthScore": {
             "title": "Collection Health",

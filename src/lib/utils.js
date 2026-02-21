@@ -16,12 +16,11 @@ export function generateUUID() {
     });
 }
 
-export function getRelativeTime(timestamp) {
+export function getRelativeTime(timestamp, t) {
     if (!timestamp) return '';
 
-    // Netscape format is often just seconds, but let's handle if it's ms
+    // Netscape format is often just seconds
     let date = new Date(parseInt(timestamp) * 1000);
-    // If year is very small (like 1970) maybe it was already ms? allow fallback
     if (date.getFullYear() < 1971) {
         date = new Date(parseInt(timestamp));
     }
@@ -29,11 +28,13 @@ export function getRelativeTime(timestamp) {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
 
-    if (diffInSeconds < 60) return 'just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}mo ago`;
+    if (!t) return '...'; // Fallback if t not provided
 
-    return `${Math.floor(diffInSeconds / 31536000)}y ago`;
+    if (diffInSeconds < 60) return t('common.relativeTime.justNow');
+    if (diffInSeconds < 3600) return t('common.relativeTime.minutesAgo', { count: Math.floor(diffInSeconds / 60) });
+    if (diffInSeconds < 86400) return t('common.relativeTime.hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
+    if (diffInSeconds < 2592000) return t('common.relativeTime.daysAgo', { count: Math.floor(diffInSeconds / 86400) });
+    if (diffInSeconds < 31536000) return t('common.relativeTime.monthsAgo', { count: Math.floor(diffInSeconds / 2592000) });
+
+    return t('common.relativeTime.yearsAgo', { count: Math.floor(diffInSeconds / 31536000) });
 }

@@ -208,11 +208,11 @@ export function Header({
                             <div className="grid grid-cols-2 gap-1 sm:gap-2 mb-1">
                                 <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'list' && "bg-accent")}>
                                     <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                    <span>{t('header.listView').split(' ')[0]}</span>
+                                    <span>{t('header.listView')}</span>
                                 </DropdownItem>
                                 <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'grid' && "bg-accent")}>
                                     <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                    <span>{t('header.gridView').split(' ')[0]}</span>
+                                    <span>{t('header.gridView')}</span>
                                 </DropdownItem>
                             </div>
 
@@ -225,7 +225,7 @@ export function Header({
                                 {viewMode === 'grid' && (
                                     <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-1.5 sm:py-2 text-[11px] sm:text-sm justify-center">
                                         <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                        {showThumbnails ? t('header.hideThumbnails').split(' ')[0] : t('header.showThumbnails').split(' ')[0]}
+                                        {showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
                                     </DropdownItem>
                                 )}
                             </div>
@@ -281,7 +281,7 @@ export function Header({
                     <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1">
                         <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
                             {isCheckingLinks ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 animate-spin" /> : <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 text-rose-500" />}
-                            <span>{isCheckingLinks ? t('header.checking') : 'Check ❤️'}</span>
+                            <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
                         </DropdownItem>
 
                         <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
@@ -315,10 +315,7 @@ export function Header({
 
                                 <DropdownItem onClick={closeFile} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
                                     <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                    <span>
-                                        <span className="sm:hidden">Close</span>
-                                        <span className="hidden sm:inline">Close Folder</span>
-                                    </span>
+                                    <span>{t('header.closeFile')}</span>
                                 </DropdownItem>
                             </div>
 
@@ -342,7 +339,7 @@ export function Header({
                         <span className="hidden lg:inline">{t('header.export')}</span>
                     </Button>
                 </div>
-            </div>
+            </div >
         </header >
     )
 }

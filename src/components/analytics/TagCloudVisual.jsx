@@ -11,7 +11,7 @@ export function TagCloudVisual({ tags }) {
     return (
         <Card className="col-span-1 md:col-span-3 flex flex-col min-h-[300px]">
             <CardHeader className="pb-2">
-                <CardTitle>{t('analytics.tagCloud.title', 'Tag Cloud')}</CardTitle>
+                <CardTitle>{t('analytics.tagCloud.title')}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden flex flex-wrap content-center items-center justify-center gap-2 pt-2 pb-4">
                 {hasTags ? (
@@ -28,7 +28,11 @@ export function TagCloudVisual({ tags }) {
                                     fontSize: `${size}rem`,
                                     opacity: opacity
                                 }}
-                                title={`${tagObj.tag}: ${tagObj.count} ${t('common.bookmarks', 'bookmarks')}`}
+                                title={t('analytics.tagCloud.tooltip', {
+                                    tag: tagObj.tag,
+                                    count: tagObj.count,
+                                    label: t('common.bookmarks', { count: tagObj.count })
+                                })}
                             >
                                 {tagObj.tag}
                             </span>

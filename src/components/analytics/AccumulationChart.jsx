@@ -34,10 +34,10 @@ export function AccumulationChart({ data }) {
                     ))}
                 </div>
             </CardHeader>
-            <CardContent className="pl-2 flex-1">
-                <div className="h-[240px] w-full min-w-0 pr-2 pl-2">
+            <CardContent className="pl-4 sm:pl-6 pr-4 pb-4 flex-1">
+                <div className="h-[240px] w-full min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 10, right: 10, left: 35, bottom: 0 }}>
+                        <BarChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted/30" />
                             <XAxis
                                 dataKey="name"
@@ -53,7 +53,7 @@ export function AccumulationChart({ data }) {
                                 tickLine={false}
                                 axisLine={false}
                                 tickFormatter={(value) => `${value}`}
-                                width={45}
+                                width={25}
                                 hide={false}
                             />
                             <Tooltip

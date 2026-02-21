@@ -35,9 +35,10 @@
         "showThumbnails": "Miniaturansichten anzeigen",
         "hideThumbnails": "Miniaturansichten ausblenden",
         "checkHealth": "Gesundheit prüfen",
+        "checkHeart": "Prüfen ❤️",
         "checking": "Prüfe...",
-        "export": "Exportieren",
-        "closeFile": "Datei Schließen",
+        "export": "Lesezeichen exportieren",
+        "closeFile": "Ordner schließen",
         "shortcuts": "Tastaturkürzel (?)",
         "settings": "Einstellungen",
         "maintenance": "Wartung",
@@ -111,6 +112,12 @@
         "ai": {
             "title": "KI-Einstellungen",
             "model": "KI-Modell",
+            "provider": "Anbieter",
+            "providers": {
+                "openai": "OpenAI",
+                "google": "Google Gemini",
+                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+            },
             "apiKey": "API-Schlüssel",
             "saved": "Gespeichert!",
             "save": "KI-Einstellungen speichern",
@@ -134,10 +141,24 @@
         "create": "Erstellen",
         "actions": "Aktionen",
         "clearAll": "Alles Löschen",
+        "selectAll": "Alles Auswählen",
         "close": "Schließen",
         "folder": "Ordner",
         "tag": "Tag",
-        "noOptions": "Keine Optionen gefunden"
+        "noOptions": "Keine Optionen gefunden",
+        "untitled": "Ohne Titel",
+        "uncategorized": "Unkategorisiert",
+        "unknownDate": "Unbekanntes Datum",
+        "relativeTime": {
+            "justNow": "gerade eben",
+            "minutesAgo": "vor {{count}}m",
+            "hoursAgo": "vor {{count}}h",
+            "daysAgo": "vor {{count}}t",
+            "monthsAgo": "vor {{count}} Monaten",
+            "yearsAgo": "vor {{count}}j"
+        },
+        "bookmarks_one": "Lesezeichen",
+        "bookmarks_other": "Lesezeichen"
     },
     "modals": {
         "rules": {
@@ -269,7 +290,7 @@
             "desc2": "keine",
             "desc3": " tatsächlichen Lesezeichen. Verwenden Sie \"Exportieren\" auf der Hauptseite für Lesezeichen."
         },
-        "failed": "Sicherung fehlgeschlagen! Überprüfen Sie die Konsole.",
+        "failed": "Sicherung fehlgeschlagen! Überprüfen Sie die Konsole. Daten wurden NICHT gelöscht.",
         "note": "Backups umfassen Ihre Regeln, Ordner, Tags und ignorierte URLs. Sie enthalten <1>nicht</1> Ihre tatsächlichen Lesezeichen. Verwenden Sie \"Exportieren\"."
     },
     "taxonomy": {
@@ -307,6 +328,27 @@
             "title": "Sammlungsgewohnheiten",
             "tooltip": "Lesezeichen"
         },
+        "timeframe": {
+            "week": "Wöchentlich",
+            "month": "Monatlich",
+            "year": "Jährlich"
+        },
+        "tagCloud": {
+            "title": "Tag-Wolke",
+            "noTags": "Noch keine Tags in Ihrer Sammlung gefunden.",
+            "tooltip": "{{tag}}: {{count}} {{label}}"
+        },
+        "healthScore": {
+            "title": "Gesundheit der Sammlung",
+            "brokenLinks": "Tote Links",
+            "duplicates": "Duplikate",
+            "checkRequired": "Gesundheitscheck noch nicht durchgeführt",
+            "accuracyDisclaimer": "Link-Gesundheitsprüfungen sind aufgrund von Serverschutzmaßnahmen (z. B. Cloudflare) oder vorübergehenden Verbindungsproblemen möglicherweise nicht zu 100 % genau."
+        },
+        "oldItems": {
+            "title": "Älteste Schätze",
+            "added": "Hinzugefügt"
+        },
         "topDomains": "Top-Domains",
         "oldAlert": {
             "title": "Vollgestaubte Regale",
@@ -340,7 +382,7 @@
         "reload": "Vorschau Neuladen",
         "close": "Vorschau Schließen",
         "loading": "Lade...",
-        "error": "Inhalt lädt nicht? Einige Websites blockieren die Einbettung.",
+        "error": "Inhalt lädt nicht? Einige Webseiten blockieren die Einbettung.",
         "openExternal": "In Neuem Tab Öffnen"
     },
     "offline": "Sie sind offline — Daten werden lokal gespeichert",
@@ -361,7 +403,7 @@
             "checking": "Prüfe...",
             "alive": "Aktiv",
             "dead": "Netzwerkfehler (Vermutlich Tot)",
-            "archive": "Suche in Internet Archive",
+            "archive": "Suche im Internet Archive",
             "ignore": "Fehler Ignorieren (Whitelist)",
             "ignored": "Ignoriert (Whitelist)",
             "unignore": "Nicht mehr ignorieren"

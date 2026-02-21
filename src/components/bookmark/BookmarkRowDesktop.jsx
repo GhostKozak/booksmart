@@ -39,7 +39,7 @@ export function BookmarkRowDesktop({
                         "font-medium truncate",
                         (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                         healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
-                    )} title={bookmark.title}>{bookmark.title}</span>
+                    )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
                 </div>
                 <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
 
@@ -51,7 +51,7 @@ export function BookmarkRowDesktop({
 
                 {bookmark.addDate && (
                     <div className="text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
-                        <span>{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate) })}</span>
+                        <span>{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
                     </div>
                 )}
 

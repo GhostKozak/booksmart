@@ -61,7 +61,7 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                                             u.newFolder.toLowerCase() !== (u.originalFolder || '').toLowerCase() && (
                                                 <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                                                     <Folder className="h-3 w-3" />
-                                                    <span className="opacity-50 line-through text-xs text-muted-foreground">{u.originalFolder || 'Uncategorized'}</span>
+                                                    <span className="opacity-50 line-through text-xs text-muted-foreground">{u.originalFolder || t('common.uncategorized')}</span>
                                                     <ArrowRight className="h-3 w-3" />
                                                     <span className="font-medium">{u.newFolder}</span>
                                                 </div>
