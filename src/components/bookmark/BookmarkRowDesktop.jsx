@@ -5,7 +5,8 @@ import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { Layers } from 'lucide-react'
+import { Button } from '../ui/button'
+import { Layers, Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowDesktop({
@@ -14,6 +15,7 @@ export function BookmarkRowDesktop({
     healthStatus,
     toggleSelection,
     toggleIgnoreUrl,
+    onPreview,
     availableFolders,
     availableTags
 }) {
@@ -27,6 +29,19 @@ export function BookmarkRowDesktop({
                     onCheckedChange={() => toggleSelection(bookmark.id)}
                     className="bg-card z-20"
                 />
+            </div>
+
+            {/* Preview Button */}
+            <div className="flex justify-center">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                    onClick={() => onPreview(bookmark)}
+                    title={t('preview.open')}
+                >
+                    <Eye className="h-4 w-4" />
+                </Button>
             </div>
 
             {/* Status Icon */}

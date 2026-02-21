@@ -263,6 +263,7 @@
         "cleanUrls": "Clean URLs"
     },
     "preview": {
+        "open": "Open Preview",
         "reload": "Reload Preview",
         "close": "Close Preview",
         "loading": "Loading preview...",

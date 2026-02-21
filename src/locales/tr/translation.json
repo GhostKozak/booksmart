@@ -262,6 +262,7 @@
         "cleanUrls": "URL'leri Temizle"
     },
     "preview": {
+        "open": "Önizlemeyi Aç",
         "reload": "Önizlemeyi Yenile",
         "close": "Önizlemeyi Kapat",
         "loading": "Önizleme yükleniyor...",

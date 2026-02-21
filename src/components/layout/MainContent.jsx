@@ -131,6 +131,7 @@ export function MainContent({
                                     linkHealth={linkHealth}
                                     ignoredUrls={ignoredUrls}
                                     toggleIgnoreUrl={toggleIgnoreUrl}
+                                    onPreview={handlePreview}
                                     availableFolders={availableFolders}
                                     availableTags={availableTags}
                                 />

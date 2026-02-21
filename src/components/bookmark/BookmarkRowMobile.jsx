@@ -5,7 +5,9 @@ import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
-import { ArrowRight, XCircle, Layers, Check } from 'lucide-react'
+import { Button } from '../ui/button'
+import { ArrowRight, XCircle, Layers, Check, Eye } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowMobile({
     bookmark,
@@ -13,9 +15,11 @@ export function BookmarkRowMobile({
     healthStatus,
     toggleSelection,
     toggleIgnoreUrl,
+    onPreview,
     availableFolders,
     availableTags
 }) {
+    const { t } = useTranslation();
     return (
         <div className="lg:hidden flex flex-col gap-2">
             {/* Row 1: Checkbox, Icon, Title */}
@@ -36,8 +40,16 @@ export function BookmarkRowMobile({
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )}>{bookmark.title}</span>
 
-                        {/* Status Icons Mini */}
                         <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground"
+                                onClick={() => onPreview(bookmark)}
+                                title={t('preview.open')}
+                            >
+                                <Eye className="h-3.5 w-3.5" />
+                            </Button>
                             {bookmark.isDuplicate && <XCircle className="h-4 w-4 text-red-500" />}
                             {bookmark.hasDuplicate && <Layers className="h-4 w-4 text-yellow-500" />}
                             {bookmark.status === 'matched' && <Check className="h-4 w-4 text-emerald-500" />}

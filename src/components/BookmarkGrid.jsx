@@ -4,10 +4,13 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink } from 'lucide-react';
+import { Folder, ExternalLink, Eye } from 'lucide-react';
+import { Button } from './ui/button';
+import { useTranslation } from 'react-i18next';
 
 // Extracted Item Component for state management
 const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails }) => {
+    const { t } = useTranslation();
     const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
 
     // Reset loading state if thumbnail visibility toggles or bookmark changes
@@ -65,7 +68,19 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                             </div>
                         )}
 
-                        <div className="absolute top-2 right-2 z-20">
+                        <div className="absolute top-2 right-2 z-20 flex gap-1">
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-6 w-6 bg-background/80 backdrop-blur-sm shadow-sm hover:bg-primary hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    context.onPreview(bookmark);
+                                }}
+                                title={t('preview.open')}
+                            >
+                                <Eye className="h-3 w-3" />
+                            </Button>
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => context.toggleSelection(bookmark.id)}
@@ -90,12 +105,25 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                             </p>
                         </div>
                         {!showThumbnails && (
-                            <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => context.toggleSelection(bookmark.id)}
-                                onClick={(e) => e.stopPropagation()}
-                                className="shrink-0 mt-0.5"
-                            />
+                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        context.onPreview(bookmark);
+                                    }}
+                                    title={t('preview.open')}
+                                >
+                                    <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                                <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => context.toggleSelection(bookmark.id)}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            </div>
                         )}
                     </div>
 

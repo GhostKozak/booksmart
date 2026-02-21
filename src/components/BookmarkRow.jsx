@@ -3,7 +3,7 @@ import { BookmarkRowDesktop } from './bookmark/BookmarkRowDesktop'
 import { BookmarkRowMobile } from './bookmark/BookmarkRowMobile'
 import { cn } from '../lib/utils'
 
-export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, className, availableFolders = [], availableTags = [] }) => {
+export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, className, availableFolders = [], availableTags = [] }) => {
     if (!bookmark) return null
 
     const isSelected = selectedIds.has(bookmark.id)
@@ -29,6 +29,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
         healthStatus,
         toggleSelection,
         toggleIgnoreUrl,
+        onPreview,
         availableFolders,
         availableTags
     }
