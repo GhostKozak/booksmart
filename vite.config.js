@@ -9,18 +9,22 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg'],
+      includeAssets: ['icons/*.svg', 'screenshots/*.png'],
       manifest: {
+        id: 'booksmart-app',
         name: 'BookSmart - Smart Bookmark Organizer and Manager',
         short_name: 'BookSmart',
         description: 'Organize your bookmarks smartly with AI, clean up dead links, and boost your productivity.',
         theme_color: '#0a0f1a',
         background_color: '#0a0f1a',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
         orientation: 'any',
+        dir: 'ltr',
+        lang: 'en-US',
         scope: '/',
         start_url: '/',
-        categories: ['productivity', 'utilities'],
+        categories: ['productivity', 'utilities', 'organization'],
         icons: [
           {
             src: '/icons/icon-192x192.svg',
@@ -39,6 +43,50 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: '/screenshots/dark-mode.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'BookSmart Dark Mode'
+          },
+          {
+            src: '/screenshots/white-mode.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'BookSmart Light Mode'
+          },
+          {
+            src: '/screenshots/analytics-page.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Analytics & Dashboard'
+          },
+          {
+            src: '/screenshots/grid-with-thumbnail-view.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Grid View with Thumbnails'
+          },
+          {
+            src: '/screenshots/grid-with-thumbnail-preview-site.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Live Site Preview'
+          },
+          {
+            src: '/screenshots/mobile.png',
+            sizes: '1080x1920',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'BookSmart Mobile View'
           }
         ]
       },
