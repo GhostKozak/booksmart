@@ -68,6 +68,9 @@ export const exportBookmarks = (bookmarks) => {
             const iconAttr = b.icon ? ` ICON="${b.icon}"` : '';
 
             output += `${indent}<DT><A HREF="${b.url}"${addDateAttr}${iconAttr}${tagsAttr}>${b.title}</A>\n`;
+            if (b.note) {
+                output += `${indent}<DD>${b.note}\n`;
+            }
         });
 
         // B. Render Subfolders
@@ -118,15 +121,16 @@ export const exportToJson = (bookmarks) => {
  * @returns {string} - The CSV string.
  */
 export const exportToCsv = (bookmarks) => {
-    const headers = ['Title', 'URL', 'Folder', 'Tags', 'Date Added'];
+    const headers = ['Title', 'URL', 'Folder', 'Tags', 'Date Added', 'Note'];
     const rows = bookmarks.map(b => {
-        const title = (b.title || '').replace(/"/g, '""'); // Escape double quotes
+        const title = (b.title || '').replace(/"/g, '""');
         const url = (b.url || '').replace(/"/g, '""');
         const folder = (b.newFolder || 'Root').replace(/"/g, '""');
         const tags = (b.tags || []).join(',').replace(/"/g, '""');
         const date = b.addDate ? new Date(parseInt(b.addDate) * 1000).toISOString() : '';
+        const note = (b.note || '').replace(/"/g, '""');
 
-        return `"${title}","${url}","${folder}","${tags}","${date}"`;
+        return `"${title}","${url}","${folder}","${tags}","${date}","${note}"`;
     });
 
     return [headers.join(','), ...rows].join('\n');
@@ -166,6 +170,9 @@ export const exportToMarkdown = (bookmarks) => {
                 md += ` \`#${b.tags.join(', #')}\``;
             }
             md += '\n';
+            if (b.note) {
+                md += `  > ${b.note}\n`;
+            }
         });
         md += '\n';
     });

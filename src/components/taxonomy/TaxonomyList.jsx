@@ -9,7 +9,7 @@ import {
 } from '@dnd-kit/sortable';
 import { TaxonomyItem } from './TaxonomyItem';
 
-export function TaxonomyList({ items, sensors, onDragEnd, onDelete, onColorChange }) {
+export function TaxonomyList({ items, sensors, onDragEnd, onDelete, onColorChange, onNoteChange }) {
     return (
         <DndContext
             sensors={sensors}
@@ -27,6 +27,7 @@ export function TaxonomyList({ items, sensors, onDragEnd, onDelete, onColorChang
                         item={item}
                         onDelete={onDelete}
                         onColorChange={onColorChange}
+                        onNoteChange={onNoteChange}
                     />
                 ))}
             </SortableContext>

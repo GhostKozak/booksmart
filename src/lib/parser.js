@@ -36,6 +36,13 @@ export const parseBookmarks = (htmlContent) => {
                     // Check for Link (A) inside DT
                     const a = child.querySelector('a');
                     if (a) {
+                        // Check for <DD> note — it's the next sibling of this DT
+                        let note = '';
+                        const nextSibling = child.nextElementSibling;
+                        if (nextSibling && nextSibling.tagName === 'DD') {
+                            note = nextSibling.textContent.trim();
+                        }
+
                         bookmarks.push({
                             id: generateUUID(),
                             title: a.textContent,
@@ -44,7 +51,8 @@ export const parseBookmarks = (htmlContent) => {
                             icon: a.getAttribute('icon'),
                             tags: a.getAttribute('tags') ? a.getAttribute('tags').split(',').map(t => t.trim()) : [],
                             originalFolder: folderPath.join(' > ') || 'Root',
-                            newFolder: folderPath.join(' > ') || 'Root', // Default to original
+                            newFolder: folderPath.join(' > ') || 'Root',
+                            note,
                             status: 'unchanged'
                         });
                     }
@@ -80,6 +88,7 @@ export const parseJson = (jsonContent) => {
             return data.map(b => ({
                 ...b,
                 id: b.id || generateUUID(),
+                note: b.note || '',
                 status: 'unchanged'
             }));
         }
@@ -128,6 +137,7 @@ export const parseCsv = (csvContent) => {
         const folder = clean(parts[2]) || 'Root';
         const tags = clean(parts[3]).split(',').map(t => t.trim()).filter(Boolean);
         const dateStr = clean(parts[4]);
+        const note = clean(parts[5]) || '';
 
         // Try to parse date
         let addDate = Date.now();
@@ -147,6 +157,7 @@ export const parseCsv = (csvContent) => {
                 tags,
                 originalFolder: folder,
                 newFolder: folder,
+                note,
                 status: 'unchanged'
             });
         }

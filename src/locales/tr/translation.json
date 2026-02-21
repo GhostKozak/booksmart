@@ -363,5 +363,11 @@
         "unknown": "Bilinmeyen İşlem",
         "redoNext": "Sıradaki işlemi yinele",
         "undoLast": "Son işlemi geri al"
+    },
+    "notes": {
+        "label": "Notlar",
+        "toggle": "Notu Aç/Kapat",
+        "placeholder": "Kişisel bir not ekleyin...",
+        "chromeWarning": "⚠ Notlar JSON dışa aktarımında korunur. Chrome, HTML içe aktarımında notları yoksayar."
     }
 }

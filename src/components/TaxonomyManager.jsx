@@ -87,6 +87,12 @@ export function TaxonomyManager({
         }
     };
 
+    const handleNoteChange = (id, note) => {
+        const setFn = activeTab === 'folders' ? setFolders : setTags;
+        const list = activeTab === 'folders' ? folders : tags;
+        setFn(list.map(item => item.id === id ? { ...item, note } : item));
+    };
+
     const currentList = activeTab === 'folders' ? folders : tags;
     const discoveredList = activeTab === 'folders' ? discoveredFolders : discoveredTags;
     const typeLabel = activeTab === 'folders' ? t('taxonomy.folders') : t('taxonomy.tags');
@@ -144,6 +150,7 @@ export function TaxonomyManager({
                     onDragEnd={handleDragEnd}
                     onDelete={handleDelete}
                     onColorChange={handleColorChange}
+                    onNoteChange={handleNoteChange}
                 />
 
                 <DiscoveredTaxonomy

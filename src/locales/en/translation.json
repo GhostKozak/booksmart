@@ -364,5 +364,11 @@
         "unknown": "Unknown Action",
         "redoNext": "Redo next action",
         "undoLast": "Undo last action"
+    },
+    "notes": {
+        "label": "Notes",
+        "toggle": "Toggle Note",
+        "placeholder": "Add a personal note...",
+        "chromeWarning": "⚠ Notes are preserved in JSON export. Chrome ignores notes in HTML import."
     }
 }
