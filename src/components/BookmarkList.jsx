@@ -27,7 +27,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                     onCheckedChange={toggleAll}
                 />
                 <span className="lg:hidden normal-case font-semibold text-foreground/80">
-                    {t('common.selectAll', 'Select All')}
+                    {t('common.selectAll')}
                 </span>
             </div>
             <div className="hidden lg:block">{t('bookmarks.columns.title')}</div>

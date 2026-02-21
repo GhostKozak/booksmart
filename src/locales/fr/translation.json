@@ -1,0 +1,411 @@
+{
+    "app": {
+        "title": "BookSmart",
+        "searchPlaceholder": "Rechercher des signets...",
+        "addBookmark": "Ajouter un Signet"
+    },
+    "header": {
+        "undo": "Annuler (Ctrl+Z)",
+        "redo": "Rétablir (Ctrl+Y)",
+        "history": "Historique des versions",
+        "advancedSearch": "Filtres de recherche avancés",
+        "advanced": {
+            "mode": "Mode",
+            "modes": {
+                "simple": "Simple",
+                "simpleTitle": "Correspondance exacte ou texte simple",
+                "fuzzy": "Flou",
+                "fuzzyTitle": "Correspondance approximative (tolère les fautes)",
+                "regex": "Regex",
+                "regexTitle": "Expression Régulière"
+            },
+            "date": {
+                "added": "Ajouté",
+                "from": "De",
+                "to": "À",
+                "clear": "Effacer"
+            }
+        },
+        "clearSearch": "Effacer la recherche",
+        "removeDuplicates": "Supprimer {{count}} doublons",
+        "cleanUrls": "Nettoyer {{count}} URLs",
+        "listView": "Vue en liste",
+        "gridView": "Vue en grille",
+        "analytics": "Analytique",
+        "showThumbnails": "Afficher les miniatures",
+        "hideThumbnails": "Masquer les miniatures",
+        "checkHealth": "Vérifier l'état",
+        "checking": "Vérification...",
+        "export": "Exporter",
+        "closeFile": "Fermer le fichier",
+        "shortcuts": "Raccourcis clavier (?)",
+        "settings": "Paramètres",
+        "maintenance": "Maintenance",
+        "view": "Options d'affichage",
+        "tools": "Outils",
+        "system": "Système",
+        "lightMode": "Mode clair",
+        "darkMode": "Mode sombre",
+        "regexPlaceholder": "ex. ^https?://.*\\.dev",
+        "sort": {
+            "label": "Trier par",
+            "default": "Par défaut",
+            "titleAz": "Titre (A → Z)",
+            "titleZa": "Titre (Z → A)",
+            "dateNew": "Date (Plus récent)",
+            "dateOld": "Date (Plus ancien)",
+            "domain": "Domaine",
+            "folder": "Dossier"
+        }
+    },
+    "sidebar": {
+        "allBookmarks": "Tous les signets",
+        "uncategorized": "Non classés",
+        "myFolders": "Mes Dossiers",
+        "myTags": "Mes Étiquettes",
+        "discovered": "Découvert",
+        "noTags": "Aucune étiquette trouvée.",
+        "sections": {
+            "library": "Bibliothèque",
+            "tags": "Étiquettes",
+            "folders": "Dossiers",
+            "smartFilters": "Filtres intelligents",
+            "rules": "Règles"
+        },
+        "smartFilters": {
+            "duplicates": "Doublons",
+            "deadLinks": "Liens morts",
+            "longUrls": "URLs longues (200+)",
+            "media": "Médias & Vidéos",
+            "social": "Réseaux sociaux",
+            "shopping": "Achats",
+            "news": "Actualités & Articles",
+            "old": "Étagères poussiéreuses (> 5a)",
+            "http": "Non sécurisé (HTTP)",
+            "untitled": "Sans titre / Générique",
+            "docs": "Documents & PDF"
+        },
+        "rules": {
+            "title": "Règles",
+            "addRule": "Ajouter une Règle",
+            "noRules": "Aucune règle définie pour le moment.",
+            "createFirst": "Créez votre première règle",
+            "edit": "Modifier la Règle",
+            "delete": "Supprimer la Règle"
+        }
+    },
+    "settings": {
+        "title": "Paramètres",
+        "tabs": {
+            "general": "Général",
+            "folders": "Dossiers",
+            "tags": "Étiquettes",
+            "backup": "Sauvegarde & Données",
+            "rules": "Règles"
+        },
+        "language": {
+            "label": "Langue",
+            "select": "Sélectionnez la langue"
+        },
+        "ai": {
+            "title": "Paramètres IA",
+            "model": "Modèle IA",
+            "apiKey": "Clé API",
+            "saved": "Enregistré !",
+            "save": "Enregistrer les paramètres",
+            "reqOpenAI": "Nécessite une clé API OpenAI",
+            "reqGemini": "Nécessite une clé API Google Gemini",
+            "reqOpenRouter": "Nécessite une clé API OpenRouter"
+        },
+        "languages": {
+            "en": "Anglais",
+            "tr": "Turc",
+            "es": "Espagnol",
+            "fr": "Français",
+            "de": "Allemand"
+        }
+    },
+    "common": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "create": "Créer",
+        "actions": "Actions",
+        "clearAll": "Tout Effacer",
+        "close": "Fermer",
+        "folder": "dossier",
+        "tag": "étiquette",
+        "noOptions": "Aucune option trouvée"
+    },
+    "modals": {
+        "rules": {
+            "newTitle": "Nouvelle Règle",
+            "editTitle": "Modifier la Règle",
+            "type": "Type",
+            "value": "Valeur",
+            "targetFolder": "Dossier Cible",
+            "tags": "Appliquer des étiquettes",
+            "update": "Mettre à jour la règle",
+            "add": "Ajouter une règle",
+            "example": "Exemple",
+            "types": {
+                "keyword": "Mot-clé",
+                "domain": "Domaine",
+                "exact": "Correspondance exacte"
+            },
+            "placeholders": {
+                "value": "ex., youtube.com ou 'tutoriel'",
+                "value_keyword": "ex., tutoriel, react, actualités",
+                "value_domain": "ex., youtube.com, github.com",
+                "value_exact": "ex., https://example.com/page",
+                "folder": "Sélectionnez ou créez un dossier...",
+                "tags": "Entrez les étiquettes séparées par des virgules..."
+            },
+            "forNested": "pour structure imbriquée."
+        },
+        "ruleConflict": {
+            "title": "Conflit de règles détecté",
+            "description": "Plusieurs règles correspondent à ce signet avec des dossiers cibles différents. Les étiquettes ont été fusionnées automatiquement.",
+            "chooseFolder": "Choisir le Dossier Cible",
+            "fromRule": "De la règle: {{rule}}",
+            "otherFolder": "Choisir un autre dossier...",
+            "mergedTags": "Étiquettes Fusionnées",
+            "tagsAutoMerged": "Les étiquettes de toutes les règles correspondantes sont fusionnées automatiquement.",
+            "apply": "Appliquer",
+            "skip": "Ignorer",
+            "resolve": "Résoudre",
+            "notificationText": "conflit(s) de règles trouvé(s)"
+        },
+        "export": {
+            "title": "Exporter des Signets",
+            "titleSelected": "Exporter la sélection ({{count}})",
+            "selectedCount_one": "<0>{{count}}</0> signet sélectionné pour l'exportation.",
+            "selectedCount_other": "<0>{{count}}</0> signets sélectionnés pour l'exportation.",
+            "formatSelect": "Sélectionnez le format d'exportation :",
+            "formats": {
+                "html": {
+                    "label": "Signets HTML",
+                    "desc": "Format de navigateur standard (Netscape)"
+                },
+                "json": {
+                    "label": "Données JSON",
+                    "desc": "Données brutes pour la sauvegarde ou le développement"
+                },
+                "csv": {
+                    "label": "Feuille de calcul CSV",
+                    "desc": "Importer vers Excel ou Google Sheets"
+                },
+                "md": {
+                    "label": "Liste Markdown",
+                    "desc": "Liste lisible pour les notes et blogs"
+                }
+            },
+            "download": "Télécharger l'Exportation"
+        },
+        "clearAll": {
+            "title": "Effacer Toutes les Données",
+            "content": "Cela supprimera <strong>TOUT</strong> vos Signets, Règles, Dossiers Personnalisés, Étiquettes et Paramètres.<br /><br />Cette action ne peut être annulée à moins d'avoir une sauvegarde.",
+            "backupAndClear": "Sauvegarder et Effacer",
+            "clearEverything": "Tout Effacer",
+            "warning1": "Cela supprimera ",
+            "warning2": "TOUS",
+            "warning3": " vos signets, règles, dossiers personnalisés, balises et paramètres."
+        },
+        "shortcuts": {
+            "title": "Raccourcis Clavier",
+            "focusSearch": "Focus sur la recherche",
+            "selectAll": "Tout sélectionner",
+            "deleteSelected": "Supprimer la sélection",
+            "clearSelection": "Effacer la sélection",
+            "undo": "Annuler",
+            "redo": "Rétablir",
+            "redoAlt": "Rétablir (Alt)",
+            "help": "Afficher les Raccourcis"
+        },
+        "sortConf": {
+            "title": "Confirmer les Changements",
+            "summary": "Veuillez examiner les changements proposés avant de les appliquer.",
+            "confirm": "Appliquer les Changements",
+            "stats": {
+                "bookmarks": "Signets",
+                "folders": "Mouvements de Dossiers"
+            },
+            "cols": {
+                "title": "Titre",
+                "changes": "Changements"
+            },
+            "tagsUpdated": "Balises mises à jour"
+        },
+        "settings": {
+            "desc": "Configurez votre modèle d'IA pour activer le \"Tri Magique\". Les clés API sont stockées localement.",
+            "cancel": "Annuler",
+            "saveContinue": "Enregistrer et Continuer"
+        }
+    },
+    "backup": {
+        "autoBackup": {
+            "title": "Auto-Sauvegarde",
+            "desc": "Enregistrer automatiquement un instantané local."
+        },
+        "lastSnapshot": "Dernier instantané :",
+        "manual": {
+            "title": "Sauvegarde Manuelle"
+        },
+        "export": {
+            "title": "Exporter la Configuration",
+            "desc": "Télécharger toutes vos règles, dossiers et étiquettes (JSON).",
+            "button": "Sauvegarder Maintenant"
+        },
+        "restore": {
+            "title": "Restaurer la Configuration",
+            "desc": "Restaurer vos paramètres depuis un fichier de sauvegarde.",
+            "button": "Sélectionner un Fichier...",
+            "restoring": "Restauration...",
+            "success": "Restauré! Rechargement...",
+            "error": "Fichier de sauvegarde invalide.",
+            "desc1": "Les sauvegardes incluent vos règles, dossiers, balises et URL ignorées. Elles ",
+            "desc2": "n'incluent pas",
+            "desc3": " vos signets réels. Utilisez \"Exporter\" sur la page principale pour les signets."
+        },
+        "failed": "La sauvegarde a échoué! Vérifiez la console.",
+        "note": "Les sauvegardes incluent les Règles, Dossiers, Étiquettes et les URL ignorées. N'inclut <1>pas</1> vos signets. Utilisez l'exportation principale."
+    },
+    "taxonomy": {
+        "folders": "Dossiers",
+        "tags": "Étiquettes",
+        "addPlaceholder": "Ajouter un(e) nouveau/elle {{type}}...",
+        "noItems": "Aucun(e) {{type}} défini(e) pour le moment.",
+        "dragHelp": "Faites glisser pour réorganiser. Cliquez sur le point pour changer la couleur.",
+        "discovered": {
+            "title": "Découvert dans les signets",
+            "add": "Ajouter à la liste permanente",
+            "addFolder": "Ajouter aux dossiers",
+            "addTag": "Ajouter aux étiquettes",
+            "count": "quantité: {{count}}"
+        }
+    },
+    "pwa": {
+        "updateAvailable": "Nouvelle version disponible !",
+        "updateDesc": "Actualisez pour mettre à jour.",
+        "updateButton": "Mettre à jour",
+        "close": "Fermer"
+    },
+    "analytics": {
+        "totalBookmarks": "Total des Signets",
+        "accumulationRate": "Taux d'Accumulation",
+        "duplicates": "Doublons",
+        "linkHealth": "Santé des Liens",
+        "subtext": {
+            "folders": "Dans {{count}} dossiers",
+            "accumulation": "Signets ajoutés ce mois-ci",
+            "duplicates": "Apparaissent plusieurs fois",
+            "health": "Liens morts ({{checked}} vérifiés)"
+        },
+        "chart": {
+            "title": "Habitudes de Collection",
+            "tooltip": "signets"
+        },
+        "topDomains": "Principaux Domaines",
+        "oldAlert": {
+            "title": "Étagères Poussiéreuses",
+            "desc": "Signets > 5 ans d'ancienneté",
+            "action": "Examiner et nettoyer"
+        }
+    },
+    "actionbar": {
+        "selected": "Sélectionnés",
+        "move": {
+            "button": "Déplacer",
+            "placeholder": "Nouveau nom de dossier...",
+            "submit": "Déplacer"
+        },
+        "tags": {
+            "button": "Étiquettes",
+            "placeholder": "Ajouter des étiquettes...",
+            "submit": "Appliquer"
+        },
+        "delete": "Supprimer",
+        "markAlive": "Marquer comme Actif",
+        "markDead": "Marquer comme Mort",
+        "export": "Exporter Sél.",
+        "cleanUrls": "Nettoyer les URLs",
+        "autoSort": "Tri Auto (Local)",
+        "sorting": "Tri en cours...",
+        "magicSort": "Tri Magique"
+    },
+    "preview": {
+        "open": "Ouvrir l'Aperçu",
+        "reload": "Recharger l'Aperçu",
+        "close": "Fermer l'Aperçu",
+        "loading": "Chargement...",
+        "error": "Le contenu ne charge pas? Certains sites bloquent l'intégration.",
+        "openExternal": "Ouvrir dans un Nouvel Onglet"
+    },
+    "offline": "Vous êtes hors ligne — Les données sont sauvegardées localement",
+    "bookmarks": {
+        "columns": {
+            "title": "Titre / URL",
+            "status": "Statut",
+            "health": "Santé"
+        },
+        "status": {
+            "duplicate": "Doublon (Sera supprimé)",
+            "original": "Original (A des doublons)",
+            "matched": "Correspond à une Règle",
+            "conflict": "Conflit de Règles",
+            "unknown": "Inconnu"
+        },
+        "health": {
+            "checking": "Vérification...",
+            "alive": "Actif",
+            "dead": "Erreur Réseau (A priori Mort)",
+            "archive": "Rechercher dans Internet Archive",
+            "ignore": "Ignorer l'Erreur (Liste Blanche)",
+            "ignored": "Ignoré (Liste Blanche)",
+            "unignore": "Ne plus ignorer"
+        },
+        "row": {
+            "added": "Ajouté {{time}}",
+            "duplicateIn": "Doublon dans : {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Déposez vos signets ici",
+            "desc": "Glissez et déposez vos fichiers Netscape HTML, JSON, CSV ou Markdown exportés pour commencer.",
+            "browse": "Parcourir"
+        },
+        "empty": {
+            "title": "Aucun signet trouvé",
+            "desc": "Nous n'avons trouvé aucun signet correspondant à votre recherche ou aux filtres.",
+            "clearSearch": "Effacer la Recherche"
+        },
+        "header": {
+            "title": "Vos Signets",
+            "moveDocs": "Déplacer {{count}} vers \"Références\""
+        }
+    },
+    "history": {
+        "title": "Historique des Versions",
+        "redo": "Pile de Rétablissement",
+        "past": "Actions Passées",
+        "noHistory": "Aucun historique pour le moment.",
+        "unknown": "Action Inconnue",
+        "redoNext": "Rétablir la prochaine action",
+        "undoLast": "Annuler la dernière action"
+    },
+    "notes": {
+        "label": "Notes",
+        "toggle": "Afficher la Note",
+        "placeholder": "Ajouter une note personnelle...",
+        "chromeWarning": "⚠ Les notes sont conservées en JSON. Chrome ignore les notes en HTML."
+    },
+    "errorBoundary": {
+        "title": "Quelque chose s'est mal passé",
+        "desc": "Une erreur inattendue s'est produite. Vos données sont en sécurité dans le stockage local.",
+        "details": "Détails de l'erreur",
+        "tryAgain": "Réessayer",
+        "reload": "Recharger la page"
+    }
+}

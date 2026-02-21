@@ -106,6 +106,23 @@
         "language": {
             "label": "Dil",
             "select": "Dil Seçin"
+        },
+        "ai": {
+            "title": "Yapay Zeka Ayarları",
+            "model": "YZ Modeli",
+            "apiKey": "API Anahtarı",
+            "saved": "Kaydedildi!",
+            "save": "YZ Ayarlarını Kaydet",
+            "reqOpenAI": "OpenAI API Anahtarı Gerekir",
+            "reqGemini": "Google Gemini API Anahtarı Gerekir",
+            "reqOpenRouter": "OpenRouter API Anahtarı Gerekir"
+        },
+        "languages": {
+            "en": "İngilizce",
+            "tr": "Türkçe",
+            "es": "İspanyolca",
+            "fr": "Fransızca",
+            "de": "Almanca"
         }
     },
     "common": {
@@ -131,7 +148,7 @@
             "tags": "Etiketleri Uygula",
             "update": "Kuralı Güncelle",
             "add": "Kural Ekle",
-            "example": "Örnek: İç içe yapı için <1>Ana &gt; Alt Klasör</1>.",
+            "example": "Örnek",
             "types": {
                 "keyword": "Anahtar Kelime",
                 "domain": "Alan Adı",
@@ -144,7 +161,8 @@
                 "value_exact": "örn: https://example.com/sayfa",
                 "folder": "Klasör seçin veya oluşturun...",
                 "tags": "Virgülle ayırarak etiketleri girin..."
-            }
+            },
+            "forNested": "iç içe yapı için."
         },
         "ruleConflict": {
             "title": "Kural Çakışması Tespit Edildi",
@@ -188,7 +206,10 @@
             "title": "Tüm Verileri Temizle",
             "content": "Bu işlem <strong>TÜM</strong> Yer İmlerini, Kuralları, Özel Klasörleri, Etiketleri ve Ayarları silecek.<br /><br />Bir yedeğiniz yoksa bu işlem geri alınamaz.",
             "backupAndClear": "Yedekle ve Temizle",
-            "clearEverything": "Hepsini Temizle"
+            "clearEverything": "Hepsini Temizle",
+            "warning1": "Bu işlem ",
+            "warning2": "TÜM",
+            "warning3": " Yer İmleri, Kurallar, Özel Klasörler, Etiketler ve Ayarları silecektir."
         },
         "shortcuts": {
             "title": "Klavye Kısayolları",
@@ -212,7 +233,13 @@
             "cols": {
                 "title": "Başlık",
                 "changes": "Değişiklikler"
-            }
+            },
+            "tagsUpdated": "Etiketler güncellendi"
+        },
+        "settings": {
+            "desc": "\"Sihirli Sıralama\"yı etkinleştirmek için yapay zeka modelinizi yapılandırın. API anahtarları yerel olarak saklanır.",
+            "cancel": "İptal",
+            "saveContinue": "Kaydet ve Devam Et"
         }
     },
     "backup": {
@@ -235,7 +262,10 @@
             "button": "Dosya Seç...",
             "restoring": "Geri yükleniyor...",
             "success": "Geri yüklendi! Yeniden yükleniyor...",
-            "error": "Geçersiz yedekleme dosyası."
+            "error": "Geçersiz yedekleme dosyası.",
+            "desc1": "Yedeklemeler Kurallarınızı, Klasörlerinizi, Etiketlerinizi ve Yoksayılan URL'leri içerir. Gerçek yer imlerinizi ",
+            "desc2": "kapsamaz.",
+            "desc3": " Yer imleri için ana sayfadaki \"Dışa Aktar\"ı kullanın."
         },
         "failed": "Yedekleme başarısız! Konsolu kontrol edin. Veriler silinmedi.",
         "note": "Yedeklemeler Kurallarınızı, Klasörlerinizi, Etiketlerinizi ve Yoksayılan URL'lerinizi içerir. Gerçek yer imlerinizi <1>içermez</1>. Yer imleri için ana sayfadaki \"Dışa Aktar\"ı kullanın."
@@ -369,5 +399,12 @@
         "toggle": "Notu Aç/Kapat",
         "placeholder": "Kişisel bir not ekleyin...",
         "chromeWarning": "⚠ Notlar JSON dışa aktarımında korunur. Chrome, HTML içe aktarımında notları yoksayar."
+    },
+    "errorBoundary": {
+        "title": "Bir şeyler ters gitti",
+        "desc": "Beklenmedik bir hata oluştu. Verileriniz tarayıcının yerel depolamasında güvende.",
+        "details": "Hata detayları",
+        "tryAgain": "Tekrar Dene",
+        "reload": "Sayfayı Yenile"
     }
 }

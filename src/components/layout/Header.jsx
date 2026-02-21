@@ -260,11 +260,23 @@ export function Header({
                     <DropdownLabel>{t('settings.language.label')}</DropdownLabel>
                     <DropdownItem onClick={() => i18n.changeLanguage('tr')} className={i18n.language.startsWith('tr') ? "bg-accent" : ""}>
                         <span className="mr-2 text-lg">🇹🇷</span>
-                        Türkçe
+                        {t('settings.languages.tr')}
                     </DropdownItem>
                     <DropdownItem onClick={() => i18n.changeLanguage('en')} className={i18n.language.startsWith('en') ? "bg-accent" : ""}>
                         <span className="mr-2 text-lg">🇺🇸</span>
-                        English
+                        {t('settings.languages.en')}
+                    </DropdownItem>
+                    <DropdownItem onClick={() => i18n.changeLanguage('es')} className={i18n.language.startsWith('es') ? "bg-accent" : ""}>
+                        <span className="mr-2 text-lg">🇪🇸</span>
+                        {t('settings.languages.es')}
+                    </DropdownItem>
+                    <DropdownItem onClick={() => i18n.changeLanguage('fr')} className={i18n.language.startsWith('fr') ? "bg-accent" : ""}>
+                        <span className="mr-2 text-lg">🇫🇷</span>
+                        {t('settings.languages.fr')}
+                    </DropdownItem>
+                    <DropdownItem onClick={() => i18n.changeLanguage('de')} className={i18n.language.startsWith('de') ? "bg-accent" : ""}>
+                        <span className="mr-2 text-lg">🇩🇪</span>
+                        {t('settings.languages.de')}
                     </DropdownItem>
 
                     <DropdownSeparator />

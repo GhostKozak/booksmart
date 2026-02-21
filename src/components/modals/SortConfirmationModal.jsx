@@ -21,22 +21,22 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
         <SimpleModal
             isOpen={isOpen}
             onClose={onClose}
-            title={t('modals.sortConf.title', 'Confirm Changes')}
+            title={t('modals.sortConf.title')}
             className="max-w-2xl"
         >
             <div className="space-y-4">
                 <p className="text-muted-foreground">
-                    {t('modals.sortConf.summary', 'Please review the proposed changes before applying them.')}
+                    {t('modals.sortConf.summary')}
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 text-center mb-4">
                     <div className="bg-muted/50 p-3 rounded-lg">
                         <div className="text-2xl font-bold">{totalUpdates}</div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.bookmarks', 'Bookmarks')}</div>
+                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.bookmarks')}</div>
                     </div>
                     <div className="bg-muted/50 p-3 rounded-lg">
                         <div className="text-2xl font-bold">{folderChanges}</div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.folders', 'Folder Moves')}</div>
+                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.folders')}</div>
                     </div>
                     {/* We can add more stats if needed */}
                 </div>
@@ -45,8 +45,8 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                     <table className="w-full text-sm text-left">
                         <thead className="bg-muted/50 sticky top-0">
                             <tr>
-                                <th className="p-2 font-medium">{t('modals.sortConf.cols.title', 'Title')}</th>
-                                <th className="p-2 font-medium">{t('modals.sortConf.cols.changes', 'Changes')}</th>
+                                <th className="p-2 font-medium">{t('modals.sortConf.cols.title')}</th>
+                                <th className="p-2 font-medium">{t('modals.sortConf.cols.changes')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -81,7 +81,7 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                                             <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
                                                 <Tag className="h-3 w-3 shrink-0" />
                                                 {/* Simple diff visualization might be complex, just showing all tags or new ones if we can calculate */}
-                                                <span className="text-xs">Tags updated</span>
+                                                <span className="text-xs">{t('modals.sortConf.tagsUpdated')}</span>
                                             </div>
                                         )}
                                     </td>
@@ -96,7 +96,7 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                         {t('common.cancel')}
                     </Button>
                     <Button onClick={onConfirm}>
-                        {t('modals.sortConf.confirm', 'Apply Changes')}
+                        {t('modals.sortConf.confirm')}
                     </Button>
                 </div>
             </div>

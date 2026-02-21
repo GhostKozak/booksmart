@@ -106,6 +106,23 @@
         "language": {
             "label": "Language",
             "select": "Select Language"
+        },
+        "ai": {
+            "title": "AI Settings",
+            "model": "AI Model",
+            "apiKey": "API Key",
+            "saved": "Saved!",
+            "save": "Save AI Settings",
+            "reqOpenAI": "Requires OpenAI API Key",
+            "reqGemini": "Requires Google Gemini API Key",
+            "reqOpenRouter": "Requires OpenRouter API Key"
+        },
+        "languages": {
+            "en": "English",
+            "tr": "Turkish",
+            "es": "Español",
+            "fr": "Français",
+            "de": "Deutsch"
         }
     },
     "common": {
@@ -131,7 +148,7 @@
             "tags": "Apply Tags",
             "update": "Update Rule",
             "add": "Add Rule",
-            "example": "Example: <1>Main &gt; Subfolder</1> for nested structure.",
+            "example": "Example",
             "types": {
                 "keyword": "Keyword",
                 "domain": "Domain",
@@ -144,7 +161,8 @@
                 "value_exact": "e.g., https://example.com/page",
                 "folder": "Select or create folder...",
                 "tags": "Enter tags separated by commas..."
-            }
+            },
+            "forNested": "for nested structure."
         },
         "ruleConflict": {
             "title": "Rule Conflict Detected",
@@ -189,7 +207,10 @@
             "title": "Clear All Data",
             "content": "This will delete <strong>ALL</strong> Bookmarks, Rules, Custom Folders, Tags, and Settings.<br /><br />This action cannot be undone unless you have a backup.",
             "backupAndClear": "Backup and Clear",
-            "clearEverything": "Clear Everything"
+            "clearEverything": "Clear Everything",
+            "warning1": "This will delete ",
+            "warning2": "ALL",
+            "warning3": " Bookmarks, Rules, Custom Folders, Tags, and Settings."
         },
         "shortcuts": {
             "title": "Keyboard Shortcuts",
@@ -213,7 +234,13 @@
             "cols": {
                 "title": "Title",
                 "changes": "Changes"
-            }
+            },
+            "tagsUpdated": "Tags updated"
+        },
+        "settings": {
+            "desc": "Configure your AI model to enable \"Magic Sort\". API keys are stored locally.",
+            "cancel": "Cancel",
+            "saveContinue": "Save & Continue"
         }
     },
     "backup": {
@@ -236,7 +263,10 @@
             "button": "Select File...",
             "restoring": "Restoring...",
             "success": "Restored! Reloading...",
-            "error": "Invalid backup file."
+            "error": "Invalid backup file.",
+            "desc1": "Backups include your Rules, Folders, Tags, and Ignored URLs. They do ",
+            "desc2": "not",
+            "desc3": " include your actual bookmarks. Use \"Export\" on the main page for bookmarks."
         },
         "failed": "Backup failed! Check console. Data was NOT cleared.",
         "note": "Backups include your Rules, Folders, Tags, and Ignored URLs. They do <1>not</1> include your actual bookmarks. Use \"Export\" on the main page for bookmarks."
@@ -370,5 +400,12 @@
         "toggle": "Toggle Note",
         "placeholder": "Add a personal note...",
         "chromeWarning": "⚠ Notes are preserved in JSON export. Chrome ignores notes in HTML import."
+    },
+    "errorBoundary": {
+        "title": "Something went wrong",
+        "desc": "An unexpected error occurred. Your data is safe in the browser's local storage.",
+        "details": "Error details",
+        "tryAgain": "Try Again",
+        "reload": "Reload Page"
     }
 }

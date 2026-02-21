@@ -3,8 +3,9 @@
  * Licensed under the GNU GPLv3 or later.
  */
 import { Component } from 'react'
+import { withTranslation } from 'react-i18next'
 
-export class ErrorBoundary extends Component {
+class ErrorBoundaryComponent extends Component {
     constructor(props) {
         super(props)
         this.state = { hasError: false, error: null }
@@ -23,6 +24,8 @@ export class ErrorBoundary extends Component {
     }
 
     render() {
+        const { t } = this.props;
+
         if (this.state.hasError) {
             return (
                 <div className="h-[100dvh] flex items-center justify-center bg-background text-foreground p-6">
@@ -36,16 +39,16 @@ export class ErrorBoundary extends Component {
                         </div>
                         <div className="space-y-2">
                             <h1 className="text-2xl font-bold tracking-tight">
-                                Something went wrong
+                                {t ? t('errorBoundary.title') : ''}
                             </h1>
                             <p className="text-muted-foreground text-sm">
-                                An unexpected error occurred. Your data is safe in the browser's local storage.
+                                {t ? t('errorBoundary.desc') : ''}
                             </p>
                         </div>
                         {this.state.error && (
                             <details className="text-left bg-muted/50 rounded-lg p-3 text-xs">
                                 <summary className="cursor-pointer font-medium text-muted-foreground">
-                                    Error details
+                                    {t ? t('errorBoundary.details') : ''}
                                 </summary>
                                 <pre className="mt-2 overflow-auto text-red-500/80 whitespace-pre-wrap break-words">
                                     {this.state.error.toString()}
@@ -57,13 +60,13 @@ export class ErrorBoundary extends Component {
                                 onClick={this.handleReset}
                                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
                             >
-                                Try Again
+                                {t ? t('errorBoundary.tryAgain') : ''}
                             </button>
                             <button
                                 onClick={() => window.location.reload()}
                                 className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
                             >
-                                Reload Page
+                                {t ? t('errorBoundary.reload') : ''}
                             </button>
                         </div>
                     </div>
@@ -74,3 +77,5 @@ export class ErrorBoundary extends Component {
         return this.props.children
     }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryComponent)

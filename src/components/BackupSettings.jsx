@@ -149,7 +149,7 @@ export function BackupSettings() {
                 <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 dark:text-amber-400">
                     <Trans i18nKey="backup.note">
-                        Backups include your Rules, Folders, Tags, and Ignored URLs. They do <strong>not</strong> include your actual bookmarks. Use "Export" on the main page for bookmarks.
+                        {t('backup.restore.desc1')}<strong>{t('backup.restore.desc2')}</strong>{t('backup.restore.desc3')}
                     </Trans>
                 </p>
             </div>

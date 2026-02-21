@@ -1,0 +1,411 @@
+{
+    "app": {
+        "title": "BookSmart",
+        "searchPlaceholder": "Lesezeichen durchsuchen...",
+        "addBookmark": "Lesezeichen Hinzufügen"
+    },
+    "header": {
+        "undo": "Rückgängig (Strg+Z)",
+        "redo": "Wiederherstellen (Strg+Y)",
+        "history": "Versionsverlauf",
+        "advancedSearch": "Erweiterte Suchfilter",
+        "advanced": {
+            "mode": "Modus",
+            "modes": {
+                "simple": "Einfach",
+                "simpleTitle": "Genaue Übereinstimmung oder einfacher Text",
+                "fuzzy": "Unscharf",
+                "fuzzyTitle": "Ungefähre Übereinstimmung (Tippfehlertolerant)",
+                "regex": "Regex",
+                "regexTitle": "Regulärer Ausdruck"
+            },
+            "date": {
+                "added": "Hinzugefügt",
+                "from": "Von",
+                "to": "Bis",
+                "clear": "Leeren"
+            }
+        },
+        "clearSearch": "Suche leeren",
+        "removeDuplicates": "{{count}} Duplikate entfernen",
+        "cleanUrls": "{{count}} URLs bereinigen",
+        "listView": "Listenansicht",
+        "gridView": "Rasteransicht",
+        "analytics": "Analytik",
+        "showThumbnails": "Miniaturansichten anzeigen",
+        "hideThumbnails": "Miniaturansichten ausblenden",
+        "checkHealth": "Gesundheit prüfen",
+        "checking": "Prüfe...",
+        "export": "Exportieren",
+        "closeFile": "Datei Schließen",
+        "shortcuts": "Tastaturkürzel (?)",
+        "settings": "Einstellungen",
+        "maintenance": "Wartung",
+        "view": "Ansichtsoptionen",
+        "tools": "Werkzeuge",
+        "system": "System",
+        "lightMode": "Heller Modus",
+        "darkMode": "Dunkler Modus",
+        "regexPlaceholder": "z.B. ^https?://.*\\.dev",
+        "sort": {
+            "label": "Sortieren Nach",
+            "default": "Standard",
+            "titleAz": "Titel (A → Z)",
+            "titleZa": "Titel (Z → A)",
+            "dateNew": "Datum (Neueste)",
+            "dateOld": "Datum (Älteste)",
+            "domain": "Domain",
+            "folder": "Ordner"
+        }
+    },
+    "sidebar": {
+        "allBookmarks": "Alle Lesezeichen",
+        "uncategorized": "Nicht kategorisiert",
+        "myFolders": "Meine Ordner",
+        "myTags": "Meine Tags",
+        "discovered": "Entdeckt",
+        "noTags": "Keine Tags gefunden.",
+        "sections": {
+            "library": "Bibliothek",
+            "tags": "Tags",
+            "folders": "Ordner",
+            "smartFilters": "Intelligente Filter",
+            "rules": "Regeln"
+        },
+        "smartFilters": {
+            "duplicates": "Duplikate",
+            "deadLinks": "Tote Links",
+            "longUrls": "Lange URLs (200+)",
+            "media": "Medien & Videos",
+            "social": "Soziale Medien",
+            "shopping": "Einkaufen",
+            "news": "Nachrichten & Artikel",
+            "old": "Vollgestaubte Regale (> 5J)",
+            "http": "Nicht sicher (HTTP)",
+            "untitled": "Ohne Titel / Generisch",
+            "docs": "Dokumente & PDFs"
+        },
+        "rules": {
+            "title": "Regeln",
+            "addRule": "Regel Hinzufügen",
+            "noRules": "Noch keine Regeln definiert.",
+            "createFirst": "Erstellen Sie Ihre erste Regel",
+            "edit": "Regel Bearbeiten",
+            "delete": "Regel Löschen"
+        }
+    },
+    "settings": {
+        "title": "Einstellungen",
+        "tabs": {
+            "general": "Allgemein",
+            "folders": "Ordner",
+            "tags": "Tags",
+            "backup": "Backup & Daten",
+            "rules": "Regeln"
+        },
+        "language": {
+            "label": "Sprache",
+            "select": "Sprache auswählen"
+        },
+        "ai": {
+            "title": "KI-Einstellungen",
+            "model": "KI-Modell",
+            "apiKey": "API-Schlüssel",
+            "saved": "Gespeichert!",
+            "save": "KI-Einstellungen speichern",
+            "reqOpenAI": "Benötigt OpenAI API-Schlüssel",
+            "reqGemini": "Benötigt Google Gemini API-Schlüssel",
+            "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel"
+        },
+        "languages": {
+            "en": "Englisch",
+            "tr": "Türkisch",
+            "es": "Spanisch",
+            "fr": "Französisch",
+            "de": "Deutsch"
+        }
+    },
+    "common": {
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "create": "Erstellen",
+        "actions": "Aktionen",
+        "clearAll": "Alles Löschen",
+        "close": "Schließen",
+        "folder": "Ordner",
+        "tag": "Tag",
+        "noOptions": "Keine Optionen gefunden"
+    },
+    "modals": {
+        "rules": {
+            "newTitle": "Neue Regel",
+            "editTitle": "Regel Bearbeiten",
+            "type": "Typ",
+            "value": "Wert",
+            "targetFolder": "Zielordner",
+            "tags": "Tags Anwenden",
+            "update": "Regel Aktualisieren",
+            "add": "Regel Hinzufügen",
+            "example": "Beispiel",
+            "types": {
+                "keyword": "Schlüsselwort",
+                "domain": "Domain",
+                "exact": "Genaue Übereinstimmung"
+            },
+            "placeholders": {
+                "value": "z.B. youtube.com oder 'tutorial'",
+                "value_keyword": "z.B. tutorial, react, news",
+                "value_domain": "z.B. youtube.com, github.com",
+                "value_exact": "z.B. https://example.com/page",
+                "folder": "Ordner auswählen oder erstellen...",
+                "tags": "Tags durch Kommas getrennt eingeben..."
+            },
+            "forNested": "für verschachtelte Struktur."
+        },
+        "ruleConflict": {
+            "title": "Regelkonflikt Entdeckt",
+            "description": "Mehrere Regeln stimmen mit diesem Lesezeichen mit verschiedenen Zielordnern überein. Tags wurden automatisch zusammengeführt.",
+            "chooseFolder": "Wählen Sie den Zielordner",
+            "fromRule": "Von Regel: {{rule}}",
+            "otherFolder": "Einen anderen Ordner wählen...",
+            "mergedTags": "Zusammengeführte Tags",
+            "tagsAutoMerged": "Tags aus allen übereinstimmenden Regeln werden automatisch zusammengeführt.",
+            "apply": "Anwenden",
+            "skip": "Überspringen",
+            "resolve": "Lösen",
+            "notificationText": "Regelkonflikt(e) gefunden"
+        },
+        "export": {
+            "title": "Lesezeichen Exportieren",
+            "titleSelected": "Auswahl Exportieren ({{count}})",
+            "selectedCount_one": "<0>{{count}}</0> Lesezeichen zum Exportieren ausgewählt.",
+            "selectedCount_other": "<0>{{count}}</0> Lesezeichen zum Exportieren ausgewählt.",
+            "formatSelect": "Exportformat wählen:",
+            "formats": {
+                "html": {
+                    "label": "HTML-Lesezeichen",
+                    "desc": "Standard-Browserformat (Netscape)"
+                },
+                "json": {
+                    "label": "JSON-Daten",
+                    "desc": "Rohdaten für Backup oder Entwicklung"
+                },
+                "csv": {
+                    "label": "CSV-Tabelle",
+                    "desc": "In Excel oder Google Sheets importieren"
+                },
+                "md": {
+                    "label": "Markdown-Liste",
+                    "desc": "Lesbare Liste für Notizen und Blogs"
+                }
+            },
+            "download": "Export Herunterladen"
+        },
+        "clearAll": {
+            "title": "Alle Daten Löschen",
+            "content": "Dies löscht <strong>ALLE</strong> Lesezeichen, Regeln, benutzerdefinierten Ordner, Tags und Einstellungen.<br /><br />Diese Aktion kann nicht rückgängig gemacht werden, es sei denn, Sie haben ein Backup.",
+            "backupAndClear": "Sichern und Löschen",
+            "clearEverything": "Alles Löschen",
+            "warning1": "Dadurch werden ",
+            "warning2": "ALLE",
+            "warning3": " Lesezeichen, Regeln, benutzerdefinierten Ordner, Tags und Einstellungen gelöscht."
+        },
+        "shortcuts": {
+            "title": "Tastaturkürzel",
+            "focusSearch": "Suche Fokusieren",
+            "selectAll": "Alles Auswählen",
+            "deleteSelected": "Auswahl Löschen",
+            "clearSelection": "Auswahl Aufheben",
+            "undo": "Rückgängig",
+            "redo": "Wiederherstellen",
+            "redoAlt": "Wiederherstellen (Alt)",
+            "help": "Kürzel Anzeigen"
+        },
+        "sortConf": {
+            "title": "Änderungen Bestätigen",
+            "summary": "Bitte überprüfen Sie die vorgeschlagenen Änderungen, bevor Sie sie anwenden.",
+            "confirm": "Änderungen Anwenden",
+            "stats": {
+                "bookmarks": "Lesezeichen",
+                "folders": "Ordnerbewegungen"
+            },
+            "cols": {
+                "title": "Titel",
+                "changes": "Änderungen"
+            },
+            "tagsUpdated": "Tags aktualisiert"
+        },
+        "settings": {
+            "desc": "Konfigurieren Sie Ihr KI-Modell, um \"Magic Sort\" zu aktivieren. API-Schlüssel werden lokal gespeichert.",
+            "cancel": "Abbrechen",
+            "saveContinue": "Speichern & Weitergeben"
+        }
+    },
+    "backup": {
+        "autoBackup": {
+            "title": "Automatisches Backup",
+            "desc": "Automatisches Speichern eines lokalen Schnappschusses."
+        },
+        "lastSnapshot": "Letzter lokaler Schnappschuss:",
+        "manual": {
+            "title": "Manuelles Backup"
+        },
+        "export": {
+            "title": "Konfiguration Exportieren",
+            "desc": "Laden Sie alle Ihre Regeln, Ordner und Tags als JSON herunter.",
+            "button": "Jetzt Sichern"
+        },
+        "restore": {
+            "title": "Konfiguration Wiederherstellen",
+            "desc": "Stellen Sie Ihre Einstellungen aus einer Backup-Datei wieder her.",
+            "button": "Datei Auswählen...",
+            "restoring": "Wiederherstellen...",
+            "success": "Wiederhergestellt! Neuladen...",
+            "error": "Ungültige Sicherungsdatei.",
+            "desc1": "Backups umfassen Ihre Regeln, Ordner, Tags und ignorierten URLs. Sie enthalten ",
+            "desc2": "keine",
+            "desc3": " tatsächlichen Lesezeichen. Verwenden Sie \"Exportieren\" auf der Hauptseite für Lesezeichen."
+        },
+        "failed": "Sicherung fehlgeschlagen! Überprüfen Sie die Konsole.",
+        "note": "Backups umfassen Ihre Regeln, Ordner, Tags und ignorierte URLs. Sie enthalten <1>nicht</1> Ihre tatsächlichen Lesezeichen. Verwenden Sie \"Exportieren\"."
+    },
+    "taxonomy": {
+        "folders": "Ordner",
+        "tags": "Tags",
+        "addPlaceholder": "Neue(n) {{type}} hinzufügen...",
+        "noItems": "Noch keine {{type}} definiert.",
+        "dragHelp": "Ziehen zum Neuordnen. Klicken Sie auf den farbigen Punkt, um die Farbe zu ändern.",
+        "discovered": {
+            "title": "In Lesezeichen entdeckt",
+            "add": "Zur permanenten Liste hinzufügen",
+            "addFolder": "Zu Ordnern hinzufügen",
+            "addTag": "Zu Tags hinzufügen",
+            "count": "Anzahl: {{count}}"
+        }
+    },
+    "pwa": {
+        "updateAvailable": "Neue Version verfügbar!",
+        "updateDesc": "Aktualisieren, um anzuwenden.",
+        "updateButton": "Aktualisieren",
+        "close": "Schließen"
+    },
+    "analytics": {
+        "totalBookmarks": "Gesamte Lesezeichen",
+        "accumulationRate": "Akkumulationsrate",
+        "duplicates": "Duplikate",
+        "linkHealth": "Link-Gesundheit",
+        "subtext": {
+            "folders": "In {{count}} Ordnern",
+            "accumulation": "Lesezeichen diesen Monat",
+            "duplicates": "Erscheinen mehrfach",
+            "health": "Tote Links ({{checked}} geprüft)"
+        },
+        "chart": {
+            "title": "Sammlungsgewohnheiten",
+            "tooltip": "Lesezeichen"
+        },
+        "topDomains": "Top-Domains",
+        "oldAlert": {
+            "title": "Vollgestaubte Regale",
+            "desc": "Lesezeichen > 5 Jahre alt",
+            "action": "Überprüfen und aufräumen"
+        }
+    },
+    "actionbar": {
+        "selected": "Ausgewählt",
+        "move": {
+            "button": "Verschieben",
+            "placeholder": "Neuer Ordnername...",
+            "submit": "Verschieben"
+        },
+        "tags": {
+            "button": "Tags",
+            "placeholder": "Tags hinzufügen...",
+            "submit": "Anwenden"
+        },
+        "delete": "Löschen",
+        "markAlive": "Als Aktiv Markieren",
+        "markDead": "Als Tot Markieren",
+        "export": "Auswahl Exportieren",
+        "cleanUrls": "URLs Bereinigen",
+        "autoSort": "Automatisch Sortieren",
+        "sorting": "Sortiere...",
+        "magicSort": "Magisches Sortieren"
+    },
+    "preview": {
+        "open": "Vorschau Öffnen",
+        "reload": "Vorschau Neuladen",
+        "close": "Vorschau Schließen",
+        "loading": "Lade...",
+        "error": "Inhalt lädt nicht? Einige Websites blockieren die Einbettung.",
+        "openExternal": "In Neuem Tab Öffnen"
+    },
+    "offline": "Sie sind offline — Daten werden lokal gespeichert",
+    "bookmarks": {
+        "columns": {
+            "title": "Titel / URL",
+            "status": "Status",
+            "health": "Gesundheit"
+        },
+        "status": {
+            "duplicate": "Duplikat (Wird entfernt)",
+            "original": "Original (Hat Duplikate)",
+            "matched": "Regelübereinstimmung",
+            "conflict": "Regelkonflikt",
+            "unknown": "Unbekannt"
+        },
+        "health": {
+            "checking": "Prüfe...",
+            "alive": "Aktiv",
+            "dead": "Netzwerkfehler (Vermutlich Tot)",
+            "archive": "Suche in Internet Archive",
+            "ignore": "Fehler Ignorieren (Whitelist)",
+            "ignored": "Ignoriert (Whitelist)",
+            "unignore": "Nicht mehr ignorieren"
+        },
+        "row": {
+            "added": "Hinzugefügt {{time}}",
+            "duplicateIn": "Duplikat in: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Legen Sie Ihre Lesezeichen hier ab",
+            "desc": "Ziehen Sie Ihre exportierten Netscape HTML-, JSON-, CSV- oder Markdown-Dateien hierher.",
+            "browse": "Dateien Durchsuchen"
+        },
+        "empty": {
+            "title": "Keine Lesezeichen gefunden",
+            "desc": "Wir konnten keine Lesezeichen finden, die Ihrer Suche entsprechen.",
+            "clearSearch": "Suche Leeren"
+        },
+        "header": {
+            "title": "Ihre Lesezeichen",
+            "moveDocs": "{{count}} nach \"Referenzen\" verschieben"
+        }
+    },
+    "history": {
+        "title": "Versionsverlauf",
+        "redo": "Wiederherstellen-Stapel",
+        "past": "Vergangene Aktionen",
+        "noHistory": "Noch kein Verlauf aufgezeichnet.",
+        "unknown": "Unbekannte Aktion",
+        "redoNext": "Nächste Aktion wiederherstellen",
+        "undoLast": "Letzte Aktion rückgängig machen"
+    },
+    "notes": {
+        "label": "Notizen",
+        "toggle": "Notiz Umschalten",
+        "placeholder": "Persönliche Notiz hinzufügen...",
+        "chromeWarning": "⚠ Notizen bleiben in JSON erhalten. Chrome ignoriert sie in HTML."
+    },
+    "errorBoundary": {
+        "title": "Etwas ist schief gelaufen",
+        "desc": "Ein unerwarteter Fehler ist aufgetreten. Ihre Daten sind im lokalen Speicher sicher.",
+        "details": "Fehlerdetails",
+        "tryAgain": "Erneut versuchen",
+        "reload": "Seite neu laden"
+    }
+}

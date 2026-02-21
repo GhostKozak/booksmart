@@ -65,7 +65,7 @@ export function RuleModal({
                     />
                     <p className="text-[10px] text-muted-foreground">
                         <Trans i18nKey="modals.rules.example">
-                            Example: <code>Main &gt; Subfolder</code> for nested structure.
+                            {t('modals.rules.example')} <code>Main &gt; Subfolder</code> {t('modals.rules.forNested')}
                         </Trans>
                     </p>
                 </div>

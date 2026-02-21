@@ -45,7 +45,7 @@ export function FloatingActionBar({
                 isMenuOpen ? "scale-100 opacity-100 pointer-events-auto translate-y-0" : "scale-90 opacity-0 pointer-events-none translate-y-4"
             )}>
                 <div className="text-sm font-bold text-foreground px-2 mb-1 flex justify-between items-center border-b pb-2">
-                    <span>{t('common.actions', 'Menu')}</span>
+                    <span>{t('common.actions')}</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => setIsMenuOpen(false)}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -58,7 +58,7 @@ export function FloatingActionBar({
                     {/* Primary Actions Group */}
                     <div className="flex flex-col gap-1">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
-                            {t('common.actions', 'Basic Actions')}
+                            {t('common.actions')}
                         </div>
                         <Button variant="destructive" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl shadow-sm" onClick={() => { onDelete(); setIsMenuOpen(false); }}>
                             <Trash2 className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function FloatingActionBar({
                     {/* Organization Group */}
                     <div className="flex flex-col gap-1">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
-                            {t('header.maintenance', 'Organization')}
+                            {t('header.maintenance')}
                         </div>
                         <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-sm text-white" onClick={() => { onAutoSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
                             <Zap className="h-4 w-4 fill-current" />
@@ -91,7 +91,7 @@ export function FloatingActionBar({
                     {/* Maintenance / Health & Export Group */}
                     <div className="flex flex-col gap-1">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
-                            {t('header.tools', 'Link Tools')}
+                            {t('header.tools')}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
@@ -173,7 +173,7 @@ export function FloatingActionBar({
                     onClick={toggleMenu}
                 >
                     {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                    <span className="text-xs font-bold uppercase">{t('common.actions', 'Actions')}</span>
+                    <span className="text-xs font-bold uppercase">{t('common.actions')}</span>
                 </Button>
             </div>
         </div>

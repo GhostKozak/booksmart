@@ -1,0 +1,411 @@
+{
+    "app": {
+        "title": "BookSmart",
+        "searchPlaceholder": "Buscar marcadores...",
+        "addBookmark": "Añadir Marcador"
+    },
+    "header": {
+        "undo": "Deshacer (Ctrl+Z)",
+        "redo": "Rehacer (Ctrl+Y)",
+        "history": "Historial de versiones",
+        "advancedSearch": "Filtros de búsqueda avanzada",
+        "advanced": {
+            "mode": "Modo",
+            "modes": {
+                "simple": "Simple",
+                "simpleTitle": "Coincidencia exacta o texto simple",
+                "fuzzy": "Difuso",
+                "fuzzyTitle": "Coincidencia aproximada (tolerante a errores)",
+                "regex": "Regex",
+                "regexTitle": "Expresión Regular"
+            },
+            "date": {
+                "added": "Añadido",
+                "from": "Desde",
+                "to": "Hasta",
+                "clear": "Limpiar"
+            }
+        },
+        "clearSearch": "Borrar búsqueda",
+        "removeDuplicates": "Eliminar {{count}} duplicados",
+        "cleanUrls": "Limpiar {{count}} URLs",
+        "listView": "Vista de lista",
+        "gridView": "Vista de cuadrícula",
+        "analytics": "Analítica",
+        "showThumbnails": "Mostrar miniaturas",
+        "hideThumbnails": "Ocultar miniaturas",
+        "checkHealth": "Comprobar estado",
+        "checking": "Comprobando...",
+        "export": "Exportar",
+        "closeFile": "Cerrar Archivo",
+        "shortcuts": "Atajos de teclado (?)",
+        "settings": "Ajustes",
+        "maintenance": "Mantenimiento",
+        "view": "Opciones de vista",
+        "tools": "Herramientas",
+        "system": "Sistema",
+        "lightMode": "Modo claro",
+        "darkMode": "Modo oscuro",
+        "regexPlaceholder": "ej. ^https?://.*\\.dev",
+        "sort": {
+            "label": "Ordenar por",
+            "default": "Por defecto",
+            "titleAz": "Título (A → Z)",
+            "titleZa": "Título (Z → A)",
+            "dateNew": "Fecha (Más nuevo)",
+            "dateOld": "Fecha (Más antiguo)",
+            "domain": "Dominio",
+            "folder": "Carpeta"
+        }
+    },
+    "sidebar": {
+        "allBookmarks": "Todos",
+        "uncategorized": "Sin clasificar",
+        "myFolders": "Mis Carpetas",
+        "myTags": "Mis Etiquetas",
+        "discovered": "Descubierto",
+        "noTags": "No se encontraron etiquetas.",
+        "sections": {
+            "library": "Biblioteca",
+            "tags": "Etiquetas",
+            "folders": "Carpetas",
+            "smartFilters": "Filtros Inteligentes",
+            "rules": "Reglas"
+        },
+        "smartFilters": {
+            "duplicates": "Duplicados",
+            "deadLinks": "Enlaces rotos",
+            "longUrls": "URLs largas (200+)",
+            "media": "Multimedia y videos",
+            "social": "Redes Sociales",
+            "shopping": "Compras",
+            "news": "Noticias y Artículos",
+            "old": "Estantes polvorientos (> 5a)",
+            "http": "No seguro (HTTP)",
+            "untitled": "Sin título / Genérico",
+            "docs": "Documentos y PDFs"
+        },
+        "rules": {
+            "title": "Reglas",
+            "addRule": "Añadir Regla",
+            "noRules": "Aún no hay reglas definidas.",
+            "createFirst": "Crea tu primera regla",
+            "edit": "Editar Regla",
+            "delete": "Eliminar Regla"
+        }
+    },
+    "settings": {
+        "title": "Ajustes",
+        "tabs": {
+            "general": "General",
+            "folders": "Carpetas",
+            "tags": "Etiquetas",
+            "backup": "Copia y Datos",
+            "rules": "Reglas"
+        },
+        "language": {
+            "label": "Idioma",
+            "select": "Seleccionar idioma"
+        },
+        "ai": {
+            "title": "Ajustes de IA",
+            "model": "Modelo de IA",
+            "apiKey": "Clave de API",
+            "saved": "¡Guardado!",
+            "save": "Guardar ajustes de IA",
+            "reqOpenAI": "Requiere clave API de OpenAI",
+            "reqGemini": "Requiere clave API de Google Gemini",
+            "reqOpenRouter": "Requiere clave API de OpenRouter"
+        },
+        "languages": {
+            "en": "Inglés",
+            "tr": "Turco",
+            "es": "Español",
+            "fr": "Francés",
+            "de": "Alemán"
+        }
+    },
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "create": "Crear",
+        "actions": "Acciones",
+        "clearAll": "Borrar todo",
+        "close": "Cerrar",
+        "folder": "carpeta",
+        "tag": "etiqueta",
+        "noOptions": "No se encontraron opciones"
+    },
+    "modals": {
+        "rules": {
+            "newTitle": "Nueva Regla",
+            "editTitle": "Editar Regla",
+            "type": "Tipo",
+            "value": "Valor",
+            "targetFolder": "Carpeta de destino",
+            "tags": "Aplicar Etiquetas",
+            "update": "Actualizar Regla",
+            "add": "Añadir Regla",
+            "example": "Ejemplo",
+            "types": {
+                "keyword": "Palabra clave",
+                "domain": "Dominio",
+                "exact": "Coincidencia exacta"
+            },
+            "placeholders": {
+                "value": "ej., youtube.com o 'tutorial'",
+                "value_keyword": "ej., tutorial, react, noticias",
+                "value_domain": "ej., youtube.com, github.com",
+                "value_exact": "ej., https://example.com/page",
+                "folder": "Seleccione o cree una carpeta...",
+                "tags": "Ingrese etiquetas separadas por comas..."
+            },
+            "forNested": "para estructura anidada."
+        },
+        "ruleConflict": {
+            "title": "Conflicto de Reglas Detectado",
+            "description": "Múltiples reglas coinciden con este marcador con diferentes carpetas de destino. Las etiquetas se han combinado automáticamente.",
+            "chooseFolder": "Elegir Carpeta de Destino",
+            "fromRule": "De la regla: {{rule}}",
+            "otherFolder": "Elige otra carpeta...",
+            "mergedTags": "Etiquetas combinadas",
+            "tagsAutoMerged": "Las etiquetas de todas las reglas coincidentes se combinan automáticamente.",
+            "apply": "Aplicar",
+            "skip": "Saltar",
+            "resolve": "Resolver",
+            "notificationText": "conflicto(s) de reglas encontrados"
+        },
+        "export": {
+            "title": "Exportar Marcadores",
+            "titleSelected": "Exportar Seleccionados ({{count}})",
+            "selectedCount_one": "<0>{{count}}</0> marcador seleccionado para exportar.",
+            "selectedCount_other": "<0>{{count}}</0> marcadores seleccionados para exportar.",
+            "formatSelect": "Seleccione el formato de exportación:",
+            "formats": {
+                "html": {
+                    "label": "Marcadores HTML",
+                    "desc": "Formato estándar del navegador (Netscape)"
+                },
+                "json": {
+                    "label": "Datos JSON",
+                    "desc": "Datos brutos para copia de seguridad o desarrollo"
+                },
+                "csv": {
+                    "label": "Hoja de cálculo CSV",
+                    "desc": "Importar a Excel o Google Sheets"
+                },
+                "md": {
+                    "label": "Lista Markdown",
+                    "desc": "Lista legible para notas y blogs"
+                }
+            },
+            "download": "Descargar Exportación"
+        },
+        "clearAll": {
+            "title": "Borrar Todos Los Datos",
+            "content": "Esto eliminará <strong>TODOS</strong> los Marcadores, Reglas, Carpetas Personalizadas, Etiquetas y Ajustes.<br /><br />Esta acción no se puede deshacer a menos que tenga una copia.",
+            "backupAndClear": "Respaldar y Borrar",
+            "clearEverything": "Borrar Todo",
+            "warning1": "Esto eliminará ",
+            "warning2": "TODOS",
+            "warning3": " los marcadores, reglas, carpetas personalizadas, etiquetas y ajustes."
+        },
+        "shortcuts": {
+            "title": "Atajos de teclado",
+            "focusSearch": "Enfocar Búsqueda",
+            "selectAll": "Seleccionar Todo",
+            "deleteSelected": "Eliminar Seleccionados",
+            "clearSelection": "Limpiar Selección",
+            "undo": "Deshacer",
+            "redo": "Rehacer",
+            "redoAlt": "Rehacer (Alt)",
+            "help": "Mostrar Atajos"
+        },
+        "sortConf": {
+            "title": "Confirmar Cambios",
+            "summary": "Revise los cambios propuestos antes de aplicarlos.",
+            "confirm": "Aplicar cambios",
+            "stats": {
+                "bookmarks": "Marcadores",
+                "folders": "Movimientos de Carpetas"
+            },
+            "cols": {
+                "title": "Título",
+                "changes": "Cambios"
+            },
+            "tagsUpdated": "Etiquetas actualizadas"
+        },
+        "settings": {
+            "desc": "Configure su modelo de IA para habilitar \"Ordenación Mágica\". Las claves de API se almacenan localmente.",
+            "cancel": "Cancelar",
+            "saveContinue": "Guardar y Continuar"
+        }
+    },
+    "backup": {
+        "autoBackup": {
+            "title": "Copia de seguridad automática",
+            "desc": "Crea una instantánea local al cambiar las reglas."
+        },
+        "lastSnapshot": "Última instantánea:",
+        "manual": {
+            "title": "Copia Manual"
+        },
+        "export": {
+            "title": "Exportar Configuración",
+            "desc": "Descarga todas tus reglas, carpetas y etiquetas en JSON.",
+            "button": "Respaldar Ahora"
+        },
+        "restore": {
+            "title": "Restaurar Configuración",
+            "desc": "Restaurar tus ajustes desde un archivo de copia.",
+            "button": "Seleccionar archivo...",
+            "restoring": "Restaurando...",
+            "success": "¡Restaurado! Recargando...",
+            "error": "Archivo de copia inválido.",
+            "desc1": "Las copias de seguridad incluyen sus reglas, carpetas, etiquetas y URLs ignoradas. ",
+            "desc2": "No",
+            "desc3": " incluyen los marcadores reales. Utilice \"Exportar\" en la página principal para marcadores."
+        },
+        "failed": "¡La copia de seguridad falló! Comprueba la consola. Los datos NO se borraron.",
+        "note": "Las copias incluyen Reglas, Carpetas, Etiquetas y URLs Ignoradas. No incluyen los marcadores en sí. Usa \"Exportar\" en la página principal."
+    },
+    "taxonomy": {
+        "folders": "Carpetas",
+        "tags": "Etiquetas",
+        "addPlaceholder": "Añadir nueva {{type}}...",
+        "noItems": "No hay {{type}} definidos todavía.",
+        "dragHelp": "Arrastra para reordenar. Haz clic en el punto de color para cambiar el color.",
+        "discovered": {
+            "title": "Descubierto en marcadores",
+            "add": "Añadir a la lista permanente",
+            "addFolder": "Añadir a carpetas permanentes",
+            "addTag": "Añadir a etiquetas permanentes",
+            "count": "cantidad: {{count}}"
+        }
+    },
+    "pwa": {
+        "updateAvailable": "¡Nueva versión disponible!",
+        "updateDesc": "Actualiza para aplicar.",
+        "updateButton": "Actualizar",
+        "close": "Cerrar"
+    },
+    "analytics": {
+        "totalBookmarks": "Total Marcadores",
+        "accumulationRate": "Tasa de acumulación",
+        "duplicates": "Duplicados",
+        "linkHealth": "Salud de Enlaces",
+        "subtext": {
+            "folders": "En {{count}} carpetas",
+            "accumulation": "Añadidos este mes",
+            "duplicates": "Aparecen varias veces",
+            "health": "Enlaces caídos ({{checked}} comp.)"
+        },
+        "chart": {
+            "title": "Hábitos de Colección",
+            "tooltip": "marcadores"
+        },
+        "topDomains": "Dominios Principales",
+        "oldAlert": {
+            "title": "Estantes Polvorientos",
+            "desc": "Marcadores > 5 años de antigüedad",
+            "action": "Revisar y limpiar"
+        }
+    },
+    "actionbar": {
+        "selected": "Seleccionados",
+        "move": {
+            "button": "Mover",
+            "placeholder": "Nombre de carpeta...",
+            "submit": "Mover"
+        },
+        "tags": {
+            "button": "Etiquetas",
+            "placeholder": "Añadir etiquetas...",
+            "submit": "Aplicar"
+        },
+        "delete": "Eliminar",
+        "markAlive": "Marcar como Activo",
+        "markDead": "Marcar como Caído",
+        "export": "Exportar Sel.",
+        "cleanUrls": "Limpiar URLs",
+        "autoSort": "Autoclasificar (Local)",
+        "sorting": "Clasificando...",
+        "magicSort": "Clasificación Mágica"
+    },
+    "preview": {
+        "open": "Abrir Vista Previa",
+        "reload": "Recargar Vista Previa",
+        "close": "Cerrar Vista Previa",
+        "loading": "Cargando...",
+        "error": "¿El contenido no carga? Algunos sitios bloquean la incrustación.",
+        "openExternal": "Abrir en Nueva Pestaña"
+    },
+    "offline": "Estás sin conexión — Los datos se guardan localmente",
+    "bookmarks": {
+        "columns": {
+            "title": "Título / URL",
+            "status": "Estado",
+            "health": "Salud"
+        },
+        "status": {
+            "duplicate": "Duplicado (Será eliminado)",
+            "original": "Original (Tiene duplicados)",
+            "matched": "Coincide con regla",
+            "conflict": "Conflicto de reglas",
+            "unknown": "Desconocido"
+        },
+        "health": {
+            "checking": "Comprobando...",
+            "alive": "Activo",
+            "dead": "Error de Red (Probablemente Caído)",
+            "archive": "Buscar en Internet Archive",
+            "ignore": "Ignorar Error (Lista Blanca)",
+            "ignored": "Ignorado (Lista Blanca)",
+            "unignore": "Dejar de ignorar"
+        },
+        "row": {
+            "added": "Añadido {{time}}",
+            "duplicateIn": "Duplicado en: {{locations}}"
+        }
+    },
+    "main": {
+        "dropzone": {
+            "title": "Suelta tus marcadores aquí",
+            "desc": "Arrastra y suelta tus archivos Netscape HTML (Recomendado), JSON, CSV o Markdown exportados para comenzar.",
+            "browse": "Examinar Archivos"
+        },
+        "empty": {
+            "title": "No se encontraron marcadores",
+            "desc": "No pudimos encontrar marcadores que coincidan con tu búsqueda o filtros.",
+            "clearSearch": "Borrar Búsqueda"
+        },
+        "header": {
+            "title": "Tus Marcadores",
+            "moveDocs": "Mover {{count}} a \"Referencias\""
+        }
+    },
+    "history": {
+        "title": "Historial de Versiones",
+        "redo": "Pila de Rehacer",
+        "past": "Acciones Pasadas",
+        "noHistory": "Todavía no hay un historial registrado.",
+        "unknown": "Acción desconocida",
+        "redoNext": "Rehacer la siguiente acción",
+        "undoLast": "Deshacer la última acción"
+    },
+    "notes": {
+        "label": "Notas",
+        "toggle": "Alternar Nota",
+        "placeholder": "Añade una nota personal...",
+        "chromeWarning": "⚠ Las notas se conservan en JSON. Chrome ignora las notas en HTML."
+    },
+    "errorBoundary": {
+        "title": "Algo salió mal",
+        "desc": "Ocurrió un error inesperado. Sus datos están seguros en el almacenamiento local del navegador.",
+        "details": "Detalles del error",
+        "tryAgain": "Intentar de nuevo",
+        "reload": "Recargar página"
+    }
+}

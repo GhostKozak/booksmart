@@ -37,7 +37,7 @@ export function AISettings() {
     return (
         <div className="space-y-4">
             <div className="space-y-2">
-                <label className="text-sm font-medium">{t('settings.ai.model', 'AI Model')}</label>
+                <label className="text-sm font-medium">{t('settings.ai.model')}</label>
                 <div className="relative">
                     <select
                         className="w-full h-10 px-3 py-2 bg-background border rounded-md text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
@@ -69,7 +69,7 @@ export function AISettings() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium">{t('settings.ai.apiKey', 'API Key')}</label>
+                <label className="text-sm font-medium">{t('settings.ai.apiKey')}</label>
                 <Input
                     type="password"
                     value={apiKey}
@@ -77,14 +77,14 @@ export function AISettings() {
                     placeholder="sk-... or AIza... or sk-or-..."
                 />
                 <p className="text-[10px] text-muted-foreground">
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openai' && 'Requires OpenAI API Key'}
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'gemini' && 'Requires Google Gemini API Key'}
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openrouter' && 'Requires OpenRouter API Key'}
+                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openai' && t('settings.ai.reqOpenAI')}
+                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'gemini' && t('settings.ai.reqGemini')}
+                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openrouter' && t('settings.ai.reqOpenRouter')}
                 </p>
             </div>
 
             <Button onClick={handleSave} className="w-full" size="sm">
-                {saved ? '✓ ' + t('settings.ai.saved', 'Saved!') : t('settings.ai.save', 'Save AI Settings')}
+                {saved ? '✓ ' + t('settings.ai.saved') : t('settings.ai.save')}
             </Button>
         </div>
     )

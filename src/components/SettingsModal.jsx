@@ -4,8 +4,10 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { AI_MODELS, DEFAULT_MODEL } from "../services/ai-service"
+import { useTranslation } from "react-i18next"
 
 export function SettingsModal({ isOpen, onClose, onSave }) {
+    const { t } = useTranslation()
     const [apiKey, setApiKey] = useState("")
     const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
 
@@ -41,14 +43,14 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>AI Settings</DialogTitle>
+                    <DialogTitle>{t('settings.ai.title')}</DialogTitle>
                     <DialogDescription>
-                        Configure your AI model to enable "Magic Sort". API keys are stored locally.
+                        {t('modals.settings.desc')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="model">AI Model</Label>
+                        <Label htmlFor="model">{t('settings.ai.model')}</Label>
                         <div className="relative">
                             <select
                                 id="model"
@@ -82,7 +84,7 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="apiKey">API Key</Label>
+                        <Label htmlFor="apiKey">{t('settings.ai.apiKey')}</Label>
                         <Input
                             id="apiKey"
                             type="password"
@@ -98,8 +100,8 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={handleSave}>Save & Continue</Button>
+                    <Button variant="outline" onClick={onClose}>{t('modals.settings.cancel')}</Button>
+                    <Button onClick={handleSave}>{t('modals.settings.saveContinue')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

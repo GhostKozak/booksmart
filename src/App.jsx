@@ -281,7 +281,7 @@ function App() {
               onClick={() => ui.setSettingsTab('ai')}
               className="text-xs h-7"
             >
-              {t('settings.tabs.ai', 'AI')}
+              {t('settings.tabs.ai')}
             </Button>
             <Button
               variant={ui.settingsTab === 'backup' ? "secondary" : "ghost"}
