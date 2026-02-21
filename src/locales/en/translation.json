@@ -43,7 +43,10 @@
         "maintenance": "Maintenance",
         "view": "View Options",
         "tools": "Tools",
-        "system": "System"
+        "system": "System",
+        "lightMode": "Light Mode",
+        "darkMode": "Dark Mode",
+        "regexPlaceholder": "e.g. ^https?://.*\\.dev"
     },
     "sidebar": {
         "allBookmarks": "All Bookmarks",
@@ -105,7 +108,8 @@
         "clearAll": "Clear All",
         "close": "Close",
         "folder": "folder",
-        "tag": "tag"
+        "tag": "tag",
+        "noOptions": "No options found"
     },
     "modals": {
         "rules": {
@@ -130,11 +134,30 @@
             }
         },
         "export": {
-            "title": "Export Configuration",
-            "format": "Format",
-            "include": "Include",
-            "download": "Download",
-            "copy": "Copy to Clipboard"
+            "title": "Export Bookmarks",
+            "titleSelected": "Export Selected ({{count}})",
+            "selectedCount_one": "<0>{{count}}</0> bookmark selected for export.",
+            "selectedCount_other": "<0>{{count}}</0> bookmarks selected for export.",
+            "formatSelect": "Select export format:",
+            "formats": {
+                "html": {
+                    "label": "HTML Bookmarks",
+                    "desc": "Standard browser format (Netscape)"
+                },
+                "json": {
+                    "label": "JSON Data",
+                    "desc": "Raw data for backup or development"
+                },
+                "csv": {
+                    "label": "CSV Spreadsheet",
+                    "desc": "Import into Excel or Google Sheets"
+                },
+                "md": {
+                    "label": "Markdown List",
+                    "desc": "Readable list for notes and blogs"
+                }
+            },
+            "download": "Download Export"
         },
         "clearAll": {
             "title": "Clear All Data",
@@ -214,7 +237,12 @@
             "title": "Collection Habits",
             "tooltip": "bookmarks"
         },
-        "topDomains": "Top Domains"
+        "topDomains": "Top Domains",
+        "oldAlert": {
+            "title": "Dusty Shelves",
+            "desc": "Bookmarks > 5 years old",
+            "action": "Review and clean up"
+        }
     },
     "actionbar": {
         "selected": "Selected",
@@ -278,5 +306,14 @@
             "title": "Your Bookmarks",
             "moveDocs": "Move {{count}} to \"References\""
         }
+    },
+    "history": {
+        "title": "Version History",
+        "redo": "Redo Stack",
+        "past": "Past Actions",
+        "noHistory": "No history recorded yet.",
+        "unknown": "Unknown Action",
+        "redoNext": "Redo next action",
+        "undoLast": "Undo last action"
     }
 }

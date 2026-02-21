@@ -104,7 +104,7 @@ export function Header({
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             ref={searchInputRef}
-                            placeholder={searchMode === 'regex' ? "e.g. ^https?://.*\\.dev" : t('app.searchPlaceholder')}
+                            placeholder={searchMode === 'regex' ? t('header.regexPlaceholder') : t('app.searchPlaceholder')}
                             className={cn(
                                 "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
                                 searchMode === 'regex' && "font-mono text-xs"
@@ -234,7 +234,7 @@ export function Header({
                     <DropdownLabel>{t('header.system')}</DropdownLabel>
                     <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                         {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-                        {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                        {theme === "dark" ? t('header.lightMode') : t('header.darkMode')}
                     </DropdownItem>
 
                     <DropdownSeparator />

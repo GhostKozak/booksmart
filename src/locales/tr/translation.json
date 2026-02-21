@@ -43,7 +43,10 @@
         "maintenance": "Bakım",
         "view": "Görünüm",
         "tools": "Araçlar",
-        "system": "Sistem"
+        "system": "Sistem",
+        "lightMode": "Açık Mod",
+        "darkMode": "Koyu Mod",
+        "regexPlaceholder": "örn: ^https?://.*\\.dev"
     },
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
@@ -105,7 +108,8 @@
         "clearAll": "Tümünü Temizle",
         "close": "Kapat",
         "folder": "klasör",
-        "tag": "etiket"
+        "tag": "etiket",
+        "noOptions": "Seçenek bulunamadı"
     },
     "modals": {
         "rules": {
@@ -130,11 +134,29 @@
             }
         },
         "export": {
-            "title": "Yapılandırmayı Dışa Aktar",
-            "format": "Biçim",
-            "include": "Dahil Et",
-            "download": "İndir",
-            "copy": "Panoya Kopyala"
+            "title": "Yer İmlerini Dışa Aktar",
+            "titleSelected": "Seçilenleri Dışa Aktar ({{count}})",
+            "selectedCount": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
+            "formatSelect": "Dışa aktarma formatını seçin:",
+            "formats": {
+                "html": {
+                    "label": "HTML Yer İmleri",
+                    "desc": "Standart tarayıcı formatı (Netscape)"
+                },
+                "json": {
+                    "label": "JSON Verisi",
+                    "desc": "Yedekleme veya geliştirme için ham veri"
+                },
+                "csv": {
+                    "label": "CSV Tablosu",
+                    "desc": "Excel veya Google E-Tablolar'a aktarın"
+                },
+                "md": {
+                    "label": "Markdown Listesi",
+                    "desc": "Notlar ve bloglar için okunabilir liste"
+                }
+            },
+            "download": "Dışa Aktarımı İndir"
         },
         "clearAll": {
             "title": "Tüm Verileri Temizle",
@@ -214,7 +236,12 @@
             "title": "Toplama Alışkanlıkları",
             "tooltip": "yer imi"
         },
-        "topDomains": "En İyi Alan Adları"
+        "topDomains": "En İyi Alan Adları",
+        "oldAlert": {
+            "title": "Tozlu Raflar",
+            "desc": "5 yıldan eski yer imleri",
+            "action": "İncele ve temizle"
+        }
     },
     "actionbar": {
         "selected": "Seçildi",
@@ -278,5 +305,14 @@
             "title": "Yer İmleriniz",
             "moveDocs": "{{count}} adeti \"References\" klasörüne taşı"
         }
+    },
+    "history": {
+        "title": "Sürüm Geçmişi",
+        "redo": "Yineleme Listesi",
+        "past": "Geçmiş İşlemler",
+        "noHistory": "Henüz geçmiş kaydedilmedi.",
+        "unknown": "Bilinmeyen İşlem",
+        "redoNext": "Sıradaki işlemi yinele",
+        "undoLast": "Son işlemi geri al"
     }
 }
