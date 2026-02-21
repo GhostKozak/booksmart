@@ -12,22 +12,29 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
 
     // Common grid layout to ensure perfect alignment
     // Checkbox | Eye | Title | Location | Status | Health
-    const gridLayout = "lg:grid lg:grid-cols-[40px_40px_minmax(0,3fr)_minmax(0,2fr)_40px_40px] lg:gap-4 lg:items-center lg:px-4"
+    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,3fr)_minmax(0,2fr)_80px_80px_40px] lg:gap-4 lg:items-center lg:px-4"
 
     const Header = () => (
-        <div className={cn("bg-background z-50 border-b py-3 font-medium uppercase text-xs text-muted-foreground grid w-full", gridLayout)}>
-            <div className="flex justify-center z-20">
+        <div className={cn(
+            "bg-background z-10 sticky top-0 border-b py-2 sm:py-3 font-medium uppercase text-[10px] sm:text-xs text-muted-foreground w-full",
+            "flex items-center px-3", // Mobile: Flex layout
+            "lg:grid lg:px-4 lg:items-center", // Desktop: Grid layout
+            gridLayout
+        )}>
+            <div className="flex items-center gap-3 lg:justify-center">
                 <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={toggleAll}
-                    className="bg-card z-20"
                 />
+                <span className="lg:hidden normal-case font-semibold text-foreground/80">
+                    {t('common.selectAll', 'Select All')}
+                </span>
             </div>
-            <div className="text-center">{t('header.view')}</div>
-            <div className="px-2">Title / URL</div>
-            <div className="px-2 text-left">{t('sidebar.sections.folders')}</div>
-            <div className="text-center">Status</div>
-            <div className="text-center">Health</div>
+            <div className="hidden lg:block">{t('bookmarks.columns.title')}</div>
+            <div className="hidden lg:block text-left">{t('sidebar.sections.folders')}</div>
+            <div className="hidden lg:block text-center">{t('bookmarks.columns.status')}</div>
+            <div className="hidden lg:block text-center">{t('bookmarks.columns.health')}</div>
+            <div className="hidden lg:block text-center">{t('header.view')}</div>
         </div>
     )
 

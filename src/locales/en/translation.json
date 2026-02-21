@@ -288,6 +288,11 @@
     },
     "offline": "You are offline — Data is saved locally",
     "bookmarks": {
+        "columns": {
+            "title": "Title / URL",
+            "status": "Status",
+            "health": "Health"
+        },
         "status": {
             "duplicate": "Duplicate (Will be removed)",
             "original": "Original (Has duplicates)",

@@ -41,7 +41,7 @@ export function Header({
     const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
 
     return (
-        <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
+        <header className="border-b h-16 flex items-center justify-between px-4 sm:px-6 bg-card/50 backdrop-blur-sm sticky top-0 z-40">
             <div className="flex items-center gap-2">
 
 

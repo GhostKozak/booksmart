@@ -27,7 +27,7 @@ export function BookmarkRowMobile({
                 <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(bookmark.id)}
-                    className="mt-1 bg-card shrink-0 z-20"
+                    className="mt-1 shrink-0 z-20"
                 />
 
                 <Favicon url={bookmark.url} className="w-5 h-5 mt-0.5 shrink-0" />

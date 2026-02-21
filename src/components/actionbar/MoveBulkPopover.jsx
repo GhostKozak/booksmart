@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Folder, FolderInput } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../lib/utils';
 
-export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
+export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle, isVertical = false }) {
     const { t } = useTranslation();
     const [targetFolder, setTargetFolder] = useState('');
     const inputRef = useRef(null);
@@ -24,9 +25,14 @@ export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
     };
 
     return (
-        <div className="relative">
+        <div className={cn("relative", isVertical && "w-full")}>
             {isOpen && (
-                <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-popover border rounded-lg p-3 shadow-xl w-64 animate-in zoom-in-95 duration-200 flex flex-col gap-2 z-50">
+                <div className={cn(
+                    "bg-popover border rounded-lg p-3 shadow-xl animate-in zoom-in-95 duration-200 flex flex-col gap-2 z-[110]",
+                    isVertical
+                        ? "relative mt-1 mb-2 w-full left-0 translate-x-0"
+                        : "absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64"
+                )}>
                     <div className="flex items-center gap-2">
                         <input
                             ref={inputRef}
@@ -65,11 +71,17 @@ export function MoveBulkPopover({ allFolders, onMove, isOpen, onToggle }) {
             <Button
                 variant={isOpen ? "secondary" : "outline"}
                 size="sm"
-                className="rounded-full gap-2 h-9 sm:h-8 px-3 sm:px-4 shrink-0"
+                className={cn(
+                    "rounded-full gap-3 h-9 sm:h-8 px-3 sm:px-4 shrink-0 overflow-hidden",
+                    isVertical ? "w-full justify-start rounded-xl h-10 border-none px-2" : "justify-center"
+                )}
                 onClick={onToggle}
             >
-                <FolderInput className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden sm:inline">{t('actionbar.move.button')}</span>
+                <FolderInput className="h-4 w-4 sm:h-3.5 sm:w-3.5 shrink-0" />
+                <span className={cn(
+                    "truncate",
+                    !isVertical && "hidden sm:inline"
+                )}>{t('actionbar.move.button')}</span>
             </Button>
         </div>
     );

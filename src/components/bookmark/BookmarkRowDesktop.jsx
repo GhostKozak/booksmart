@@ -27,25 +27,12 @@ export function BookmarkRowDesktop({
                 <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(bookmark.id)}
-                    className="bg-card z-20"
+                    className="z-20"
                 />
             </div>
 
-            {/* Preview Button (Col 2) */}
-            <div className="flex justify-center">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
-                    onClick={() => onPreview(bookmark)}
-                    title={t('preview.open')}
-                >
-                    <Eye className="h-4 w-4" />
-                </Button>
-            </div>
-
-            {/* Title / URL (Col 3) */}
-            <div className="flex flex-col min-w-0 pr-4 py-2">
+            {/* Title / URL (Col 2) */}
+            <div className="flex flex-col min-w-0 py-2">
                 <div className="flex items-center gap-2 min-w-0">
                     <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
                     <span className={cn(
@@ -76,8 +63,8 @@ export function BookmarkRowDesktop({
                 )}
             </div>
 
-            {/* Folder Location (Col 4) */}
-            <div className="px-2 flex items-center gap-2">
+            {/* Folder Location (Col 3) */}
+            <div className="flex items-center gap-2">
                 {bookmark.newFolder && bookmark.newFolder !== bookmark.originalFolder ? (
                     <>
                         <BookmarkFolderBadge
@@ -102,15 +89,32 @@ export function BookmarkRowDesktop({
                 )}
             </div>
 
-            {/* Status Icon (Col 5) */}
-            <BookmarkStatusIcon bookmark={bookmark} />
+            {/* Status Icon (Col 4) */}
+            <div className="flex justify-center w-full">
+                <BookmarkStatusIcon bookmark={bookmark} />
+            </div>
 
-            {/* Health Icon (Col 6) */}
-            <BookmarkHealthStatus
-                url={bookmark.url}
-                status={healthStatus}
-                onToggleIgnore={toggleIgnoreUrl}
-            />
+            {/* Health Icon (Col 5) */}
+            <div className="flex justify-center w-full">
+                <BookmarkHealthStatus
+                    url={bookmark.url}
+                    status={healthStatus}
+                    onToggleIgnore={toggleIgnoreUrl}
+                />
+            </div>
+
+            {/* Preview Button (Col 6) */}
+            <div className="flex justify-center">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                    onClick={() => onPreview(bookmark)}
+                    title={t('preview.open')}
+                >
+                    <Eye className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
     )
 }

@@ -22,68 +22,68 @@ export function AdvancedSearch({
             <div className="flex flex-col gap-4">
 
                 {/* Search Modes */}
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="text-sm font-medium text-muted-foreground w-20">{t('header.advanced.mode')}</div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="text-sm font-medium text-muted-foreground sm:w-20">{t('header.advanced.mode')}</div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <Button
                             variant={searchMode === 'simple' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setSearchMode('simple')}
-                            className="h-7 text-xs"
+                            className="h-8 text-xs flex-1 sm:flex-none py-1 px-3"
                             title={t('header.advanced.modes.simpleTitle')}
                         >
-                            <Type className="h-3 w-3 mr-1.5" />
-                            {t('header.advanced.modes.simple')}
+                            <Type className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('header.advanced.modes.simple')}</span>
                         </Button>
 
                         <Button
                             variant={searchMode === 'fuzzy' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setSearchMode('fuzzy')}
-                            className="h-7 text-xs"
+                            className="h-8 text-xs flex-1 sm:flex-none py-1 px-3"
                             title={t('header.advanced.modes.fuzzyTitle')}
                         >
-                            <Search className="h-3 w-3 mr-1.5" />
-                            {t('header.advanced.modes.fuzzy')}
+                            <Search className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('header.advanced.modes.fuzzy')}</span>
                         </Button>
 
                         <Button
                             variant={searchMode === 'regex' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setSearchMode('regex')}
-                            className="h-7 text-xs font-mono"
+                            className="h-8 text-xs font-mono flex-1 sm:flex-none py-1 px-3"
                             title={t('header.advanced.modes.regexTitle')}
                         >
-                            <Regex className="h-3 w-3 mr-1.5" />
-                            {t('header.advanced.modes.regex')}
+                            <Regex className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                            <span className="truncate">{t('header.advanced.modes.regex')}</span>
                         </Button>
                     </div>
                 </div>
 
                 {/* Date Filter */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pt-2 border-t">
-                    <div className="text-sm font-medium text-muted-foreground flex items-center gap-2 w-20">
-                        <Calendar className="h-4 w-4" />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-4 border-t">
+                    <div className="text-sm font-medium text-muted-foreground flex items-center gap-2 sm:w-20">
+                        <Calendar className="h-4 w-4 shrink-0" />
                         {t('header.advanced.date.added')}
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{t('header.advanced.date.from')}</span>
+                    <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-3 flex-1 overflow-hidden">
+                        <div className="flex items-center gap-2 flex-1">
+                            <span className="text-xs text-muted-foreground shrink-0 w-8 sm:w-auto">{t('header.advanced.date.from')}</span>
                             <Input
                                 type="date"
-                                className="h-8 w-auto min-w-[130px] text-xs px-2"
+                                className="h-9 w-full sm:w-36 text-xs px-2"
                                 value={dateFilter.start || ''}
                                 onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value }))}
                             />
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{t('header.advanced.date.to')}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                            <span className="text-xs text-muted-foreground shrink-0 w-8 sm:w-auto">{t('header.advanced.date.to')}</span>
                             <Input
                                 type="date"
-                                className="h-8 w-auto min-w-[130px] text-xs px-2"
+                                className="h-9 w-full sm:w-36 text-xs px-2"
                                 value={dateFilter.end || ''}
                                 onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value }))}
                             />
@@ -93,7 +93,7 @@ export function AdvancedSearch({
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 ml-auto sm:ml-0"
+                                className="h-9 px-3 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
                                 onClick={() => setDateFilter({ start: null, end: null })}
                             >
                                 {t('header.advanced.date.clear')}

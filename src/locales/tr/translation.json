@@ -287,6 +287,11 @@
     },
     "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
     "bookmarks": {
+        "columns": {
+            "title": "Başlık / URL",
+            "status": "Durum",
+            "health": "Sağlık"
+        },
         "status": {
             "duplicate": "Kopya (Silinecek)",
             "original": "Orijinal (Kopyaları var)",

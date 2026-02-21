@@ -61,14 +61,14 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
 
                         {/* Selection Overlay */}
                         {isSelected && (
-                            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-10">
+                            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-[5]">
                                 <div className="bg-primary text-primary-foreground rounded-full p-1">
                                     <Folder className="w-6 h-6" />
                                 </div>
                             </div>
                         )}
 
-                        <div className="absolute top-2 right-2 z-20 flex gap-1">
+                        <div className="absolute top-2 right-2 z-10 flex gap-1">
                             <Button
                                 variant="secondary"
                                 size="icon"
