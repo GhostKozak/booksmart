@@ -14,6 +14,7 @@ import {
     sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { TaxonomyList } from './taxonomy/TaxonomyList';
 import { DiscoveredTaxonomy } from './taxonomy/DiscoveredTaxonomy';
@@ -56,6 +57,7 @@ export function TaxonomyManager({
                 order: list.length
             };
             setFn([...list, newItemObj]);
+            toast.success(activeTab === 'folders' ? t('toast.folderCreated') : t('toast.tagCreated'));
         }
         if (!name) setNewItem('');
     };
@@ -64,6 +66,7 @@ export function TaxonomyManager({
         const setFn = activeTab === 'folders' ? setFolders : setTags;
         const list = activeTab === 'folders' ? folders : tags;
         setFn(list.filter(item => item.id !== id));
+        toast.success(activeTab === 'folders' ? t('toast.folderDeleted') : t('toast.tagDeleted'));
     };
 
     const handleColorChange = (id, color) => {

@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { createBackup, downloadBackup, restoreBackup, getLastAutoBackupTime } from '../lib/backup-manager';
+import { toast } from 'sonner';
 
 export function BackupSettings() {
     const { t } = useTranslation();
@@ -37,6 +38,7 @@ export function BackupSettings() {
             downloadBackup(data);
         } catch (e) {
             console.error("Backup failed", e);
+            toast.error(t('toast.error'));
         }
     };
 
@@ -53,12 +55,14 @@ export function BackupSettings() {
                 const json = JSON.parse(event.target.result);
                 await restoreBackup(json);
                 setRestoreStatus('success');
+                toast.success(t('toast.dbRestored'));
                 // Reload page to reflect changes? Or rely on live query?
                 // Live query should update, but let's show success first.
                 setTimeout(() => window.location.reload(), 1500);
             } catch (err) {
                 console.error("Restore failed", err);
                 setRestoreStatus('error');
+                toast.error(t('toast.error'));
             } finally {
                 setIsRestoring(false);
             }

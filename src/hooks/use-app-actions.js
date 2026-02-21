@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { db } from '../db'
 import { createBackup, downloadBackup } from '../lib/backup-manager'
+import { toast } from 'sonner'
 
 export function useAppActions({
     addCommand,
@@ -76,6 +77,7 @@ export function useAppActions({
         console.log(`Applied ${updatesToApply.length} sort updates.`)
         setSelectedIds(new Set())
         setPendingSortUpdates(null)
+        toast.success(t('toast.sortApplied'))
     }, [pendingSortUpdates, addCommand, t])
 
     // ── Guarded Export ──
@@ -108,6 +110,7 @@ export function useAppActions({
         })
         setSelectedIds(new Set())
         setShowBackupModal(false)
+        toast.success(t('toast.clearedAll'))
     }, [t, setShowBackupModal])
 
     const clearAll = useCallback(() => setShowBackupModal(true), [setShowBackupModal])

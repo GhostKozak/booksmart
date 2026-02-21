@@ -101,7 +101,8 @@
             "folders": "Ordner",
             "tags": "Tags",
             "backup": "Backup & Daten",
-            "rules": "Regeln"
+            "rules": "Regeln",
+            "ai": "KI"
         },
         "language": {
             "label": "Sprache",
@@ -407,5 +408,23 @@
         "details": "Fehlerdetails",
         "tryAgain": "Erneut versuchen",
         "reload": "Seite neu laden"
+    },
+    "toast": {
+        "deleted": "{{count}} Lesezeichen gelöscht",
+        "deleted_plural": "{{count}} Lesezeichen gelöscht",
+        "exportSuccess": "Export erfolgreich abgeschlossen",
+        "clearedAll": "Alle Daten wurden gelöscht",
+        "ruleSaved": "Regel erfolgreich gespeichert",
+        "settingsSaved": "Einstellungen erfolgreich gespeichert",
+        "folderCreated": "Ordner erfolgreich erstellt",
+        "folderUpdated": "Ordner erfolgreich aktualisiert",
+        "folderDeleted": "Ordner gelöscht",
+        "tagCreated": "Tag erfolgreich erstellt",
+        "tagUpdated": "Tag erfolgreich aktualisiert",
+        "tagDeleted": "Tag gelöscht",
+        "sortApplied": "Smart Sort erfolgreich angewendet",
+        "noteSaved": "Notiz gespeichert",
+        "error": "Ein Fehler ist aufgetreten",
+        "dbRestored": "Datenbank erfolgreich wiederhergestellt"
     }
 }

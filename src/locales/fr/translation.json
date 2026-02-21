@@ -101,7 +101,8 @@
             "folders": "Dossiers",
             "tags": "Étiquettes",
             "backup": "Sauvegarde & Données",
-            "rules": "Règles"
+            "rules": "Règles",
+            "ai": "IA"
         },
         "language": {
             "label": "Langue",
@@ -407,5 +408,23 @@
         "details": "Détails de l'erreur",
         "tryAgain": "Réessayer",
         "reload": "Recharger la page"
+    },
+    "toast": {
+        "deleted": "{{count}} signet supprimé",
+        "deleted_plural": "{{count}} signets supprimés",
+        "exportSuccess": "Exportation terminée avec succès",
+        "clearedAll": "Toutes les données ont été effacées",
+        "ruleSaved": "Règle enregistrée avec succès",
+        "settingsSaved": "Paramètres enregistrés avec succès",
+        "folderCreated": "Dossier créé avec succès",
+        "folderUpdated": "Dossier mis à jour avec succès",
+        "folderDeleted": "Dossier supprimé",
+        "tagCreated": "Balise créée avec succès",
+        "tagUpdated": "Balise mise à jour avec succès",
+        "tagDeleted": "Balise supprimée",
+        "sortApplied": "Tri Intelligent appliqué avec succès",
+        "noteSaved": "Note enregistrée",
+        "error": "Une erreur est survenue",
+        "dbRestored": "Base de données restaurée avec succès"
     }
 }

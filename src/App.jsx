@@ -47,6 +47,7 @@ import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
+import { Toaster } from 'sonner'
 
 const EMPTY_ARRAY = []
 
@@ -361,6 +362,7 @@ function App() {
         <OfflineIndicator />
         <PWAUpdatePrompt />
       </div>
+      <Toaster position="bottom-right" richColors closeButton theme={theme} />
     </div>
   )
 }

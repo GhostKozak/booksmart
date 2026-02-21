@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { db } from '../db'
 import { generateUUID } from '../lib/utils'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 export function useRuleManager({ rules, addCommand }) {
     const [newRule, setNewRule] = useState({
@@ -11,6 +13,7 @@ export function useRuleManager({ rules, addCommand }) {
     })
     const [editingRuleId, setEditingRuleId] = useState(null)
     const [isRuleModalOpen, setIsRuleModalOpen] = useState(false)
+    const { t } = useTranslation()
 
     const addRule = async () => {
         if (newRule.value && (newRule.targetFolder || newRule.tags)) {
@@ -39,6 +42,7 @@ export function useRuleManager({ rules, addCommand }) {
             }
             setNewRule({ type: 'keyword', value: '', targetFolder: '', tags: '' })
             setIsRuleModalOpen(false)
+            toast.success(t('toast.ruleSaved'))
         }
     }
 

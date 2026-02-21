@@ -101,7 +101,8 @@
             "folders": "Folders",
             "tags": "Tags",
             "backup": "Backup & Data",
-            "rules": "Rules"
+            "rules": "Rules",
+            "ai": "AI"
         },
         "language": {
             "label": "Language",
@@ -407,5 +408,23 @@
         "details": "Error details",
         "tryAgain": "Try Again",
         "reload": "Reload Page"
+    },
+    "toast": {
+        "deleted": "{{count}} bookmark deleted",
+        "deleted_plural": "{{count}} bookmarks deleted",
+        "exportSuccess": "Export completed successfully",
+        "clearedAll": "All data has been cleared",
+        "ruleSaved": "Rule saved successfully",
+        "settingsSaved": "Settings saved successfully",
+        "folderCreated": "Folder created successfully",
+        "folderUpdated": "Folder updated successfully",
+        "folderDeleted": "Folder deleted",
+        "tagCreated": "Tag created successfully",
+        "tagUpdated": "Tag updated successfully",
+        "tagDeleted": "Tag deleted",
+        "sortApplied": "Smart Sort applied successfully",
+        "noteSaved": "Note saved",
+        "error": "An error occurred",
+        "dbRestored": "Database restored successfully"
     }
 }

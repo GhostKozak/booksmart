@@ -3,6 +3,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { AI_MODELS, DEFAULT_MODEL } from '../services/ai-service'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 export function AISettings() {
     const { t } = useTranslation()
@@ -28,6 +29,7 @@ export function AISettings() {
 
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
+        toast.success(t('toast.settingsSaved'))
     }
 
     const openaiModels = AI_MODELS.filter(m => m.provider === 'openai')

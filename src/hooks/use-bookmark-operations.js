@@ -2,6 +2,8 @@ import { useMemo, useCallback } from 'react'
 import { db } from '../db'
 import { generateUUID } from '../lib/utils'
 import { cleanUrl, countCleanableUrls } from '../lib/url-cleaner'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 export function useBookmarkOperations({
     rawBookmarks,
@@ -14,6 +16,7 @@ export function useBookmarkOperations({
     setLinkHealth,
     setSmartFilter
 }) {
+    const { t } = useTranslation()
     const cleanableCount = useMemo(() => countCleanableUrls(rawBookmarks), [rawBookmarks])
 
     const removeDuplicates = async () => {
@@ -128,8 +131,9 @@ export function useBookmarkOperations({
             })
 
             setSelectedIds(new Set())
+            toast.success(t('toast.deleted', { count: idsToDelete.length }))
         }
-    }, [selectedIds, addCommand, setSelectedIds])
+    }, [selectedIds, addCommand, setSelectedIds, t])
 
     const handleBatchMove = async (targetFolder) => {
         const idsToMove = [...selectedIds]

@@ -101,7 +101,8 @@
             "folders": "Klasörler",
             "tags": "Etiketler",
             "backup": "Yedekleme & Veri",
-            "rules": "Kurallar"
+            "rules": "Kurallar",
+            "ai": "Yapay Zeka"
         },
         "language": {
             "label": "Dil",
@@ -406,5 +407,23 @@
         "details": "Hata detayları",
         "tryAgain": "Tekrar Dene",
         "reload": "Sayfayı Yenile"
+    },
+    "toast": {
+        "deleted": "{{count}} yer imi silindi",
+        "deleted_plural": "{{count}} yer imi silindi",
+        "exportSuccess": "Dışa aktarma başarıyla tamamlandı",
+        "clearedAll": "Tüm veriler temizlendi",
+        "ruleSaved": "Kural başarıyla kaydedildi",
+        "settingsSaved": "Ayarlar başarıyla kaydedildi",
+        "folderCreated": "Klasör başarıyla oluşturuldu",
+        "folderUpdated": "Klasör başarıyla güncellendi",
+        "folderDeleted": "Klasör silindi",
+        "tagCreated": "Etiket başarıyla oluşturuldu",
+        "tagUpdated": "Etiket başarıyla güncellendi",
+        "tagDeleted": "Etiket silindi",
+        "sortApplied": "Akıllı Sıralama başarıyla uygulandı",
+        "noteSaved": "Not kaydedildi",
+        "error": "Bir hata oluştu",
+        "dbRestored": "Veritabanı başarıyla geri yüklendi"
     }
 }

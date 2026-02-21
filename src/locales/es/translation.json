@@ -101,7 +101,8 @@
             "folders": "Carpetas",
             "tags": "Etiquetas",
             "backup": "Copia y Datos",
-            "rules": "Reglas"
+            "rules": "Reglas",
+            "ai": "IA"
         },
         "language": {
             "label": "Idioma",
@@ -407,5 +408,23 @@
         "details": "Detalles del error",
         "tryAgain": "Intentar de nuevo",
         "reload": "Recargar página"
+    },
+    "toast": {
+        "deleted": "{{count}} marcador eliminado",
+        "deleted_plural": "{{count}} marcadores eliminados",
+        "exportSuccess": "Exportación completada con éxito",
+        "clearedAll": "Todos los datos han sido borrados",
+        "ruleSaved": "Regla guardada con éxito",
+        "settingsSaved": "Ajustes guardados con éxito",
+        "folderCreated": "Carpeta creada con éxito",
+        "folderUpdated": "Carpeta actualizada con éxito",
+        "folderDeleted": "Carpeta eliminada",
+        "tagCreated": "Etiqueta creada con éxito",
+        "tagUpdated": "Etiqueta actualizada con éxito",
+        "tagDeleted": "Etiqueta eliminada",
+        "sortApplied": "Ordenación Inteligente aplicada con éxito",
+        "noteSaved": "Nota guardada",
+        "error": "Ocurrió un error",
+        "dbRestored": "Base de datos restaurada con éxito"
     }
 }

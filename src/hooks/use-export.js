@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { exportBookmarks, exportToJson, exportToCsv, exportToMarkdown } from '../lib/exporter'
+import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
+    const { t } = useTranslation()
     const [isExportModalOpen, setIsExportModalOpen] = useState(false)
     const [exportFormat, setExportFormat] = useState('html')
     const [exportOnlySelected, setExportOnlySelected] = useState(false)
@@ -60,6 +63,7 @@ export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
         URL.revokeObjectURL(url)
         setIsExportModalOpen(false)
         if (exportOnlySelected) setSelectedIds(new Set())
+        toast.success(t('toast.exportSuccess'))
     }
 
     return {

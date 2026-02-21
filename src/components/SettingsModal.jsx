@@ -5,6 +5,7 @@ import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { AI_MODELS, DEFAULT_MODEL } from "../services/ai-service"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 
 export function SettingsModal({ isOpen, onClose, onSave }) {
     const { t } = useTranslation()
@@ -32,6 +33,7 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
 
         onSave()
         onClose()
+        toast.success(t('toast.settingsSaved'))
     }
 
     // Helper to group models by provider
