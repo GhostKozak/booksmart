@@ -2,9 +2,12 @@
  * BookSmart - Copyright (C) 2026 BookSmart Contributors
  * Licensed under the GNU GPLv3 or later.
  */
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { useMemo, useCallback, useEffect } from 'react'
 import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
+import { useUIState } from './hooks/use-ui-state'
+import { useTaxonomy } from './hooks/use-taxonomy'
+import { useAppActions } from './hooks/use-app-actions'
 import { useBookmarkWorker } from './hooks/use-bookmark-worker'
 import { useBookmarkOperations } from './hooks/use-bookmark-operations'
 import { useRuleManager } from './hooks/use-rule-manager'
@@ -15,8 +18,7 @@ import { useExport } from './hooks/use-export'
 import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
-import { generateUUID } from './lib/utils'
-import { saveAutoBackup, createBackup, downloadBackup } from './lib/backup-manager'
+import { saveAutoBackup } from './lib/backup-manager'
 
 // Layout Components
 import { Header } from './components/layout/Header'
@@ -29,6 +31,8 @@ import { TaxonomyManager } from './components/TaxonomyManager'
 import { BackupSettings } from './components/BackupSettings'
 import { SimpleModal } from './components/ui/SimpleModal'
 import { Button } from './components/ui/button'
+import { ConflictNotificationBar } from './components/ConflictNotificationBar'
+
 // Modal Components
 import { ExportModal } from './components/modals/ExportModal'
 import { RuleModal } from './components/modals/RuleModal'
@@ -38,30 +42,23 @@ import { ShortcutsModal } from './components/modals/ShortcutsModal'
 import { AISettings } from './components/AISettings'
 import { SortConfirmationModal } from './components/modals/SortConfirmationModal'
 
-
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
-import { Checkbox } from './components/ui/checkbox'
-import { Card } from './components/ui/card'
-import { Input } from './components/ui/input'
-import { Favicon } from './components/Favicon'
-import { AnalyticsDashboard } from './components/AnalyticsDashboard'
-import { SettingsModal } from './components/SettingsModal'
-import { categorizeBookmarks } from './services/ai-service'
-import { cn } from './lib/utils'
 
-const EMPTY_ARRAY = [];
+const EMPTY_ARRAY = []
 
 function App() {
   const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
   const { addCommand, undo, redo, canUndo, canRedo, past, future } = useUndoRedo()
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
-  // Initialization & Migration
+  // ── UI State ──
+  const ui = useUIState()
+
+  // ── Initialization & Migration ──
   useEffect(() => {
     const init = async () => {
       await migrateFromLocalStorage()
@@ -71,60 +68,90 @@ function App() {
     init()
   }, [])
 
-  // Data from IndexedDB
+  // ── Data from IndexedDB ──
   const rawBookmarks = useLiveQuery(() => db.bookmarks.toArray()) || EMPTY_ARRAY
   const rules = useLiveQuery(() => db.rules.toArray()) || EMPTY_ARRAY
-  const availableFolders = useLiveQuery(() => db.folders.orderBy('order').toArray()) || EMPTY_ARRAY
-  const availableTags = useLiveQuery(() => db.tags.orderBy('order').toArray()) || EMPTY_ARRAY
 
-  // Ignored URLs
-  const ignoredUrlsList = useLiveQuery(() => db.ignoredUrls.toArray()) || EMPTY_ARRAY
-  const ignoredUrls = useMemo(() => new Set(ignoredUrlsList.map(i => i.url)), [ignoredUrlsList])
-
-  // UI State
-  const [selectedIds, setSelectedIds] = useState(new Set())
-  const [activeFolder, setActiveFolder] = useState(null)
-  const [activeTag, setActiveTag] = useState(null)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [viewMode, setViewMode] = useState('list')
-  const [showThumbnails, setShowThumbnails] = useState(false)
-  const [previewBookmark, setPreviewBookmark] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [smartFilter, setSmartFilter] = useState(null)
-  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
-  const [searchMode, setSearchMode] = useState('simple')
-  const [dateFilter, setDateFilter] = useState({ start: null, end: null })
-  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
-  const [showBackupModal, setShowBackupModal] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
-  const [settingsTab, setSettingsTab] = useState('folders')
-
-  const searchInputRef = useRef(null)
-
-  // Sidebar Accordion
-  const [collapsedSections, setCollapsedSections] = useState({
-    tags: false, folders: false, filters: false, rules: false
-  })
-  const toggleSection = (section) => {
-    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
-  }
-
-  const hasFileLoaded = rawBookmarks.length > 0
-
-  const openSettings = (tab = 'folders') => {
-    setSettingsTab(tab)
-    setIsSettingsOpen(true)
-  }
-
-  // Fuse options for search
+  // ── Fuse options for search ──
   const fuseOptions = useMemo(() => ({
     keys: ['title', 'url', 'tags', 'originalFolder'],
     threshold: 0.4,
     ignoreLocation: true
   }), [])
 
-  // Auto-Backup Effect
+  // ── Worker ──
+  const worker = useBookmarkWorker({
+    rawBookmarks, rules,
+    searchQuery: ui.searchQuery, searchMode: ui.searchMode,
+    activeTag: ui.activeTag, activeFolder: ui.activeFolder,
+    smartFilter: ui.smartFilter, dateFilter: ui.dateFilter, fuseOptions
+  })
+
+  // ── Taxonomy ──
+  const taxonomy = useTaxonomy({
+    workerUniqueTags: worker.uniqueTags,
+    workerUniqueFolders: worker.uniqueFolders,
+  })
+
+  // ── App Actions (selection, sort, clear) ──
+  const actions = useAppActions({
+    addCommand,
+    setSmartFilter: ui.setSmartFilter,
+    setSearchQuery: ui.setSearchQuery,
+    setActiveTag: ui.setActiveTag,
+    setShowBackupModal: ui.setShowBackupModal,
+    workerSetLinkHealth: worker.setLinkHealth,
+    workerRuleConflicts: worker.ruleConflicts,
+    setIsConflictModalOpen: ui.setIsConflictModalOpen,
+    displayBookmarks: worker.displayBookmarks,
+  })
+
+  // ── Operations ──
+  const operations = useBookmarkOperations({
+    rawBookmarks,
+    bookmarks: worker.bookmarks,
+    addCommand,
+    selectedIds: actions.selectedIds, setSelectedIds: actions.setSelectedIds,
+    availableFolders: taxonomy.availableFolders,
+    linkHealth: worker.linkHealth,
+    setLinkHealth: worker.setLinkHealth,
+    setSmartFilter: ui.setSmartFilter
+  })
+
+  const ruleManager = useRuleManager({ rules, addCommand })
+  const fileUpload = useFileUpload()
+
+  const exporter = useExport({
+    bookmarks: worker.bookmarks,
+    selectedIds: actions.selectedIds,
+    setSelectedIds: actions.setSelectedIds
+  })
+
+  const magicSort = useMagicSort({
+    selectedIds: actions.selectedIds,
+    setSelectedIds: actions.setSelectedIds,
+    rawBookmarks, openSettings: ui.openSettings,
+    onSortPreview: actions.handleSortPreview
+  })
+
+  const autoCategorize = useAutoCategorize({
+    selectedIds: actions.selectedIds,
+    setSelectedIds: actions.setSelectedIds,
+    rawBookmarks,
+    onSortPreview: actions.handleSortPreview
+  })
+
+  useKeyboardShortcuts({
+    selectedIds: actions.selectedIds,
+    setSelectedIds: actions.setSelectedIds,
+    bookmarks: worker.bookmarks,
+    handleBatchDelete: operations.handleBatchDelete,
+    undo, redo,
+    searchInputRef: ui.searchInputRef,
+    setIsShortcutsOpen: ui.setIsShortcutsOpen
+  })
+
+  // ── Auto-Backup ──
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localStorage.getItem('booksmart_auto_backup_enabled') === 'true') {
@@ -132,275 +159,55 @@ function App() {
       }
     }, 2000)
     return () => clearTimeout(timer)
-  }, [rules, availableFolders, availableTags, ignoredUrlsList])
+  }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList])
 
-  // Preview handler
+  // ── Preview handler ──
   const handlePreview = useCallback((bookmark) => {
-    setPreviewBookmark(bookmark)
-  }, [])
+    ui.setPreviewBookmark(bookmark)
+  }, [ui])
 
-  // Ignored URL toggle
-  const toggleIgnoreUrl = useCallback((url) => {
-    if (ignoredUrls.has(url)) {
-      db.ignoredUrls.where('url').equals(url).delete()
-    } else {
-      db.ignoredUrls.add({ url })
-    }
-  }, [ignoredUrls])
-
-  // Taxonomy Helpers
-  const setAvailableFolders = async (newFolders) => {
-    await db.transaction('rw', db.folders, async () => {
-      const existingIds = new Set((await db.folders.toArray()).map(f => f.id))
-      const newIds = new Set(newFolders.map(f => f.id))
-      const toDelete = [...existingIds].filter(id => !newIds.has(id))
-      if (toDelete.length > 0) await db.folders.bulkDelete(toDelete)
-      await db.folders.bulkPut(newFolders)
-    })
-  }
-
-  const setAvailableTags = async (newTags) => {
-    await db.transaction('rw', db.tags, async () => {
-      const existingIds = new Set((await db.tags.toArray()).map(f => f.id))
-      const newIds = new Set(newTags.map(f => f.id))
-      const toDelete = [...existingIds].filter(id => !newIds.has(id))
-      if (toDelete.length > 0) await db.tags.bulkDelete(toDelete)
-      await db.tags.bulkPut(newTags)
-    })
-  }
-
-  const saveToTaxonomy = async (name, type) => {
-    if (type === 'tag') {
-      await db.tags.add({ id: generateUUID(), name, color: '#10b981', order: availableTags.length })
-    } else {
-      await db.folders.add({ id: generateUUID(), name, color: '#3b82f6', order: availableFolders.length })
-    }
-  }
-
-
-  // Sort Confirmation State
-  const [pendingSortUpdates, setPendingSortUpdates] = useState(null)
-
-  const handleSortPreview = (updates) => {
-    setPendingSortUpdates(updates)
-  }
-
-  const applySortUpdates = async () => {
-    if (!pendingSortUpdates) return
-
-    // Capture previous state for undo
-    const previousState = await db.bookmarks.bulkGet(pendingSortUpdates.map(u => u.id))
-
-    const updatesToApply = pendingSortUpdates.map(u => ({
-      ...u,
-      // originalFolder: u.originalFolder, // Keep original
-      newFolder: u.newFolder,            // COMMIT the new folder!
-      tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])], // Commit the tags
-      ruleTags: [], // Clear temporary rule tags
-      status: 'idle', // Reset status
-      suggestedFolder: null // Clear suggestion only
-    }))
-
-    const execute = async () => {
-      await db.bookmarks.bulkPut(updatesToApply)
-    }
-
-    const revert = async () => {
-      await db.bookmarks.bulkPut(previousState)
-    }
-
-    await execute()
-
-    addCommand({
-      undo: revert,
-      redo: execute,
-      description: t('actionbar.magicSort')
-    })
-
-    console.log(`Applied ${updatesToApply.length} sort updates.`)
-
-    // Check if we need to add to taxonomy (folders/tags)
-    // This logic was partly in auto-categorize, moving it here to be central
-    const foldersToAdd = new Set()
-    pendingSortUpdates.forEach(u => {
-      if (u.newFolder) foldersToAdd.add(u.newFolder)
-    })
-
-    // We rely on the app's TaxonomyManager to pick these up via 'deduplicateTaxonomy' or just 'discovered' logic
-    // But for immediate UI feedback on "My Folders", we might want to ensure they exist if we want them to be permanent?
-    // For now, let's stick to the existing behavior where they appear as "Discovered" if not explicitly added.
-
-    setSelectedIds(new Set())
-    setPendingSortUpdates(null)
-  }
-
-  // ── Custom Hooks ──
-
-  const worker = useBookmarkWorker({
-    rawBookmarks, rules, searchQuery, searchMode,
-    activeTag, activeFolder, smartFilter, dateFilter, fuseOptions
-  })
-
-  const operations = useBookmarkOperations({
-    rawBookmarks,
-    bookmarks: worker.bookmarks,
-    addCommand,
-    selectedIds, setSelectedIds,
-    availableFolders,
-    linkHealth: worker.linkHealth,
-    setLinkHealth: worker.setLinkHealth,
-    setSmartFilter
-  })
-
-  const ruleManager = useRuleManager({ rules, addCommand })
-
-  const fileUpload = useFileUpload()
-
-  const exporter = useExport({
-    bookmarks: worker.bookmarks,
-    selectedIds, setSelectedIds
-  })
-
-  // Guard exports — block when conflicts exist
-  const guardedExport = useCallback((exportFn) => {
-    if (worker.ruleConflicts.length > 0) {
-      setIsConflictModalOpen(true)
-      return
-    }
-    exportFn()
-  }, [worker.ruleConflicts])
-
-  const magicSort = useMagicSort({
-    selectedIds, setSelectedIds,
-    rawBookmarks, openSettings,
-    onSortPreview: handleSortPreview
-  })
-
-  const autoCategorize = useAutoCategorize({
-    selectedIds, setSelectedIds,
-    rawBookmarks,
-    onSortPreview: handleSortPreview
-  })
-
-  useKeyboardShortcuts({
-    selectedIds, setSelectedIds,
-    bookmarks: worker.bookmarks,
-    handleBatchDelete: operations.handleBatchDelete,
-    undo, redo,
-    searchInputRef,
-    setIsShortcutsOpen
-  })
-
-  // ── Derived State ──
-
-  const discoveredTags = useMemo(() => {
-    const existingNames = new Set(availableTags.map(t => t.name))
-    return worker.uniqueTags.filter(t => !existingNames.has(t.name))
-  }, [worker.uniqueTags, availableTags])
-
-  const discoveredFolders = useMemo(() => {
-    const existingNames = new Set(availableFolders.map(f => f.name))
-    return worker.uniqueFolders.filter(f => !existingNames.has(f.name))
-  }, [worker.uniqueFolders, availableFolders])
-
-  // Selection Logic
-  const toggleSelection = (id) => {
-    const newSelected = new Set(selectedIds)
-    if (newSelected.has(id)) { newSelected.delete(id) } else { newSelected.add(id) }
-    setSelectedIds(newSelected)
-  }
-
-  const toggleAll = () => {
-    if (selectedIds.size === worker.displayBookmarks.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(worker.displayBookmarks.map(b => b.id)))
-    }
-  }
-
-  // Clear / Close
-  const confirmClearAll = async (shouldBackup) => {
-    if (shouldBackup) {
-      try {
-        const data = await createBackup()
-        downloadBackup(data)
-      } catch (e) {
-        console.error("Backup failed before clear:", e)
-        alert(t('backup.failed'))
-        return
-      }
-    }
-    await db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
-      await db.bookmarks.clear()
-      await db.rules.clear()
-      await db.folders.clear()
-      await db.tags.clear()
-      await db.ignoredUrls.clear()
-    })
-    setSelectedIds(new Set())
-    setShowBackupModal(false)
-  }
-
-  const clearAll = () => setShowBackupModal(true)
-
-  const closeFile = () => {
-    db.transaction('rw', db.bookmarks, db.rules, async () => {
-      await db.bookmarks.clear()
-      await db.rules.clear()
-    })
-    setSelectedIds(new Set())
-    worker.setLinkHealth({})
-    setSearchQuery('')
-    setActiveTag(null)
-    setSmartFilter(null)
-  }
+  const hasFileLoaded = rawBookmarks.length > 0
 
   // ── Render ──
-
   return (
     <div className="h-[100dvh] bg-background text-foreground flex flex-col font-sans overflow-hidden">
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={() => magicSort.handleMagicSort()}
-      />
       <Header
         theme={theme} setTheme={setTheme}
         canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
         past={past} future={future}
-        isHistoryOpen={isHistoryOpen} setIsHistoryOpen={setIsHistoryOpen}
-        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-        searchMode={searchMode} searchInputRef={searchInputRef}
-        isAdvancedSearchOpen={isAdvancedSearchOpen} setIsAdvancedSearchOpen={setIsAdvancedSearchOpen}
-        setSearchMode={setSearchMode} dateFilter={dateFilter} setDateFilter={setDateFilter}
-        viewMode={viewMode} setViewMode={setViewMode}
-        showThumbnails={showThumbnails} setShowThumbnails={setShowThumbnails}
+        isHistoryOpen={ui.isHistoryOpen} setIsHistoryOpen={ui.setIsHistoryOpen}
+        searchQuery={ui.searchQuery} setSearchQuery={ui.setSearchQuery}
+        searchMode={ui.searchMode} searchInputRef={ui.searchInputRef}
+        isAdvancedSearchOpen={ui.isAdvancedSearchOpen} setIsAdvancedSearchOpen={ui.setIsAdvancedSearchOpen}
+        setSearchMode={ui.setSearchMode} dateFilter={ui.dateFilter} setDateFilter={ui.setDateFilter}
+        viewMode={ui.viewMode} setViewMode={ui.setViewMode}
+        showThumbnails={ui.showThumbnails} setShowThumbnails={ui.setShowThumbnails}
         duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
         cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
         checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
-        openExportModal={() => guardedExport(exporter.openExportModal)}
-        hasFileLoaded={hasFileLoaded} closeFile={closeFile}
+        openExportModal={() => actions.guardedExport(exporter.openExportModal)}
+        hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
         bookmarkCount={worker.bookmarks.length}
-        openSettings={openSettings}
-        isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
-        setIsShortcutsOpen={setIsShortcutsOpen}
-        clearAll={clearAll}
+        openSettings={ui.openSettings}
+        isSidebarOpen={ui.isSidebarOpen} setIsSidebarOpen={ui.setIsSidebarOpen}
+        setIsShortcutsOpen={ui.setIsShortcutsOpen}
+        clearAll={actions.clearAll}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
-          isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
-          collapsedSections={collapsedSections} toggleSection={toggleSection}
-          uniqueTags={worker.uniqueTags} availableTags={availableTags}
-          discoveredTags={discoveredTags} activeTag={activeTag} setActiveTag={setActiveTag}
-          availableFolders={availableFolders} uniqueFolders={worker.uniqueFolders}
-          discoveredFolders={discoveredFolders} bookmarks={worker.bookmarks}
-          activeFolder={activeFolder} setActiveFolder={setActiveFolder}
-          smartFilter={smartFilter} setSmartFilter={setSmartFilter}
+          isSidebarOpen={ui.isSidebarOpen} setIsSidebarOpen={ui.setIsSidebarOpen}
+          collapsedSections={ui.collapsedSections} toggleSection={ui.toggleSection}
+          uniqueTags={worker.uniqueTags} availableTags={taxonomy.availableTags}
+          discoveredTags={taxonomy.discoveredTags} activeTag={ui.activeTag} setActiveTag={ui.setActiveTag}
+          availableFolders={taxonomy.availableFolders} uniqueFolders={worker.uniqueFolders}
+          discoveredFolders={taxonomy.discoveredFolders} bookmarks={worker.bookmarks}
+          activeFolder={ui.activeFolder} setActiveFolder={ui.setActiveFolder}
+          smartFilter={ui.smartFilter} setSmartFilter={ui.setSmartFilter}
           smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
           rules={rules} startEditing={ruleManager.startEditing}
           deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
-          saveToTaxonomy={saveToTaxonomy}
+          saveToTaxonomy={taxonomy.saveToTaxonomy}
         />
 
         <MainContent
@@ -409,26 +216,27 @@ function App() {
           rawBookmarks={rawBookmarks}
           getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps}
           isDragActive={fileUpload.isDragActive}
-          viewMode={viewMode} showThumbnails={showThumbnails}
-          selectedIds={selectedIds} toggleSelection={toggleSelection} toggleAll={toggleAll}
-          linkHealth={worker.linkHealth} ignoredUrls={ignoredUrls} toggleIgnoreUrl={toggleIgnoreUrl}
-          availableFolders={availableFolders} availableTags={availableTags}
-          smartFilter={smartFilter} smartCounts={worker.smartCounts}
+          viewMode={ui.viewMode} showThumbnails={ui.showThumbnails}
+          selectedIds={actions.selectedIds} toggleSelection={actions.toggleSelection} toggleAll={actions.toggleAll}
+          linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
+          availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
+          smartFilter={ui.smartFilter} smartCounts={worker.smartCounts}
           handleBatchMoveDocs={operations.handleBatchMoveDocs}
-          previewBookmark={previewBookmark} handlePreview={handlePreview} setPreviewBookmark={setPreviewBookmark}
-          clearAll={clearAll} setSmartFilter={setSmartFilter} setViewMode={setViewMode}
-          setSearchQuery={setSearchQuery} setActiveTag={setActiveTag} setActiveFolder={setActiveFolder}
+          previewBookmark={ui.previewBookmark} handlePreview={handlePreview} setPreviewBookmark={ui.setPreviewBookmark}
+          clearAll={actions.clearAll} setSmartFilter={ui.setSmartFilter} setViewMode={ui.setViewMode}
+          setSearchQuery={ui.setSearchQuery} setActiveTag={ui.setActiveTag} setActiveFolder={ui.setActiveFolder}
         />
+
         <FloatingActionBar
-          selectedCount={selectedIds.size}
+          selectedCount={actions.selectedIds.size}
           onDelete={operations.handleBatchDelete}
           onMove={operations.handleBatchMove}
-          onClearSelection={() => setSelectedIds(new Set())}
-          allFolders={availableFolders}
-          allTags={availableTags}
+          onClearSelection={() => actions.setSelectedIds(new Set())}
+          allFolders={taxonomy.availableFolders}
+          allTags={taxonomy.availableTags}
           onOverrideStatus={operations.handleStatusOverride}
           onAddTags={operations.handleBatchAddTags}
-          onExportSelected={() => guardedExport(exporter.openExportSelectedModal)}
+          onExportSelected={() => actions.guardedExport(exporter.openExportSelectedModal)}
           onCleanUrls={operations.cleanSelectedUrls}
           onAutoSort={autoCategorize.handleAutoCategorize}
           onMagicSort={magicSort.handleMagicSort}
@@ -437,46 +245,46 @@ function App() {
 
         {/* Settings Modal */}
         <SimpleModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
+          isOpen={ui.isSettingsOpen}
+          onClose={() => ui.setIsSettingsOpen(false)}
           title={t('settings.title')}
         >
-          {settingsTab === 'backup' ? (
+          {ui.settingsTab === 'backup' ? (
             <BackupSettings />
-          ) : settingsTab === 'ai' ? (
+          ) : ui.settingsTab === 'ai' ? (
             <AISettings />
           ) : (
             <TaxonomyManager
-              folders={availableFolders}
-              setFolders={setAvailableFolders}
-              tags={availableTags}
-              setTags={setAvailableTags}
-              discoveredFolders={discoveredFolders}
-              discoveredTags={discoveredTags}
-              defaultTab={settingsTab}
+              folders={taxonomy.availableFolders}
+              setFolders={taxonomy.setAvailableFolders}
+              tags={taxonomy.availableTags}
+              setTags={taxonomy.setAvailableTags}
+              discoveredFolders={taxonomy.discoveredFolders}
+              discoveredTags={taxonomy.discoveredTags}
+              defaultTab={ui.settingsTab}
             />
           )}
           <div className="flex justify-center gap-2 mt-4 border-t pt-2">
             <Button
-              variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
+              variant={ui.settingsTab === 'folders' || ui.settingsTab === 'tags' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setSettingsTab('folders')}
+              onClick={() => ui.setSettingsTab('folders')}
               className="text-xs h-7"
             >
               {t('sidebar.sections.library')}
             </Button>
             <Button
-              variant={settingsTab === 'ai' ? "secondary" : "ghost"}
+              variant={ui.settingsTab === 'ai' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setSettingsTab('ai')}
+              onClick={() => ui.setSettingsTab('ai')}
               className="text-xs h-7"
             >
               {t('settings.tabs.ai', 'AI')}
             </Button>
             <Button
-              variant={settingsTab === 'backup' ? "secondary" : "ghost"}
+              variant={ui.settingsTab === 'backup' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setSettingsTab('backup')}
+              onClick={() => ui.setSettingsTab('backup')}
               className="text-xs h-7"
             >
               {t('settings.tabs.backup')}
@@ -485,14 +293,14 @@ function App() {
         </SimpleModal>
 
         <ClearAllModal
-          isOpen={showBackupModal}
-          onClose={() => setShowBackupModal(false)}
-          onConfirm={confirmClearAll}
+          isOpen={ui.showBackupModal}
+          onClose={() => ui.setShowBackupModal(false)}
+          onConfirm={actions.confirmClearAll}
         />
 
         <ShortcutsModal
-          isOpen={isShortcutsOpen}
-          onClose={() => setIsShortcutsOpen(false)}
+          isOpen={ui.isShortcutsOpen}
+          onClose={() => ui.setIsShortcutsOpen(false)}
         />
 
         <ExportModal
@@ -501,7 +309,7 @@ function App() {
           exportFormat={exporter.exportFormat}
           setExportFormat={exporter.setExportFormat}
           exportOnlySelected={exporter.exportOnlySelected}
-          selectedCount={selectedIds.size}
+          selectedCount={actions.selectedIds.size}
           onExport={exporter.performExport}
         />
 
@@ -512,58 +320,40 @@ function App() {
           newRule={ruleManager.newRule}
           setNewRule={ruleManager.setNewRule}
           onSave={ruleManager.addRule}
-          availableFolders={availableFolders}
-          availableTags={availableTags}
-          discoveredFolders={discoveredFolders}
-          saveToTaxonomy={saveToTaxonomy}
+          availableFolders={taxonomy.availableFolders}
+          availableTags={taxonomy.availableTags}
+          discoveredFolders={taxonomy.discoveredFolders}
+          saveToTaxonomy={taxonomy.saveToTaxonomy}
         />
 
         <RuleConflictModal
-          isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
-          onClose={() => setIsConflictModalOpen(false)}
+          isOpen={ui.isConflictModalOpen && worker.ruleConflicts.length > 0}
+          onClose={() => ui.setIsConflictModalOpen(false)}
           conflict={worker.ruleConflicts[0] || null}
-          availableFolders={availableFolders}
-          discoveredFolders={discoveredFolders}
+          availableFolders={taxonomy.availableFolders}
+          discoveredFolders={taxonomy.discoveredFolders}
           onResolve={(id, folder) => {
             worker.resolveConflict(id, folder)
-            // If there are more conflicts, keep modal open; otherwise close
             if (worker.ruleConflicts.length <= 1) {
-              setIsConflictModalOpen(false)
+              ui.setIsConflictModalOpen(false)
             }
           }}
-          onSkip={() => setIsConflictModalOpen(false)}
+          onSkip={() => ui.setIsConflictModalOpen(false)}
         />
 
         {/* Non-intrusive conflict notification */}
-        {worker.ruleConflicts.length > 0 && !isConflictModalOpen && selectedIds.size === 0 && (
-          <div className="fixed left-1/2 -translate-x-1/2 bottom-4 z-40 animate-in slide-in-from-bottom-2 fade-in duration-300">
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-amber-500/15 border border-amber-500/30 backdrop-blur-sm shadow-lg">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-amber-700 dark:text-amber-300">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-                  <path d="M12 9v4" /><path d="M12 17h.01" />
-                </svg>
-                <span className="font-medium whitespace-nowrap">
-                  {worker.ruleConflicts.length} {t('modals.ruleConflict.notificationText', { count: worker.ruleConflicts.length })}
-                </span>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-6 sm:h-7 text-[10px] sm:text-xs rounded-full border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 px-2.5 sm:px-3"
-                onClick={() => setIsConflictModalOpen(true)}
-              >
-                {t('modals.ruleConflict.resolve')}
-              </Button>
-            </div>
-          </div>
+        {worker.ruleConflicts.length > 0 && !ui.isConflictModalOpen && actions.selectedIds.size === 0 && (
+          <ConflictNotificationBar
+            conflictCount={worker.ruleConflicts.length}
+            onResolve={() => ui.setIsConflictModalOpen(true)}
+          />
         )}
 
         <SortConfirmationModal
-          isOpen={!!pendingSortUpdates}
-          onClose={() => setPendingSortUpdates(null)}
-          onConfirm={applySortUpdates}
-          updates={pendingSortUpdates || []}
+          isOpen={!!actions.pendingSortUpdates}
+          onClose={() => actions.setPendingSortUpdates(null)}
+          onConfirm={actions.applySortUpdates}
+          updates={actions.pendingSortUpdates || []}
         />
 
         <OfflineIndicator />
