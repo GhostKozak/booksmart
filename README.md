@@ -7,6 +7,7 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 ## ✨ Features
 
 - **📂 Privacy First**: 100% local processing. No data ever leaves your browser.
+- **🪄 AI Magic Sort**: Automatically categorize bookmarks into folders and generate smart tags using Local AI (Ollama) or cloud providers (OpenAI, Google Gemini, Anthropic).
 - **🧹 Duplicate Cleaner**: Find, merge, or delete duplicate bookmarks with a single click.
 - **📊 Analytics Dashboard**: Visualize your collection habits, top domains, and folder statistics.
 - **🔗 Dead Link Checker**: Automatically identifies broken links (404s) and timeouts to keep your library clean.
@@ -20,6 +21,7 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 
 ## 📝 Roadmap
 
+- [x] **AI Integration**: Auto-categorization and tagging via local (Ollama) and cloud APIs.
 - [x] **PWA Support**: Install as a native app on desktop and mobile.
 - [x] **Keyboard Shortcuts**: Navigate and manage bookmarks with keyboard.
 - [x] **Undo/Redo**: Mistake-proof management.
@@ -34,6 +36,7 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 - **State/Database**: Dexie.js (IndexedDB), Zustand
 - **Styling**: TailwindCSS, Shadcn/UI
 - **Performance**: Web Workers, React Virtuoso (Virtualization)
+- **AI Integration**: Internal API clients for OpenAI, Anthropic, Gemini, and Ollama
 - **Internationalization**: i18next
 - **Icons**: Lucide React
 - **Charts**: Recharts
@@ -44,10 +47,11 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 
 1.  **Export** your bookmarks from your browser (Chrome, Firefox, Edge, etc.) as an HTML file.
 2.  **Open** BookSmart and drag & drop your bookmarks file.
-3.  **Analyze** your collection using the Dashboard to understand your habits.
-4.  **Organize** by creating Rules and using Smart Filters to sort automatically.
-5.  **Clean** up duplicates and broken links with the built-in tools.
-6.  **Export** the organized list back to your browser when done.
+3.  **Setup AI (Optional)**: Head to Settings and configure your preferred AI provider (Ollama, OpenAI, Gemini, or Anthropic) to enable Magic Sort.
+4.  **Analyze** your collection using the Dashboard to understand your habits.
+5.  **Organize** by using Magic Sort, creating Rules, or filtering manually.
+6.  **Clean** up duplicates and broken links with the built-in tools.
+7.  **Export** the organized list back to your browser when done.
 
 ### For Developers
 
@@ -96,6 +100,9 @@ src/
 
 **Q: Is my data safe?**
 A: Yes! Everything runs locally in your browser's IndexedDB. We do not track you or send data to any server.
+
+**Q: Does the AI feature send my bookmarks to the cloud?**
+A: By default, no. If you use Local AI via Ollama, everything remains on your machine. If you securely configure cloud providers like OpenAI or Gemini in your settings, only the specific bookmarks you select for "Magic Sort" will be sent to those APIs for processing. Your API keys are saved locally.
 
 **Q: Which browsers are supported?**
 A: Chrome, Firefox, Edge, Safari (latest versions).

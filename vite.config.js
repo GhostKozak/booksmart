@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.svg'],
       manifest: {
-        name: 'BookSmart - Akıllı Yer İmi Organizatörü ve Yöneticisi',
+        name: 'BookSmart - Smart Bookmark Organizer and Manager',
         short_name: 'BookSmart',
-        description: 'Yer imlerinizi akıllıca organize edin, ölü linkleri temizleyin ve verimliliğinizi artırın.',
+        description: 'Organize your bookmarks smartly with AI, clean up dead links, and boost your productivity.',
         theme_color: '#0a0f1a',
         background_color: '#0a0f1a',
         display: 'standalone',
