@@ -52,14 +52,15 @@ export function FloatingActionBar({
                 </div>
 
                 {/* Vertical Actions List */}
-                <div className="flex flex-col gap-3 max-h-[70vh] overflow-y-auto pr-1">
+                {/* Vertical Actions List */}
+                <div className="flex flex-col gap-2 max-h-[55vh] overflow-y-auto pr-1 pb-1">
 
                     {/* Primary Actions Group */}
                     <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-1 tracking-wider opacity-70">
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
                             {t('common.actions', 'Basic Actions')}
                         </div>
-                        <Button variant="destructive" size="sm" className="justify-start gap-3 h-10 px-3 rounded-xl shadow-sm" onClick={() => { onDelete(); setIsMenuOpen(false); }}>
+                        <Button variant="destructive" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl shadow-sm" onClick={() => { onDelete(); setIsMenuOpen(false); }}>
                             <Trash2 className="h-4 w-4" />
                             <span>{t('actionbar.delete')}</span>
                         </Button>
@@ -71,15 +72,15 @@ export function FloatingActionBar({
 
                     {/* Organization Group */}
                     <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-1 tracking-wider opacity-70">
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
                             {t('header.maintenance', 'Organization')}
                         </div>
-                        <Button variant="default" size="sm" className="justify-start gap-3 h-10 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-sm text-white" onClick={() => { onAutoSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
+                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-sm text-white" onClick={() => { onAutoSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
                             <Zap className="h-4 w-4 fill-current" />
                             <span>{t('actionbar.autoSort')}</span>
                         </Button>
 
-                        <Button variant="default" size="sm" className="justify-start gap-3 h-10 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md text-white" onClick={() => { onMagicSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
+                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md text-white" onClick={() => { onMagicSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
                             {isProcessingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                             <span>{isProcessingAI ? t('actionbar.sorting') : t('actionbar.magicSort')}</span>
                         </Button>
@@ -87,38 +88,33 @@ export function FloatingActionBar({
 
                     <div className="h-px bg-border/50 mx-1" />
 
-                    {/* Maintenance / Health Group */}
+                    {/* Maintenance / Health & Export Group */}
                     <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-1 tracking-wider opacity-70">
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
                             {t('header.tools', 'Link Tools')}
                         </div>
-                        <Button variant="outline" size="sm" className="justify-start gap-3 h-10 px-3 rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400" onClick={() => { onCleanUrls(); setIsMenuOpen(false); }}>
-                            <Sparkles className="h-4 w-4" />
-                            <span>{t('actionbar.cleanUrls')}</span>
-                        </Button>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-2 rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400" onClick={() => { onCleanUrls(); setIsMenuOpen(false); }}>
+                                <Sparkles className="h-4 w-4 shrink-0" />
+                                <span className="truncate">{t('actionbar.cleanUrls')}</span>
+                            </Button>
+
+                            <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-2 rounded-xl shadow-sm" onClick={() => { onExportSelected(); setIsMenuOpen(false); }}>
+                                <Download className="h-4 w-4 shrink-0" />
+                                <span className="truncate">{t('actionbar.export')}</span>
+                            </Button>
+                        </div>
 
                         <div className="flex items-center gap-2 px-1 mt-1 bg-muted/30 rounded-xl p-1">
                             <span className="text-[11px] font-medium text-muted-foreground ml-2 mr-auto">{t('bookmarks.columns.status')}</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-emerald-500/20" title={t('actionbar.markAlive')} onClick={() => onOverrideStatus('alive')}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-emerald-500/20" title={t('actionbar.markAlive')} onClick={() => onOverrideStatus('alive')}>
                                 <Check className="h-4 w-4 text-emerald-500" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-500/20" title={t('actionbar.markDead')} onClick={() => onOverrideStatus('dead')}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg hover:bg-red-500/20" title={t('actionbar.markDead')} onClick={() => onOverrideStatus('dead')}>
                                 <XCircle className="h-4 w-4 text-red-500" />
                             </Button>
                         </div>
-                    </div>
-
-                    <div className="h-px bg-border/50 mx-1" />
-
-                    {/* Secondary Actions / Data Group */}
-                    <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-1 tracking-wider opacity-70">
-                            {t('header.export', 'Data & Sharing')}
-                        </div>
-                        <Button variant="outline" size="sm" className="justify-start gap-3 h-10 px-3 rounded-xl shadow-sm" onClick={() => { onExportSelected(); setIsMenuOpen(false); }}>
-                            <Download className="h-4 w-4" />
-                            <span>{t('actionbar.export')}</span>
-                        </Button>
                     </div>
                 </div>
             </div>

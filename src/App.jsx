@@ -347,7 +347,7 @@ function App() {
   // ── Render ──
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
+    <div className="h-[100dvh] bg-background text-foreground flex flex-col font-sans overflow-hidden">
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}

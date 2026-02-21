@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart } from 'lucide-react'
@@ -37,6 +38,7 @@ export function Header({
     setIsShortcutsOpen
 }) {
     const { t, i18n } = useTranslation()
+    const [isMobileSearchActive, setIsMobileSearchActive] = useState(false)
 
     const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
 
@@ -57,7 +59,10 @@ export function Header({
                 >
                     <TextAlignStart className="h-5 w-5" />
                 </Button>
-                <div className="flex items-center gap-1 ml-4 border-l pl-4">
+                <div className={cn(
+                    "flex items-center gap-1",
+                    (canUndo || canRedo || past.length > 0 || future.length > 0) ? "ml-2 sm:ml-4 border-l pl-2 sm:pl-4" : ""
+                )}>
                     {canUndo && (
                         <Button variant="ghost" size="icon" onClick={undo} title={t('header.undo')}>
                             <Undo2 className="h-4 w-4" />
@@ -92,15 +97,25 @@ export function Header({
             </div>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-md mx-2 sm:mx-4 flex flex-col relative z-20"
+            <div className={cn(
+                "flex-1 max-w-md sm:mx-4 relative z-50",
+                isMobileSearchActive
+                    ? "absolute inset-0 pt-3.5 px-2 bg-background sm:static sm:pt-0 sm:px-0 sm:bg-transparent flex flex-col"
+                    : "hidden sm:flex sm:flex-col mx-2"
+            )}
                 onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget)) {
                         setIsAdvancedSearchOpen(false)
                     }
                 }}
             >
-                <div className="flex gap-2">
-                    <div className="relative flex-1">
+                <div className="flex gap-1 sm:gap-2 w-full">
+                    {isMobileSearchActive && (
+                        <Button variant="ghost" size="icon" className="shrink-0 sm:hidden" onClick={() => setIsMobileSearchActive(false)}>
+                            <X className="h-5 w-5" />
+                        </Button>
+                    )}
+                    <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             ref={searchInputRef}
@@ -146,6 +161,18 @@ export function Header({
             </div>
 
             <div className="flex items-center gap-1 sm:gap-4">
+                {!isMobileSearchActive && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="sm:hidden"
+                        onClick={() => setIsMobileSearchActive(true)}
+                        title={t('app.searchPlaceholder')}
+                    >
+                        <Search className="h-5 w-5" />
+                    </Button>
+                )}
+
                 <DropdownMenu
                     trigger={
                         <Button variant="ghost" size="icon" className="rounded-full">
@@ -247,6 +274,11 @@ export function Header({
                     {hasFileLoaded && (
                         <>
                             <DropdownSeparator />
+                            <DropdownItem onClick={openExportModal} className="sm:hidden">
+                                <Download className="h-4 w-4 mr-2" />
+                                {t('header.export')}
+                            </DropdownItem>
+
                             <DropdownItem onClick={closeFile}>
                                 <LogOut className="h-4 w-4 mr-2" />
                                 {t('header.closeFile')}
@@ -260,11 +292,11 @@ export function Header({
                     )}
                 </DropdownMenu>
 
-                <div className="flex items-center border-l pl-1 ml-1 sm:pl-2 sm:ml-2">
+                <div className="hidden sm:flex items-center border-l pl-2 ml-2">
 
                     <Button
                         variant="ghost"
-                        className="gap-2 px-2 sm:px-4"
+                        className="gap-2 px-4"
                         onClick={openExportModal}
                         title={t('header.export')}
                     >

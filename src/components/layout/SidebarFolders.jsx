@@ -22,9 +22,9 @@ export function SidebarFolders({
                 className="flex items-center justify-between mb-1 border-t pt-2 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
                 onClick={onToggle}
             >
-                <h2 className="font-semibold text-lg flex items-center gap-2">
-                    {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary" />}
-                    <Folder className="h-5 w-5" /> {t('sidebar.sections.folders')}
+                <h2 className="font-semibold text-base lg:text-lg flex items-center gap-2">
+                    {collapsed ? <ChevronRight className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary" />}
+                    <Folder className="h-4 w-4 lg:h-5 lg:w-5" /> {t('sidebar.sections.folders')}
                 </h2>
             </div>
 

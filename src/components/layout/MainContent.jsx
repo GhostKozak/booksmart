@@ -39,23 +39,23 @@ export function MainContent({
     if (!hasFileLoaded) {
         return (
             <main className="flex-1 overflow-auto bg-secondary/10 p-6 relative">
-                <div className="h-full flex flex-col items-center justify-center p-8">
+                <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8">
                     <div
                         {...getRootProps()}
                         className={cn(
-                            "border-4 border-dashed rounded-3xl p-16 flex flex-col items-center justify-center text-center transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 max-w-2xl w-full",
+                            "border-4 border-dashed rounded-3xl p-8 sm:p-16 flex flex-col items-center justify-center text-center transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 max-w-2xl w-full",
                             isDragActive ? "border-primary bg-primary/10 scale-105" : "border-muted-foreground/25"
                         )}
                     >
                         <input {...getInputProps()} />
-                        <div className="bg-primary/10 p-6 rounded-full mb-6">
-                            <Logo className="h-16 w-16" />
+                        <div className="bg-primary/10 p-4 sm:p-6 rounded-full mb-4 sm:mb-6">
+                            <Logo className="h-12 w-12 sm:h-16 sm:w-16" />
                         </div>
-                        <h3 className="text-2xl font-bold mb-2">{t('main.dropzone.title')}</h3>
-                        <p className="text-muted-foreground max-w-md">
+                        <h3 className="text-xl sm:text-2xl font-bold mb-2">{t('main.dropzone.title')}</h3>
+                        <p className="text-sm sm:text-base text-muted-foreground max-w-md">
                             {t('main.dropzone.desc')}
                         </p>
-                        <Button variant="outline" className="mt-8">{t('main.dropzone.browse')}</Button>
+                        <Button variant="outline" className="mt-6 sm:mt-8">{t('main.dropzone.browse')}</Button>
                     </div>
                 </div>
             </main>
