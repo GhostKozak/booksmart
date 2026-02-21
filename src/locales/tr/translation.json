@@ -306,6 +306,26 @@
             "title": "Toplama Alışkanlıkları",
             "tooltip": "yer imi"
         },
+        "timeframe": {
+            "week": "Haftalık",
+            "month": "Aylık",
+            "year": "Yıllık"
+        },
+        "tagCloud": {
+            "title": "Etiket Bulutu",
+            "noTags": "Koleksiyonunuzda henüz etiket bulunamadı."
+        },
+        "healthScore": {
+            "title": "Koleksiyon Sağlığı",
+            "brokenLinks": "Ölü Linkler",
+            "duplicates": "Kopyalar",
+            "checkRequired": "Henüz sağlık kontrolü yapılmadı",
+            "accuracyDisclaimer": "Bağlantı sağlığı kontrolleri, sunucu korumaları (örn. Cloudflare) veya geçici bağlantı sorunları nedeniyle %100 doğru olmayabilir."
+        },
+        "oldItems": {
+            "title": "Eski Hazineler",
+            "added": "Eklendi"
+        },
         "topDomains": "En İyi Alan Adları",
         "oldAlert": {
             "title": "Tozlu Raflar",

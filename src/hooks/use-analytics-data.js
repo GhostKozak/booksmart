@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { startOfWeek, subWeeks, subMonths, subYears, format } from 'date-fns';
 
 export function useAnalyticsData(bookmarks, linkHealth, oldBookmarksCount) {
     const now = useMemo(() => new Date(), []);
@@ -37,31 +38,88 @@ export function useAnalyticsData(bookmarks, linkHealth, oldBookmarksCount) {
                 percentage: Math.round((count / total) * 100)
             }));
 
-        // Accumulation Velocity (Last 12 Months)
-        const months = {};
-        // Initialize last 12 months
+        // Accumulation Velocity
+        const accumulation = { week: [], month: [], year: [] };
+
+        const weeks = {};
         for (let i = 11; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            months[key] = {
-                name: d.toLocaleDateString('en-US', { month: 'short' }),
-                count: 0,
-                fullDate: key
-            };
+            const d = subWeeks(now, i);
+            const start = startOfWeek(d, { weekStartsOn: 1 });
+            const key = format(start, 'yyyy-MM-dd');
+            weeks[key] = { name: format(start, 'MMM d'), count: 0, fullDate: key };
+        }
+
+        const months = {};
+        for (let i = 11; i >= 0; i--) {
+            const d = subMonths(now, i);
+            const key = format(d, 'yyyy-MM');
+            months[key] = { name: format(d, 'MMM'), count: 0, fullDate: key };
+        }
+
+        const years = {};
+        for (let i = 4; i >= 0; i--) {
+            const d = subYears(now, i);
+            const key = format(d, 'yyyy');
+            years[key] = { name: format(d, 'yyyy'), count: 0, fullDate: key };
         }
 
         bookmarks.forEach(b => {
             if (!b.addDate) return;
             const date = new Date(parseInt(b.addDate) * 1000);
-            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            if (months[key]) {
-                months[key].count++;
-            }
+
+            // Week
+            const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+            const weekKey = format(weekStart, 'yyyy-MM-dd');
+            if (weeks[weekKey]) weeks[weekKey].count++;
+
+            // Month
+            const monthKey = format(date, 'yyyy-MM');
+            if (months[monthKey]) months[monthKey].count++;
+
+            // Year
+            const yearKey = format(date, 'yyyy');
+            if (years[yearKey]) years[yearKey].count++;
         });
 
-        const accumulationData = Object.values(months);
-        const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        accumulation.week = Object.values(weeks);
+        accumulation.month = Object.values(months);
+        accumulation.year = Object.values(years);
+
+        const currentMonthKey = format(now, 'yyyy-MM');
         const addedThisMonth = months[currentMonthKey]?.count || 0;
+
+        // Tag Cloud
+        const tagCounts = {};
+        bookmarks.forEach(b => {
+            if (b.tags && Array.isArray(b.tags)) {
+                b.tags.forEach(t => {
+                    tagCounts[t] = (tagCounts[t] || 0) + 1;
+                });
+            }
+        });
+        const tagCloudData = Object.entries(tagCounts)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 30)
+            .map(([tag, count]) => ({ tag, count }));
+
+        // Health Score
+        const brokenRatio = checkedLinks > 0 ? deadLinks / checkedLinks : 0;
+        const duplicateRatio = total > 0 ? duplicates / total : 0;
+        const defectScore = (brokenRatio * 0.7) + (duplicateRatio * 0.3);
+
+        let grade = 'A';
+        if (defectScore > 0.15) grade = 'F';
+        else if (defectScore > 0.10) grade = 'D';
+        else if (defectScore > 0.05) grade = 'C';
+        else if (defectScore > 0.02) grade = 'B';
+
+        const healthScore = { grade, brokenRatio, duplicateRatio, checkedLinks };
+
+        // Old Bookmarks List
+        const oldBookmarksList = [...bookmarks]
+            .filter(b => b.addDate)
+            .sort((a, b) => parseInt(a.addDate) - parseInt(b.addDate))
+            .slice(0, 10);
 
         return {
             total,
@@ -71,8 +129,11 @@ export function useAnalyticsData(bookmarks, linkHealth, oldBookmarksCount) {
             checkedLinks,
             topDomains,
             oldBookmarksCount,
-            accumulationData,
-            addedThisMonth
+            accumulation,
+            addedThisMonth,
+            tagCloudData,
+            healthScore,
+            oldBookmarksList
         };
     }, [bookmarks, linkHealth, oldBookmarksCount, now]);
 

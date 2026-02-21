@@ -185,145 +185,145 @@ export function Header({
                     <DropdownLabel>{t('common.actions')}</DropdownLabel>
 
                     {hasMaintenanceActions && (
-                        <>
-                            <DropdownLabel>{t('header.maintenance')}</DropdownLabel>
+                        <div className="bg-muted/30 rounded-lg p-1 sm:p-2 my-1">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-1 px-1">{t('header.maintenance')}</DropdownLabel>
                             {duplicateCount > 0 && (
-                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50">
-                                    <Layers className="h-4 w-4 mr-2" />
+                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                                    <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
                                     {t('header.removeDuplicates', { count: duplicateCount })}
                                 </DropdownItem>
                             )}
                             {cleanableCount > 0 && (
-                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400">
-                                    <Sparkles className="h-4 w-4 mr-2" />
+                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
                                     {t('header.cleanUrls', { count: cleanableCount })}
                                 </DropdownItem>
                             )}
-                            <DropdownSeparator />
-                        </>
+                        </div>
                     )}
 
                     {bookmarkCount > 0 && (
                         <>
-                            <DropdownLabel>{t('header.view')}</DropdownLabel>
-                            <DropdownItem onClick={() => setViewMode('list')} className={viewMode === 'list' ? "bg-accent" : ""}>
-                                <List className="h-4 w-4 mr-2" />
-                                {t('header.listView')}
-                            </DropdownItem>
-
-                            <DropdownItem onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? "bg-accent" : ""}>
-                                <LayoutGrid className="h-4 w-4 mr-2" />
-                                {t('header.gridView')}
-                            </DropdownItem>
-
-                            {viewMode === 'grid' && (
-                                <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)}>
-                                    <Image className="h-4 w-4 mr-2" />
-                                    {showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('header.view')}</DropdownLabel>
+                            <div className="grid grid-cols-2 gap-1 sm:gap-2 mb-1">
+                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'list' && "bg-accent")}>
+                                    <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    <span>{t('header.listView').split(' ')[0]}</span>
                                 </DropdownItem>
-                            )}
+                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'grid' && "bg-accent")}>
+                                    <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    <span>{t('header.gridView').split(' ')[0]}</span>
+                                </DropdownItem>
+                            </div>
 
-                            <DropdownItem onClick={() => setViewMode('analytics')} className={viewMode === 'analytics' ? "bg-accent" : ""}>
-                                <BarChart3 className="h-4 w-4 mr-2" />
-                                {t('header.analytics')}
-                            </DropdownItem>
+                            <div className={cn("grid gap-1 sm:gap-2 mb-1", viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1")}>
+                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-1.5 sm:py-2 text-[11px] sm:text-sm justify-center", viewMode === 'analytics' && "bg-accent")}>
+                                    <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    {t('header.analytics')}
+                                </DropdownItem>
+
+                                {viewMode === 'grid' && (
+                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-1.5 sm:py-2 text-[11px] sm:text-sm justify-center">
+                                        <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                        {showThumbnails ? t('header.hideThumbnails').split(' ')[0] : t('header.showThumbnails').split(' ')[0]}
+                                    </DropdownItem>
+                                )}
+                            </div>
 
                             <DropdownSeparator />
 
-                            <DropdownLabel>
-                                <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 inline" />
-                                {t('header.sort.label')}
-                            </DropdownLabel>
-                            {[
-                                { key: 'default', label: t('header.sort.default') },
-                                { key: 'title-az', label: t('header.sort.titleAz') },
-                                { key: 'title-za', label: t('header.sort.titleZa') },
-                                { key: 'date-new', label: t('header.sort.dateNew') },
-                                { key: 'date-old', label: t('header.sort.dateOld') },
-                                { key: 'domain', label: t('header.sort.domain') },
-                                { key: 'folder', label: t('header.sort.folder') },
-                            ].map(opt => (
-                                <DropdownItem
-                                    key={opt.key}
-                                    onClick={() => setSortBy(opt.key)}
-                                    className={sortBy === opt.key ? "bg-accent" : ""}
-                                >
-                                    {opt.label}
-                                </DropdownItem>
-                            ))}
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('header.sort.label')}</DropdownLabel>
+                            <div className="grid grid-cols-2 gap-1 sm:gap-2 max-h-40 sm:max-h-60 overflow-y-auto pr-1">
+                                {[
+                                    { key: 'default', label: t('header.sort.default') },
+                                    { key: 'title-az', label: t('header.sort.titleAz') },
+                                    { key: 'title-za', label: t('header.sort.titleZa') },
+                                    { key: 'date-new', label: t('header.sort.dateNew') },
+                                    { key: 'date-old', label: t('header.sort.dateOld') },
+                                    { key: 'domain', label: t('header.sort.domain') },
+                                    { key: 'folder', label: t('header.sort.folder') },
+                                ].map(opt => (
+                                    <DropdownItem
+                                        key={opt.key}
+                                        onClick={() => setSortBy(opt.key)}
+                                        className={cn("text-[10px] sm:text-[11px] py-1.5 sm:py-2 h-auto truncate justify-center sm:justify-start", sortBy === opt.key && "bg-accent text-accent-foreground font-bold border border-accent-foreground/10")}
+                                    >
+                                        {opt.label}
+                                    </DropdownItem>
+                                ))}
+                            </div>
 
                             <DropdownSeparator />
-
                         </>
                     )}
 
-                    <DropdownLabel>{t('settings.language.label')}</DropdownLabel>
-                    <DropdownItem onClick={() => i18n.changeLanguage('tr')} className={i18n.language.startsWith('tr') ? "bg-accent" : ""}>
-                        <span className="mr-2 text-lg">🇹🇷</span>
-                        {t('settings.languages.tr')}
-                    </DropdownItem>
-                    <DropdownItem onClick={() => i18n.changeLanguage('en')} className={i18n.language.startsWith('en') ? "bg-accent" : ""}>
-                        <span className="mr-2 text-lg">🇺🇸</span>
-                        {t('settings.languages.en')}
-                    </DropdownItem>
-                    <DropdownItem onClick={() => i18n.changeLanguage('es')} className={i18n.language.startsWith('es') ? "bg-accent" : ""}>
-                        <span className="mr-2 text-lg">🇪🇸</span>
-                        {t('settings.languages.es')}
-                    </DropdownItem>
-                    <DropdownItem onClick={() => i18n.changeLanguage('fr')} className={i18n.language.startsWith('fr') ? "bg-accent" : ""}>
-                        <span className="mr-2 text-lg">🇫🇷</span>
-                        {t('settings.languages.fr')}
-                    </DropdownItem>
-                    <DropdownItem onClick={() => i18n.changeLanguage('de')} className={i18n.language.startsWith('de') ? "bg-accent" : ""}>
-                        <span className="mr-2 text-lg">🇩🇪</span>
-                        {t('settings.languages.de')}
-                    </DropdownItem>
+                    <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('settings.language.label')}</DropdownLabel>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2 mb-1 px-1">
+                        {[
+                            { code: 'tr', flag: '🇹🇷' },
+                            { code: 'en', flag: '🇺🇸' },
+                            { code: 'es', flag: '🇪🇸' },
+                            { code: 'fr', flag: '🇫🇷' },
+                            { code: 'de', flag: '🇩🇪' },
+                        ].map(lang => (
+                            <DropdownItem
+                                key={lang.code}
+                                onClick={() => i18n.changeLanguage(lang.code)}
+                                className={cn("justify-center py-1.5 sm:py-2 h-10 sm:h-12 text-lg sm:text-xl", i18n.language.startsWith(lang.code) && "bg-accent border")}
+                            >
+                                <span className="drop-shadow-sm">{lang.flag}</span>
+                            </DropdownItem>
+                        ))}
+                    </div>
 
                     <DropdownSeparator />
 
-                    <DropdownLabel>{t('header.tools')}</DropdownLabel>
-                    <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks}>
-                        {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Activity className="h-4 w-4 mr-2" />}
-                        {isCheckingLinks ? t('header.checking') : t('header.checkHealth')}
-                    </DropdownItem>
+                    <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1">
+                        <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                            {isCheckingLinks ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 animate-spin" /> : <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 text-rose-500" />}
+                            <span>{isCheckingLinks ? t('header.checking') : 'Check ❤️'}</span>
+                        </DropdownItem>
+
+                        <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                            {theme === "dark" ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />}
+                            <span>{theme === "dark" ? t('header.lightMode') : t('header.darkMode')}</span>
+                        </DropdownItem>
+                    </div>
 
                     <DropdownSeparator />
 
-                    <DropdownItem onClick={() => setIsShortcutsOpen(true)}>
-                        <HelpCircle className="h-4 w-4 mr-2" />
-                        {t('header.shortcuts')}
-                    </DropdownItem>
+                    <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1">
+                        <DropdownItem onClick={() => setIsShortcutsOpen(true)} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                            <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                            {t('header.shortcuts')}
+                        </DropdownItem>
 
-                    <DropdownSeparator />
-
-                    <DropdownLabel>{t('header.system')}</DropdownLabel>
-                    <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                        {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-                        {theme === "dark" ? t('header.lightMode') : t('header.darkMode')}
-                    </DropdownItem>
-
-                    <DropdownSeparator />
-
-                    <DropdownItem onClick={() => openSettings('folders')}>
-                        <Settings className="h-4 w-4 mr-2" />
-                        {t('header.settings')}
-                    </DropdownItem>
+                        <DropdownItem onClick={() => openSettings('folders')} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                            <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                            {t('header.settings')}
+                        </DropdownItem>
+                    </div>
 
                     {hasFileLoaded && (
                         <>
                             <DropdownSeparator />
-                            <DropdownItem onClick={openExportModal} className="sm:hidden">
-                                <Download className="h-4 w-4 mr-2" />
-                                {t('header.export')}
-                            </DropdownItem>
+                            <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1 mb-1">
+                                <DropdownItem onClick={openExportModal} className="sm:hidden py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    {t('header.export')}
+                                </DropdownItem>
 
-                            <DropdownItem onClick={closeFile}>
-                                <LogOut className="h-4 w-4 mr-2" />
-                                {t('header.closeFile')}
-                            </DropdownItem>
+                                <DropdownItem onClick={closeFile} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                                    <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    <span>
+                                        <span className="sm:hidden">Close</span>
+                                        <span className="hidden sm:inline">Close Folder</span>
+                                    </span>
+                                </DropdownItem>
+                            </div>
 
-                            <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50">
-                                <Trash2 className="h-4 w-4 mr-2" />
+                            <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
+                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
                                 {t('common.clearAll')}
                             </DropdownItem>
                         </>

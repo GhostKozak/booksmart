@@ -307,6 +307,26 @@
             "title": "Collection Habits",
             "tooltip": "bookmarks"
         },
+        "timeframe": {
+            "week": "Weekly",
+            "month": "Monthly",
+            "year": "Yearly"
+        },
+        "tagCloud": {
+            "title": "Tag Cloud",
+            "noTags": "No tags found in your collection yet."
+        },
+        "healthScore": {
+            "title": "Collection Health",
+            "brokenLinks": "Broken Links",
+            "duplicates": "Duplicates",
+            "checkRequired": "Health check not performed yet",
+            "accuracyDisclaimer": "Link health checks may not be 100% accurate due to server protections (e.g. Cloudflare) or temporary connection issues."
+        },
+        "oldItems": {
+            "title": "Oldest Treasures",
+            "added": "Added"
+        },
         "topDomains": "Top Domains",
         "oldAlert": {
             "title": "Dusty Shelves",
