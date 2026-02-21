@@ -1,8 +1,22 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export function useUIState() {
     // Sidebar
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024)
+
+    // Auto-open/close sidebar only when crossing the desktop breakpoint
+    useEffect(() => {
+        let isDesktop = window.innerWidth >= 1024;
+        const handleResize = () => {
+            const currentlyDesktop = window.innerWidth >= 1024;
+            if (currentlyDesktop !== isDesktop) {
+                isDesktop = currentlyDesktop;
+                setIsSidebarOpen(currentlyDesktop);
+            }
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
     const [collapsedSections, setCollapsedSections] = useState({
         tags: false, folders: false, filters: false, rules: false
     })
