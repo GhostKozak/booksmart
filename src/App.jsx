@@ -14,6 +14,7 @@ import { useRuleManager } from './hooks/use-rule-manager'
 import { useMagicSort } from './hooks/use-magic-sort'
 import { useCollections } from './hooks/use-collections'
 import { useAutoCategorize } from './hooks/use-auto-categorize'
+import { useAITools } from './hooks/use-ai-tools'
 import { useFileUpload } from './hooks/use-file-upload'
 import { useExport } from './hooks/use-export'
 import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
@@ -132,10 +133,11 @@ function App() {
     setSelectedIds: actions.setSelectedIds
   })
 
-  const magicSort = useMagicSort({
+  const { handleMagicSort, cancelMagicSort, isProcessingAI } = useMagicSort({
     selectedIds: actions.selectedIds,
     setSelectedIds: actions.setSelectedIds,
-    rawBookmarks, openSettings: ui.openSettings,
+    rawBookmarks,
+    openSettings: ui.openSettings,
     onSortPreview: actions.handleSortPreview
   })
 
@@ -145,6 +147,19 @@ function App() {
     rawBookmarks,
     onSortPreview: actions.handleSortPreview
   })
+
+  const aiTools = useAITools({
+    selectedIds: actions.selectedIds,
+    setSelectedIds: actions.setSelectedIds,
+    rawBookmarks,
+    openSettings: ui.openSettings,
+    onSortPreview: actions.handleSortPreview
+  })
+
+  const handleCancelAITasks = useCallback(() => {
+    cancelMagicSort();
+    if (aiTools.cancelAITools) aiTools.cancelAITools();
+  }, [cancelMagicSort, aiTools]);
 
   useKeyboardShortcuts({
     selectedIds: actions.selectedIds,
@@ -268,8 +283,13 @@ function App() {
           onExportSelected={() => actions.guardedExport(exporter.openExportSelectedModal)}
           onCleanUrls={operations.cleanSelectedUrls}
           onAutoSort={autoCategorize.handleAutoCategorize}
-          onMagicSort={magicSort.handleMagicSort}
-          isProcessingAI={magicSort.isProcessingAI || autoCategorize.isProcessingLocal}
+          onMagicSort={handleMagicSort}
+          isProcessingAI={isProcessingAI}
+          onFixTitles={aiTools.handleFixTitles}
+          onFindSmartDuplicates={aiTools.handleFindSmartDuplicates}
+          isProcessingAITitles={aiTools.isProcessingAITitles}
+          isProcessingAIDupes={aiTools.isProcessingAIDupes}
+          onCancelAITasks={handleCancelAITasks}
           allCollections={collectionsHook.collections}
           onAddToCollection={(collectionId) =>
             collectionsHook.addBookmarksToCollection(actions.selectedIds, collectionId)

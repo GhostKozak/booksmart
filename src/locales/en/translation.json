@@ -141,6 +141,8 @@
         "edit": "Edit",
         "create": "Create",
         "actions": "Actions",
+        "cancelled": "Cancelled",
+        "error": "Error",
         "clearAll": "Clear All",
         "selectAll": "Select All",
         "close": "Close",
@@ -258,7 +260,9 @@
                 "title": "Title",
                 "changes": "Changes"
             },
-            "tagsUpdated": "Tags updated"
+            "tagsUpdated": "Tags updated",
+            "selectMore": "Select at least 2 bookmarks.",
+            "noUpdates": "No changes needed."
         },
         "settings": {
             "desc": "Configure your AI model to enable \"Magic Sort\". API keys are stored locally.",
@@ -377,6 +381,14 @@
         "autoSort": "Auto Sort (Local)",
         "sorting": "Sorting...",
         "magicSort": "Magic Sort",
+        "fixTitles": "Fix Titles (AI)",
+        "smartDuplicates": "Smart Dupes (AI)",
+        "moreTools": "More Tools",
+        "tooltips": {
+            "magicSort": "AI analyzes content and categorizes bookmarks into appropriate folders.",
+            "fixTitles": "AI fixes messy, broken or missing titles based on the URL and current title.",
+            "smartDuplicates": "AI detects semantic duplicates (different URLs pointing to the exact same content)."
+        },
         "collection": {
             "button": "Collection",
             "add": "Add",
@@ -389,7 +401,10 @@
         "close": "Close Preview",
         "loading": "Loading preview...",
         "error": "Content not loading? Some sites block embedding.",
-        "openExternal": "Open in New Tab"
+        "openExternal": "Open in New Tab",
+        "summarize": "Summarize with AI",
+        "summarySuccess": "AI Summary generated.",
+        "summaryError": "Failed to generate AI summary."
     },
     "offline": "You are offline — Data is saved locally",
     "bookmarks": {

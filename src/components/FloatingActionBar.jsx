@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Trash2, Check, XCircle, Download, Sparkles, Loader2, Zap, Menu, X, MoreVertical } from 'lucide-react';
+import { Trash2, Check, XCircle, Download, Sparkles, Loader2, Zap, Menu, X, MoreVertical, Wand2, Search } from 'lucide-react';
 import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
 import { MoveBulkPopover } from './actionbar/MoveBulkPopover';
 import { CollectionBulkPopover } from './actionbar/CollectionBulkPopover';
+import { DropdownMenu, DropdownItem, DropdownSeparator } from './ui/DropdownMenu';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
 
@@ -24,7 +25,12 @@ export function FloatingActionBar({
     isProcessingAI,
     allCollections,
     onAddToCollection,
-    onRemoveFromCollection
+    onRemoveFromCollection,
+    onFixTitles,
+    onFindSmartDuplicates,
+    isProcessingAITitles,
+    isProcessingAIDupes,
+    onCancelAITasks
 }) {
     const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
@@ -41,6 +47,15 @@ export function FloatingActionBar({
         if (isMenuOpen) setActivePopover(null);
     };
 
+    const isAnyProcessing = isProcessingAI || isProcessingAITitles || isProcessingAIDupes;
+
+    const getProcessingText = () => {
+        if (isProcessingAI) return t('actionbar.sorting');
+        if (isProcessingAITitles) return t('actionbar.fixTitles');
+        if (isProcessingAIDupes) return t('actionbar.smartDuplicates');
+        return t('actionbar.moreTools');
+    };
+
     return (
         <div className="fixed bottom-6 right-6 min-[1200px]:left-1/2 min-[1200px]:-translate-x-1/2 z-[100] flex flex-col items-end min-[1200px]:items-center gap-3">
             {/* Mobile Actions Menu (Expanded) */}
@@ -55,7 +70,6 @@ export function FloatingActionBar({
                     </Button>
                 </div>
 
-                {/* Vertical Actions List */}
                 {/* Vertical Actions List */}
                 <div className="flex flex-col gap-2 max-h-[55vh] overflow-y-auto pr-1 pb-1">
 
@@ -75,24 +89,6 @@ export function FloatingActionBar({
 
                     <div className="h-px bg-border/50 mx-1" />
 
-                    {/* Organization Group */}
-                    <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
-                            {t('header.maintenance')}
-                        </div>
-                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-sm text-white" onClick={() => { onAutoSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
-                            <Zap className="h-4 w-4 fill-current" />
-                            <span>{t('actionbar.autoSort')}</span>
-                        </Button>
-
-                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md text-white" onClick={() => { onMagicSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
-                            {isProcessingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                            <span>{isProcessingAI ? t('actionbar.sorting') : t('actionbar.magicSort')}</span>
-                        </Button>
-                    </div>
-
-                    <div className="h-px bg-border/50 mx-1" />
-
                     {/* Maintenance / Health & Export Group */}
                     <div className="flex flex-col gap-1">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase px-2 mb-0.5 tracking-wider opacity-70">
@@ -100,16 +96,36 @@ export function FloatingActionBar({
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
-                            <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-2 rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400" onClick={() => { onCleanUrls(); setIsMenuOpen(false); }}>
-                                <Sparkles className="h-4 w-4 shrink-0" />
-                                <span className="truncate">{t('actionbar.cleanUrls')}</span>
-                            </Button>
-
                             <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-2 rounded-xl shadow-sm" onClick={() => { onExportSelected(); setIsMenuOpen(false); }}>
                                 <Download className="h-4 w-4 shrink-0" />
                                 <span className="truncate">{t('actionbar.export')}</span>
                             </Button>
+
+                            <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-2 rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400" onClick={() => { onCleanUrls(); setIsMenuOpen(false); }}>
+                                <Sparkles className="h-4 w-4 shrink-0" />
+                                <span className="truncate">{t('actionbar.cleanUrls')}</span>
+                            </Button>
                         </div>
+
+                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 mt-1 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-sm text-white" onClick={() => { onAutoSort(); setIsMenuOpen(false); }} disabled={isProcessingAI}>
+                            <Zap className="h-4 w-4 fill-current" />
+                            <span>{t('actionbar.autoSort')}</span>
+                        </Button>
+
+                        <Button variant="default" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md text-white" onClick={() => { onMagicSort(); setIsMenuOpen(false); }} disabled={isProcessingAI} title={t('actionbar.tooltips.magicSort')}>
+                            {isProcessingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                            <span>{isProcessingAI ? t('actionbar.sorting') : t('actionbar.magicSort')}</span>
+                        </Button>
+
+                        <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl border-purple-500/30 text-purple-600 dark:text-purple-400" onClick={() => { onFixTitles(); setIsMenuOpen(false); }} disabled={isProcessingAITitles} title={t('actionbar.tooltips.fixTitles')}>
+                            {isProcessingAITitles ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4 shrink-0" />}
+                            <span>{t('actionbar.fixTitles')}</span>
+                        </Button>
+
+                        <Button variant="outline" size="sm" className="justify-start gap-2 h-9 px-3 rounded-xl border-purple-500/30 text-purple-600 dark:text-purple-400" onClick={() => { onFindSmartDuplicates(); setIsMenuOpen(false); }} disabled={isProcessingAIDupes} title={t('actionbar.tooltips.smartDuplicates')}>
+                            {isProcessingAIDupes ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 shrink-0" />}
+                            <span>{t('actionbar.smartDuplicates')}</span>
+                        </Button>
 
                         <div className="flex items-center gap-2 px-1 mt-1 bg-muted/30 rounded-xl p-1">
                             <span className="text-[11px] font-medium text-muted-foreground ml-2 mr-auto">{t('bookmarks.columns.status')}</span>
@@ -139,47 +155,146 @@ export function FloatingActionBar({
                     <MoveBulkPopover allFolders={allFolders} onMove={onMove} isOpen={activePopover === 'move'} onToggle={() => togglePopover('move')} />
                     <CollectionBulkPopover collections={allCollections} onAddToCollection={onAddToCollection} onRemoveFromCollection={onRemoveFromCollection} isOpen={activePopover === 'collection'} onToggle={() => togglePopover('collection')} />
 
-                    <div className="flex gap-1 border-l pl-2 border-border">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={t('actionbar.markAlive')} onClick={() => onOverrideStatus('alive')}>
-                            <Check className="h-4 w-4 text-emerald-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={t('actionbar.markDead')} onClick={() => onOverrideStatus('dead')}>
-                            <XCircle className="h-4 w-4 text-red-500" />
-                        </Button>
-                    </div>
-
                     <div className="flex gap-2 border-l pl-2 border-border">
-                        <Button variant="outline" size="sm" className="rounded-full gap-2 h-8 px-4" onClick={onExportSelected} title={t('actionbar.export')}>
-                            <Download className="h-3.5 w-3.5" />
-                            <span>{t('actionbar.export')}</span>
-                        </Button>
+                        <DropdownMenu
+                            align="right"
+                            side="top"
+                            trigger={
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={cn(
+                                        "group rounded-full gap-2 h-8 px-4 font-medium transition-all duration-300",
+                                        isAnyProcessing && "border-primary/50 text-primary bg-primary/5 hover:border-destructive hover:text-destructive hover:bg-destructive/10 active:border-destructive active:text-destructive active:bg-destructive/10"
+                                    )}
+                                    title={isAnyProcessing ? t('common.cancel') : t('actionbar.moreTools')}
+                                    onClick={(e) => {
+                                        if (isAnyProcessing) {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            onCancelAITasks();
+                                        }
+                                    }}
+                                >
+                                    {isAnyProcessing ? (
+                                        <>
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin group-hover:hidden group-active:hidden" />
+                                            <X className="h-3.5 w-3.5 hidden group-hover:block group-active:block" />
+                                            <span className="truncate max-w-[120px] group-hover:hidden group-active:hidden animate-pulse">
+                                                {getProcessingText()}
+                                            </span>
+                                            <span className="truncate max-w-[120px] hidden group-hover:block group-active:block font-bold">
+                                                {t('common.cancel')}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="h-3.5 w-3.5 text-primary" />
+                                            <span className="truncate max-w-[120px]">
+                                                {getProcessingText()}
+                                            </span>
+                                        </>
+                                    )}
+                                </Button>
+                            }
+                        >
+                            <DropdownItem onClick={onExportSelected} icon={Download}>
+                                {t('actionbar.export')}
+                            </DropdownItem>
 
-                        <Button variant="outline" size="sm" className="rounded-full gap-2 h-8 px-4 border-amber-500/30 text-amber-600 dark:text-amber-400" onClick={onCleanUrls} title={t('actionbar.cleanUrls')}>
-                            <Sparkles className="h-3.5 w-3.5" />
-                            <span>{t('actionbar.cleanUrls')}</span>
-                        </Button>
+                            <DropdownItem onClick={onCleanUrls} icon={Sparkles} className="text-amber-600 dark:text-amber-400">
+                                {t('actionbar.cleanUrls')}
+                            </DropdownItem>
 
-                        <Button variant="default" size="sm" className="rounded-full gap-2 h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white shadow-sm" onClick={onAutoSort} disabled={isProcessingAI}>
-                            <Zap className="h-3.5 w-3.5 fill-current" />
-                            <span>{t('actionbar.autoSort')}</span>
-                        </Button>
+                            <DropdownSeparator />
 
-                        <Button variant="default" size="sm" className="rounded-full gap-2 h-8 px-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm" onClick={onMagicSort} disabled={isProcessingAI}>
-                            {isProcessingAI ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                            <span>{isProcessingAI ? t('actionbar.sorting') : t('actionbar.magicSort')}</span>
-                        </Button>
+                            <DropdownItem onClick={onAutoSort} icon={Zap} disabled={isProcessingAI} className="text-blue-600 dark:text-blue-400">
+                                {t('actionbar.autoSort')}
+                            </DropdownItem>
+
+                            <DropdownItem
+                                onClick={onMagicSort}
+                                icon={isProcessingAI ? Loader2 : Sparkles}
+                                disabled={isProcessingAI}
+                                className="text-purple-600 dark:text-purple-400"
+                                title={t('actionbar.tooltips.magicSort')}
+                            >
+                                <span className={cn(isProcessingAI && "animate-pulse")}>
+                                    {isProcessingAI ? t('actionbar.sorting') : t('actionbar.magicSort')}
+                                </span>
+                            </DropdownItem>
+
+                            <DropdownItem
+                                onClick={onFixTitles}
+                                icon={isProcessingAITitles ? Loader2 : Wand2}
+                                disabled={isProcessingAITitles}
+                                className="text-purple-600 dark:text-purple-400"
+                                title={t('actionbar.tooltips.fixTitles')}
+                            >
+                                <span className={cn(isProcessingAITitles && "animate-pulse")}>
+                                    {t('actionbar.fixTitles')}
+                                </span>
+                            </DropdownItem>
+
+                            <DropdownItem
+                                onClick={onFindSmartDuplicates}
+                                icon={isProcessingAIDupes ? Loader2 : Search}
+                                disabled={isProcessingAIDupes}
+                                className="text-purple-600 dark:text-purple-400"
+                                title={t('actionbar.tooltips.smartDuplicates')}
+                            >
+                                <span className={cn(isProcessingAIDupes && "animate-pulse")}>
+                                    {t('actionbar.smartDuplicates')}
+                                </span>
+                            </DropdownItem>
+
+                            <DropdownSeparator />
+
+                            <DropdownItem onClick={() => onOverrideStatus('alive')} icon={Check} className="text-emerald-600 dark:text-emerald-400">
+                                {t('actionbar.markAlive')}
+                            </DropdownItem>
+
+                            <DropdownItem onClick={() => onOverrideStatus('dead')} icon={XCircle} className="text-red-600 dark:text-red-400">
+                                {t('actionbar.markDead')}
+                            </DropdownItem>
+                        </DropdownMenu>
                     </div>
                 </div>
 
                 {/* Mobile Toggle Button (Hidden on Desktop) */}
                 <Button
-                    variant={isMenuOpen ? "secondary" : "default"}
+                    variant={isAnyProcessing ? "outline" : (isMenuOpen ? "secondary" : "default")}
                     size="sm"
-                    className="min-[1200px]:hidden rounded-full h-9 px-4 gap-2 shadow-lg"
-                    onClick={toggleMenu}
+                    className={cn(
+                        "min-[1200px]:hidden rounded-full h-9 shadow-lg transition-all duration-300",
+                        isAnyProcessing ? "px-2 py-0 border-primary/50 bg-primary/5" : "px-4 gap-2"
+                    )}
+                    onClick={(e) => {
+                        if (isAnyProcessing) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onCancelAITasks();
+                        } else {
+                            toggleMenu();
+                        }
+                    }}
                 >
-                    {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                    <span className="text-xs font-bold uppercase">{t('common.actions')}</span>
+                    {isAnyProcessing ? (
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary ml-1" />
+                            <span className="text-xs font-bold uppercase truncate max-w-[90px] text-primary">
+                                {getProcessingText()}
+                            </span>
+                            <div className="bg-destructive/10 text-destructive rounded-full p-1 ml-1 flex items-center justify-center">
+                                <X className="h-3 w-3" />
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                            <span className="text-xs font-bold uppercase">{t('common.actions')}</span>
+                        </>
+                    )}
                 </Button>
             </div>
         </div>

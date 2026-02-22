@@ -141,6 +141,8 @@
         "edit": "Bearbeiten",
         "create": "Erstellen",
         "actions": "Aktionen",
+        "cancelled": "Abgebrochen",
+        "error": "Fehler",
         "clearAll": "Alles Löschen",
         "selectAll": "Alles Auswählen",
         "close": "Schließen",
@@ -258,7 +260,9 @@
                 "title": "Titel",
                 "changes": "Änderungen"
             },
-            "tagsUpdated": "Tags aktualisiert"
+            "tagsUpdated": "Tags aktualisiert",
+            "selectMore": "Wählen Sie mindestens 2 Lesezeichen.",
+            "noUpdates": "Keine Änderungen nötig."
         },
         "settings": {
             "desc": "Konfigurieren Sie Ihr KI-Modell, um \"Magic Sort\" zu aktivieren. API-Schlüssel werden lokal gespeichert.",
@@ -377,6 +381,14 @@
         "autoSort": "Automatisch Sortieren",
         "sorting": "Sortiere...",
         "magicSort": "Magisches Sortieren",
+        "fixTitles": "Titel Reparieren (KI)",
+        "smartDuplicates": "Schlanke Duplikate (KI)",
+        "moreTools": "Mehr Werkzeuge",
+        "tooltips": {
+            "magicSort": "KI analysiert den Inhalt und kategorisiert Lesezeichen in passende Ordner.",
+            "fixTitles": "KI repariert chaotische, fehlerhafte oder fehlende Titel basierend auf der URL und dem aktuellen Titel.",
+            "smartDuplicates": "KI erkennt semantische Duplikate (verschiedene URLs, die auf denselben Inhalt verweisen)."
+        },
         "collection": {
             "button": "Sammlung",
             "add": "Hinzufügen",
@@ -389,7 +401,10 @@
         "close": "Vorschau Schließen",
         "loading": "Lade...",
         "error": "Inhalt lädt nicht? Einige Webseiten blockieren die Einbettung.",
-        "openExternal": "In Neuem Tab Öffnen"
+        "openExternal": "In Neuem Tab Öffnen",
+        "summarize": "Zusammenfassen mit KI",
+        "summarySuccess": "KI-Zusammenfassung generiert.",
+        "summaryError": "Fehler beim Generieren der KI-Zusammenfassung."
     },
     "offline": "Sie sind offline — Daten werden lokal gespeichert",
     "bookmarks": {

@@ -1,9 +1,20 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { db } from '../db'
 import { categorizeBookmarks } from '../services/ai-service'
+import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview }) {
+    const { t } = useTranslation()
     const [isProcessingAI, setIsProcessingAI] = useState(false)
+    const abortControllerRef = useRef(null);
+
+    const cancelMagicSort = useCallback(() => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+    }, []);
 
     const handleMagicSort = useCallback(async () => {
         const apiKey = localStorage.getItem("bs_api_key")
@@ -14,12 +25,13 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
             return
         }
 
+        abortControllerRef.current = new AbortController();
         setIsProcessingAI(true)
         try {
             const selectedBookmarks = rawBookmarks.filter(b => selectedIds.has(b.id))
             if (selectedBookmarks.length === 0) return
 
-            const results = await categorizeBookmarks(selectedBookmarks, apiKey, model)
+            const results = await categorizeBookmarks(selectedBookmarks, apiKey, model, null, { abortSignal: abortControllerRef.current.signal })
 
             // Prepare updates
             const updates = rawBookmarks
@@ -89,15 +101,20 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
             }
 
         } catch (error) {
+            if (error.name === 'AbortError') {
+                toast.info(t('common.cancelled'));
+                return;
+            }
             console.error("AI Magic Sort Error:", error)
-            alert("AI Classification Failed: " + error.message)
+            toast.error(t('common.error') + ": " + error.message)
             if (error.message.includes("API Key") || error.message.includes("401")) {
                 openSettings('ai')
             }
         } finally {
             setIsProcessingAI(false)
+            abortControllerRef.current = null;
         }
     }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview])
 
-    return { handleMagicSort, isProcessingAI }
+    return { handleMagicSort, cancelMagicSort, isProcessingAI }
 }

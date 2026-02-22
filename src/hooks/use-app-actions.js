@@ -49,7 +49,7 @@ export function useAppActions({
 
         const previousState = await db.bookmarks.bulkGet(pendingSortUpdates.map(u => u.id))
 
-        const updatesToApply = pendingSortUpdates.map(u => ({
+        const updatesToApply = pendingSortUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
             ...u,
             newFolder: u.newFolder,
             tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])],

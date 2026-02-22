@@ -1,10 +1,12 @@
 
 import React, { useState, useCallback } from 'react';
 import { Button } from './ui/button';
-import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote } from 'lucide-react';
+import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
+import { summarizeContent } from '../services/ai-service';
+import { toast } from 'sonner';
 
 export function PreviewPane({ bookmark, onClose, className }) {
     const { t } = useTranslation();
@@ -22,6 +24,33 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const handleReload = () => {
         setIsLoading(true);
         setRefreshKey(prev => prev + 1);
+    };
+
+    const [isSummarizing, setIsSummarizing] = useState(false);
+
+    const handleSummarize = async () => {
+        const apiKey = localStorage.getItem('bs_api_key');
+        const modelId = localStorage.getItem('bs_model') || 'gpt-4o-mini';
+
+        if (!apiKey) {
+            toast.error(t('settings.ai.reqOpenAI') || 'API key required');
+            return;
+        }
+
+        setIsSummarizing(true);
+        setIsNoteOpen(true);
+
+        try {
+            const summary = await summarizeContent(bookmark.url, apiKey, modelId);
+            const newNote = noteValue ? `${noteValue}\n\n---\n**AI Summary:**\n${summary}` : `**AI Summary:**\n${summary}`;
+            await saveNote(newNote);
+            toast.success(t('preview.summarySuccess') || 'AI Summary generated');
+        } catch (e) {
+            console.error(e);
+            toast.error(t('preview.summaryError') || 'Failed to generate summary');
+        } finally {
+            setIsSummarizing(false);
+        }
     };
 
     const saveNote = useCallback(async (value) => {
@@ -47,6 +76,16 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                        onClick={handleSummarize}
+                        disabled={isSummarizing}
+                        title={t('preview.summarize') || 'Summarize Content'}
+                    >
+                        {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                    </Button>
                     <Button
                         variant={isNoteOpen ? "secondary" : "ghost"}
                         size="icon"

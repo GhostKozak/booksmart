@@ -3,7 +3,7 @@ import { cn } from '../../lib/utils';
 import { Button } from './button';
 import { MoreVertical } from 'lucide-react';
 
-export function DropdownMenu({ trigger, children, align = 'right', className }) {
+export function DropdownMenu({ trigger, children, align = 'right', side = 'bottom', className }) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -36,7 +36,8 @@ export function DropdownMenu({ trigger, children, align = 'right', className }) 
             {isOpen && (
                 <div
                     className={cn(
-                        "absolute z-50 mt-2 min-w-[240px] sm:w-72 w-[calc(100vw-32px)] max-w-96 rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 max-h-[70dvh] sm:max-h-[85dvh] overflow-y-auto",
+                        "absolute z-50 min-w-[240px] sm:w-72 w-[calc(100vw-32px)] max-w-96 rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 max-h-[70dvh] sm:max-h-[85dvh] overflow-y-auto",
+                        side === 'top' ? 'bottom-full mb-2 slide-in-from-bottom-2 origin-bottom' : 'top-full mt-2 slide-in-from-top-2 origin-top',
                         align === 'right' ? 'right-0' : 'left-0'
                     )}
                 >

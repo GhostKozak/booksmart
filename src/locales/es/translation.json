@@ -141,6 +141,8 @@
         "edit": "Editar",
         "create": "Crear",
         "actions": "Acciones",
+        "cancelled": "Cancelado",
+        "error": "Error",
         "clearAll": "Borrar todo",
         "selectAll": "Seleccionar todo",
         "close": "Cerrar",
@@ -258,7 +260,9 @@
                 "title": "Título",
                 "changes": "Cambios"
             },
-            "tagsUpdated": "Etiquetas actualizadas"
+            "tagsUpdated": "Etiquetas actualizadas",
+            "selectMore": "Selecciona al menos 2 marcadores.",
+            "noUpdates": "No se necesitan cambios."
         },
         "settings": {
             "desc": "Configure su modelo de IA para habilitar \"Ordenación Mágica\". Las claves de API se almacenan localmente.",
@@ -377,6 +381,14 @@
         "autoSort": "Autoclasificar (Local)",
         "sorting": "Clasificando...",
         "magicSort": "Clasificación Mágica",
+        "fixTitles": "Corregir Títulos (IA)",
+        "smartDuplicates": "Duplicados Intel. (IA)",
+        "moreTools": "Más Herramientas",
+        "tooltips": {
+            "magicSort": "La IA analiza el contenido y categoriza los marcadores en las carpetas adecuadas.",
+            "fixTitles": "La IA corrige títulos desordenados, rotos o faltantes basándose en la URL y el título actual.",
+            "smartDuplicates": "La IA detecta duplicados semánticos (diferentes URL apuntando exactamente al mismo contenido)."
+        },
         "collection": {
             "button": "Colección",
             "add": "Añadir",
@@ -389,7 +401,10 @@
         "close": "Cerrar Vista Previa",
         "loading": "Cargando...",
         "error": "¿El contenido no carga? Algunos sitios bloquean la incrustación.",
-        "openExternal": "Abrir en Nueva Pestaña"
+        "openExternal": "Abrir en Nueva Pestaña",
+        "summarize": "Resumir con IA",
+        "summarySuccess": "Resumen generado por IA.",
+        "summaryError": "Error al generar el resumen de IA."
     },
     "offline": "Estás sin conexión — Los datos se guardan localmente",
     "bookmarks": {

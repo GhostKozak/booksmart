@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SimpleModal } from '../ui/SimpleModal';
 import { Button } from '../ui/button';
-import { ArrowRight, Folder, Tag } from 'lucide-react';
+import { ArrowRight, Folder, Tag, Type, AlertTriangle } from 'lucide-react';
 
 export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = [] }) {
     const { t } = useTranslation();
@@ -12,7 +12,8 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
     // Calculate summary statistics
     const totalUpdates = updates.length;
     const folderChanges = updates.filter(u => u.newFolder && u.newFolder !== u.originalFolder).length;
-    const tagChanges = updates.reduce((acc, u) => acc + (u.ruleTags?.length || 0) + (u.tags?.length || 0) - (u.originalTags?.length || 0), 0);
+    const titleChanges = updates.filter(u => u.originalTitle && u.title !== u.originalTitle).length;
+    const duplicateChanges = updates.filter(u => u.hasDuplicate).length;
     // Note: tag calculation is rough, better to just count bookmarks getting new tags if possible, 
     // or just say "x bookmarks updated". 
     // Let's stick to "Bookmarks to update", "Folder moves", "Tag additions".
@@ -29,16 +30,29 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                     {t('modals.sortConf.summary')}
                 </p>
 
-                <div className="grid grid-cols-3 gap-4 text-center mb-4">
-                    <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-4">
+                    <div className="bg-muted/50 p-3 rounded-lg flex flex-col items-center justify-center">
                         <div className="text-2xl font-bold">{totalUpdates}</div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.bookmarks')}</div>
+                        <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.bookmarks')}</div>
                     </div>
-                    <div className="bg-muted/50 p-3 rounded-lg">
-                        <div className="text-2xl font-bold">{folderChanges}</div>
-                        <div className="text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.folders')}</div>
-                    </div>
-                    {/* We can add more stats if needed */}
+                    {folderChanges > 0 && (
+                        <div className="bg-muted/50 p-3 rounded-lg flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold">{folderChanges}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">{t('modals.sortConf.stats.folders')}</div>
+                        </div>
+                    )}
+                    {titleChanges > 0 && (
+                        <div className="bg-muted/50 p-3 rounded-lg flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold">{titleChanges}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Title Fixes</div>
+                        </div>
+                    )}
+                    {duplicateChanges > 0 && (
+                        <div className="bg-muted/50 p-3 rounded-lg flex flex-col items-center justify-center">
+                            <div className="text-2xl font-bold">{duplicateChanges}</div>
+                            <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Duplicates</div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="border rounded-md max-h-[40vh] overflow-y-auto">
@@ -52,10 +66,16 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                         <tbody className="divide-y">
                             {updates.map((u) => (
                                 <tr key={u.id} className="hover:bg-muted/20">
-                                    <td className="p-2 max-w-[200px] truncate" title={u.title}>
-                                        {u.title || u.url}
+                                    <td className="p-2 max-w-[200px] truncate" title={u.originalTitle || u.title}>
+                                        {u.originalTitle || u.title || u.url}
                                     </td>
                                     <td className="p-2 space-y-1">
+                                        {u.originalTitle && u.title !== u.originalTitle && (
+                                            <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                                                <Type className="h-3 w-3 shrink-0" />
+                                                <span className="font-medium truncate max-w-[200px]" title={u.title}>{u.title}</span>
+                                            </div>
+                                        )}
                                         {u.newFolder &&
                                             u.newFolder !== u.originalFolder &&
                                             u.newFolder.toLowerCase() !== (u.originalFolder || '').toLowerCase() && (
@@ -80,8 +100,18 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
                                         {(u.tags && u.tags.length > (u.originalTags?.length || 0)) && (
                                             <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
                                                 <Tag className="h-3 w-3 shrink-0" />
-                                                {/* Simple diff visualization might be complex, just showing all tags or new ones if we can calculate */}
-                                                <span className="text-xs">{t('modals.sortConf.tagsUpdated')}</span>
+                                                {/* Filter only new tags */}
+                                                {(u.tags || []).filter(t => !(u.originalTags || []).includes(t)).map(tag => (
+                                                    <span key={tag} className="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded text-xs flex items-center gap-1">
+                                                        {tag === 'ai-dupe' ? <AlertTriangle className="h-3 w-3" /> : null}
+                                                        +{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {u.isDuplicate && (
+                                            <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                                Marked as duplicate
                                             </div>
                                         )}
                                     </td>

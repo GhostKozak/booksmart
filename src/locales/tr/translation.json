@@ -141,6 +141,8 @@
         "edit": "Düzenle",
         "create": "Oluştur",
         "actions": "İşlemler",
+        "cancelled": "İptal Edildi",
+        "error": "Hata",
         "clearAll": "Tümünü Temizle",
         "selectAll": "Tümünü Seç",
         "close": "Kapat",
@@ -258,7 +260,9 @@
                 "title": "Başlık",
                 "changes": "Değişiklikler"
             },
-            "tagsUpdated": "Etiketler güncellendi"
+            "tagsUpdated": "Etiketler güncellendi",
+            "selectMore": "En az 2 yer imi seçin.",
+            "noUpdates": "Herhangi bir değişiklik gerekmiyor."
         },
         "settings": {
             "desc": "\"Sihirli Sıralama\"yı etkinleştirmek için yapay zeka modelinizi yapılandırın. API anahtarları yerel olarak saklanır.",
@@ -377,6 +381,14 @@
         "autoSort": "Otomatik Sırala (Yerel)",
         "sorting": "Sıralanıyor...",
         "magicSort": "Sihirli Sırala",
+        "fixTitles": "Başlıkları Düzelt (YZ)",
+        "smartDuplicates": "Akıllı Kopyalar (YZ)",
+        "moreTools": "Daha Fazla Araç",
+        "tooltips": {
+            "magicSort": "Yapay zeka içeriği analiz eder ve yer imlerini uygun klasörlere akıllıca yerleştirir.",
+            "fixTitles": "Yapay zeka, URL ve mevcut başlığa bakarak bozuk, karmaşık veya eksik başlıkları düzeltir.",
+            "smartDuplicates": "Yapay zeka anlamsal kopyaları (aynı içeriği gösteren farklı URL'ler) tespit eder."
+        },
         "collection": {
             "button": "Koleksiyon",
             "add": "Ekle",
@@ -389,7 +401,10 @@
         "close": "Önizlemeyi Kapat",
         "loading": "Önizleme yükleniyor...",
         "error": "İçerik yüklenemiyor mu? Bazı siteler yerleştirmeyi engeller.",
-        "openExternal": "Yeni Sekmede Aç"
+        "openExternal": "Yeni Sekmede Aç",
+        "summarize": "YZ ile Özetle",
+        "summarySuccess": "YZ Özeti oluşturuldu.",
+        "summaryError": "YZ özeti oluşturulamadı."
     },
     "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
     "bookmarks": {

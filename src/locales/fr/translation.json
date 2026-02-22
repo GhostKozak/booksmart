@@ -141,6 +141,8 @@
         "edit": "Modifier",
         "create": "Créer",
         "actions": "Actions",
+        "cancelled": "Annulé",
+        "error": "Erreur",
         "clearAll": "Tout Effacer",
         "selectAll": "Tout sélectionner",
         "close": "Fermer",
@@ -258,7 +260,9 @@
                 "title": "Titre",
                 "changes": "Changements"
             },
-            "tagsUpdated": "Balises mises à jour"
+            "tagsUpdated": "Balises mises à jour",
+            "selectMore": "Sélectionnez au moins 2 favoris.",
+            "noUpdates": "Aucun changement nécessaire."
         },
         "settings": {
             "desc": "Configurez votre modèle d'IA pour activer le \"Tri Magique\". Les clés API sont stockées localement.",
@@ -377,6 +381,14 @@
         "autoSort": "Tri Auto (Local)",
         "sorting": "Tri en cours...",
         "magicSort": "Tri Magique",
+        "fixTitles": "Réparer les Titres (IA)",
+        "smartDuplicates": "Doublons Intelligents (IA)",
+        "moreTools": "Plus d'outils",
+        "tooltips": {
+            "magicSort": "L'IA analyse le contenu et catégorise les signets dans les dossiers appropriés.",
+            "fixTitles": "L'IA répare les titres désordonnés, cassés ou manquants en fonction de l'URL et du titre actuel.",
+            "smartDuplicates": "L'IA détecte les doublons sémantiques (différentes URL pointant vers le même contenu exact)."
+        },
         "collection": {
             "button": "Collection",
             "add": "Ajouter",
@@ -389,7 +401,10 @@
         "close": "Fermer l'Aperçu",
         "loading": "Chargement...",
         "error": "Le contenu ne charge pas? Certains sites bloquent l'intégration.",
-        "openExternal": "Ouvrir dans un Nouvel Onglet"
+        "openExternal": "Ouvrir dans un Nouvel Onglet",
+        "summarize": "Résumer avec l'IA",
+        "summarySuccess": "Résumé généré par l'IA.",
+        "summaryError": "Échec de la génération du résumé par l'IA."
     },
     "offline": "Vous êtes hors ligne — Les données sont sauvegardées localement",
     "bookmarks": {
