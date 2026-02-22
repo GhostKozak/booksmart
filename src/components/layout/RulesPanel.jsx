@@ -2,15 +2,18 @@ import { Settings, Plus, Pencil, Trash2, ArrowRight, ChevronRight, ChevronDown }
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 
+import { useAppStore } from '../../store/useAppStore'
+
 export function RulesPanel({
     rules,
     startEditing,
     deleteRule,
-    openNewRuleModal,
-    collapsed,
-    onToggle
+    openNewRuleModal
 }) {
     const { t } = useTranslation()
+    const { collapsedSections, toggleSection } = useAppStore()
+    const collapsed = collapsedSections.rules
+    const onToggle = () => toggleSection('rules')
 
     return (
         <>

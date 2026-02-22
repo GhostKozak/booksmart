@@ -7,25 +7,24 @@ import { SidebarCollections } from './SidebarCollections'
 import { SmartFilters } from './SmartFilters'
 import { RulesPanel } from './RulesPanel'
 import packageJson from '../../../package.json'
+import { useAppStore } from '../../store/useAppStore'
 
 export function Sidebar({
-    isSidebarOpen, setIsSidebarOpen,
-    // Accordion
-    collapsedSections, toggleSection,
     // Tags
-    uniqueTags, availableTags, discoveredTags, activeTag, setActiveTag,
+    uniqueTags, availableTags, discoveredTags,
     // Folders
-    availableFolders, uniqueFolders, discoveredFolders, bookmarks, activeFolder, setActiveFolder,
+    availableFolders, uniqueFolders, discoveredFolders, bookmarks,
     // Smart Filters
-    smartFilter, setSmartFilter, smartCounts, deadLinkCount,
+    smartCounts, deadLinkCount,
     // Rules
     rules, startEditing, deleteRule, openNewRuleModal,
     // Taxonomy
     saveToTaxonomy,
     // Collections
-    collections, activeCollection, setActiveCollection,
-    onCreateCollection, onEditCollection, onDeleteCollection, onShareCollection
+    collections, onCreateCollection, onEditCollection, onDeleteCollection, onShareCollection
 }) {
+    const { isSidebarOpen, setIsSidebarOpen, collapsedSections } = useAppStore()
+
     return (
         <aside
             className={cn(
@@ -40,11 +39,7 @@ export function Sidebar({
                     uniqueTags={uniqueTags}
                     availableTags={availableTags}
                     discoveredTags={discoveredTags}
-                    activeTag={activeTag}
-                    setActiveTag={setActiveTag}
                     saveToTaxonomy={saveToTaxonomy}
-                    collapsed={collapsedSections.tags}
-                    onToggle={() => toggleSection('tags')}
                 />
             </div>
 
@@ -64,36 +59,24 @@ export function Sidebar({
                     uniqueFolders={uniqueFolders}
                     discoveredFolders={discoveredFolders}
                     bookmarks={bookmarks}
-                    activeFolder={activeFolder}
-                    setActiveFolder={setActiveFolder}
                     saveToTaxonomy={saveToTaxonomy}
-                    collapsed={collapsedSections.folders}
-                    onToggle={() => toggleSection('folders')}
                 />
             </div>
 
             <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.collections ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SidebarCollections
                     collections={collections}
-                    activeCollection={activeCollection}
-                    setActiveCollection={setActiveCollection}
                     onCreateCollection={onCreateCollection}
                     onEditCollection={onEditCollection}
                     onDeleteCollection={onDeleteCollection}
                     onShareCollection={onShareCollection}
-                    collapsed={collapsedSections.collections}
-                    onToggle={() => toggleSection('collections')}
                 />
             </div>
 
             <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.filters ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SmartFilters
-                    smartFilter={smartFilter}
-                    setSmartFilter={setSmartFilter}
                     smartCounts={smartCounts}
                     deadLinkCount={deadLinkCount}
-                    collapsed={collapsedSections.filters}
-                    onToggle={() => toggleSection('filters')}
                 />
             </div>
 
@@ -103,8 +86,6 @@ export function Sidebar({
                     startEditing={startEditing}
                     deleteRule={deleteRule}
                     openNewRuleModal={openNewRuleModal}
-                    collapsed={collapsedSections.rules}
-                    onToggle={() => toggleSection('rules')}
                 />
             </div>
 

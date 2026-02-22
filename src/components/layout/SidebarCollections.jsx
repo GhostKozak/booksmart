@@ -6,18 +6,19 @@ import { useTranslation } from 'react-i18next'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db'
 
+import { useAppStore } from '../../store/useAppStore'
+
 export function SidebarCollections({
     collections,
-    activeCollection,
-    setActiveCollection,
     onCreateCollection,
     onEditCollection,
     onDeleteCollection,
-    onShareCollection,
-    collapsed,
-    onToggle
+    onShareCollection
 }) {
     const { t } = useTranslation()
+    const { activeCollection, setActiveCollection, collapsedSections, toggleSection } = useAppStore()
+    const collapsed = collapsedSections.collections
+    const onToggle = () => toggleSection('collections')
     const [contextMenu, setContextMenu] = useState(null) // collection id or null
 
     // Reactively compute counts via useLiveQuery — updates when bookmarks change

@@ -143,15 +143,21 @@ export default defineConfig({
     })
   ],
   build: {
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-db': ['dexie', 'dexie-react-hooks'],
-          'vendor-i18n': ['i18next', 'i18next-browser-languagedetector', 'react-i18next'],
-          'vendor-recharts': ['recharts'],
-          'vendor-dndkit': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-          'vendor-utils': ['fuse.js', 'date-fns', 'lucide-react'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) return 'vendor-react';
+            if (id.includes('/dexie/')) return 'vendor-db';
+            if (id.includes('/i18next/') || id.includes('/react-i18next/')) return 'vendor-i18n';
+            if (id.includes('/recharts/')) return 'vendor-recharts';
+            if (id.includes('/@dnd-kit/')) return 'vendor-dndkit';
+            if (id.includes('/fuse.js/') || id.includes('/date-fns/') || id.includes('/lucide-react/') || id.includes('/react-virtuoso/')) {
+              return 'vendor-utils';
+            }
+            return 'vendor';
+          }
         }
       }
     }

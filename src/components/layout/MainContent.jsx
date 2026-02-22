@@ -7,6 +7,7 @@ import { PreviewPane } from '../PreviewPane'
 import { AnalyticsDashboard } from '../AnalyticsDashboard'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
+import { useAppStore } from '../../store/useAppStore'
 
 export function MainContent({
     hasFileLoaded,
@@ -14,11 +15,6 @@ export function MainContent({
     rawBookmarks,
     // Dropzone
     getRootProps, getInputProps, isDragActive,
-    // View
-    viewMode,
-    showThumbnails,
-    // Selection
-    selectedIds, toggleSelection, toggleAll,
     // Link health
     linkHealth,
     ignoredUrls, toggleIgnoreUrl,
@@ -27,18 +23,20 @@ export function MainContent({
     // Collections
     allCollections,
     onRemoveFromCollection,
-    // Smart filter
-    smartFilter,
+    // Smart filter (counts)
     smartCounts,
     // Batch
     handleBatchMoveDocs,
     // Preview
-    previewBookmark, handlePreview, setPreviewBookmark,
-    // Actions
-    setSmartFilter, setViewMode,
-    setSearchQuery, setActiveTag, setActiveFolder
+    previewBookmark, handlePreview, setPreviewBookmark
 }) {
     const { t } = useTranslation()
+    const {
+        viewMode, setViewMode, showThumbnails,
+        selectedIds, toggleSelection, toggleAll,
+        smartFilter, setSmartFilter,
+        setSearchQuery, setActiveTag, setActiveFolder
+    } = useAppStore()
     if (!hasFileLoaded) {
         return (
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative">

@@ -8,23 +8,11 @@ import { Input } from '../ui/input'
 import { HistoryPanel } from '../HistoryPanel'
 import { AdvancedSearch } from '../AdvancedSearch'
 import { cn } from '../../lib/utils'
+import { useAppStore } from '../../store/useAppStore'
 
 export function Header({
-    // Theme
-    theme, setTheme,
     // Undo/Redo
     canUndo, canRedo, undo, redo, past, future,
-    // History
-    isHistoryOpen, setIsHistoryOpen,
-    // Search
-    searchQuery, setSearchQuery, searchMode, searchInputRef,
-    // Advanced Search
-    isAdvancedSearchOpen, setIsAdvancedSearchOpen,
-    setSearchMode, dateFilter, setDateFilter,
-    // View mode
-    viewMode, setViewMode, showThumbnails, setShowThumbnails,
-    // Sorting
-    sortBy, setSortBy,
     // Actions
     duplicateCount, removeDuplicates,
     cleanableCount, cleanAllUrls,
@@ -32,15 +20,22 @@ export function Header({
     openExportModal,
     // File
     hasFileLoaded, closeFile, bookmarkCount, clearAll,
-    // Settings
-    openSettings,
-    // Sidebar
-    isSidebarOpen, setIsSidebarOpen,
-    // Shortcuts
-    setIsShortcutsOpen
 }) {
     const { t, i18n } = useTranslation()
     const [isMobileSearchActive, setIsMobileSearchActive] = useState(false)
+
+    const {
+        theme, setTheme,
+        isHistoryOpen, setIsHistoryOpen,
+        searchQuery, setSearchQuery, searchMode, setSearchMode,
+        isAdvancedSearchOpen, setIsAdvancedSearchOpen,
+        dateFilter, setDateFilter,
+        viewMode, setViewMode, showThumbnails, setShowThumbnails,
+        sortBy, setSortBy,
+        openSettings,
+        isSidebarOpen, setIsSidebarOpen,
+        setIsShortcutsOpen
+    } = useAppStore()
 
     const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
 
@@ -120,7 +115,7 @@ export function Header({
                     <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            ref={searchInputRef}
+                            type="search"
                             placeholder={searchMode === 'regex' ? t('header.regexPlaceholder') : t('app.searchPlaceholder')}
                             className={cn(
                                 "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",

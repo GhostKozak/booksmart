@@ -2,15 +2,16 @@ import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCirc
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
+import { useAppStore } from '../../store/useAppStore'
+
 export function SmartFilters({
-    smartFilter,
-    setSmartFilter,
     smartCounts,
-    deadLinkCount,
-    collapsed,
-    onToggle
+    deadLinkCount
 }) {
     const { t } = useTranslation()
+    const { smartFilter, setSmartFilter, collapsedSections, toggleSection } = useAppStore()
+    const collapsed = collapsedSections.filters
+    const onToggle = () => toggleSection('filters')
 
     const filters = [
         { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },

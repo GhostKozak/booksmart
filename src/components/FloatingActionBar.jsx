@@ -8,12 +8,11 @@ import { CollectionBulkPopover } from './actionbar/CollectionBulkPopover';
 import { DropdownMenu, DropdownItem, DropdownSeparator } from './ui/DropdownMenu';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
+import { useAppStore } from '../store/useAppStore';
 
 export function FloatingActionBar({
-    selectedCount,
     onDelete,
     onMove,
-    onClearSelection,
     allFolders,
     allTags,
     onOverrideStatus,
@@ -35,6 +34,11 @@ export function FloatingActionBar({
     const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const selectedIds = useAppStore(state => state.selectedIds);
+    const setSelectedIds = useAppStore(state => state.setSelectedIds);
+    const selectedCount = selectedIds.size;
+    const onClearSelection = () => setSelectedIds(new Set());
 
     if (selectedCount === 0) return null;
 

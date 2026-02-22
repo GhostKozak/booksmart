@@ -3,39 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { db } from '../db'
 import { createBackup, downloadBackup } from '../lib/backup-manager'
 import { toast } from 'sonner'
+import { useAppStore } from '../store/useAppStore'
 
 export function useAppActions({
     addCommand,
-    setSmartFilter,
-    setSearchQuery,
-    setActiveTag,
-    setShowBackupModal,
     workerSetLinkHealth,
     workerRuleConflicts,
-    setIsConflictModalOpen,
     displayBookmarks,
 }) {
     const { t } = useTranslation()
-
-    // ── Selection ──
-    const [selectedIds, setSelectedIds] = useState(new Set())
-
-    const toggleSelection = useCallback((id) => {
-        setSelectedIds(prev => {
-            const next = new Set(prev)
-            if (next.has(id)) { next.delete(id) } else { next.add(id) }
-            return next
-        })
-    }, [])
-
-    const toggleAll = useCallback(() => {
-        setSelectedIds(prev => {
-            if (prev.size === displayBookmarks.length) {
-                return new Set()
-            }
-            return new Set(displayBookmarks.map(b => b.id))
-        })
-    }, [displayBookmarks])
 
     // ── Sort Confirmation ──
     const [pendingSortUpdates, setPendingSortUpdates] = useState(null)
@@ -79,7 +55,7 @@ export function useAppActions({
         })
 
         console.log(`Applied ${updatesToApply.length} sort updates.`)
-        setSelectedIds(new Set())
+        useAppStore.getState().setSelectedIds(new Set())
         setPendingSortUpdates(null)
         toast.success(t('toast.sortApplied'))
     }, [pendingSortUpdates, addCommand, t])
@@ -87,11 +63,11 @@ export function useAppActions({
     // ── Guarded Export ──
     const guardedExport = useCallback((exportFn) => {
         if (workerRuleConflicts.length > 0) {
-            setIsConflictModalOpen(true)
+            useAppStore.getState().setIsConflictModalOpen(true)
             return
         }
         exportFn()
-    }, [workerRuleConflicts, setIsConflictModalOpen])
+    }, [workerRuleConflicts])
 
     // ── Clear / Close ──
     const confirmClearAll = useCallback(async (shouldBackup) => {
@@ -112,30 +88,27 @@ export function useAppActions({
             await db.tags.clear()
             await db.ignoredUrls.clear()
         })
-        setSelectedIds(new Set())
-        setShowBackupModal(false)
+        useAppStore.getState().setSelectedIds(new Set())
+        useAppStore.getState().setShowBackupModal(false)
         toast.success(t('toast.clearedAll'))
-    }, [t, setShowBackupModal])
+    }, [t])
 
-    const clearAll = useCallback(() => setShowBackupModal(true), [setShowBackupModal])
+    const clearAll = useCallback(() => useAppStore.getState().setShowBackupModal(true), [])
 
     const closeFile = useCallback(() => {
         db.transaction('rw', db.bookmarks, db.rules, async () => {
             await db.bookmarks.clear()
             await db.rules.clear()
         })
-        setSelectedIds(new Set())
+        const store = useAppStore.getState()
+        store.setSelectedIds(new Set())
         workerSetLinkHealth({})
-        setSearchQuery('')
-        setActiveTag(null)
-        setSmartFilter(null)
-    }, [workerSetLinkHealth, setSearchQuery, setActiveTag, setSmartFilter])
+        store.setSearchQuery('')
+        store.setActiveTag(null)
+        store.setSmartFilter(null)
+    }, [workerSetLinkHealth])
 
     return {
-        // Selection
-        selectedIds, setSelectedIds,
-        toggleSelection, toggleAll,
-
         // Sort
         pendingSortUpdates, setPendingSortUpdates,
         handleSortPreview, applySortUpdates,

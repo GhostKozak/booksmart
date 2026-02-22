@@ -3,17 +3,18 @@ import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
+import { useAppStore } from '../../store/useAppStore'
+
 export function SidebarTags({
     uniqueTags,
     availableTags,
     discoveredTags,
-    activeTag,
-    setActiveTag,
-    saveToTaxonomy,
-    collapsed,
-    onToggle
+    saveToTaxonomy
 }) {
     const { t } = useTranslation()
+    const { activeTag, setActiveTag, collapsedSections, toggleSection } = useAppStore()
+    const collapsed = collapsedSections.tags
+    const onToggle = () => toggleSection('tags')
 
     return (
         <>

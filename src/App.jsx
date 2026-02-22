@@ -3,9 +3,7 @@
  * Licensed under the GNU GPLv3 or later.
  */
 import { useMemo, useCallback, useEffect } from 'react'
-import { useTheme } from './hooks/use-theme'
 import { useUndoRedo } from './hooks/use-undo-redo'
-import { useUIState } from './hooks/use-ui-state'
 import { useTaxonomy } from './hooks/use-taxonomy'
 import { useAppActions } from './hooks/use-app-actions'
 import { useBookmarkWorker } from './hooks/use-bookmark-worker'
@@ -21,6 +19,7 @@ import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 import { saveAutoBackup } from './lib/backup-manager'
+import { useAppStore } from './store/useAppStore'
 
 // Layout Components
 import { Header } from './components/layout/Header'
@@ -56,21 +55,33 @@ const EMPTY_ARRAY = []
 
 function App() {
   const { t } = useTranslation()
-  const { theme, setTheme } = useTheme()
   const { addCommand, undo, redo, canUndo, canRedo, past, future } = useUndoRedo()
 
-  // ── UI State ──
-  const ui = useUIState()
+  // ── UI State from Store ──
+  const {
+    searchQuery, searchMode, activeTag, activeFolder, smartFilter,
+    dateFilter, sortBy, activeCollection, theme, initTheme,
+    settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen,
+    isConflictModalOpen, setIsConflictModalOpen,
+    showBackupModal, setShowBackupModal,
+    isShortcutsOpen, setIsShortcutsOpen,
+    isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection
+  } = useAppStore()
+
+  // Selection
+  const selectedIds = useAppStore(state => state.selectedIds)
+  const setSelectedIds = useAppStore(state => state.setSelectedIds)
 
   // ── Initialization & Migration ──
   useEffect(() => {
+    initTheme()
     const init = async () => {
       await migrateFromLocalStorage()
       await deduplicateTaxonomy()
       await seedDefaults()
     }
     init()
-  }, [])
+  }, [initTheme])
 
   // ── Data from IndexedDB ──
   const rawBookmarks = useLiveQuery(() => db.bookmarks.toArray()) || EMPTY_ARRAY
@@ -86,10 +97,10 @@ function App() {
   // ── Worker ──
   const worker = useBookmarkWorker({
     rawBookmarks, rules,
-    searchQuery: ui.searchQuery, searchMode: ui.searchMode,
-    activeTag: ui.activeTag, activeFolder: ui.activeFolder,
-    smartFilter: ui.smartFilter, dateFilter: ui.dateFilter,
-    sortBy: ui.sortBy, fuseOptions
+    searchQuery, searchMode,
+    activeTag, activeFolder,
+    smartFilter, dateFilter,
+    sortBy, fuseOptions
   })
 
   // ── Taxonomy ──
@@ -98,16 +109,11 @@ function App() {
     workerUniqueFolders: worker.uniqueFolders,
   })
 
-  // ── App Actions (selection, sort, clear) ──
+  // ── App Actions (sort, clear) ──
   const actions = useAppActions({
     addCommand,
-    setSmartFilter: ui.setSmartFilter,
-    setSearchQuery: ui.setSearchQuery,
-    setActiveTag: ui.setActiveTag,
-    setShowBackupModal: ui.setShowBackupModal,
     workerSetLinkHealth: worker.setLinkHealth,
     workerRuleConflicts: worker.ruleConflicts,
-    setIsConflictModalOpen: ui.setIsConflictModalOpen,
     displayBookmarks: worker.displayBookmarks,
   })
 
@@ -116,11 +122,12 @@ function App() {
     rawBookmarks,
     bookmarks: worker.bookmarks,
     addCommand,
-    selectedIds: actions.selectedIds, setSelectedIds: actions.setSelectedIds,
+    selectedIds,
+    setSelectedIds,
     availableFolders: taxonomy.availableFolders,
     linkHealth: worker.linkHealth,
     setLinkHealth: worker.setLinkHealth,
-    setSmartFilter: ui.setSmartFilter
+    setSmartFilter: useAppStore.getState().setSmartFilter
   })
 
   const ruleManager = useRuleManager({ rules, addCommand })
@@ -129,30 +136,30 @@ function App() {
 
   const exporter = useExport({
     bookmarks: worker.bookmarks,
-    selectedIds: actions.selectedIds,
-    setSelectedIds: actions.setSelectedIds
+    selectedIds,
+    setSelectedIds
   })
 
   const { handleMagicSort, cancelMagicSort, isProcessingAI } = useMagicSort({
-    selectedIds: actions.selectedIds,
-    setSelectedIds: actions.setSelectedIds,
+    selectedIds,
+    setSelectedIds,
     rawBookmarks,
-    openSettings: ui.openSettings,
+    openSettings: useAppStore.getState().openSettings,
     onSortPreview: actions.handleSortPreview
   })
 
   const autoCategorize = useAutoCategorize({
-    selectedIds: actions.selectedIds,
-    setSelectedIds: actions.setSelectedIds,
+    selectedIds,
+    setSelectedIds,
     rawBookmarks,
     onSortPreview: actions.handleSortPreview
   })
 
   const aiTools = useAITools({
-    selectedIds: actions.selectedIds,
-    setSelectedIds: actions.setSelectedIds,
+    selectedIds,
+    setSelectedIds,
     rawBookmarks,
-    openSettings: ui.openSettings,
+    openSettings: useAppStore.getState().openSettings,
     onSortPreview: actions.handleSortPreview
   })
 
@@ -162,13 +169,13 @@ function App() {
   }, [cancelMagicSort, aiTools]);
 
   useKeyboardShortcuts({
-    selectedIds: actions.selectedIds,
-    setSelectedIds: actions.setSelectedIds,
+    selectedIds,
+    setSelectedIds,
     bookmarks: worker.bookmarks,
     handleBatchDelete: operations.handleBatchDelete,
     undo, redo,
-    searchInputRef: ui.searchInputRef,
-    setIsShortcutsOpen: ui.setIsShortcutsOpen
+    searchInputRef: { current: document.querySelector('input[type="search"]') },
+    setIsShortcutsOpen
   })
 
   // ── Auto-Backup ──
@@ -181,18 +188,13 @@ function App() {
     return () => clearTimeout(timer)
   }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
-  // ── Preview handler ──
-  const handlePreview = useCallback((bookmark) => {
-    ui.setPreviewBookmark(bookmark)
-  }, [ui])
-
   const hasFileLoaded = rawBookmarks.length > 0
 
   // ── Collection filtering ──
   const collectionFilteredBookmarks = useMemo(() => {
     let base = worker.displayBookmarks
-    if (ui.activeCollection) {
-      base = base.filter(b => b.collections && b.collections.includes(ui.activeCollection))
+    if (activeCollection) {
+      base = base.filter(b => b.collections && b.collections.includes(activeCollection))
     }
 
     // Merge pending AI updates so we see "Eski -> Yeni" transitions in the list
@@ -208,59 +210,41 @@ function App() {
     }
 
     return base
-  }, [worker.displayBookmarks, ui.activeCollection, actions.pendingSortUpdates])
+  }, [worker.displayBookmarks, activeCollection, actions.pendingSortUpdates])
 
   // ── Render ──
   return (
     <div className="h-[100dvh] bg-background text-foreground flex flex-col font-sans overflow-hidden">
       <Header
-        theme={theme} setTheme={setTheme}
         canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
         past={past} future={future}
-        isHistoryOpen={ui.isHistoryOpen} setIsHistoryOpen={ui.setIsHistoryOpen}
-        searchQuery={ui.searchQuery} setSearchQuery={ui.setSearchQuery}
-        searchMode={ui.searchMode} searchInputRef={ui.searchInputRef}
-        isAdvancedSearchOpen={ui.isAdvancedSearchOpen} setIsAdvancedSearchOpen={ui.setIsAdvancedSearchOpen}
-        setSearchMode={ui.setSearchMode} dateFilter={ui.dateFilter} setDateFilter={ui.setDateFilter}
-        viewMode={ui.viewMode} setViewMode={ui.setViewMode}
-        showThumbnails={ui.showThumbnails} setShowThumbnails={ui.setShowThumbnails}
-        sortBy={ui.sortBy} setSortBy={ui.setSortBy}
         duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
         cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
         checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
         openExportModal={() => actions.guardedExport(exporter.openExportModal)}
         hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
         bookmarkCount={worker.bookmarks.length}
-        openSettings={ui.openSettings}
-        isSidebarOpen={ui.isSidebarOpen} setIsSidebarOpen={ui.setIsSidebarOpen}
-        setIsShortcutsOpen={ui.setIsShortcutsOpen}
         clearAll={actions.clearAll}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar
-          isSidebarOpen={ui.isSidebarOpen} setIsSidebarOpen={ui.setIsSidebarOpen}
-          collapsedSections={ui.collapsedSections} toggleSection={ui.toggleSection}
           uniqueTags={worker.uniqueTags} availableTags={taxonomy.availableTags}
-          discoveredTags={taxonomy.discoveredTags} activeTag={ui.activeTag} setActiveTag={ui.setActiveTag}
+          discoveredTags={taxonomy.discoveredTags}
           availableFolders={taxonomy.availableFolders} uniqueFolders={worker.uniqueFolders}
           discoveredFolders={taxonomy.discoveredFolders} bookmarks={worker.bookmarks}
-          activeFolder={ui.activeFolder} setActiveFolder={ui.setActiveFolder}
-          smartFilter={ui.smartFilter} setSmartFilter={ui.setSmartFilter}
           smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
           rules={rules} startEditing={ruleManager.startEditing}
           deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
           saveToTaxonomy={taxonomy.saveToTaxonomy}
           collections={collectionsHook.collections}
-          activeCollection={ui.activeCollection}
-          setActiveCollection={ui.setActiveCollection}
           onCreateCollection={() => {
-            ui.setEditingCollection(null)
-            ui.setIsCollectionModalOpen(true)
+            setEditingCollection(null)
+            setIsCollectionModalOpen(true)
           }}
           onEditCollection={(collection) => {
-            ui.setEditingCollection(collection)
-            ui.setIsCollectionModalOpen(true)
+            setEditingCollection(collection)
+            setIsCollectionModalOpen(true)
           }}
           onDeleteCollection={collectionsHook.deleteCollection}
           onShareCollection={collectionsHook.shareCollection}
@@ -272,24 +256,18 @@ function App() {
           rawBookmarks={rawBookmarks}
           getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps}
           isDragActive={fileUpload.isDragActive}
-          viewMode={ui.viewMode} showThumbnails={ui.showThumbnails}
-          selectedIds={actions.selectedIds} toggleSelection={actions.toggleSelection} toggleAll={actions.toggleAll}
           linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
           availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
           allCollections={collectionsHook.collections}
           onRemoveFromCollection={collectionsHook.removeBookmarkFromCollection}
-          smartFilter={ui.smartFilter} smartCounts={worker.smartCounts}
+          smartCounts={worker.smartCounts}
           handleBatchMoveDocs={operations.handleBatchMoveDocs}
-          previewBookmark={ui.previewBookmark} handlePreview={handlePreview} setPreviewBookmark={ui.setPreviewBookmark}
-          clearAll={actions.clearAll} setSmartFilter={ui.setSmartFilter} setViewMode={ui.setViewMode}
-          setSearchQuery={ui.setSearchQuery} setActiveTag={ui.setActiveTag} setActiveFolder={ui.setActiveFolder}
+          clearAll={actions.clearAll}
         />
 
         <FloatingActionBar
-          selectedCount={actions.selectedIds.size}
           onDelete={operations.handleBatchDelete}
           onMove={operations.handleBatchMove}
-          onClearSelection={() => actions.setSelectedIds(new Set())}
           allFolders={taxonomy.availableFolders}
           allTags={taxonomy.availableTags}
           onOverrideStatus={operations.handleStatusOverride}
@@ -306,20 +284,20 @@ function App() {
           onCancelAITasks={handleCancelAITasks}
           allCollections={collectionsHook.collections}
           onAddToCollection={(collectionId) =>
-            collectionsHook.addBookmarksToCollection(actions.selectedIds, collectionId)
+            collectionsHook.addBookmarksToCollection(selectedIds, collectionId)
           }
           onRemoveFromCollection={(collectionId) =>
-            collectionsHook.removeBookmarksFromCollection(actions.selectedIds, collectionId)
+            collectionsHook.removeBookmarksFromCollection(selectedIds, collectionId)
           }
         />
 
         <CollectionModal
-          isOpen={ui.isCollectionModalOpen}
+          isOpen={isCollectionModalOpen}
           onClose={() => {
-            ui.setIsCollectionModalOpen(false)
-            ui.setEditingCollection(null)
+            setIsCollectionModalOpen(false)
+            setEditingCollection(null)
           }}
-          editingCollection={ui.editingCollection}
+          editingCollection={editingCollection}
           onSave={async (data) => {
             if (data.id) {
               await collectionsHook.updateCollection(data.id, {
@@ -335,13 +313,13 @@ function App() {
 
         {/* Settings Modal */}
         <SimpleModal
-          isOpen={ui.isSettingsOpen}
-          onClose={() => ui.setIsSettingsOpen(false)}
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
           title={t('settings.title')}
         >
-          {ui.settingsTab === 'backup' ? (
+          {settingsTab === 'backup' ? (
             <BackupSettings />
-          ) : ui.settingsTab === 'ai' ? (
+          ) : settingsTab === 'ai' ? (
             <AISettings />
           ) : (
             <TaxonomyManager
@@ -351,30 +329,30 @@ function App() {
               setTags={taxonomy.setAvailableTags}
               discoveredFolders={taxonomy.discoveredFolders}
               discoveredTags={taxonomy.discoveredTags}
-              defaultTab={ui.settingsTab}
+              defaultTab={settingsTab}
             />
           )}
           <div className="flex justify-center gap-2 mt-4 border-t pt-2">
             <Button
-              variant={ui.settingsTab === 'folders' || ui.settingsTab === 'tags' ? "secondary" : "ghost"}
+              variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => ui.setSettingsTab('folders')}
+              onClick={() => setSettingsTab('folders')}
               className="text-xs h-7"
             >
               {t('sidebar.sections.library')}
             </Button>
             <Button
-              variant={ui.settingsTab === 'ai' ? "secondary" : "ghost"}
+              variant={settingsTab === 'ai' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => ui.setSettingsTab('ai')}
+              onClick={() => setSettingsTab('ai')}
               className="text-xs h-7"
             >
               {t('settings.tabs.ai')}
             </Button>
             <Button
-              variant={ui.settingsTab === 'backup' ? "secondary" : "ghost"}
+              variant={settingsTab === 'backup' ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => ui.setSettingsTab('backup')}
+              onClick={() => setSettingsTab('backup')}
               className="text-xs h-7"
             >
               {t('settings.tabs.backup')}
@@ -383,14 +361,14 @@ function App() {
         </SimpleModal>
 
         <ClearAllModal
-          isOpen={ui.showBackupModal}
-          onClose={() => ui.setShowBackupModal(false)}
+          isOpen={showBackupModal}
+          onClose={() => setShowBackupModal(false)}
           onConfirm={actions.confirmClearAll}
         />
 
         <ShortcutsModal
-          isOpen={ui.isShortcutsOpen}
-          onClose={() => ui.setIsShortcutsOpen(false)}
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
         />
 
         <ExportModal
@@ -399,7 +377,7 @@ function App() {
           exportFormat={exporter.exportFormat}
           setExportFormat={exporter.setExportFormat}
           exportOnlySelected={exporter.exportOnlySelected}
-          selectedCount={actions.selectedIds.size}
+          selectedCount={selectedIds.size}
           onExport={exporter.performExport}
         />
 
@@ -417,25 +395,25 @@ function App() {
         />
 
         <RuleConflictModal
-          isOpen={ui.isConflictModalOpen && worker.ruleConflicts.length > 0}
-          onClose={() => ui.setIsConflictModalOpen(false)}
+          isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
+          onClose={() => setIsConflictModalOpen(false)}
           conflict={worker.ruleConflicts[0] || null}
           availableFolders={taxonomy.availableFolders}
           discoveredFolders={taxonomy.discoveredFolders}
           onResolve={(id, folder) => {
             worker.resolveConflict(id, folder)
             if (worker.ruleConflicts.length <= 1) {
-              ui.setIsConflictModalOpen(false)
+              setIsConflictModalOpen(false)
             }
           }}
-          onSkip={() => ui.setIsConflictModalOpen(false)}
+          onSkip={() => setIsConflictModalOpen(false)}
         />
 
         {/* Non-intrusive conflict notification */}
-        {worker.ruleConflicts.length > 0 && !ui.isConflictModalOpen && actions.selectedIds.size === 0 && (
+        {worker.ruleConflicts.length > 0 && !isConflictModalOpen && selectedIds.size === 0 && (
           <ConflictNotificationBar
             conflictCount={worker.ruleConflicts.length}
-            onResolve={() => ui.setIsConflictModalOpen(true)}
+            onResolve={() => setIsConflictModalOpen(true)}
           />
         )}
 
