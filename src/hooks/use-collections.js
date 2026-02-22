@@ -230,6 +230,51 @@ export function useCollections({ addCommand }) {
         await db.collections.bulkAdd(collectionsToAdd)
     }, [t])
 
+    const shareCollection = useCallback(async (collectionId, format = 'markdown') => {
+        const collection = await db.collections.get(collectionId)
+        if (!collection) return
+
+        const bookmarks = await db.bookmarks
+            .where('collections')
+            .equals(collectionId)
+            .toArray()
+
+        if (bookmarks.length === 0) {
+            toast.info(t('collections.share.empty'))
+            return
+        }
+
+        let output = ''
+
+        if (format === 'markdown') {
+            output += `# ${collection.icon} ${collection.name}\n\n`
+            bookmarks.forEach(b => {
+                const title = b.title || b.url
+                output += `- [${title}](${b.url})`
+                const allTags = [...new Set([...(b.tags || []), ...(b.ruleTags || [])])]
+                if (allTags.length > 0) {
+                    output += ` — ${allTags.map(t => `\`#${t}\``).join(' ')}`
+                }
+                output += '\n'
+            })
+            output += `\n---\n*${t('collections.share.footer', { count: bookmarks.length })}*\n`
+        } else {
+            output += `${collection.icon} ${collection.name}\n${'─'.repeat(30)}\n\n`
+            bookmarks.forEach(b => {
+                const title = b.title || b.url
+                output += `• ${title}\n  ${b.url}\n`
+                const allTags = [...new Set([...(b.tags || []), ...(b.ruleTags || [])])]
+                if (allTags.length > 0) {
+                    output += `  ${allTags.map(t => `#${t}`).join(' ')}\n`
+                }
+                output += '\n'
+            })
+        }
+
+        await navigator.clipboard.writeText(output)
+        toast.success(t('collections.share.copied', { count: bookmarks.length }))
+    }, [t])
+
     return {
         collections,
         createCollection,
@@ -240,6 +285,7 @@ export function useCollections({ addCommand }) {
         removeBookmarksFromCollection,
         getCollectionBookmarkCount,
         seedDefaultCollections,
+        shareCollection,
         COLLECTION_ICONS
     }
 }

@@ -502,6 +502,13 @@
             "addedBookmarks": "Añadir {{count}} marcadores a la colección",
             "removedBookmark": "Eliminar marcador de la colección",
             "removedBookmarks": "Eliminar {{count}} marcadores de la colección"
+        },
+        "share": {
+            "markdown": "Copiar como Markdown",
+            "text": "Copiar como Texto",
+            "copied": "{{count}} marcadores copiados al portapapeles",
+            "empty": "Esta colección está vacía",
+            "footer": "{{count}} marcadores compartidos vía BookSmart"
         }
     }
 }

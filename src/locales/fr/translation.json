@@ -502,6 +502,13 @@
             "addedBookmarks": "Ajouter {{count}} signets à la collection",
             "removedBookmark": "Retirer le signet de la collection",
             "removedBookmarks": "Retirer {{count}} signets de la collection"
+        },
+        "share": {
+            "markdown": "Copier en Markdown",
+            "text": "Copier en Texte",
+            "copied": "{{count}} signets copiés dans le presse-papiers",
+            "empty": "Cette collection est vide",
+            "footer": "{{count}} signets partagés via BookSmart"
         }
     }
 }

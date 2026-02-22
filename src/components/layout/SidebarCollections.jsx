@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Library, Plus, ChevronRight, ChevronDown, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Library, Plus, ChevronRight, ChevronDown, MoreHorizontal, Pencil, Trash2, Share2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +13,7 @@ export function SidebarCollections({
     onCreateCollection,
     onEditCollection,
     onDeleteCollection,
+    onShareCollection,
     collapsed,
     onToggle
 }) {
@@ -122,6 +123,27 @@ export function SidebarCollections({
                                             <Pencil className="h-3 w-3" />
                                             {t('common.edit')}
                                         </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded-md hover:bg-accent transition-colors"
+                                            onClick={() => {
+                                                onShareCollection(collection.id, 'markdown')
+                                                setContextMenu(null)
+                                            }}
+                                        >
+                                            <Share2 className="h-3 w-3" />
+                                            {t('collections.share.markdown')}
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded-md hover:bg-accent transition-colors"
+                                            onClick={() => {
+                                                onShareCollection(collection.id, 'text')
+                                                setContextMenu(null)
+                                            }}
+                                        >
+                                            <Share2 className="h-3 w-3" />
+                                            {t('collections.share.text')}
+                                        </button>
+                                        <div className="h-px bg-border mx-1 my-0.5" />
                                         <button
                                             className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors"
                                             onClick={() => {

@@ -502,6 +502,13 @@
             "addedBookmarks": "{{count}} Lesezeichen zur Sammlung hinzugefügt",
             "removedBookmark": "Lesezeichen aus der Sammlung entfernt",
             "removedBookmarks": "{{count}} Lesezeichen aus der Sammlung entfernt"
+        },
+        "share": {
+            "markdown": "Als Markdown kopieren",
+            "text": "Als Text kopieren",
+            "copied": "{{count}} Lesezeichen in die Zwischenablage kopiert",
+            "empty": "Diese Sammlung ist leer",
+            "footer": "{{count}} Lesezeichen geteilt über BookSmart"
         }
     }
 }

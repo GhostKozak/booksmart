@@ -24,7 +24,7 @@ export function Sidebar({
     saveToTaxonomy,
     // Collections
     collections, activeCollection, setActiveCollection,
-    onCreateCollection, onEditCollection, onDeleteCollection
+    onCreateCollection, onEditCollection, onDeleteCollection, onShareCollection
 }) {
     return (
         <aside
@@ -80,6 +80,7 @@ export function Sidebar({
                     onCreateCollection={onCreateCollection}
                     onEditCollection={onEditCollection}
                     onDeleteCollection={onDeleteCollection}
+                    onShareCollection={onShareCollection}
                     collapsed={collapsedSections.collections}
                     onToggle={() => toggleSection('collections')}
                 />

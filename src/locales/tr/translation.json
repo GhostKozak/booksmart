@@ -502,6 +502,13 @@
             "addedBookmarks": "{{count}} yer imi koleksiyona eklendi",
             "removedBookmark": "Yer imi koleksiyondan kaldırıldı",
             "removedBookmarks": "{{count}} yer imi koleksiyondan çıkarıldı"
+        },
+        "share": {
+            "markdown": "Markdown Olarak Kopyala",
+            "text": "Metin Olarak Kopyala",
+            "copied": "{{count}} yer imi panoya kopyalandı",
+            "empty": "Bu koleksiyon boş",
+            "footer": "{{count}} yer imi BookSmart ile paylaşıldı"
         }
     }
 }

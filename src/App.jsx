@@ -234,6 +234,7 @@ function App() {
             ui.setIsCollectionModalOpen(true)
           }}
           onDeleteCollection={collectionsHook.deleteCollection}
+          onShareCollection={collectionsHook.shareCollection}
         />
 
         <MainContent
