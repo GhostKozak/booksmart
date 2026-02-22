@@ -2,7 +2,7 @@
  * BookSmart - Copyright (C) 2026 BookSmart Contributors
  * Licensed under the GNU GPLv3 or later.
  */
-import { useMemo, useCallback, useEffect } from 'react'
+import { useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { useTaxonomy } from './hooks/use-taxonomy'
 import { useAppActions } from './hooks/use-app-actions'
@@ -28,21 +28,21 @@ import { MainContent } from './components/layout/MainContent'
 
 // Existing Components
 import { FloatingActionBar } from './components/FloatingActionBar'
-import { TaxonomyManager } from './components/TaxonomyManager'
-import { BackupSettings } from './components/BackupSettings'
 import { SimpleModal } from './components/ui/SimpleModal'
 import { Button } from './components/ui/button'
 import { ConflictNotificationBar } from './components/ConflictNotificationBar'
 
-// Modal Components
-import { ExportModal } from './components/modals/ExportModal'
-import { RuleModal } from './components/modals/RuleModal'
-import { RuleConflictModal } from './components/modals/RuleConflictModal'
-import { ClearAllModal } from './components/modals/ClearAllModal'
-import { ShortcutsModal } from './components/modals/ShortcutsModal'
-import { AISettings } from './components/AISettings'
-import { SortConfirmationModal } from './components/modals/SortConfirmationModal'
-import { CollectionModal } from './components/modals/CollectionModal'
+// Lazy loaded components
+const TaxonomyManager = lazy(() => import('./components/TaxonomyManager').then(m => ({ default: m.TaxonomyManager })))
+const BackupSettings = lazy(() => import('./components/BackupSettings').then(m => ({ default: m.BackupSettings })))
+const AISettings = lazy(() => import('./components/AISettings').then(m => ({ default: m.AISettings })))
+const ExportModal = lazy(() => import('./components/modals/ExportModal').then(m => ({ default: m.ExportModal })))
+const RuleModal = lazy(() => import('./components/modals/RuleModal').then(m => ({ default: m.RuleModal })))
+const RuleConflictModal = lazy(() => import('./components/modals/RuleConflictModal').then(m => ({ default: m.RuleConflictModal })))
+const ClearAllModal = lazy(() => import('./components/modals/ClearAllModal').then(m => ({ default: m.ClearAllModal })))
+const ShortcutsModal = lazy(() => import('./components/modals/ShortcutsModal').then(m => ({ default: m.ShortcutsModal })))
+const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirmationModal').then(m => ({ default: m.SortConfirmationModal })))
+const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -297,25 +297,29 @@ function App() {
           }
         />
 
-        <CollectionModal
-          isOpen={isCollectionModalOpen}
-          onClose={() => {
-            setIsCollectionModalOpen(false)
-            setEditingCollection(null)
-          }}
-          editingCollection={editingCollection}
-          onSave={async (data) => {
-            if (data.id) {
-              await collectionsHook.updateCollection(data.id, {
-                name: data.name,
-                icon: data.icon,
-                color: data.color
-              })
-            } else {
-              await collectionsHook.createCollection(data)
-            }
-          }}
-        />
+        <Suspense fallback={null}>
+          {isCollectionModalOpen && (
+            <CollectionModal
+              isOpen={isCollectionModalOpen}
+              onClose={() => {
+                setIsCollectionModalOpen(false)
+                setEditingCollection(null)
+              }}
+              editingCollection={editingCollection}
+              onSave={async (data) => {
+                if (data.id) {
+                  await collectionsHook.updateCollection(data.id, {
+                    name: data.name,
+                    icon: data.icon,
+                    color: data.color
+                  })
+                } else {
+                  await collectionsHook.createCollection(data)
+                }
+              }}
+            />
+          )}
+        </Suspense>
 
         {/* Settings Modal */}
         <SimpleModal
@@ -323,21 +327,23 @@ function App() {
           onClose={() => setIsSettingsOpen(false)}
           title={t('settings.title')}
         >
-          {settingsTab === 'backup' ? (
-            <BackupSettings />
-          ) : settingsTab === 'ai' ? (
-            <AISettings />
-          ) : (
-            <TaxonomyManager
-              folders={taxonomy.availableFolders}
-              setFolders={taxonomy.setAvailableFolders}
-              tags={taxonomy.availableTags}
-              setTags={taxonomy.setAvailableTags}
-              discoveredFolders={taxonomy.discoveredFolders}
-              discoveredTags={taxonomy.discoveredTags}
-              defaultTab={settingsTab}
-            />
-          )}
+          <Suspense fallback={<div className="p-8 text-center text-muted-foreground">{t('common.loading', 'Loading...')}</div>}>
+            {settingsTab === 'backup' ? (
+              <BackupSettings />
+            ) : settingsTab === 'ai' ? (
+              <AISettings />
+            ) : (
+              <TaxonomyManager
+                folders={taxonomy.availableFolders}
+                setFolders={taxonomy.setAvailableFolders}
+                tags={taxonomy.availableTags}
+                setTags={taxonomy.setAvailableTags}
+                discoveredFolders={taxonomy.discoveredFolders}
+                discoveredTags={taxonomy.discoveredTags}
+                defaultTab={settingsTab}
+              />
+            )}
+          </Suspense>
           <div className="flex justify-center gap-2 mt-4 border-t pt-2">
             <Button
               variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
@@ -366,54 +372,66 @@ function App() {
           </div>
         </SimpleModal>
 
-        <ClearAllModal
-          isOpen={showBackupModal}
-          onClose={() => setShowBackupModal(false)}
-          onConfirm={actions.confirmClearAll}
-        />
+        <Suspense fallback={null}>
+          {showBackupModal && (
+            <ClearAllModal
+              isOpen={showBackupModal}
+              onClose={() => setShowBackupModal(false)}
+              onConfirm={actions.confirmClearAll}
+            />
+          )}
 
-        <ShortcutsModal
-          isOpen={isShortcutsOpen}
-          onClose={() => setIsShortcutsOpen(false)}
-        />
+          {isShortcutsOpen && (
+            <ShortcutsModal
+              isOpen={isShortcutsOpen}
+              onClose={() => setIsShortcutsOpen(false)}
+            />
+          )}
 
-        <ExportModal
-          isOpen={exporter.isExportModalOpen}
-          onClose={() => exporter.setIsExportModalOpen(false)}
-          exportFormat={exporter.exportFormat}
-          setExportFormat={exporter.setExportFormat}
-          exportOnlySelected={exporter.exportOnlySelected}
-          selectedCount={selectedIds.size}
-          onExport={exporter.performExport}
-        />
+          {exporter.isExportModalOpen && (
+            <ExportModal
+              isOpen={exporter.isExportModalOpen}
+              onClose={() => exporter.setIsExportModalOpen(false)}
+              exportFormat={exporter.exportFormat}
+              setExportFormat={exporter.setExportFormat}
+              exportOnlySelected={exporter.exportOnlySelected}
+              selectedCount={selectedIds.size}
+              onExport={exporter.performExport}
+            />
+          )}
 
-        <RuleModal
-          isOpen={ruleManager.isRuleModalOpen}
-          onClose={ruleManager.cancelEditing}
-          editingRuleId={ruleManager.editingRuleId}
-          newRule={ruleManager.newRule}
-          setNewRule={ruleManager.setNewRule}
-          onSave={ruleManager.addRule}
-          availableFolders={taxonomy.availableFolders}
-          availableTags={taxonomy.availableTags}
-          discoveredFolders={taxonomy.discoveredFolders}
-          saveToTaxonomy={taxonomy.saveToTaxonomy}
-        />
+          {ruleManager.isRuleModalOpen && (
+            <RuleModal
+              isOpen={ruleManager.isRuleModalOpen}
+              onClose={ruleManager.cancelEditing}
+              editingRuleId={ruleManager.editingRuleId}
+              newRule={ruleManager.newRule}
+              setNewRule={ruleManager.setNewRule}
+              onSave={ruleManager.addRule}
+              availableFolders={taxonomy.availableFolders}
+              availableTags={taxonomy.availableTags}
+              discoveredFolders={taxonomy.discoveredFolders}
+              saveToTaxonomy={taxonomy.saveToTaxonomy}
+            />
+          )}
 
-        <RuleConflictModal
-          isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
-          onClose={() => setIsConflictModalOpen(false)}
-          conflict={worker.ruleConflicts[0] || null}
-          availableFolders={taxonomy.availableFolders}
-          discoveredFolders={taxonomy.discoveredFolders}
-          onResolve={(id, folder) => {
-            worker.resolveConflict(id, folder)
-            if (worker.ruleConflicts.length <= 1) {
-              setIsConflictModalOpen(false)
-            }
-          }}
-          onSkip={() => setIsConflictModalOpen(false)}
-        />
+          {isConflictModalOpen && worker.ruleConflicts.length > 0 && (
+            <RuleConflictModal
+              isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
+              onClose={() => setIsConflictModalOpen(false)}
+              conflict={worker.ruleConflicts[0] || null}
+              availableFolders={taxonomy.availableFolders}
+              discoveredFolders={taxonomy.discoveredFolders}
+              onResolve={(id, folder) => {
+                worker.resolveConflict(id, folder)
+                if (worker.ruleConflicts.length <= 1) {
+                  setIsConflictModalOpen(false)
+                }
+              }}
+              onSkip={() => setIsConflictModalOpen(false)}
+            />
+          )}
+        </Suspense>
 
         {/* Non-intrusive conflict notification */}
         {worker.ruleConflicts.length > 0 && !isConflictModalOpen && selectedIds.size === 0 && (
@@ -423,12 +441,16 @@ function App() {
           />
         )}
 
-        <SortConfirmationModal
-          isOpen={!!actions.pendingSortUpdates}
-          onClose={() => actions.setPendingSortUpdates(null)}
-          onConfirm={actions.applySortUpdates}
-          updates={actions.pendingSortUpdates || []}
-        />
+        <Suspense fallback={null}>
+          {!!actions.pendingSortUpdates && (
+            <SortConfirmationModal
+              isOpen={!!actions.pendingSortUpdates}
+              onClose={() => actions.setPendingSortUpdates(null)}
+              onConfirm={actions.applySortUpdates}
+              updates={actions.pendingSortUpdates || []}
+            />
+          )}
+        </Suspense>
 
         <OfflineIndicator />
         <PWAUpdatePrompt />
