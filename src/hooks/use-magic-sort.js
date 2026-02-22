@@ -17,10 +17,11 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
     }, []);
 
     const handleMagicSort = useCallback(async () => {
-        const apiKey = localStorage.getItem("bs_api_key")
+        const provider = localStorage.getItem("bs_provider") || 'openai'
+        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key")
         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
 
-        if (!apiKey) {
+        if (!apiKey && provider !== 'ollama') {
             openSettings('ai')
             return
         }
@@ -78,7 +79,7 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
                         newFolder: folder,
                         // tags: [...new Set([...(b.tags || []), ...tags])], // Don't merge into main tags
                         ruleTags: mergedTags, // Add to ruleTags for distinction
-                        status: 'matched',
+                        status: 'suggested',
                         // Store original values for diffing in modal
                         originalFolder: original,
                         originalTags: b.tags

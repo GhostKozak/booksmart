@@ -40,6 +40,7 @@ export function BookmarkRowDesktop({
                     <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
                     <span className={cn(
                         "font-medium truncate",
+                        (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
                         (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                         healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                     )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
@@ -74,28 +75,38 @@ export function BookmarkRowDesktop({
 
             {/* Folder Location (Col 3) */}
             <div className="flex items-center gap-2">
-                {bookmark.newFolder && bookmark.newFolder !== bookmark.originalFolder ? (
-                    <>
+                {(() => {
+                    const oldF = bookmark.originalFolder || t('common.uncategorized');
+                    const newF = bookmark.newFolder || t('common.uncategorized');
+                    const hasChange = newF.normalize("NFC").trim().toLowerCase() !== oldF.normalize("NFC").trim().toLowerCase();
+                    const isSuggestion = (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict');
+
+                    if (hasChange && isSuggestion) {
+                        return (
+                            <>
+                                <BookmarkFolderBadge
+                                    folderName={bookmark.originalFolder || ''}
+                                    availableFolders={availableFolders}
+                                    className="opacity-50 shrink-0"
+                                />
+                                <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                                <BookmarkFolderBadge
+                                    folderName={bookmark.newFolder}
+                                    availableFolders={availableFolders}
+                                    isMatched={true}
+                                    className="shrink-0"
+                                />
+                            </>
+                        );
+                    }
+                    return (
                         <BookmarkFolderBadge
-                            folderName={bookmark.originalFolder}
+                            folderName={bookmark.newFolder || bookmark.originalFolder || ''}
                             availableFolders={availableFolders}
-                            className="opacity-50 shrink-0"
+                            isMatched={bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict'}
                         />
-                        <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-                        <BookmarkFolderBadge
-                            folderName={bookmark.newFolder}
-                            availableFolders={availableFolders}
-                            isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
-                            className="shrink-0"
-                        />
-                    </>
-                ) : (
-                    <BookmarkFolderBadge
-                        folderName={bookmark.newFolder || bookmark.originalFolder}
-                        availableFolders={availableFolders}
-                        isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
-                    />
-                )}
+                    );
+                })()}
             </div>
 
             {/* Status Icon (Col 4) */}

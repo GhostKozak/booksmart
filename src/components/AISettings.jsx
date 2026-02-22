@@ -8,18 +8,22 @@ import { toast } from 'sonner'
 export function AISettings() {
     const { t } = useTranslation()
     const [apiKey, setApiKey] = useState('')
+    const [ollamaUrl, setOllamaUrl] = useState('')
     const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
     const [saved, setSaved] = useState(false)
 
     useEffect(() => {
         const storedKey = localStorage.getItem('bs_api_key')
+        const storedOllamaUrl = localStorage.getItem('bs_ollama_url')
         const storedModel = localStorage.getItem('bs_model')
         if (storedKey) setApiKey(storedKey)
+        if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
         if (storedModel) setSelectedModel(storedModel)
     }, [])
 
     const handleSave = () => {
         localStorage.setItem('bs_api_key', apiKey)
+        localStorage.setItem('bs_ollama_url', ollamaUrl)
         localStorage.setItem('bs_model', selectedModel)
 
         const modelInfo = AI_MODELS.find(m => m.id === selectedModel)
@@ -35,6 +39,9 @@ export function AISettings() {
     const openaiModels = AI_MODELS.filter(m => m.provider === 'openai')
     const geminiModels = AI_MODELS.filter(m => m.provider === 'gemini')
     const openrouterModels = AI_MODELS.filter(m => m.provider === 'openrouter')
+    const ollamaModels = AI_MODELS.filter(m => m.provider === 'ollama')
+
+    const selectedProvider = AI_MODELS.find(m => m.id === selectedModel)?.provider
 
     return (
         <div className="space-y-4">
@@ -46,6 +53,11 @@ export function AISettings() {
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
                     >
+                        <optgroup label={t('settings.ai.providers.ollama')}>
+                            {ollamaModels.map(model => (
+                                <option key={model.id} value={model.id}>{model.name}</option>
+                            ))}
+                        </optgroup>
                         <optgroup label={t('settings.ai.providers.openai')}>
                             {openaiModels.map(model => (
                                 <option key={model.id} value={model.id}>{model.name}</option>
@@ -71,17 +83,20 @@ export function AISettings() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-medium">{t('settings.ai.apiKey')}</label>
+                <label className="text-sm font-medium">
+                    {selectedProvider === 'ollama' ? t('settings.ai.ollamaUrl') || 'Ollama Base URL' : t('settings.ai.apiKey')}
+                </label>
                 <Input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-... or AIza... or sk-or-..."
+                    type={selectedProvider === 'ollama' ? 'text' : 'password'}
+                    value={selectedProvider === 'ollama' ? ollamaUrl : apiKey}
+                    onChange={(e) => selectedProvider === 'ollama' ? setOllamaUrl(e.target.value) : setApiKey(e.target.value)}
+                    placeholder={selectedProvider === 'ollama' ? "http://localhost:11434" : "sk-... or AIza... or sk-or-..."}
                 />
                 <p className="text-[10px] text-muted-foreground">
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openai' && t('settings.ai.reqOpenAI')}
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'gemini' && t('settings.ai.reqGemini')}
-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openrouter' && t('settings.ai.reqOpenRouter')}
+                    {selectedProvider === 'openai' && t('settings.ai.reqOpenAI')}
+                    {selectedProvider === 'gemini' && t('settings.ai.reqGemini')}
+                    {selectedProvider === 'openrouter' && t('settings.ai.reqOpenRouter')}
+                    {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
                 </p>
             </div>
 

@@ -115,16 +115,19 @@
             "model": "AI Model",
             "provider": "Provider",
             "providers": {
+                "ollama": "Local AI (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
             },
             "apiKey": "API Key",
+            "ollamaUrl": "Ollama Base URL",
             "saved": "Saved!",
             "save": "Save AI Settings",
             "reqOpenAI": "Requires OpenAI API Key",
             "reqGemini": "Requires Google Gemini API Key",
-            "reqOpenRouter": "Requires OpenRouter API Key"
+            "reqOpenRouter": "Requires OpenRouter API Key",
+            "reqOllama": "Leave empty to use http://localhost:11434"
         },
         "languages": {
             "en": "English",
@@ -378,7 +381,7 @@
         "markDead": "Mark as Dead",
         "export": "Export Selected",
         "cleanUrls": "Clean URLs",
-        "autoSort": "Auto Sort (Local)",
+        "autoSort": "Auto Sort",
         "sorting": "Sorting...",
         "magicSort": "Magic Sort",
         "fixTitles": "Fix Titles (AI)",
@@ -417,6 +420,7 @@
             "duplicate": "Duplicate (Will be removed)",
             "original": "Original (Has duplicates)",
             "matched": "Matched Rule-Based",
+            "suggested": "AI Suggestion",
             "conflict": "Rule Conflict",
             "unknown": "Unknown"
         },

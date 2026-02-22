@@ -115,16 +115,19 @@
             "model": "YZ Modeli",
             "provider": "Sağlayıcı",
             "providers": {
+                "ollama": "Yerel YZ (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
                 "openrouter": "OpenRouter (Claude, Llama, vb.)"
             },
             "apiKey": "API Anahtarı",
+            "ollamaUrl": "Ollama Base URL",
             "saved": "Kaydedildi!",
             "save": "YZ Ayarlarını Kaydet",
             "reqOpenAI": "OpenAI API Anahtarı Gerekir",
             "reqGemini": "Google Gemini API Anahtarı Gerekir",
-            "reqOpenRouter": "OpenRouter API Anahtarı Gerekir"
+            "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
+            "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın"
         },
         "languages": {
             "en": "İngilizce",
@@ -378,7 +381,7 @@
         "markDead": "Ölü Olarak İşaretle",
         "export": "Seçilenleri Dışa Aktar",
         "cleanUrls": "URL'leri Temizle",
-        "autoSort": "Otomatik Sırala (Yerel)",
+        "autoSort": "Otomatik Sırala",
         "sorting": "Sıralanıyor...",
         "magicSort": "Sihirli Sırala",
         "fixTitles": "Başlıkları Düzelt (YZ)",
@@ -417,6 +420,7 @@
             "duplicate": "Kopya (Silinecek)",
             "original": "Orijinal (Kopyaları var)",
             "matched": "Kural Eşleşti",
+            "suggested": "YZ Önerisi",
             "conflict": "Kural Çakışması",
             "unknown": "Bilinmiyor"
         },

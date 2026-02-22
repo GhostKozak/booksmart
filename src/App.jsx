@@ -190,11 +190,25 @@ function App() {
 
   // ── Collection filtering ──
   const collectionFilteredBookmarks = useMemo(() => {
-    if (!ui.activeCollection) return worker.displayBookmarks
-    return worker.displayBookmarks.filter(b =>
-      b.collections && b.collections.includes(ui.activeCollection)
-    )
-  }, [worker.displayBookmarks, ui.activeCollection])
+    let base = worker.displayBookmarks
+    if (ui.activeCollection) {
+      base = base.filter(b => b.collections && b.collections.includes(ui.activeCollection))
+    }
+
+    // Merge pending AI updates so we see "Eski -> Yeni" transitions in the list
+    if (actions.pendingSortUpdates && actions.pendingSortUpdates.length > 0) {
+      const updatesMap = new Map(actions.pendingSortUpdates.map(u => [u.id, u]))
+      return base.map(b => {
+        const update = updatesMap.get(b.id)
+        if (update) {
+          return { ...b, ...update }
+        }
+        return b
+      })
+    }
+
+    return base
+  }, [worker.displayBookmarks, ui.activeCollection, actions.pendingSortUpdates])
 
   // ── Render ──
   return (

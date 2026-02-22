@@ -29,10 +29,11 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const [isSummarizing, setIsSummarizing] = useState(false);
 
     const handleSummarize = async () => {
-        const apiKey = localStorage.getItem('bs_api_key');
+        const provider = localStorage.getItem('bs_provider') || 'openai';
+        const apiKey = provider === 'ollama' ? localStorage.getItem('bs_ollama_url') : localStorage.getItem('bs_api_key');
         const modelId = localStorage.getItem('bs_model') || 'gpt-4o-mini';
 
-        if (!apiKey) {
+        if (!apiKey && provider !== 'ollama') {
             toast.error(t('settings.ai.reqOpenAI') || 'API key required');
             return;
         }

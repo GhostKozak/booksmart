@@ -39,6 +39,7 @@ export function BookmarkRowMobile({
                     <div className="flex items-start justify-between gap-2">
                         <span className={cn(
                             "font-medium text-sm break-words leading-snug",
+                            (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )}>{bookmark.title || t('common.untitled')}</span>
@@ -76,28 +77,39 @@ export function BookmarkRowMobile({
             <div className="flex flex-col gap-1 pl-8 text-xs">
                 {/* Folder Path */}
                 <div className="flex flex-wrap items-center gap-1.5 leading-relaxed">
-                    {bookmark.originalFolder !== bookmark.newFolder ? (
-                        <>
+                    {(() => {
+                        const oldF = bookmark.originalFolder || t('common.uncategorized');
+                        const newF = bookmark.newFolder || t('common.uncategorized');
+                        const hasChange = newF.normalize("NFC").trim().toLowerCase() !== oldF.normalize("NFC").trim().toLowerCase();
+                        const isSuggestion = (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict');
+
+                        if (hasChange && isSuggestion) {
+                            return (
+                                <>
+                                    <BookmarkFolderBadge
+                                        folderName={bookmark.originalFolder || ''}
+                                        availableFolders={availableFolders}
+                                        className="whitespace-normal text-left opacity-50"
+                                    />
+                                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                                    <BookmarkFolderBadge
+                                        folderName={bookmark.newFolder}
+                                        availableFolders={availableFolders}
+                                        isMatched={true}
+                                        className="whitespace-normal text-left"
+                                    />
+                                </>
+                            );
+                        }
+                        return (
                             <BookmarkFolderBadge
-                                folderName={bookmark.originalFolder}
+                                folderName={bookmark.newFolder || bookmark.originalFolder || ''}
                                 availableFolders={availableFolders}
-                                className="whitespace-normal text-left"
+                                isMatched={bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict'}
+                                className={cn(!isSuggestion && "bg-muted/50 whitespace-normal text-left")}
                             />
-                            <ArrowRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-                            <BookmarkFolderBadge
-                                folderName={bookmark.newFolder}
-                                availableFolders={availableFolders}
-                                isMatched={true}
-                                className="whitespace-normal text-left"
-                            />
-                        </>
-                    ) : (
-                        <BookmarkFolderBadge
-                            folderName={bookmark.newFolder || bookmark.originalFolder}
-                            availableFolders={availableFolders}
-                            className="bg-muted/50 whitespace-normal text-left"
-                        />
-                    )}
+                        );
+                    })()}
                 </div>
 
                 {/* Tags */}

@@ -53,7 +53,7 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
                         newFolder: folder,
                         // tags: b.tags, // Keep original manual tags as is
                         ruleTags: newRuleTags, // Use ruleTags for auto-generated ones
-                        status: 'matched',
+                        status: 'suggested',
                         // Store original values for diffing in modal
                         originalFolder: original,
                         originalTags: b.tags

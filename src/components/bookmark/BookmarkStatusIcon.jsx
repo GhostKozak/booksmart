@@ -1,4 +1,4 @@
-import { Check, XCircle, Layers, AlertTriangle } from 'lucide-react'
+import { Check, XCircle, Layers, AlertTriangle, Sparkles } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
@@ -30,6 +30,16 @@ export function BookmarkStatusIcon({ bookmark, className }) {
             <div className={cn("flex justify-center", className)} title={t('bookmarks.status.conflict')}>
                 <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                     <AlertTriangle className="h-3.5 w-3.5" />
+                </div>
+            </div>
+        )
+    }
+
+    if (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') {
+        return (
+            <div className={cn("flex justify-center", className)} title={t('bookmarks.status.suggested')}>
+                <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                    <Sparkles className="h-3.5 w-3.5" />
                 </div>
             </div>
         )

@@ -1,0 +1,1125 @@
+diff --git a/README.md b/README.md
+index 3c21564..faa0650 100644
+--- a/README.md
++++ b/README.md
+@@ -11,8 +11,9 @@ This project was developed entirely using Artificial Intelligence within the Ant
+ 
+ ## ✨ Features
+ 
+-- **📂 Privacy First**: 100% local processing. No data ever leaves your browser.
+-- **🪄 AI Magic Sort**: Automatically categorize bookmarks into folders and generate smart tags using Local AI (Ollama) or cloud providers (OpenAI, Google Gemini, Anthropic).
++- **📂 Privacy First**: 100% local processing. No data ever leaves your browser unless you choose so.
++- **🪄 True Local AI & Cloud AI**: Use **Ollama** for completely private, local AI processing, or connect your favorite cloud providers (OpenAI, Google Gemini, Anthropic).
++- **✨ Magic Sort & Auto Sort**: Automatically categorize bookmarks via AI (Magic Sort) or use our rapid, rule-based matching (Auto Sort).
+ - **🧹 Duplicate Cleaner**: Find, merge, or delete duplicate bookmarks with a single click.
+ - **📊 Analytics Dashboard**: Visualize your collection habits, top domains, and folder statistics.
+ - **🔗 Dead Link Checker**: Automatically identifies broken links (404s) and timeouts to keep your library clean.
+@@ -54,7 +55,7 @@ This project was developed entirely using Artificial Intelligence within the Ant
+ 2.  **Open** BookSmart and drag & drop your bookmarks file.
+ 3.  **Setup AI (Optional)**: Head to Settings and configure your preferred AI provider (Ollama, OpenAI, Gemini, or Anthropic) to enable Magic Sort.
+ 4.  **Analyze** your collection using the Dashboard to understand your habits.
+-5.  **Organize** by using Magic Sort, creating Rules, or filtering manually.
++5.  **Organize** by using AI Magic Sort, fast code-based Auto Sort, creating Rules, or filtering manually.
+ 6.  **Clean** up duplicates and broken links with the built-in tools.
+ 7.  **Export** the organized list back to your browser when done.
+ 
+diff --git a/dev-dist/sw.js b/dev-dist/sw.js
+index f3d6606..b1bdafe 100644
+--- a/dev-dist/sw.js
++++ b/dev-dist/sw.js
+@@ -82,7 +82,7 @@ define(['./workbox-ca84f546'], (function (workbox) { 'use strict';
+     "revision": "3ca0b8505b4bec776b69afdba2768812"
+   }, {
+     "url": "index.html",
+-    "revision": "0.mjl3v5f107"
++    "revision": "0.nava5ehjgq"
+   }], {});
+   workbox.cleanupOutdatedCaches();
+   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
+diff --git a/src/App.jsx b/src/App.jsx
+index 7780052..e98d122 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -190,11 +190,25 @@ function App() {
+ 
+   // ── Collection filtering ──
+   const collectionFilteredBookmarks = useMemo(() => {
+-    if (!ui.activeCollection) return worker.displayBookmarks
+-    return worker.displayBookmarks.filter(b =>
+-      b.collections && b.collections.includes(ui.activeCollection)
+-    )
+-  }, [worker.displayBookmarks, ui.activeCollection])
++    let base = worker.displayBookmarks
++    if (ui.activeCollection) {
++      base = base.filter(b => b.collections && b.collections.includes(ui.activeCollection))
++    }
++
++    // Merge pending AI updates so we see "Eski -> Yeni" transitions in the list
++    if (actions.pendingSortUpdates && actions.pendingSortUpdates.length > 0) {
++      const updatesMap = new Map(actions.pendingSortUpdates.map(u => [u.id, u]))
++      return base.map(b => {
++        const update = updatesMap.get(b.id)
++        if (update) {
++          return { ...b, ...update }
++        }
++        return b
++      })
++    }
++
++    return base
++  }, [worker.displayBookmarks, ui.activeCollection, actions.pendingSortUpdates])
+ 
+   // ── Render ──
+   return (
+diff --git a/src/components/AISettings.jsx b/src/components/AISettings.jsx
+index 1ca51ff..7097176 100644
+--- a/src/components/AISettings.jsx
++++ b/src/components/AISettings.jsx
+@@ -8,18 +8,22 @@ import { toast } from 'sonner'
+ export function AISettings() {
+     const { t } = useTranslation()
+     const [apiKey, setApiKey] = useState('')
++    const [ollamaUrl, setOllamaUrl] = useState('')
+     const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+     const [saved, setSaved] = useState(false)
+ 
+     useEffect(() => {
+         const storedKey = localStorage.getItem('bs_api_key')
++        const storedOllamaUrl = localStorage.getItem('bs_ollama_url')
+         const storedModel = localStorage.getItem('bs_model')
+         if (storedKey) setApiKey(storedKey)
++        if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
+         if (storedModel) setSelectedModel(storedModel)
+     }, [])
+ 
+     const handleSave = () => {
+         localStorage.setItem('bs_api_key', apiKey)
++        localStorage.setItem('bs_ollama_url', ollamaUrl)
+         localStorage.setItem('bs_model', selectedModel)
+ 
+         const modelInfo = AI_MODELS.find(m => m.id === selectedModel)
+@@ -35,6 +39,9 @@ export function AISettings() {
+     const openaiModels = AI_MODELS.filter(m => m.provider === 'openai')
+     const geminiModels = AI_MODELS.filter(m => m.provider === 'gemini')
+     const openrouterModels = AI_MODELS.filter(m => m.provider === 'openrouter')
++    const ollamaModels = AI_MODELS.filter(m => m.provider === 'ollama')
++
++    const selectedProvider = AI_MODELS.find(m => m.id === selectedModel)?.provider
+ 
+     return (
+         <div className="space-y-4">
+@@ -46,6 +53,11 @@ export function AISettings() {
+                         value={selectedModel}
+                         onChange={(e) => setSelectedModel(e.target.value)}
+                     >
++                        <optgroup label={t('settings.ai.providers.ollama')}>
++                            {ollamaModels.map(model => (
++                                <option key={model.id} value={model.id}>{model.name}</option>
++                            ))}
++                        </optgroup>
+                         <optgroup label={t('settings.ai.providers.openai')}>
+                             {openaiModels.map(model => (
+                                 <option key={model.id} value={model.id}>{model.name}</option>
+@@ -71,17 +83,20 @@ export function AISettings() {
+             </div>
+ 
+             <div className="space-y-2">
+-                <label className="text-sm font-medium">{t('settings.ai.apiKey')}</label>
++                <label className="text-sm font-medium">
++                    {selectedProvider === 'ollama' ? t('settings.ai.ollamaUrl') || 'Ollama Base URL' : t('settings.ai.apiKey')}
++                </label>
+                 <Input
+-                    type="password"
+-                    value={apiKey}
+-                    onChange={(e) => setApiKey(e.target.value)}
+-                    placeholder="sk-... or AIza... or sk-or-..."
++                    type={selectedProvider === 'ollama' ? 'text' : 'password'}
++                    value={selectedProvider === 'ollama' ? ollamaUrl : apiKey}
++                    onChange={(e) => selectedProvider === 'ollama' ? setOllamaUrl(e.target.value) : setApiKey(e.target.value)}
++                    placeholder={selectedProvider === 'ollama' ? "http://localhost:11434" : "sk-... or AIza... or sk-or-..."}
+                 />
+                 <p className="text-[10px] text-muted-foreground">
+-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openai' && t('settings.ai.reqOpenAI')}
+-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'gemini' && t('settings.ai.reqGemini')}
+-                    {AI_MODELS.find(m => m.id === selectedModel)?.provider === 'openrouter' && t('settings.ai.reqOpenRouter')}
++                    {selectedProvider === 'openai' && t('settings.ai.reqOpenAI')}
++                    {selectedProvider === 'gemini' && t('settings.ai.reqGemini')}
++                    {selectedProvider === 'openrouter' && t('settings.ai.reqOpenRouter')}
++                    {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
+                 </p>
+             </div>
+ 
+diff --git a/src/components/BookmarkRow.jsx b/src/components/BookmarkRow.jsx
+index 0357e35..cf3630a 100644
+--- a/src/components/BookmarkRow.jsx
++++ b/src/components/BookmarkRow.jsx
+@@ -11,14 +11,23 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
+     const healthStatus = isIgnored ? 'ignored' : (linkHealth[bookmark.url] || 'idle')
+ 
+     let rowBgClass = ""
+-    if (isSelected) {
+-        rowBgClass = "bg-primary/5"
+-    } else if (bookmark.isDuplicate) {
+-        rowBgClass = "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
++    let borderClass = "border-b"
++
++    if (bookmark.isDuplicate) {
++        rowBgClass = isSelected ? "bg-red-500/20 dark:bg-red-900/40" : "bg-red-500/10 hover:bg-red-500/20 dark:bg-red-900/20 dark:hover:bg-red-900/30"
++        borderClass = "border-b border-red-500/30"
+     } else if (bookmark.hasDuplicate) {
+-        rowBgClass = "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
++        rowBgClass = isSelected ? "bg-yellow-500/20 dark:bg-yellow-900/40" : "bg-yellow-500/10 hover:bg-yellow-500/20 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30"
++        borderClass = "border-b border-yellow-500/30"
++    } else if (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') {
++        rowBgClass = isSelected
++            ? "bg-purple-500/10 dark:bg-purple-500/20 ring-1 ring-inset ring-purple-500/30"
++            : "bg-purple-500/5 dark:bg-purple-500/10 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 ring-1 ring-inset ring-purple-500/20"
++        borderClass = "border-b border-purple-500/20"
+     } else if (bookmark.status === 'matched' || bookmark.status === 'conflict') {
+-        rowBgClass = "bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
++        rowBgClass = isSelected ? "bg-emerald-500/20 dark:bg-emerald-500/20" : "bg-emerald-500/10 dark:bg-emerald-500/10 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30"
++    } else if (isSelected) {
++        rowBgClass = "bg-primary/5"
+     } else {
+         rowBgClass = "hover:bg-muted/30"
+     }
+@@ -39,7 +48,8 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
+     return (
+         <div
+             className={cn(
+-                "border-b transition-colors duration-200",
++                borderClass,
++                "transition-colors duration-200",
+                 "flex flex-col p-3 gap-3",
+                 "lg:p-0 lg:gap-0 lg:border-b",
+                 className,
+diff --git a/src/components/PreviewPane.jsx b/src/components/PreviewPane.jsx
+index bf327af..fb86527 100644
+--- a/src/components/PreviewPane.jsx
++++ b/src/components/PreviewPane.jsx
+@@ -29,10 +29,11 @@ export function PreviewPane({ bookmark, onClose, className }) {
+     const [isSummarizing, setIsSummarizing] = useState(false);
+ 
+     const handleSummarize = async () => {
+-        const apiKey = localStorage.getItem('bs_api_key');
++        const provider = localStorage.getItem('bs_provider') || 'openai';
++        const apiKey = provider === 'ollama' ? localStorage.getItem('bs_ollama_url') : localStorage.getItem('bs_api_key');
+         const modelId = localStorage.getItem('bs_model') || 'gpt-4o-mini';
+ 
+-        if (!apiKey) {
++        if (!apiKey && provider !== 'ollama') {
+             toast.error(t('settings.ai.reqOpenAI') || 'API key required');
+             return;
+         }
+diff --git a/src/components/bookmark/BookmarkRowDesktop.jsx b/src/components/bookmark/BookmarkRowDesktop.jsx
+index 1fabba4..66ada4b 100644
+--- a/src/components/bookmark/BookmarkRowDesktop.jsx
++++ b/src/components/bookmark/BookmarkRowDesktop.jsx
+@@ -40,6 +40,7 @@ export function BookmarkRowDesktop({
+                     <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
+                     <span className={cn(
+                         "font-medium truncate",
++                        (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
+                         (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
+                         healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
+                     )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
+@@ -74,28 +75,38 @@ export function BookmarkRowDesktop({
+ 
+             {/* Folder Location (Col 3) */}
+             <div className="flex items-center gap-2">
+-                {bookmark.newFolder && bookmark.newFolder !== bookmark.originalFolder ? (
+-                    <>
+-                        <BookmarkFolderBadge
+-                            folderName={bookmark.originalFolder}
+-                            availableFolders={availableFolders}
+-                            className="opacity-50 shrink-0"
+-                        />
+-                        <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
++                {(() => {
++                    const oldF = bookmark.originalFolder || t('common.uncategorized');
++                    const newF = bookmark.newFolder || t('common.uncategorized');
++                    const hasChange = newF.normalize("NFC").trim().toLowerCase() !== oldF.normalize("NFC").trim().toLowerCase();
++                    const isSuggestion = (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict');
++
++                    if (hasChange && isSuggestion) {
++                        return (
++                            <>
++                                <BookmarkFolderBadge
++                                    folderName={bookmark.originalFolder || ''}
++                                    availableFolders={availableFolders}
++                                    className="opacity-50 shrink-0"
++                                />
++                                <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
++                                <BookmarkFolderBadge
++                                    folderName={bookmark.newFolder}
++                                    availableFolders={availableFolders}
++                                    isMatched={true}
++                                    className="shrink-0"
++                                />
++                            </>
++                        );
++                    }
++                    return (
+                         <BookmarkFolderBadge
+-                            folderName={bookmark.newFolder}
++                            folderName={bookmark.newFolder || bookmark.originalFolder || ''}
+                             availableFolders={availableFolders}
+-                            isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
+-                            className="shrink-0"
++                            isMatched={bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict'}
+                         />
+-                    </>
+-                ) : (
+-                    <BookmarkFolderBadge
+-                        folderName={bookmark.newFolder || bookmark.originalFolder}
+-                        availableFolders={availableFolders}
+-                        isMatched={bookmark.status === 'matched' || bookmark.status === 'conflict'}
+-                    />
+-                )}
++                    );
++                })()}
+             </div>
+ 
+             {/* Status Icon (Col 4) */}
+diff --git a/src/components/bookmark/BookmarkRowMobile.jsx b/src/components/bookmark/BookmarkRowMobile.jsx
+index a347836..3dbe92d 100644
+--- a/src/components/bookmark/BookmarkRowMobile.jsx
++++ b/src/components/bookmark/BookmarkRowMobile.jsx
+@@ -39,6 +39,7 @@ export function BookmarkRowMobile({
+                     <div className="flex items-start justify-between gap-2">
+                         <span className={cn(
+                             "font-medium text-sm break-words leading-snug",
++                            (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
+                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
+                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
+                         )}>{bookmark.title || t('common.untitled')}</span>
+@@ -76,28 +77,39 @@ export function BookmarkRowMobile({
+             <div className="flex flex-col gap-1 pl-8 text-xs">
+                 {/* Folder Path */}
+                 <div className="flex flex-wrap items-center gap-1.5 leading-relaxed">
+-                    {bookmark.originalFolder !== bookmark.newFolder ? (
+-                        <>
+-                            <BookmarkFolderBadge
+-                                folderName={bookmark.originalFolder}
+-                                availableFolders={availableFolders}
+-                                className="whitespace-normal text-left"
+-                            />
+-                            <ArrowRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
++                    {(() => {
++                        const oldF = bookmark.originalFolder || t('common.uncategorized');
++                        const newF = bookmark.newFolder || t('common.uncategorized');
++                        const hasChange = newF.normalize("NFC").trim().toLowerCase() !== oldF.normalize("NFC").trim().toLowerCase();
++                        const isSuggestion = (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict');
++
++                        if (hasChange && isSuggestion) {
++                            return (
++                                <>
++                                    <BookmarkFolderBadge
++                                        folderName={bookmark.originalFolder || ''}
++                                        availableFolders={availableFolders}
++                                        className="whitespace-normal text-left opacity-50"
++                                    />
++                                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
++                                    <BookmarkFolderBadge
++                                        folderName={bookmark.newFolder}
++                                        availableFolders={availableFolders}
++                                        isMatched={true}
++                                        className="whitespace-normal text-left"
++                                    />
++                                </>
++                            );
++                        }
++                        return (
+                             <BookmarkFolderBadge
+-                                folderName={bookmark.newFolder}
++                                folderName={bookmark.newFolder || bookmark.originalFolder || ''}
+                                 availableFolders={availableFolders}
+-                                isMatched={true}
+-                                className="whitespace-normal text-left"
++                                isMatched={bookmark.status === 'suggested' || bookmark.status === 'ai-suggested' || bookmark.status === 'matched' || bookmark.status === 'conflict'}
++                                className={cn(!isSuggestion && "bg-muted/50 whitespace-normal text-left")}
+                             />
+-                        </>
+-                    ) : (
+-                        <BookmarkFolderBadge
+-                            folderName={bookmark.newFolder || bookmark.originalFolder}
+-                            availableFolders={availableFolders}
+-                            className="bg-muted/50 whitespace-normal text-left"
+-                        />
+-                    )}
++                        );
++                    })()}
+                 </div>
+ 
+                 {/* Tags */}
+diff --git a/src/components/bookmark/BookmarkStatusIcon.jsx b/src/components/bookmark/BookmarkStatusIcon.jsx
+index f9e604c..11bbda3 100644
+--- a/src/components/bookmark/BookmarkStatusIcon.jsx
++++ b/src/components/bookmark/BookmarkStatusIcon.jsx
+@@ -1,4 +1,4 @@
+-import { Check, XCircle, Layers, AlertTriangle } from 'lucide-react'
++import { Check, XCircle, Layers, AlertTriangle, Sparkles } from 'lucide-react'
+ import { cn } from '../../lib/utils'
+ import { useTranslation } from 'react-i18next'
+ 
+@@ -35,6 +35,16 @@ export function BookmarkStatusIcon({ bookmark, className }) {
+         )
+     }
+ 
++    if (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') {
++        return (
++            <div className={cn("flex justify-center", className)} title={t('bookmarks.status.suggested')}>
++                <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
++                    <Sparkles className="h-3.5 w-3.5" />
++                </div>
++            </div>
++        )
++    }
++
+     if (bookmark.status === 'matched') {
+         return (
+             <div className={cn("flex justify-center", className)} title={t('bookmarks.status.matched')}>
+diff --git a/src/components/modals/SortConfirmationModal.jsx b/src/components/modals/SortConfirmationModal.jsx
+index eeb7c8b..e889cb3 100644
+--- a/src/components/modals/SortConfirmationModal.jsx
++++ b/src/components/modals/SortConfirmationModal.jsx
+@@ -1,22 +1,57 @@
+-import React from 'react';
++import React, { useState, useEffect } from 'react';
+ import { useTranslation } from 'react-i18next';
+ import { SimpleModal } from '../ui/SimpleModal';
+ import { Button } from '../ui/button';
+-import { ArrowRight, Folder, Tag, Type, AlertTriangle } from 'lucide-react';
++import { ArrowRight, Folder, Tag, Type, AlertTriangle, X } from 'lucide-react';
+ 
+ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = [] }) {
+     const { t } = useTranslation();
+ 
++    const [editableUpdates, setEditableUpdates] = useState([]);
++
++    useEffect(() => {
++        if (isOpen) {
++            setEditableUpdates(JSON.parse(JSON.stringify(updates)));
++        } else {
++            setEditableUpdates([]);
++        }
++    }, [isOpen, updates]);
++
+     if (!isOpen) return null;
+ 
+     // Calculate summary statistics
+-    const totalUpdates = updates.length;
+-    const folderChanges = updates.filter(u => u.newFolder && u.newFolder !== u.originalFolder).length;
+-    const titleChanges = updates.filter(u => u.originalTitle && u.title !== u.originalTitle).length;
+-    const duplicateChanges = updates.filter(u => u.hasDuplicate).length;
+-    // Note: tag calculation is rough, better to just count bookmarks getting new tags if possible, 
+-    // or just say "x bookmarks updated". 
+-    // Let's stick to "Bookmarks to update", "Folder moves", "Tag additions".
++    const totalUpdates = editableUpdates.filter(u => {
++        const hasFolderChange = u.newFolder && u.newFolder !== u.originalFolder;
++        const hasTitleChange = u.originalTitle && u.title !== u.originalTitle;
++        const hasRuleTags = u.ruleTags && u.ruleTags.length > 0;
++        const hasNewTags = u.tags && u.tags.length > (u.originalTags?.length || 0) && u.tags.some(t => !(u.originalTags || []).includes(t));
++        const hasDuplicate = u.isDuplicate || u.hasDuplicate;
++        return hasFolderChange || hasTitleChange || hasRuleTags || hasNewTags || hasDuplicate;
++    }).length;
++
++    const folderChanges = editableUpdates.filter(u => u.newFolder && u.newFolder !== u.originalFolder).length;
++    const titleChanges = editableUpdates.filter(u => u.originalTitle && u.title !== u.originalTitle).length;
++    const duplicateChanges = editableUpdates.filter(u => u.hasDuplicate || u.isDuplicate).length;
++
++    const handleRemoveUpdate = (id) => setEditableUpdates(prev => prev.filter(u => u.id !== id));
++    const handleRevertFolder = (id) => setEditableUpdates(prev => prev.map(u => u.id === id ? { ...u, newFolder: u.originalFolder } : u));
++    const handleRevertTitle = (id) => setEditableUpdates(prev => prev.map(u => u.id === id ? { ...u, title: u.originalTitle } : u));
++    const handleRemoveRuleTag = (id, tagToRemove) => setEditableUpdates(prev => prev.map(u => u.id === id ? { ...u, ruleTags: u.ruleTags.filter(t => t !== tagToRemove) } : u));
++    const handleRemoveTag = (id, tagToRemove) => setEditableUpdates(prev => prev.map(u => u.id === id ? { ...u, tags: u.tags.filter(t => t !== tagToRemove) } : u));
++    const handleRevertDuplicate = (id) => setEditableUpdates(prev => prev.map(u => u.id === id ? { ...u, isDuplicate: false, hasDuplicate: false } : u));
++
++    const handleConfirm = () => {
++        const finalUpdates = editableUpdates.filter(u => {
++            const hasFolderChange = u.newFolder !== u.originalFolder;
++            const hasTitleChange = u.originalTitle && u.title !== u.originalTitle;
++            const hasRuleTags = u.ruleTags && u.ruleTags.length > 0;
++            const hasNewTags = u.tags && u.tags.length > (u.originalTags?.length || 0) && u.tags.some(t => !(u.originalTags || []).includes(t));
++            const hasDuplicateChange = u.hasDuplicate || u.isDuplicate;
++            return hasFolderChange || hasTitleChange || hasRuleTags || hasNewTags || hasDuplicateChange;
++        });
++        onConfirm(finalUpdates);
++    };
++
+ 
+     return (
+         <SimpleModal
+@@ -64,59 +99,82 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
+                             </tr>
+                         </thead>
+                         <tbody className="divide-y">
+-                            {updates.map((u) => (
+-                                <tr key={u.id} className="hover:bg-muted/20">
+-                                    <td className="p-2 max-w-[200px] truncate" title={u.originalTitle || u.title}>
+-                                        {u.originalTitle || u.title || u.url}
+-                                    </td>
+-                                    <td className="p-2 space-y-1">
+-                                        {u.originalTitle && u.title !== u.originalTitle && (
+-                                            <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+-                                                <Type className="h-3 w-3 shrink-0" />
+-                                                <span className="font-medium truncate max-w-[200px]" title={u.title}>{u.title}</span>
++                            {editableUpdates.map((u) => {
++                                const hasFolderChange = u.newFolder && u.newFolder !== u.originalFolder && u.newFolder.toLowerCase() !== (u.originalFolder || '').toLowerCase();
++                                const hasTitleChange = u.originalTitle && u.title !== u.originalTitle;
++                                const hasRuleTags = u.ruleTags && u.ruleTags.length > 0;
++                                const newTags = (u.tags || []).filter(t => !(u.originalTags || []).includes(t));
++                                const hasNewTags = newTags.length > 0;
++                                const hasDuplicate = u.isDuplicate || u.hasDuplicate;
++
++                                if (!hasFolderChange && !hasTitleChange && !hasRuleTags && !hasNewTags && !hasDuplicate) {
++                                    return null;
++                                }
++
++                                return (
++                                    <tr key={u.id} className="hover:bg-muted/20">
++                                        <td className="p-2 max-w-[200px] truncate" title={u.originalTitle || u.title}>
++                                            <div className="flex items-center gap-2">
++                                                <button
++                                                    onClick={() => handleRemoveUpdate(u.id)}
++                                                    className="text-muted-foreground hover:text-destructive shrink-0"
++                                                    title={t('common.cancel')}
++                                                >
++                                                    <X className="h-4 w-4" />
++                                                </button>
++                                                <span className="truncate">{u.originalTitle || u.title || u.url}</span>
+                                             </div>
+-                                        )}
+-                                        {u.newFolder &&
+-                                            u.newFolder !== u.originalFolder &&
+-                                            u.newFolder.toLowerCase() !== (u.originalFolder || '').toLowerCase() && (
+-                                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+-                                                    <Folder className="h-3 w-3" />
+-                                                    <span className="opacity-50 line-through text-xs text-muted-foreground">{u.originalFolder || t('common.uncategorized')}</span>
+-                                                    <ArrowRight className="h-3 w-3" />
+-                                                    <span className="font-medium">{u.newFolder}</span>
++                                        </td>
++                                        <td className="p-2 space-y-1">
++                                            {hasTitleChange && (
++                                                <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 group/item">
++                                                    <Type className="h-3 w-3 shrink-0" />
++                                                    <span className="font-medium truncate max-w-[200px]" title={u.title}>{u.title}</span>
++                                                    <button onClick={() => handleRevertTitle(u.id)} className="opacity-0 group-hover/item:opacity-100 hover:text-destructive ml-1 shrink-0"><X className="h-3 w-3" /></button>
+                                                 </div>
+                                             )}
+-                                        {(u.ruleTags && u.ruleTags.length > 0) && (
+-                                            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
+-                                                <Tag className="h-3 w-3 shrink-0" />
+-                                                {u.ruleTags.map(tag => (
+-                                                    <span key={tag} className="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded text-xs">
+-                                                        +{tag}
+-                                                    </span>
+-                                                ))}
+-                                            </div>
+-                                        )}
+-                                        {/* If there are regular tags being added (less common in current logic but possible) */}
+-                                        {(u.tags && u.tags.length > (u.originalTags?.length || 0)) && (
+-                                            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
+-                                                <Tag className="h-3 w-3 shrink-0" />
+-                                                {/* Filter only new tags */}
+-                                                {(u.tags || []).filter(t => !(u.originalTags || []).includes(t)).map(tag => (
+-                                                    <span key={tag} className="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded text-xs flex items-center gap-1">
+-                                                        {tag === 'ai-dupe' ? <AlertTriangle className="h-3 w-3" /> : null}
+-                                                        +{tag}
+-                                                    </span>
+-                                                ))}
+-                                            </div>
+-                                        )}
+-                                        {u.isDuplicate && (
+-                                            <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+-                                                Marked as duplicate
+-                                            </div>
+-                                        )}
+-                                    </td>
+-                                </tr>
+-                            ))}
++                                            {hasFolderChange && (
++                                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 group/item">
++                                                    <Folder className="h-3 w-3 shrink-0" />
++                                                    <span className="opacity-50 line-through text-xs text-muted-foreground truncate max-w-[80px]" title={u.originalFolder}>{u.originalFolder || t('common.uncategorized')}</span>
++                                                    <ArrowRight className="h-3 w-3 shrink-0" />
++                                                    <span className="font-medium truncate max-w-[80px]" title={u.newFolder}>{u.newFolder}</span>
++                                                    <button onClick={() => handleRevertFolder(u.id)} className="opacity-0 group-hover/item:opacity-100 hover:text-destructive ml-1 shrink-0"><X className="h-3 w-3" /></button>
++                                                </div>
++                                            )}
++                                            {hasRuleTags && (
++                                                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
++                                                    <Tag className="h-3 w-3 shrink-0" />
++                                                    {u.ruleTags.map(tag => (
++                                                        <span key={tag} className="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded text-xs flex items-center gap-1 group/tag">
++                                                            +{tag}
++                                                            <button onClick={() => handleRemoveRuleTag(u.id, tag)} className="opacity-0 group-hover/tag:opacity-100 hover:text-destructive shrink-0"><X className="h-2 w-2" /></button>
++                                                        </span>
++                                                    ))}
++                                                </div>
++                                            )}
++                                            {hasNewTags && (
++                                                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 flex-wrap">
++                                                    <Tag className="h-3 w-3 shrink-0" />
++                                                    {newTags.map(tag => (
++                                                        <span key={tag} className="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded text-xs flex items-center gap-1 group/tag">
++                                                            {tag === 'ai-dupe' ? <AlertTriangle className="h-3 w-3 shrink-0" /> : null}
++                                                            +{tag}
++                                                            <button onClick={() => handleRemoveTag(u.id, tag)} className="opacity-0 group-hover/tag:opacity-100 hover:text-destructive shrink-0"><X className="h-2 w-2" /></button>
++                                                        </span>
++                                                    ))}
++                                                </div>
++                                            )}
++                                            {hasDuplicate && (
++                                                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 mt-1 group/item">
++                                                    <span className="text-xs">Marked as duplicate</span>
++                                                    <button onClick={() => handleRevertDuplicate(u.id)} className="opacity-0 group-hover/item:opacity-100 hover:text-destructive ml-1 shrink-0"><X className="h-3 w-3" /></button>
++                                                </div>
++                                            )}
++                                        </td>
++                                    </tr>
++                                );
++                            })}
+                         </tbody>
+                     </table>
+                 </div>
+@@ -125,7 +183,7 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
+                     <Button variant="ghost" onClick={onClose}>
+                         {t('common.cancel')}
+                     </Button>
+-                    <Button onClick={onConfirm}>
++                    <Button onClick={handleConfirm}>
+                         {t('modals.sortConf.confirm')}
+                     </Button>
+                 </div>
+diff --git a/src/hooks/use-ai-tools.js b/src/hooks/use-ai-tools.js
+index dc9ffe4..c2efe16 100644
+--- a/src/hooks/use-ai-tools.js
++++ b/src/hooks/use-ai-tools.js
+@@ -18,10 +18,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
+     }, []);
+ 
+     const handleFixTitles = useCallback(async () => {
+-        const apiKey = localStorage.getItem("bs_api_key");
++        const provider = localStorage.getItem("bs_provider") || 'openai';
++        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
+         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
+ 
+-        if (!apiKey) {
++        if (!apiKey && provider !== 'ollama') {
+             openSettings('ai');
+             return;
+         }
+@@ -68,10 +69,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
+     }, [selectedIds, setSelectedIds, rawBookmarks, openSettings]);
+ 
+     const handleFindSmartDuplicates = useCallback(async () => {
+-        const apiKey = localStorage.getItem("bs_api_key");
++        const provider = localStorage.getItem("bs_provider") || 'openai';
++        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
+         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
+ 
+-        if (!apiKey) {
++        if (!apiKey && provider !== 'ollama') {
+             openSettings('ai');
+             return;
+         }
+diff --git a/src/hooks/use-app-actions.js b/src/hooks/use-app-actions.js
+index b6b8cd6..71ce878 100644
+--- a/src/hooks/use-app-actions.js
++++ b/src/hooks/use-app-actions.js
+@@ -44,18 +44,22 @@ export function useAppActions({
+         setPendingSortUpdates(updates)
+     }, [])
+ 
+-    const applySortUpdates = useCallback(async () => {
+-        if (!pendingSortUpdates) return
++    const applySortUpdates = useCallback(async (modifiedUpdates) => {
++        const finalUpdates = Array.isArray(modifiedUpdates) ? modifiedUpdates : pendingSortUpdates;
++        if (!finalUpdates || finalUpdates.length === 0) {
++            setPendingSortUpdates(null);
++            return;
++        }
+ 
+-        const previousState = await db.bookmarks.bulkGet(pendingSortUpdates.map(u => u.id))
++        const previousState = await db.bookmarks.bulkGet(finalUpdates.map(u => u.id))
+ 
+-        const updatesToApply = pendingSortUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
++        const updatesToApply = finalUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
+             ...u,
+-            newFolder: u.newFolder,
++            originalFolder: originalFolder,
++            newFolder: u.newFolder || u.suggestedFolder,
+             tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])],
+-            ruleTags: [],
+-            status: 'idle',
+-            suggestedFolder: null
++            ruleTags: u.ruleTags || [],
++            status: 'ai-suggested',
+         }))
+ 
+         const execute = async () => {
+diff --git a/src/hooks/use-auto-categorize.js b/src/hooks/use-auto-categorize.js
+index 178ce73..8243d92 100644
+--- a/src/hooks/use-auto-categorize.js
++++ b/src/hooks/use-auto-categorize.js
+@@ -53,7 +53,7 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
+                         newFolder: folder,
+                         // tags: b.tags, // Keep original manual tags as is
+                         ruleTags: newRuleTags, // Use ruleTags for auto-generated ones
+-                        status: 'matched',
++                        status: 'suggested',
+                         // Store original values for diffing in modal
+                         originalFolder: original,
+                         originalTags: b.tags
+diff --git a/src/hooks/use-magic-sort.js b/src/hooks/use-magic-sort.js
+index b1f4e96..1b4af63 100644
+--- a/src/hooks/use-magic-sort.js
++++ b/src/hooks/use-magic-sort.js
+@@ -17,10 +17,11 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
+     }, []);
+ 
+     const handleMagicSort = useCallback(async () => {
+-        const apiKey = localStorage.getItem("bs_api_key")
++        const provider = localStorage.getItem("bs_provider") || 'openai'
++        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key")
+         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
+ 
+-        if (!apiKey) {
++        if (!apiKey && provider !== 'ollama') {
+             openSettings('ai')
+             return
+         }
+@@ -78,7 +79,7 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
+                         newFolder: folder,
+                         // tags: [...new Set([...(b.tags || []), ...tags])], // Don't merge into main tags
+                         ruleTags: mergedTags, // Add to ruleTags for distinction
+-                        status: 'matched',
++                        status: 'suggested',
+                         // Store original values for diffing in modal
+                         originalFolder: original,
+                         originalTags: b.tags
+diff --git a/src/locales/de/translation.json b/src/locales/de/translation.json
+index 488e1c0..9e9b3e9 100644
+--- a/src/locales/de/translation.json
++++ b/src/locales/de/translation.json
+@@ -115,16 +115,19 @@
+             "model": "KI-Modell",
+             "provider": "Anbieter",
+             "providers": {
++                "ollama": "Lokale KI (Ollama)",
+                 "openai": "OpenAI",
+                 "google": "Google Gemini",
+                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
+             },
+             "apiKey": "API-Schlüssel",
++            "ollamaUrl": "Ollama Base URL",
+             "saved": "Gespeichert!",
+             "save": "KI-Einstellungen speichern",
+             "reqOpenAI": "Benötigt OpenAI API-Schlüssel",
+             "reqGemini": "Benötigt Google Gemini API-Schlüssel",
+-            "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel"
++            "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
++            "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden"
+         },
+         "languages": {
+             "en": "Englisch",
+diff --git a/src/locales/en/translation.json b/src/locales/en/translation.json
+index e5feb6d..69167b1 100644
+--- a/src/locales/en/translation.json
++++ b/src/locales/en/translation.json
+@@ -115,16 +115,19 @@
+             "model": "AI Model",
+             "provider": "Provider",
+             "providers": {
++                "ollama": "Local AI (Ollama)",
+                 "openai": "OpenAI",
+                 "google": "Google Gemini",
+                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
+             },
+             "apiKey": "API Key",
++            "ollamaUrl": "Ollama Base URL",
+             "saved": "Saved!",
+             "save": "Save AI Settings",
+             "reqOpenAI": "Requires OpenAI API Key",
+             "reqGemini": "Requires Google Gemini API Key",
+-            "reqOpenRouter": "Requires OpenRouter API Key"
++            "reqOpenRouter": "Requires OpenRouter API Key",
++            "reqOllama": "Leave empty to use http://localhost:11434"
+         },
+         "languages": {
+             "en": "English",
+@@ -378,7 +381,7 @@
+         "markDead": "Mark as Dead",
+         "export": "Export Selected",
+         "cleanUrls": "Clean URLs",
+-        "autoSort": "Auto Sort (Local)",
++        "autoSort": "Auto Sort",
+         "sorting": "Sorting...",
+         "magicSort": "Magic Sort",
+         "fixTitles": "Fix Titles (AI)",
+@@ -417,6 +420,7 @@
+             "duplicate": "Duplicate (Will be removed)",
+             "original": "Original (Has duplicates)",
+             "matched": "Matched Rule-Based",
++            "suggested": "AI Suggestion",
+             "conflict": "Rule Conflict",
+             "unknown": "Unknown"
+         },
+diff --git a/src/locales/es/translation.json b/src/locales/es/translation.json
+index e7d2dac..ee3d37b 100644
+--- a/src/locales/es/translation.json
++++ b/src/locales/es/translation.json
+@@ -115,16 +115,19 @@
+             "model": "Modelo de IA",
+             "provider": "Proveedor",
+             "providers": {
++                "ollama": "IA Local (Ollama)",
+                 "openai": "OpenAI",
+                 "google": "Google Gemini",
+                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
+             },
+             "apiKey": "Clave de API",
++            "ollamaUrl": "Ollama Base URL",
+             "saved": "¡Guardado!",
+             "save": "Guardar ajustes de IA",
+             "reqOpenAI": "Requiere clave API de OpenAI",
+             "reqGemini": "Requiere clave API de Google Gemini",
+-            "reqOpenRouter": "Requiere clave API de OpenRouter"
++            "reqOpenRouter": "Requiere clave API de OpenRouter",
++            "reqOllama": "Dejar vacío para el predeterminado http://localhost:11434"
+         },
+         "languages": {
+             "en": "Inglés",
+@@ -378,7 +381,7 @@
+         "markDead": "Marcar como Caído",
+         "export": "Exportar Sel.",
+         "cleanUrls": "Limpiar URLs",
+-        "autoSort": "Autoclasificar (Local)",
++        "autoSort": "Autoclasificar",
+         "sorting": "Clasificando...",
+         "magicSort": "Clasificación Mágica",
+         "fixTitles": "Corregir Títulos (IA)",
+diff --git a/src/locales/fr/translation.json b/src/locales/fr/translation.json
+index 5d16c7e..6f8f4db 100644
+--- a/src/locales/fr/translation.json
++++ b/src/locales/fr/translation.json
+@@ -115,16 +115,19 @@
+             "model": "Modèle IA",
+             "provider": "Fournisseur",
+             "providers": {
++                "ollama": "IA Locale (Ollama)",
+                 "openai": "OpenAI",
+                 "google": "Google Gemini",
+                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
+             },
+             "apiKey": "Clé API",
++            "ollamaUrl": "Ollama Base URL",
+             "saved": "Enregistré !",
+             "save": "Enregistrer les paramètres",
+             "reqOpenAI": "Nécessite une clé API OpenAI",
+             "reqGemini": "Nécessite une clé API Google Gemini",
+-            "reqOpenRouter": "Nécessite une clé API OpenRouter"
++            "reqOpenRouter": "Nécessite une clé API OpenRouter",
++            "reqOllama": "Laissez vide pour utiliser http://localhost:11434 par défaut"
+         },
+         "languages": {
+             "en": "Anglais",
+@@ -378,7 +381,7 @@
+         "markDead": "Marquer comme Mort",
+         "export": "Exporter Sél.",
+         "cleanUrls": "Nettoyer les URLs",
+-        "autoSort": "Tri Auto (Local)",
++        "autoSort": "Tri Auto",
+         "sorting": "Tri en cours...",
+         "magicSort": "Tri Magique",
+         "fixTitles": "Réparer les Titres (IA)",
+diff --git a/src/locales/tr/translation.json b/src/locales/tr/translation.json
+index c97199f..45a6951 100644
+--- a/src/locales/tr/translation.json
++++ b/src/locales/tr/translation.json
+@@ -115,16 +115,19 @@
+             "model": "YZ Modeli",
+             "provider": "Sağlayıcı",
+             "providers": {
++                "ollama": "Yerel YZ (Ollama)",
+                 "openai": "OpenAI",
+                 "google": "Google Gemini",
+                 "openrouter": "OpenRouter (Claude, Llama, vb.)"
+             },
+             "apiKey": "API Anahtarı",
++            "ollamaUrl": "Ollama Base URL",
+             "saved": "Kaydedildi!",
+             "save": "YZ Ayarlarını Kaydet",
+             "reqOpenAI": "OpenAI API Anahtarı Gerekir",
+             "reqGemini": "Google Gemini API Anahtarı Gerekir",
+-            "reqOpenRouter": "OpenRouter API Anahtarı Gerekir"
++            "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
++            "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın"
+         },
+         "languages": {
+             "en": "İngilizce",
+@@ -378,7 +381,7 @@
+         "markDead": "Ölü Olarak İşaretle",
+         "export": "Seçilenleri Dışa Aktar",
+         "cleanUrls": "URL'leri Temizle",
+-        "autoSort": "Otomatik Sırala (Yerel)",
++        "autoSort": "Otomatik Sırala",
+         "sorting": "Sıralanıyor...",
+         "magicSort": "Sihirli Sırala",
+         "fixTitles": "Başlıkları Düzelt (YZ)",
+@@ -417,6 +420,7 @@
+             "duplicate": "Kopya (Silinecek)",
+             "original": "Orijinal (Kopyaları var)",
+             "matched": "Kural Eşleşti",
++            "suggested": "YZ Önerisi",
+             "conflict": "Kural Çakışması",
+             "unknown": "Bilinmiyor"
+         },
+diff --git a/src/services/ai-service.js b/src/services/ai-service.js
+index a08a2d0..a24feb1 100644
+--- a/src/services/ai-service.js
++++ b/src/services/ai-service.js
+@@ -4,6 +4,11 @@ export const AI_MODELS = [
+     { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
+     { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'openai' },
+ 
++    // --- Local ---
++    { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
++    { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
++    { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
++
+     // --- Gemini 3.0 (Preview) ---
+     { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (Preview)', provider: 'gemini' },
+     { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)', provider: 'gemini' },
+@@ -57,6 +62,7 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
+ 
+     let processedCount = 0;
+     const results = {};
++    let processingError = null;
+ 
+     // Helper to process a single chunk
+     const processChunk = async (chunk) => {
+@@ -67,6 +73,8 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
+         } catch (error) {
+             if (error.name === 'AbortError') throw error;
+             console.error("Error processing chunk:", error);
++            processingError = error;
++            queue.length = 0;
+         } finally {
+             processedCount += chunk.length;
+             onProgress?.(processedCount, bookmarks.length);
+@@ -88,6 +96,7 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
+     }
+ 
+     await Promise.all(workers);
++    if (processingError) throw processingError;
+     return results;
+ }
+ 
+@@ -98,10 +107,12 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
+         url: b.url
+     }));
+ 
++    const lang = localStorage.getItem('i18nextLng') || 'en';
+     const systemPrompt = `You are a bookmark organizer. Analyze the following list of bookmarks. 
++  IMPORTANT: The user's preferred language is '${lang}'. You MUST translate all generated folder names and tags into '${lang}' natively.
+   Return a JSON object where the key is the ID and the value is an object containing:
+-  - "folder": A short, concise category name (e.g., 'Development', 'News', 'Shopping', 'Entertainment', 'Tools', 'Reading'). Use Title Case.
+-  - "tags": An array of specific, lowercase tags (e.g., ['react', 'tutorial'], ['shoes', 'ecommerce']).
++  - "folder": A short, concise category name (e.g. 'Development', 'News', or their localized equivalents). Use Title Case.
++  - "tags": An array of specific, lowercase tags conceptually relevant in '${lang}'.
+   
+   Do not return any explanations, just the JSON.`;
+ 
+@@ -116,6 +127,8 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
+         return callGemini(messages, apiKey, modelId, true, signal);
+     } else if (provider === 'openrouter') {
+         return callOpenRouter(messages, apiKey, modelId, true, signal);
++    } else if (provider === 'ollama') {
++        return callOllama(messages, apiKey, modelId, true, signal);
+     }
+ 
+     throw new Error("Invalid provider");
+@@ -265,6 +278,46 @@ async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
+     return text;
+ }
+ 
++async function callOllama(messages, baseUrl, model, asJson = true, signal) {
++    const cleanUrl = (baseUrl || 'http://localhost:11434').replace(/\/$/, '');
++    const url = `${cleanUrl}/v1/chat/completions`;
++
++    const body = {
++        model: model,
++        messages: messages
++    };
++    if (asJson) {
++        body.response_format = { type: "json_object" };
++    }
++
++    const response = await fetch(url, {
++        method: "POST",
++        headers: {
++            "Content-Type": "application/json"
++        },
++        body: JSON.stringify(body),
++        signal
++    });
++
++    if (!response.ok) {
++        const error = await response.json().catch(() => ({}));
++        throw new Error(error.error?.message || "Ollama API Error. Is Ollama running?");
++    }
++
++    const data = await response.json();
++    const text = data.choices[0].message.content;
++
++    if (asJson) {
++        try {
++            return JSON.parse(cleanJsonString(text));
++        } catch (e) {
++            console.error("Failed to parse Ollama response", e);
++            return {};
++        }
++    }
++    return text;
++}
++
+ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {}) {
+     const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+     const provider = modelInfo.provider;
+@@ -286,9 +339,10 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
+         console.warn("Failed to fetch proxy content, falling back to URL only", e);
+     }
+ 
++    const lang = localStorage.getItem('i18nextLng') || 'en';
+     const messages = [
+         { role: "system", content: systemPrompt },
+-        { role: "user", content: `Please summarize this page:\n${pageText}` }
++        { role: "user", content: `Please summarize this page in '${lang}'. The summary MUST be translated natively to the language code '${lang}':\n${pageText}` }
+     ];
+ 
+     if (provider === 'openai') {
+@@ -297,6 +351,8 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
+         return callGemini(messages, apiKey, modelId, false, abortSignal);
+     } else if (provider === 'openrouter') {
+         return callOpenRouter(messages, apiKey, modelId, false, abortSignal);
++    } else if (provider === 'ollama') {
++        return callOllama(messages, apiKey, modelId, false, abortSignal);
+     }
+     throw new Error("Invalid provider");
+ }
+@@ -312,13 +368,16 @@ export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortS
+ 
+     let processedCount = 0;
+     const results = {};
++    let processingError = null;
+ 
+     const processChunk = async (chunk) => {
+         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
+         try {
+             const simplified = chunk.map(b => ({ id: b.id, title: b.title, url: b.url }));
++            const lang = localStorage.getItem('i18nextLng') || 'en';
+             const systemPrompt = `You are a helpful bookmark assistant. Review the following bookmarks. Some have broken, messy, or missing titles.
+ Fix the titles to be clean, readable, and professional based on their URL and current title.
++IMPORTANT: The user's preferred language is '${lang}'. If you need to generate a completely new title, and the URL is language-agnostic, attempt to write the new title natively in '${lang}'. Note that original names of brands/companies should remain untouched.
+ Return a JSON object where the key is the bookmark ID and the value is the "fixedTitle" string.
+ Only return the IDs of the bookmarks you chose to fix. Do not return explanations.`;
+ 
+@@ -334,11 +393,15 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
+                 chunkResults = await callGemini(messages, apiKey, modelId, true, abortSignal);
+             } else if (provider === 'openrouter') {
+                 chunkResults = await callOpenRouter(messages, apiKey, modelId, true, abortSignal);
++            } else if (provider === 'ollama') {
++                chunkResults = await callOllama(messages, apiKey, modelId, true, abortSignal);
+             }
+             if (!abortSignal?.aborted) Object.assign(results, chunkResults);
+         } catch (error) {
+             if (error.name === 'AbortError') throw error;
+             console.error("Error processing titles chunk:", error);
++            processingError = error;
++            queue.length = 0;
+         } finally {
+             processedCount += chunk.length;
+             onProgress?.(processedCount, bookmarks.length);
+@@ -359,6 +422,7 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
+     }
+ 
+     await Promise.all(workers);
++    if (processingError) throw processingError;
+     return results;
+ }
+ 
+@@ -374,6 +438,7 @@ export async function findSmartDuplicates(bookmarks, apiKey, modelId, onProgress
+ 
+     let processedCount = 0;
+     const duplicateGroups = [];
++    let processingError = null;
+ 
+     const processChunk = async (chunk) => {
+         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
+@@ -405,6 +470,8 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
+                 resultJson = await handleResponse(callGemini);
+             } else if (provider === 'openrouter') {
+                 resultJson = await handleResponse(callOpenRouter);
++            } else if (provider === 'ollama') {
++                resultJson = await handleResponse(callOllama);
+             }
+ 
+             if (!abortSignal?.aborted && Array.isArray(resultJson)) {
+@@ -414,6 +481,8 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
+         } catch (error) {
+             if (error.name === 'AbortError') throw error;
+             console.error("Error processing dedupe chunk:", error);
++            processingError = error;
++            queue.length = 0;
+         } finally {
+             processedCount += chunk.length;
+             onProgress?.(processedCount, bookmarks.length);
+@@ -434,6 +503,7 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
+     }
+ 
+     await Promise.all(workers);
++    if (processingError) throw processingError;
+     return duplicateGroups;
+ }
+ 
+diff --git a/src/workers/processing.worker.js b/src/workers/processing.worker.js
+index 35a1e02..c1841dc 100644
+--- a/src/workers/processing.worker.js
++++ b/src/workers/processing.worker.js
+@@ -272,18 +272,30 @@ const processData = ({
+         if (typeof existingTags === 'string') {
+             existingTags = existingTags.split(',').map(t => t.trim()).filter(Boolean);
+         }
+-        const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
+ 
+         const hasMatch = matchedRules.length > 0;
+ 
++        let finalStatus = hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged';
++        let finalNewFolder = hasMatch ? newFolder : b.originalFolder;
++        let finalRuleTags = ruleTags;
++
++        // Preserve AI suggestion state if present in DB
++        if (b.status === 'suggested' || b.status === 'ai-suggested') {
++            finalStatus = b.status;
++            finalNewFolder = b.newFolder || b.suggestedFolder || b.originalFolder;
++            finalRuleTags = b.ruleTags && b.ruleTags.length > 0 ? b.ruleTags : ruleTags;
++        }
++
++        const allTags = Array.from(new Set([...existingTags, ...finalRuleTags]));
++
+         return {
+             ...b,
+-            newFolder: hasMatch ? newFolder : b.originalFolder,
++            newFolder: finalNewFolder,
+             tags: allTags,
+-            ruleTags: ruleTags,
++            ruleTags: finalRuleTags,
+             matchedRules: matchedRules.map(r => ({ type: r.type, value: r.value, targetFolder: r.targetFolder, tags: r.tags })),
+             conflictingFolders,
+-            status: hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged',
++            status: finalStatus,
+             isDuplicate,
+             hasDuplicate,
+             otherLocations

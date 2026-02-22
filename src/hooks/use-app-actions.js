@@ -44,18 +44,22 @@ export function useAppActions({
         setPendingSortUpdates(updates)
     }, [])
 
-    const applySortUpdates = useCallback(async () => {
-        if (!pendingSortUpdates) return
+    const applySortUpdates = useCallback(async (modifiedUpdates) => {
+        const finalUpdates = Array.isArray(modifiedUpdates) ? modifiedUpdates : pendingSortUpdates;
+        if (!finalUpdates || finalUpdates.length === 0) {
+            setPendingSortUpdates(null);
+            return;
+        }
 
-        const previousState = await db.bookmarks.bulkGet(pendingSortUpdates.map(u => u.id))
+        const previousState = await db.bookmarks.bulkGet(finalUpdates.map(u => u.id))
 
-        const updatesToApply = pendingSortUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
+        const updatesToApply = finalUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
             ...u,
-            newFolder: u.newFolder,
+            originalFolder: originalFolder,
+            newFolder: u.newFolder || u.suggestedFolder,
             tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])],
-            ruleTags: [],
-            status: 'idle',
-            suggestedFolder: null
+            ruleTags: u.ruleTags || [],
+            status: 'ai-suggested',
         }))
 
         const execute = async () => {

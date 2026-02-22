@@ -18,10 +18,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
     }, []);
 
     const handleFixTitles = useCallback(async () => {
-        const apiKey = localStorage.getItem("bs_api_key");
+        const provider = localStorage.getItem("bs_provider") || 'openai';
+        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
 
-        if (!apiKey) {
+        if (!apiKey && provider !== 'ollama') {
             openSettings('ai');
             return;
         }
@@ -68,10 +69,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
     }, [selectedIds, setSelectedIds, rawBookmarks, openSettings]);
 
     const handleFindSmartDuplicates = useCallback(async () => {
-        const apiKey = localStorage.getItem("bs_api_key");
+        const provider = localStorage.getItem("bs_provider") || 'openai';
+        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
         const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
 
-        if (!apiKey) {
+        if (!apiKey && provider !== 'ollama') {
             openSettings('ai');
             return;
         }

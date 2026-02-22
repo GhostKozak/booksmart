@@ -11,8 +11,9 @@ This project was developed entirely using Artificial Intelligence within the Ant
 
 ## ✨ Features
 
-- **📂 Privacy First**: 100% local processing. No data ever leaves your browser.
-- **🪄 AI Magic Sort**: Automatically categorize bookmarks into folders and generate smart tags using Local AI (Ollama) or cloud providers (OpenAI, Google Gemini, Anthropic).
+- **📂 Privacy First**: 100% local processing. No data ever leaves your browser unless you choose so.
+- **🪄 True Local AI & Cloud AI**: Use **Ollama** for completely private, local AI processing, or connect your favorite cloud providers (OpenAI, Google Gemini, Anthropic).
+- **✨ Magic Sort & Auto Sort**: Automatically categorize bookmarks via AI (Magic Sort) or use our rapid, rule-based matching (Auto Sort).
 - **🧹 Duplicate Cleaner**: Find, merge, or delete duplicate bookmarks with a single click.
 - **📊 Analytics Dashboard**: Visualize your collection habits, top domains, and folder statistics.
 - **🔗 Dead Link Checker**: Automatically identifies broken links (404s) and timeouts to keep your library clean.
@@ -54,7 +55,7 @@ This project was developed entirely using Artificial Intelligence within the Ant
 2.  **Open** BookSmart and drag & drop your bookmarks file.
 3.  **Setup AI (Optional)**: Head to Settings and configure your preferred AI provider (Ollama, OpenAI, Gemini, or Anthropic) to enable Magic Sort.
 4.  **Analyze** your collection using the Dashboard to understand your habits.
-5.  **Organize** by using Magic Sort, creating Rules, or filtering manually.
+5.  **Organize** by using AI Magic Sort, fast code-based Auto Sort, creating Rules, or filtering manually.
 6.  **Clean** up duplicates and broken links with the built-in tools.
 7.  **Export** the organized list back to your browser when done.
 

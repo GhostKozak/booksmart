@@ -115,16 +115,19 @@
             "model": "KI-Modell",
             "provider": "Anbieter",
             "providers": {
+                "ollama": "Lokale KI (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
                 "openrouter": "OpenRouter (Claude, Llama, etc.)"
             },
             "apiKey": "API-Schlüssel",
+            "ollamaUrl": "Ollama Base URL",
             "saved": "Gespeichert!",
             "save": "KI-Einstellungen speichern",
             "reqOpenAI": "Benötigt OpenAI API-Schlüssel",
             "reqGemini": "Benötigt Google Gemini API-Schlüssel",
-            "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel"
+            "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
+            "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden"
         },
         "languages": {
             "en": "Englisch",

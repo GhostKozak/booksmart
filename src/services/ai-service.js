@@ -4,6 +4,11 @@ export const AI_MODELS = [
     { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
     { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'openai' },
 
+    // --- Local ---
+    { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
+    { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
+    { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
+
     // --- Gemini 3.0 (Preview) ---
     { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (Preview)', provider: 'gemini' },
     { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)', provider: 'gemini' },
@@ -57,6 +62,7 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
 
     let processedCount = 0;
     const results = {};
+    let processingError = null;
 
     // Helper to process a single chunk
     const processChunk = async (chunk) => {
@@ -67,6 +73,8 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
         } catch (error) {
             if (error.name === 'AbortError') throw error;
             console.error("Error processing chunk:", error);
+            processingError = error;
+            queue.length = 0;
         } finally {
             processedCount += chunk.length;
             onProgress?.(processedCount, bookmarks.length);
@@ -88,6 +96,7 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
     }
 
     await Promise.all(workers);
+    if (processingError) throw processingError;
     return results;
 }
 
@@ -98,10 +107,12 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
         url: b.url
     }));
 
+    const lang = localStorage.getItem('i18nextLng') || 'en';
     const systemPrompt = `You are a bookmark organizer. Analyze the following list of bookmarks. 
+  IMPORTANT: The user's preferred language is '${lang}'. You MUST translate all generated folder names and tags into '${lang}' natively.
   Return a JSON object where the key is the ID and the value is an object containing:
-  - "folder": A short, concise category name (e.g., 'Development', 'News', 'Shopping', 'Entertainment', 'Tools', 'Reading'). Use Title Case.
-  - "tags": An array of specific, lowercase tags (e.g., ['react', 'tutorial'], ['shoes', 'ecommerce']).
+  - "folder": A short, concise category name (e.g. 'Development', 'News', or their localized equivalents). Use Title Case.
+  - "tags": An array of specific, lowercase tags conceptually relevant in '${lang}'.
   
   Do not return any explanations, just the JSON.`;
 
@@ -116,6 +127,8 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
         return callGemini(messages, apiKey, modelId, true, signal);
     } else if (provider === 'openrouter') {
         return callOpenRouter(messages, apiKey, modelId, true, signal);
+    } else if (provider === 'ollama') {
+        return callOllama(messages, apiKey, modelId, true, signal);
     }
 
     throw new Error("Invalid provider");
@@ -265,6 +278,46 @@ async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
     return text;
 }
 
+async function callOllama(messages, baseUrl, model, asJson = true, signal) {
+    const cleanUrl = (baseUrl || 'http://localhost:11434').replace(/\/$/, '');
+    const url = `${cleanUrl}/v1/chat/completions`;
+
+    const body = {
+        model: model,
+        messages: messages
+    };
+    if (asJson) {
+        body.response_format = { type: "json_object" };
+    }
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body),
+        signal
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error?.message || "Ollama API Error. Is Ollama running?");
+    }
+
+    const data = await response.json();
+    const text = data.choices[0].message.content;
+
+    if (asJson) {
+        try {
+            return JSON.parse(cleanJsonString(text));
+        } catch (e) {
+            console.error("Failed to parse Ollama response", e);
+            return {};
+        }
+    }
+    return text;
+}
+
 export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {}) {
     const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
@@ -286,9 +339,10 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
         console.warn("Failed to fetch proxy content, falling back to URL only", e);
     }
 
+    const lang = localStorage.getItem('i18nextLng') || 'en';
     const messages = [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Please summarize this page:\n${pageText}` }
+        { role: "user", content: `Please summarize this page in '${lang}'. The summary MUST be translated natively to the language code '${lang}':\n${pageText}` }
     ];
 
     if (provider === 'openai') {
@@ -297,6 +351,8 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
         return callGemini(messages, apiKey, modelId, false, abortSignal);
     } else if (provider === 'openrouter') {
         return callOpenRouter(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'ollama') {
+        return callOllama(messages, apiKey, modelId, false, abortSignal);
     }
     throw new Error("Invalid provider");
 }
@@ -312,13 +368,16 @@ export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortS
 
     let processedCount = 0;
     const results = {};
+    let processingError = null;
 
     const processChunk = async (chunk) => {
         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
         try {
             const simplified = chunk.map(b => ({ id: b.id, title: b.title, url: b.url }));
+            const lang = localStorage.getItem('i18nextLng') || 'en';
             const systemPrompt = `You are a helpful bookmark assistant. Review the following bookmarks. Some have broken, messy, or missing titles.
 Fix the titles to be clean, readable, and professional based on their URL and current title.
+IMPORTANT: The user's preferred language is '${lang}'. If you need to generate a completely new title, and the URL is language-agnostic, attempt to write the new title natively in '${lang}'. Note that original names of brands/companies should remain untouched.
 Return a JSON object where the key is the bookmark ID and the value is the "fixedTitle" string.
 Only return the IDs of the bookmarks you chose to fix. Do not return explanations.`;
 
@@ -334,11 +393,15 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
                 chunkResults = await callGemini(messages, apiKey, modelId, true, abortSignal);
             } else if (provider === 'openrouter') {
                 chunkResults = await callOpenRouter(messages, apiKey, modelId, true, abortSignal);
+            } else if (provider === 'ollama') {
+                chunkResults = await callOllama(messages, apiKey, modelId, true, abortSignal);
             }
             if (!abortSignal?.aborted) Object.assign(results, chunkResults);
         } catch (error) {
             if (error.name === 'AbortError') throw error;
             console.error("Error processing titles chunk:", error);
+            processingError = error;
+            queue.length = 0;
         } finally {
             processedCount += chunk.length;
             onProgress?.(processedCount, bookmarks.length);
@@ -359,6 +422,7 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
     }
 
     await Promise.all(workers);
+    if (processingError) throw processingError;
     return results;
 }
 
@@ -374,6 +438,7 @@ export async function findSmartDuplicates(bookmarks, apiKey, modelId, onProgress
 
     let processedCount = 0;
     const duplicateGroups = [];
+    let processingError = null;
 
     const processChunk = async (chunk) => {
         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
@@ -405,6 +470,8 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
                 resultJson = await handleResponse(callGemini);
             } else if (provider === 'openrouter') {
                 resultJson = await handleResponse(callOpenRouter);
+            } else if (provider === 'ollama') {
+                resultJson = await handleResponse(callOllama);
             }
 
             if (!abortSignal?.aborted && Array.isArray(resultJson)) {
@@ -414,6 +481,8 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
         } catch (error) {
             if (error.name === 'AbortError') throw error;
             console.error("Error processing dedupe chunk:", error);
+            processingError = error;
+            queue.length = 0;
         } finally {
             processedCount += chunk.length;
             onProgress?.(processedCount, bookmarks.length);
@@ -434,6 +503,7 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
     }
 
     await Promise.all(workers);
+    if (processingError) throw processingError;
     return duplicateGroups;
 }
 

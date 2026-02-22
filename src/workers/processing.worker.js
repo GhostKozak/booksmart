@@ -272,18 +272,30 @@ const processData = ({
         if (typeof existingTags === 'string') {
             existingTags = existingTags.split(',').map(t => t.trim()).filter(Boolean);
         }
-        const allTags = Array.from(new Set([...existingTags, ...ruleTags]));
 
         const hasMatch = matchedRules.length > 0;
 
+        let finalStatus = hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged';
+        let finalNewFolder = hasMatch ? newFolder : b.originalFolder;
+        let finalRuleTags = ruleTags;
+
+        // Preserve AI suggestion state if present in DB
+        if (b.status === 'suggested' || b.status === 'ai-suggested') {
+            finalStatus = b.status;
+            finalNewFolder = b.newFolder || b.suggestedFolder || b.originalFolder;
+            finalRuleTags = b.ruleTags && b.ruleTags.length > 0 ? b.ruleTags : ruleTags;
+        }
+
+        const allTags = Array.from(new Set([...existingTags, ...finalRuleTags]));
+
         return {
             ...b,
-            newFolder: hasMatch ? newFolder : b.originalFolder,
+            newFolder: finalNewFolder,
             tags: allTags,
-            ruleTags: ruleTags,
+            ruleTags: finalRuleTags,
             matchedRules: matchedRules.map(r => ({ type: r.type, value: r.value, targetFolder: r.targetFolder, tags: r.tags })),
             conflictingFolders,
-            status: hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged',
+            status: finalStatus,
             isDuplicate,
             hasDuplicate,
             otherLocations
