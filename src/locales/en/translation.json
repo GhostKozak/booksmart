@@ -71,7 +71,8 @@
             "tags": "Tags",
             "folders": "Folders",
             "smartFilters": "Smart Filters",
-            "rules": "Rules"
+            "rules": "Rules",
+            "collections": "Collections"
         },
         "smartFilters": {
             "duplicates": "Duplicates",
@@ -375,7 +376,12 @@
         "cleanUrls": "Clean URLs",
         "autoSort": "Auto Sort (Local)",
         "sorting": "Sorting...",
-        "magicSort": "Magic Sort"
+        "magicSort": "Magic Sort",
+        "collection": {
+            "button": "Collection",
+            "add": "Add",
+            "remove": "Remove"
+        }
     },
     "preview": {
         "open": "Open Preview",
@@ -467,6 +473,35 @@
         "sortApplied": "Smart Sort applied successfully",
         "noteSaved": "Note saved",
         "error": "An error occurred",
-        "dbRestored": "Database restored successfully"
+        "dbRestored": "Database restored successfully",
+        "collectionCreated": "Collection created successfully",
+        "collectionUpdated": "Collection updated successfully",
+        "collectionDeleted": "Collection deleted",
+        "addedToCollection": "Added to \"{{name}}\"",
+        "removedFromCollection": "{{count}} bookmarks removed from \"{{name}}\""
+    },
+    "collections": {
+        "add": "New Collection",
+        "empty": "No collections yet.",
+        "createFirst": "Create your first collection",
+        "newTitle": "New Collection",
+        "editTitle": "Edit Collection",
+        "nameLabel": "Collection Name",
+        "namePlaceholder": "My Collection",
+        "iconLabel": "Icon",
+        "colorLabel": "Color",
+        "defaults": {
+            "readLater": "Read Later",
+            "favorites": "Favorites",
+            "work": "Work"
+        },
+        "history": {
+            "created": "Create collection \"{{name}}\"",
+            "updated": "Update collection \"{{name}}\"",
+            "deleted": "Delete collection \"{{name}}\"",
+            "addedBookmarks": "Add {{count}} bookmarks to collection",
+            "removedBookmark": "Remove bookmark from collection",
+            "removedBookmarks": "Remove {{count}} bookmarks from collection"
+        }
     }
 }

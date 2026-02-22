@@ -12,6 +12,7 @@ import { useBookmarkWorker } from './hooks/use-bookmark-worker'
 import { useBookmarkOperations } from './hooks/use-bookmark-operations'
 import { useRuleManager } from './hooks/use-rule-manager'
 import { useMagicSort } from './hooks/use-magic-sort'
+import { useCollections } from './hooks/use-collections'
 import { useAutoCategorize } from './hooks/use-auto-categorize'
 import { useFileUpload } from './hooks/use-file-upload'
 import { useExport } from './hooks/use-export'
@@ -41,6 +42,7 @@ import { ClearAllModal } from './components/modals/ClearAllModal'
 import { ShortcutsModal } from './components/modals/ShortcutsModal'
 import { AISettings } from './components/AISettings'
 import { SortConfirmationModal } from './components/modals/SortConfirmationModal'
+import { CollectionModal } from './components/modals/CollectionModal'
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -122,6 +124,7 @@ function App() {
 
   const ruleManager = useRuleManager({ rules, addCommand })
   const fileUpload = useFileUpload()
+  const collectionsHook = useCollections({ addCommand })
 
   const exporter = useExport({
     bookmarks: worker.bookmarks,
@@ -161,7 +164,7 @@ function App() {
       }
     }, 2000)
     return () => clearTimeout(timer)
-  }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList])
+  }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
   // ── Preview handler ──
   const handlePreview = useCallback((bookmark) => {
@@ -169,6 +172,14 @@ function App() {
   }, [ui])
 
   const hasFileLoaded = rawBookmarks.length > 0
+
+  // ── Collection filtering ──
+  const collectionFilteredBookmarks = useMemo(() => {
+    if (!ui.activeCollection) return worker.displayBookmarks
+    return worker.displayBookmarks.filter(b =>
+      b.collections && b.collections.includes(ui.activeCollection)
+    )
+  }, [worker.displayBookmarks, ui.activeCollection])
 
   // ── Render ──
   return (
@@ -211,11 +222,23 @@ function App() {
           rules={rules} startEditing={ruleManager.startEditing}
           deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
           saveToTaxonomy={taxonomy.saveToTaxonomy}
+          collections={collectionsHook.collections}
+          activeCollection={ui.activeCollection}
+          setActiveCollection={ui.setActiveCollection}
+          onCreateCollection={() => {
+            ui.setEditingCollection(null)
+            ui.setIsCollectionModalOpen(true)
+          }}
+          onEditCollection={(collection) => {
+            ui.setEditingCollection(collection)
+            ui.setIsCollectionModalOpen(true)
+          }}
+          onDeleteCollection={collectionsHook.deleteCollection}
         />
 
         <MainContent
           hasFileLoaded={hasFileLoaded}
-          displayBookmarks={worker.displayBookmarks}
+          displayBookmarks={collectionFilteredBookmarks}
           rawBookmarks={rawBookmarks}
           getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps}
           isDragActive={fileUpload.isDragActive}
@@ -223,6 +246,8 @@ function App() {
           selectedIds={actions.selectedIds} toggleSelection={actions.toggleSelection} toggleAll={actions.toggleAll}
           linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
           availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
+          allCollections={collectionsHook.collections}
+          onRemoveFromCollection={collectionsHook.removeBookmarkFromCollection}
           smartFilter={ui.smartFilter} smartCounts={worker.smartCounts}
           handleBatchMoveDocs={operations.handleBatchMoveDocs}
           previewBookmark={ui.previewBookmark} handlePreview={handlePreview} setPreviewBookmark={ui.setPreviewBookmark}
@@ -244,6 +269,33 @@ function App() {
           onAutoSort={autoCategorize.handleAutoCategorize}
           onMagicSort={magicSort.handleMagicSort}
           isProcessingAI={magicSort.isProcessingAI || autoCategorize.isProcessingLocal}
+          allCollections={collectionsHook.collections}
+          onAddToCollection={(collectionId) =>
+            collectionsHook.addBookmarksToCollection(actions.selectedIds, collectionId)
+          }
+          onRemoveFromCollection={(collectionId) =>
+            collectionsHook.removeBookmarksFromCollection(actions.selectedIds, collectionId)
+          }
+        />
+
+        <CollectionModal
+          isOpen={ui.isCollectionModalOpen}
+          onClose={() => {
+            ui.setIsCollectionModalOpen(false)
+            ui.setEditingCollection(null)
+          }}
+          editingCollection={ui.editingCollection}
+          onSave={async (data) => {
+            if (data.id) {
+              await collectionsHook.updateCollection(data.id, {
+                name: data.name,
+                icon: data.icon,
+                color: data.color
+              })
+            } else {
+              await collectionsHook.createCollection(data)
+            }
+          }}
         />
 
         {/* Settings Modal */}

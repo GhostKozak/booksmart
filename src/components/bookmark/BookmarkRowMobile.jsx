@@ -3,6 +3,7 @@ import { Favicon } from '../Favicon'
 import { BookmarkStatusIcon } from './BookmarkStatusIcon'
 import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
+import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
@@ -17,7 +18,9 @@ export function BookmarkRowMobile({
     toggleIgnoreUrl,
     onPreview,
     availableFolders,
-    availableTags
+    availableTags,
+    allCollections,
+    onRemoveFromCollection
 }) {
     const { t } = useTranslation();
     return (
@@ -102,6 +105,12 @@ export function BookmarkRowMobile({
                     tags={bookmark.tags}
                     ruleTags={bookmark.ruleTags}
                     availableTags={availableTags}
+                />
+
+                <BookmarkCollections
+                    collectionIds={bookmark.collections}
+                    allCollections={allCollections}
+                    onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
                 />
             </div>
         </div>

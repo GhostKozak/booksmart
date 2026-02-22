@@ -71,7 +71,8 @@
             "tags": "Etiketler",
             "folders": "Klasörler",
             "smartFilters": "Akıllı Filtreler",
-            "rules": "Kurallar"
+            "rules": "Kurallar",
+            "collections": "Koleksiyonlar"
         },
         "smartFilters": {
             "duplicates": "Yinelenenler",
@@ -375,7 +376,12 @@
         "cleanUrls": "URL'leri Temizle",
         "autoSort": "Otomatik Sırala (Yerel)",
         "sorting": "Sıralanıyor...",
-        "magicSort": "Sihirli Sırala"
+        "magicSort": "Sihirli Sırala",
+        "collection": {
+            "button": "Koleksiyon",
+            "add": "Ekle",
+            "remove": "Çıkar"
+        }
     },
     "preview": {
         "open": "Önizlemeyi Aç",
@@ -467,6 +473,35 @@
         "sortApplied": "Akıllı Sıralama başarıyla uygulandı",
         "noteSaved": "Not kaydedildi",
         "error": "Bir hata oluştu",
-        "dbRestored": "Veritabanı başarıyla geri yüklendi"
+        "dbRestored": "Veritabanı başarıyla geri yüklendi",
+        "collectionCreated": "Koleksiyon başarıyla oluşturuldu",
+        "collectionUpdated": "Koleksiyon başarıyla güncellendi",
+        "collectionDeleted": "Koleksiyon silindi",
+        "addedToCollection": "\"{{name}}\" koleksiyonuna eklendi",
+        "removedFromCollection": "{{count}} yer imi \"{{name}}\" koleksiyonundan çıkarıldı"
+    },
+    "collections": {
+        "add": "Yeni Koleksiyon",
+        "empty": "Henüz koleksiyon yok.",
+        "createFirst": "İlk koleksiyonunuzu oluşturun",
+        "newTitle": "Yeni Koleksiyon",
+        "editTitle": "Koleksiyonu Düzenle",
+        "nameLabel": "Koleksiyon Adı",
+        "namePlaceholder": "Koleksiyonum",
+        "iconLabel": "İkon",
+        "colorLabel": "Renk",
+        "defaults": {
+            "readLater": "Sonra Oku",
+            "favorites": "Favoriler",
+            "work": "İş"
+        },
+        "history": {
+            "created": "\"{{name}}\" koleksiyonu oluşturuldu",
+            "updated": "\"{{name}}\" koleksiyonu güncellendi",
+            "deleted": "\"{{name}}\" koleksiyonu silindi",
+            "addedBookmarks": "{{count}} yer imi koleksiyona eklendi",
+            "removedBookmark": "Yer imi koleksiyondan kaldırıldı",
+            "removedBookmarks": "{{count}} yer imi koleksiyondan çıkarıldı"
+        }
     }
 }

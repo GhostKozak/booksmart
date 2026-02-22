@@ -71,7 +71,8 @@
             "tags": "Tags",
             "folders": "Ordner",
             "smartFilters": "Intelligente Filter",
-            "rules": "Regeln"
+            "rules": "Regeln",
+            "collections": "Sammlungen"
         },
         "smartFilters": {
             "duplicates": "Duplikate",
@@ -375,7 +376,12 @@
         "cleanUrls": "URLs Bereinigen",
         "autoSort": "Automatisch Sortieren",
         "sorting": "Sortiere...",
-        "magicSort": "Magisches Sortieren"
+        "magicSort": "Magisches Sortieren",
+        "collection": {
+            "button": "Sammlung",
+            "add": "Hinzufügen",
+            "remove": "Entfernen"
+        }
     },
     "preview": {
         "open": "Vorschau Öffnen",
@@ -467,6 +473,35 @@
         "sortApplied": "Smart Sort erfolgreich angewendet",
         "noteSaved": "Notiz gespeichert",
         "error": "Ein Fehler ist aufgetreten",
-        "dbRestored": "Datenbank erfolgreich wiederhergestellt"
+        "dbRestored": "Datenbank erfolgreich wiederhergestellt",
+        "collectionCreated": "Sammlung erfolgreich erstellt",
+        "collectionUpdated": "Sammlung erfolgreich aktualisiert",
+        "collectionDeleted": "Sammlung gelöscht",
+        "addedToCollection": "Hinzugefügt zu \"{{name}}\"",
+        "removedFromCollection": "{{count}} Lesezeichen aus \"{{name}}\" entfernt"
+    },
+    "collections": {
+        "add": "Neue Sammlung",
+        "empty": "Noch keine Sammlungen.",
+        "createFirst": "Erstellen Sie Ihre erste Sammlung",
+        "newTitle": "Neue Sammlung",
+        "editTitle": "Sammlung Bearbeiten",
+        "nameLabel": "Sammlungsname",
+        "namePlaceholder": "Meine Sammlung",
+        "iconLabel": "Symbol",
+        "colorLabel": "Farbe",
+        "defaults": {
+            "readLater": "Später Lesen",
+            "favorites": "Favoriten",
+            "work": "Arbeit"
+        },
+        "history": {
+            "created": "Sammlung \"{{name}}\" erstellt",
+            "updated": "Sammlung \"{{name}}\" aktualisiert",
+            "deleted": "Sammlung \"{{name}}\" gelöscht",
+            "addedBookmarks": "{{count}} Lesezeichen zur Sammlung hinzugefügt",
+            "removedBookmark": "Lesezeichen aus der Sammlung entfernt",
+            "removedBookmarks": "{{count}} Lesezeichen aus der Sammlung entfernt"
+        }
     }
 }

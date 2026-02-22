@@ -18,7 +18,7 @@ export function useUIState() {
         return () => window.removeEventListener('resize', handleResize)
     }, [])
     const [collapsedSections, setCollapsedSections] = useState({
-        tags: false, folders: false, filters: false, rules: false
+        tags: false, folders: false, filters: false, rules: false, collections: false
     })
     const toggleSection = (section) => {
         setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
@@ -49,6 +49,11 @@ export function useUIState() {
     const [settingsTab, setSettingsTab] = useState('folders')
     const [isConflictModalOpen, setIsConflictModalOpen] = useState(false)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+
+    // Collections
+    const [activeCollection, setActiveCollection] = useState(null)
+    const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false)
+    const [editingCollection, setEditingCollection] = useState(null)
 
     const openSettings = (tab = 'folders') => {
         setSettingsTab(tab)
@@ -86,5 +91,10 @@ export function useUIState() {
         isConflictModalOpen, setIsConflictModalOpen,
         isHistoryOpen, setIsHistoryOpen,
         openSettings,
+
+        // Collections
+        activeCollection, setActiveCollection,
+        isCollectionModalOpen, setIsCollectionModalOpen,
+        editingCollection, setEditingCollection,
     }
 }

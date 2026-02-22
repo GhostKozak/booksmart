@@ -71,7 +71,8 @@
             "tags": "Etiquetas",
             "folders": "Carpetas",
             "smartFilters": "Filtros Inteligentes",
-            "rules": "Reglas"
+            "rules": "Reglas",
+            "collections": "Colecciones"
         },
         "smartFilters": {
             "duplicates": "Duplicados",
@@ -375,7 +376,12 @@
         "cleanUrls": "Limpiar URLs",
         "autoSort": "Autoclasificar (Local)",
         "sorting": "Clasificando...",
-        "magicSort": "Clasificación Mágica"
+        "magicSort": "Clasificación Mágica",
+        "collection": {
+            "button": "Colección",
+            "add": "Añadir",
+            "remove": "Quitar"
+        }
     },
     "preview": {
         "open": "Abrir Vista Previa",
@@ -467,6 +473,35 @@
         "sortApplied": "Ordenación Inteligente aplicada con éxito",
         "noteSaved": "Nota guardada",
         "error": "Ocurrió un error",
-        "dbRestored": "Base de datos restaurada con éxito"
+        "dbRestored": "Base de datos restaurada con éxito",
+        "collectionCreated": "Colección creada con éxito",
+        "collectionUpdated": "Colección actualizada con éxito",
+        "collectionDeleted": "Colección eliminada",
+        "addedToCollection": "Añadido a \"{{name}}\"",
+        "removedFromCollection": "{{count}} marcadores eliminados de \"{{name}}\""
+    },
+    "collections": {
+        "add": "Nueva Colección",
+        "empty": "No hay colecciones todavía.",
+        "createFirst": "Crea tu primera colección",
+        "newTitle": "Nueva Colección",
+        "editTitle": "Editar Colección",
+        "nameLabel": "Nombre de la Colección",
+        "namePlaceholder": "Mi Colección",
+        "iconLabel": "Icono",
+        "colorLabel": "Color",
+        "defaults": {
+            "readLater": "Leer Después",
+            "favorites": "Favoritos",
+            "work": "Trabajo"
+        },
+        "history": {
+            "created": "Crear colección \"{{name}}\"",
+            "updated": "Actualizar colección \"{{name}}\"",
+            "deleted": "Eliminar colección \"{{name}}\"",
+            "addedBookmarks": "Añadir {{count}} marcadores a la colección",
+            "removedBookmark": "Eliminar marcador de la colección",
+            "removedBookmarks": "Eliminar {{count}} marcadores de la colección"
+        }
     }
 }

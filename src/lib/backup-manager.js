@@ -10,6 +10,7 @@ export async function createBackup() {
         const folders = await db.folders.toArray();
         const tags = await db.tags.toArray();
         const ignoredUrls = await db.ignoredUrls.toArray();
+        const collections = await db.collections.toArray();
 
         return {
             version: 1,
@@ -18,7 +19,8 @@ export async function createBackup() {
                 rules,
                 folders,
                 tags,
-                ignoredUrls
+                ignoredUrls,
+                collections
             }
         };
     } catch (error) {
@@ -56,9 +58,9 @@ export async function restoreBackup(backupData) {
         throw new Error("Invalid backup file format");
     }
 
-    const { rules, folders, tags, ignoredUrls } = backupData.data;
+    const { rules, folders, tags, ignoredUrls, collections } = backupData.data;
 
-    await db.transaction('rw', db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
+    await db.transaction('rw', db.rules, db.folders, db.tags, db.ignoredUrls, db.collections, async () => {
         // We can decide to wipe and replace, or merge. 
         // "Restore" usually implies getting back to a state, so wipe and text is often safer for consistent state,
         // but might lose new things. 
@@ -69,13 +71,15 @@ export async function restoreBackup(backupData) {
             db.rules.clear(),
             db.folders.clear(),
             db.tags.clear(),
-            db.ignoredUrls.clear()
+            db.ignoredUrls.clear(),
+            db.collections.clear()
         ]);
 
         if (rules?.length) await db.rules.bulkAdd(rules);
         if (folders?.length) await db.folders.bulkAdd(folders);
         if (tags?.length) await db.tags.bulkAdd(tags);
         if (ignoredUrls?.length) await db.ignoredUrls.bulkAdd(ignoredUrls);
+        if (collections?.length) await db.collections.bulkAdd(collections);
     });
 }
 

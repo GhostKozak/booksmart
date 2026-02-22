@@ -3,6 +3,7 @@ import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { SidebarTags } from './SidebarTags'
 import { SidebarFolders } from './SidebarFolders'
+import { SidebarCollections } from './SidebarCollections'
 import { SmartFilters } from './SmartFilters'
 import { RulesPanel } from './RulesPanel'
 import packageJson from '../../../package.json'
@@ -20,7 +21,10 @@ export function Sidebar({
     // Rules
     rules, startEditing, deleteRule, openNewRuleModal,
     // Taxonomy
-    saveToTaxonomy
+    saveToTaxonomy,
+    // Collections
+    collections, activeCollection, setActiveCollection,
+    onCreateCollection, onEditCollection, onDeleteCollection
 }) {
     return (
         <aside
@@ -65,6 +69,19 @@ export function Sidebar({
                     saveToTaxonomy={saveToTaxonomy}
                     collapsed={collapsedSections.folders}
                     onToggle={() => toggleSection('folders')}
+                />
+            </div>
+
+            <div className="mb-4">
+                <SidebarCollections
+                    collections={collections}
+                    activeCollection={activeCollection}
+                    setActiveCollection={setActiveCollection}
+                    onCreateCollection={onCreateCollection}
+                    onEditCollection={onEditCollection}
+                    onDeleteCollection={onDeleteCollection}
+                    collapsed={collapsedSections.collections}
+                    onToggle={() => toggleSection('collections')}
                 />
             </div>
 

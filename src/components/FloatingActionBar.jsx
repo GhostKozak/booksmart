@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
 import { MoveBulkPopover } from './actionbar/MoveBulkPopover';
+import { CollectionBulkPopover } from './actionbar/CollectionBulkPopover';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/utils';
 
@@ -20,7 +21,10 @@ export function FloatingActionBar({
     onCleanUrls,
     onAutoSort,
     onMagicSort,
-    isProcessingAI
+    isProcessingAI,
+    allCollections,
+    onAddToCollection,
+    onRemoveFromCollection
 }) {
     const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
@@ -66,6 +70,7 @@ export function FloatingActionBar({
                         </Button>
                         <TagBulkPopover allTags={allTags} onApply={onAddTags} isOpen={activePopover === 'tag'} onToggle={() => togglePopover('tag')} isVertical />
                         <MoveBulkPopover allFolders={allFolders} onMove={onMove} isOpen={activePopover === 'move'} onToggle={() => togglePopover('move')} isVertical />
+                        <CollectionBulkPopover collections={allCollections} onAddToCollection={(cid) => { onAddToCollection(cid); setIsMenuOpen(false); }} onRemoveFromCollection={(cid) => { onRemoveFromCollection(cid); setIsMenuOpen(false); }} isOpen={activePopover === 'collection'} onToggle={() => togglePopover('collection')} isVertical />
                     </div>
 
                     <div className="h-px bg-border/50 mx-1" />
@@ -132,6 +137,7 @@ export function FloatingActionBar({
 
                     <TagBulkPopover allTags={allTags} onApply={onAddTags} isOpen={activePopover === 'tag'} onToggle={() => togglePopover('tag')} />
                     <MoveBulkPopover allFolders={allFolders} onMove={onMove} isOpen={activePopover === 'move'} onToggle={() => togglePopover('move')} />
+                    <CollectionBulkPopover collections={allCollections} onAddToCollection={onAddToCollection} onRemoveFromCollection={onRemoveFromCollection} isOpen={activePopover === 'collection'} onToggle={() => togglePopover('collection')} />
 
                     <div className="flex gap-1 border-l pl-2 border-border">
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title={t('actionbar.markAlive')} onClick={() => onOverrideStatus('alive')}>

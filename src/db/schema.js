@@ -19,3 +19,12 @@ db.version(3).stores({
     rules: 'id, type, value, targetFolder, *tags',
     ignoredUrls: 'url'
 });
+
+db.version(4).stores({
+    bookmarks: '++id, url, title, originalFolder, newFolder, *tags, *ruleTags, addDate, *collections',
+    folders: 'id, name, order',
+    tags: 'id, name, order',
+    rules: 'id, type, value, targetFolder, *tags',
+    ignoredUrls: 'url',
+    collections: 'id, name, order'
+});

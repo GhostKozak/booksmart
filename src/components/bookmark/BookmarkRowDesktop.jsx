@@ -3,6 +3,7 @@ import { Favicon } from '../Favicon'
 import { BookmarkStatusIcon } from './BookmarkStatusIcon'
 import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
+import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn, getRelativeTime } from '../../lib/utils'
 import { ArrowRight, Eye, Layers } from 'lucide-react'
@@ -17,7 +18,9 @@ export function BookmarkRowDesktop({
     toggleIgnoreUrl,
     onPreview,
     availableFolders,
-    availableTags
+    availableTags,
+    allCollections,
+    onRemoveFromCollection
 }) {
     const { t } = useTranslation();
     return (
@@ -47,6 +50,12 @@ export function BookmarkRowDesktop({
                     tags={bookmark.tags}
                     ruleTags={bookmark.ruleTags}
                     availableTags={availableTags}
+                />
+
+                <BookmarkCollections
+                    collectionIds={bookmark.collections}
+                    allCollections={allCollections}
+                    onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
                 />
 
                 {bookmark.addDate && (

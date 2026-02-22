@@ -24,6 +24,9 @@ export function MainContent({
     ignoredUrls, toggleIgnoreUrl,
     // Folders/Tags
     availableFolders, availableTags,
+    // Collections
+    allCollections,
+    onRemoveFromCollection,
     // Smart filter
     smartFilter,
     smartCounts,
@@ -134,6 +137,8 @@ export function MainContent({
                                     onPreview={handlePreview}
                                     availableFolders={availableFolders}
                                     availableTags={availableTags}
+                                    allCollections={allCollections}
+                                    onRemoveFromCollection={onRemoveFromCollection}
                                 />
                             ) : (
                                 <BookmarkGrid

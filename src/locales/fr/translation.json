@@ -71,7 +71,8 @@
             "tags": "Étiquettes",
             "folders": "Dossiers",
             "smartFilters": "Filtres intelligents",
-            "rules": "Règles"
+            "rules": "Règles",
+            "collections": "Collections"
         },
         "smartFilters": {
             "duplicates": "Doublons",
@@ -375,7 +376,12 @@
         "cleanUrls": "Nettoyer les URLs",
         "autoSort": "Tri Auto (Local)",
         "sorting": "Tri en cours...",
-        "magicSort": "Tri Magique"
+        "magicSort": "Tri Magique",
+        "collection": {
+            "button": "Collection",
+            "add": "Ajouter",
+            "remove": "Retirer"
+        }
     },
     "preview": {
         "open": "Ouvrir l'Aperçu",
@@ -467,6 +473,35 @@
         "sortApplied": "Tri Intelligent appliqué avec succès",
         "noteSaved": "Note enregistrée",
         "error": "Une erreur est survenue",
-        "dbRestored": "Base de données restaurée avec succès"
+        "dbRestored": "Base de données restaurée avec succès",
+        "collectionCreated": "Collection créée avec succès",
+        "collectionUpdated": "Collection mise à jour avec succès",
+        "collectionDeleted": "Collection supprimée",
+        "addedToCollection": "Ajouté à \"{{name}}\"",
+        "removedFromCollection": "{{count}} signets retirés de \"{{name}}\""
+    },
+    "collections": {
+        "add": "Nouvelle Collection",
+        "empty": "Pas encore de collections.",
+        "createFirst": "Créez votre première collection",
+        "newTitle": "Nouvelle Collection",
+        "editTitle": "Modifier la Collection",
+        "nameLabel": "Nom de la Collection",
+        "namePlaceholder": "Ma Collection",
+        "iconLabel": "Icône",
+        "colorLabel": "Couleur",
+        "defaults": {
+            "readLater": "Lire Plus Tard",
+            "favorites": "Favoris",
+            "work": "Travail"
+        },
+        "history": {
+            "created": "Créer la collection \"{{name}}\"",
+            "updated": "Mettre à jour la collection \"{{name}}\"",
+            "deleted": "Supprimer la collection \"{{name}}\"",
+            "addedBookmarks": "Ajouter {{count}} signets à la collection",
+            "removedBookmark": "Retirer le signet de la collection",
+            "removedBookmarks": "Retirer {{count}} signets de la collection"
+        }
     }
 }
