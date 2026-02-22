@@ -31,6 +31,7 @@ export function BookmarkRowDesktop({
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(bookmark.id)}
                     className="z-20"
+                    aria-label={t('common.select')}
                 />
             </div>
 
@@ -131,6 +132,7 @@ export function BookmarkRowDesktop({
                     className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
                     onClick={() => onPreview(bookmark)}
                     title={t('preview.open')}
+                    aria-label={t('preview.open')}
                 >
                     <Eye className="h-4 w-4" />
                 </Button>

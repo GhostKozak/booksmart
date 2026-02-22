@@ -8,6 +8,7 @@ import { SmartFilters } from './SmartFilters'
 import { RulesPanel } from './RulesPanel'
 import packageJson from '../../../package.json'
 import { useAppStore } from '../../store/useAppStore'
+import { useTranslation } from 'react-i18next'
 
 export function Sidebar({
     // Tags
@@ -24,6 +25,7 @@ export function Sidebar({
     collections, onCreateCollection, onEditCollection, onDeleteCollection, onShareCollection
 }) {
     const { isSidebarOpen, setIsSidebarOpen, collapsedSections } = useAppStore()
+    const { t } = useTranslation()
 
     return (
         <aside
@@ -49,6 +51,7 @@ export function Sidebar({
                 size="icon"
                 className="lg:hidden absolute top-4 right-4"
                 onClick={() => setIsSidebarOpen(false)}
+                aria-label={t('common.close')}
             >
                 <ArrowRight className="h-4 w-4 rotate-180" />
             </Button>

@@ -154,6 +154,8 @@
         "noOptions": "Aucune option trouvée",
         "untitled": "Sans titre",
         "uncategorized": "Non classé",
+        "menu": "Menu",
+        "select": "Sélectionner",
         "unknownDate": "Date inconnue",
         "relativeTime": {
             "justNow": "à l'instant",
@@ -528,5 +530,8 @@
             "empty": "Cette collection est vide",
             "footer": "{{count}} signets partagés via BookSmart"
         }
+    },
+    "accessibility": {
+        "skipToMain": "Passer au contenu principal"
     }
 }

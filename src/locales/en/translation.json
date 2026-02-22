@@ -154,6 +154,8 @@
         "noOptions": "No options found",
         "untitled": "Untitled",
         "uncategorized": "Uncategorized",
+        "menu": "Menu",
+        "select": "Select",
         "unknownDate": "Unknown date",
         "relativeTime": {
             "justNow": "just now",
@@ -529,5 +531,8 @@
             "empty": "This collection is empty",
             "footer": "{{count}} bookmarks shared via BookSmart"
         }
+    },
+    "accessibility": {
+        "skipToMain": "Skip to main content"
     }
 }

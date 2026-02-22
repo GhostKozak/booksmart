@@ -215,6 +215,12 @@ function App() {
   // ── Render ──
   return (
     <div className="h-[100dvh] bg-background text-foreground flex flex-col font-sans overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-background focus:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-br shadow-lg top-0 left-0 font-semibold"
+      >
+        {t('accessibility.skipToMain')}
+      </a>
       <Header
         canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
         past={past} future={future}

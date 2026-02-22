@@ -154,6 +154,8 @@
         "noOptions": "Seçenek bulunamadı",
         "untitled": "Başlıksız",
         "uncategorized": "Kategorize Edilmemiş",
+        "menu": "Menü",
+        "select": "Seç",
         "unknownDate": "Bilinmeyen tarih",
         "relativeTime": {
             "justNow": "az önce",
@@ -529,5 +531,8 @@
             "empty": "Bu koleksiyon boş",
             "footer": "{{count}} yer imi BookSmart ile paylaşıldı"
         }
+    },
+    "accessibility": {
+        "skipToMain": "Ana içeriğe atla"
     }
 }

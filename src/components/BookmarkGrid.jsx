@@ -24,9 +24,21 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
         <div className="h-full flex flex-col">
             <Card
                 className={cn(
-                    "h-full flex flex-col transition-all duration-200 cursor-pointer hover:shadow-md border overflow-hidden group relative",
+                    "h-full flex flex-col transition-all duration-200 cursor-pointer hover:shadow-md border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
                     isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
                 )}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (e.ctrlKey || e.metaKey) {
+                            context.toggleSelection(bookmark.id);
+                        } else {
+                            context.onPreview(bookmark);
+                        }
+                    }
+                }}
                 onClick={(e) => {
                     if (e.ctrlKey || e.metaKey) {
                         context.toggleSelection(bookmark.id);
@@ -78,6 +90,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     context.onPreview(bookmark);
                                 }}
                                 title={t('preview.open')}
+                                aria-label={t('preview.open')}
                             >
                                 <Eye className="h-3 w-3" />
                             </Button>
@@ -85,7 +98,8 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                 checked={isSelected}
                                 onCheckedChange={() => context.toggleSelection(bookmark.id)}
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-background/80 backdrop-blur-sm shadow-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                className="bg-background/80 backdrop-blur-sm shadow-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground focus-visible:ring-2"
+                                aria-label={t('common.select')}
                             />
                         </div>
                     </div>
@@ -115,6 +129,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                         context.onPreview(bookmark);
                                     }}
                                     title={t('preview.open')}
+                                    aria-label={t('preview.open')}
                                 >
                                     <Eye className="h-3.5 w-3.5" />
                                 </Button>
@@ -122,6 +137,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     checked={isSelected}
                                     onCheckedChange={() => context.toggleSelection(bookmark.id)}
                                     onClick={(e) => e.stopPropagation()}
+                                    aria-label={t('common.select')}
                                 />
                             </div>
                         )}

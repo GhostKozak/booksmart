@@ -154,6 +154,8 @@
         "noOptions": "No se encontraron opciones",
         "untitled": "Sin título",
         "uncategorized": "Sin clasificar",
+        "menu": "Menú",
+        "select": "Seleccionar",
         "unknownDate": "Fecha desconocida",
         "relativeTime": {
             "justNow": "ahora mismo",
@@ -526,7 +528,10 @@
             "text": "Copiar como Texto",
             "copied": "{{count}} marcadores copiados al portapapeles",
             "empty": "Esta colección está vacía",
-            "footer": "{{count}} marcadores compartidos vía BookSmart"
+            "footer": "{{count}} marcadores compartidos a través de BookSmart"
         }
+    },
+    "accessibility": {
+        "skipToMain": "Saltar al contenido principal"
     }
 }

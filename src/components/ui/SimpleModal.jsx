@@ -31,12 +31,17 @@ export function SimpleModal({ isOpen, onClose, title, children, className }) {
                 onClick={onClose}
                 aria-hidden="true"
             />
-            <div className={cn(
-                "relative w-full max-w-lg mx-4 bg-card border rounded-lg shadow-lg shadow-black/5 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]",
-                className
-            )}>
+            <div
+                className={cn(
+                    "relative w-full max-w-lg mx-4 bg-card border rounded-lg shadow-lg shadow-black/5 animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]",
+                    className
+                )}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
+            >
                 <div className="flex items-center justify-between px-6 py-4 border-b">
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 id="modal-title" className="text-lg font-semibold">{title}</h3>
                     <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full" aria-label={t('common.close')}>
                         <X className="h-4 w-4" />
                     </Button>

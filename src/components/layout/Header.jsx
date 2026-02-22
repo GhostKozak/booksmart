@@ -53,6 +53,8 @@ export function Header({
                     size="icon"
                     className="lg:hidden h-8 w-8 ml-1"
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    aria-label={t('common.menu')}
+                    title={t('common.menu')}
                 >
                     <TextAlignStart className="h-5 w-5" />
                 </Button>
@@ -61,12 +63,12 @@ export function Header({
                     (canUndo || canRedo || past.length > 0 || future.length > 0) ? "ml-2 sm:ml-4 border-l pl-2 sm:pl-4" : ""
                 )}>
                     {canUndo && (
-                        <Button variant="ghost" size="icon" onClick={undo} title={t('header.undo')}>
+                        <Button variant="ghost" size="icon" onClick={undo} title={t('header.undo')} aria-label={t('header.undo')}>
                             <Undo2 className="h-4 w-4" />
                         </Button>
                     )}
                     {canRedo && (
-                        <Button variant="ghost" size="icon" onClick={redo} title={t('header.redo')}>
+                        <Button variant="ghost" size="icon" onClick={redo} title={t('header.redo')} aria-label={t('header.redo')}>
                             <Redo2 className="h-4 w-4" />
                         </Button>
                     )}
@@ -76,6 +78,7 @@ export function Header({
                             size="icon"
                             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
                             title={t('header.history')}
+                            aria-label={t('header.history')}
                             className={cn("ml-1", isHistoryOpen && "bg-muted")}
                         >
                             <HistoryIcon className="h-4 w-4" />
@@ -108,7 +111,7 @@ export function Header({
             >
                 <div className="flex gap-1 sm:gap-2 w-full">
                     {isMobileSearchActive && (
-                        <Button variant="ghost" size="icon" className="shrink-0 sm:hidden" onClick={() => setIsMobileSearchActive(false)}>
+                        <Button variant="ghost" size="icon" className="shrink-0 sm:hidden" onClick={() => setIsMobileSearchActive(false)} aria-label={t('common.close')} title={t('common.close')}>
                             <X className="h-5 w-5" />
                         </Button>
                     )}
@@ -116,6 +119,7 @@ export function Header({
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
+                            aria-label={t('app.searchPlaceholder')}
                             placeholder={searchMode === 'regex' ? t('header.regexPlaceholder') : t('app.searchPlaceholder')}
                             className={cn(
                                 "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
@@ -129,6 +133,7 @@ export function Header({
                                 onClick={() => setSearchQuery('')}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-full hover:bg-muted"
                                 title={t('header.clearSearch')}
+                                aria-label={t('header.clearSearch')}
                             >
                                 <X className="h-3.5 w-3.5" />
                             </button>
@@ -140,6 +145,7 @@ export function Header({
                         onClick={() => setIsAdvancedSearchOpen(!isAdvancedSearchOpen)}
                         className="shrink-0"
                         title={t('header.advancedSearch')}
+                        aria-label={t('header.advancedSearch')}
                     >
                         <Filter className="h-4 w-4" />
                     </Button>
@@ -165,6 +171,7 @@ export function Header({
                         className="sm:hidden"
                         onClick={() => setIsMobileSearchActive(true)}
                         title={t('app.searchPlaceholder')}
+                        aria-label={t('app.searchPlaceholder')}
                     >
                         <Search className="h-5 w-5" />
                     </Button>
@@ -172,7 +179,7 @@ export function Header({
 
                 <DropdownMenu
                     trigger={
-                        <Button variant="ghost" size="icon" className="rounded-full">
+                        <Button variant="ghost" size="icon" className="rounded-full" aria-label={t('common.actions')} title={t('common.actions')}>
                             <MoreVertical className="h-5 w-5" />
                         </Button>
                     }

@@ -39,7 +39,7 @@ export function MainContent({
     } = useAppStore()
     if (!hasFileLoaded) {
         return (
-            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative">
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
                 <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8">
                     <div
                         {...getRootProps()}
@@ -65,7 +65,7 @@ export function MainContent({
 
     if (displayBookmarks.length === 0) {
         return (
-            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative">
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
                 <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                     <div className="bg-muted p-6 rounded-full mb-4">
                         <Logo className="h-12 w-12 grayscale opacity-50" />
@@ -91,10 +91,10 @@ export function MainContent({
     }
 
     return (
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
             <div className="space-y-4 max-w-[1600px] mx-auto">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight">{t('main.header.title')} ({displayBookmarks.length})</h2>
+                    <h2 className="text-2xl font-bold tracking-tight" aria-live="polite">{t('main.header.title')} ({displayBookmarks.length})</h2>
                     <div className="flex gap-2">
                         {smartFilter === 'docs' && displayBookmarks.length > 0 && (
                             <Button

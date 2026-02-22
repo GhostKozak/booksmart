@@ -31,6 +31,7 @@ export function BookmarkRowMobile({
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(bookmark.id)}
                     className="mt-1 shrink-0 z-20"
+                    aria-label={t('common.select')}
                 />
 
                 <Favicon url={bookmark.url} className="w-5 h-5 mt-0.5 shrink-0" />
@@ -51,6 +52,7 @@ export function BookmarkRowMobile({
                                 className="h-7 w-7 text-muted-foreground"
                                 onClick={() => onPreview(bookmark)}
                                 title={t('preview.open')}
+                                aria-label={t('preview.open')}
                             >
                                 <Eye className="h-3.5 w-3.5" />
                             </Button>

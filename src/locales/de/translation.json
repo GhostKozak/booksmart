@@ -154,6 +154,8 @@
         "noOptions": "Keine Optionen gefunden",
         "untitled": "Ohne Titel",
         "uncategorized": "Unkategorisiert",
+        "menu": "Menü",
+        "select": "Auswählen",
         "unknownDate": "Unbekanntes Datum",
         "relativeTime": {
             "justNow": "gerade eben",
@@ -526,7 +528,10 @@
             "text": "Als Text kopieren",
             "copied": "{{count}} Lesezeichen in die Zwischenablage kopiert",
             "empty": "Diese Sammlung ist leer",
-            "footer": "{{count}} Lesezeichen geteilt über BookSmart"
+            "footer": "{{count}} Lesezeichen über BookSmart geteilt"
         }
+    },
+    "accessibility": {
+        "skipToMain": "Zum Hauptinhalt springen"
     }
 }
