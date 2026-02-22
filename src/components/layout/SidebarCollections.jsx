@@ -57,7 +57,7 @@ export function SidebarCollections({
             </div>
 
             {!collapsed && (
-                <div className="mb-2 space-y-0.5 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="mb-2 space-y-0.5 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
                     {collections.length === 0 ? (
                         <div className="px-2 py-3 text-center">
                             <p className="text-xs text-muted-foreground mb-2">{t('collections.empty')}</p>

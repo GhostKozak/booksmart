@@ -38,7 +38,7 @@ export function RulesPanel({
             </div>
 
             {!collapsed && (
-                <div className="animate-in fade-in slide-in-from-top-1 duration-200 pb-2 max-h-[35vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40">
+                <div className="animate-in fade-in slide-in-from-top-1 duration-200 pb-2 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40">
                     <div className="space-y-2">
                         {rules.length === 0 && (
                             <div className="text-center py-6">

@@ -35,7 +35,7 @@ export function Sidebar({
                 isSidebarOpen ? "w-80 p-4 translate-x-0" : "w-0 p-0 -translate-x-full lg:w-0 lg:translate-x-0 lg:p-0 overflow-hidden"
             )}
         >
-            <div className="mb-4">
+            <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.tags ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SidebarTags
                     uniqueTags={uniqueTags}
                     availableTags={availableTags}
@@ -58,7 +58,7 @@ export function Sidebar({
                 <ArrowRight className="h-4 w-4 rotate-180" />
             </Button>
 
-            <div className="mb-4">
+            <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.folders ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SidebarFolders
                     availableFolders={availableFolders}
                     uniqueFolders={uniqueFolders}
@@ -72,7 +72,7 @@ export function Sidebar({
                 />
             </div>
 
-            <div className="mb-4">
+            <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.collections ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SidebarCollections
                     collections={collections}
                     activeCollection={activeCollection}
@@ -86,7 +86,7 @@ export function Sidebar({
                 />
             </div>
 
-            <div className="mb-4">
+            <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.filters ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <SmartFilters
                     smartFilter={smartFilter}
                     setSmartFilter={setSmartFilter}
@@ -97,7 +97,7 @@ export function Sidebar({
                 />
             </div>
 
-            <div className="mb-4">
+            <div className={cn("mb-4 flex flex-col transition-all duration-300", !collapsedSections.rules ? "flex-1 min-h-0" : "flex-shrink-0")}>
                 <RulesPanel
                     rules={rules}
                     startEditing={startEditing}

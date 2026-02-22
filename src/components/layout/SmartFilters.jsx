@@ -52,7 +52,7 @@ export function SmartFilters({
             </div>
 
             {!collapsed && (
-                <div className="mb-2 space-y-1 max-h-[18vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="mb-2 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 animate-in fade-in slide-in-from-top-1 duration-200">
                     {filters.map(filter => {
                         if (filter.key === 'divider') {
                             return <div key="divider" className="my-1 border-t border-dashed" />
