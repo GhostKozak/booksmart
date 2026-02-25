@@ -17,7 +17,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.svg', 'screenshots/*.png'],
+      includeAssets: ['icons/*.svg', 'icons/*.png', 'screenshots/*.png'],
       manifest: {
         id: 'booksmart-app',
         name: 'BookSmart - Smart Bookmark Organizer and Manager',
@@ -30,24 +30,36 @@ export default defineConfig({
         orientation: 'any',
         dir: 'ltr',
         lang: 'en-US',
-        scope: '/',
-        start_url: '/',
+        scope: '/booksmart/',
+        start_url: '/booksmart/',
         categories: ['productivity', 'utilities', 'organization'],
         icons: [
           {
-            src: '/icons/icon-192x192.svg',
+            src: 'icons/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'icons/icon-192x192.svg',
             sizes: '192x192',
             type: 'image/svg+xml',
             purpose: 'any'
           },
           {
-            src: '/icons/icon-512x512.svg',
+            src: 'icons/icon-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any'
           },
           {
-            src: '/icons/maskable-icon-512x512.svg',
+            src: 'icons/maskable-icon-512x512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable'
@@ -55,42 +67,42 @@ export default defineConfig({
         ],
         screenshots: [
           {
-            src: '/screenshots/dark-mode.png',
+            src: 'screenshots/dark-mode.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'BookSmart Dark Mode'
           },
           {
-            src: '/screenshots/white-mode.png',
+            src: 'screenshots/white-mode.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'BookSmart Light Mode'
           },
           {
-            src: '/screenshots/analytics-page.png',
+            src: 'screenshots/analytics-page.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'Analytics & Dashboard'
           },
           {
-            src: '/screenshots/grid-with-thumbnail-view.png',
+            src: 'screenshots/grid-with-thumbnail-view.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'Grid View with Thumbnails'
           },
           {
-            src: '/screenshots/grid-with-thumbnail-preview-site.png',
+            src: 'screenshots/grid-with-thumbnail-preview-site.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'Live Site Preview'
           },
           {
-            src: '/screenshots/mobile.png',
+            src: 'screenshots/mobile.png',
             sizes: '1080x1920',
             type: 'image/png',
             form_factor: 'narrow',
