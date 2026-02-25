@@ -86,7 +86,7 @@ export function SidebarCollections({
                                             : "text-muted-foreground hover:bg-muted"
                                     )}
                                 >
-                                    <div className="flex items-center gap-2 min-w-0">
+                                    <div className="flex items-center gap-2 min-w-0 transition-transform duration-200 group-hover/item:translate-x-1">
                                         <span
                                             className="text-base shrink-0 w-5 h-5 flex items-center justify-center rounded"
                                             style={{ backgroundColor: `${collection.color}20` }}

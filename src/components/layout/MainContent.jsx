@@ -88,8 +88,8 @@ export function MainContent({
     if (displayBookmarks.length === 0) {
         return (
             <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
-                <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-                    <div className="bg-muted p-6 rounded-full mb-4">
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-muted p-6 rounded-full mb-6 animate-float shadow-sm">
                         <Logo className="h-12 w-12 grayscale opacity-50" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">{t('main.empty.title')}</h3>
@@ -144,7 +144,7 @@ export function MainContent({
                     />
                 ) : (
                     <div className="flex h-[calc(100vh-250px)] gap-4 transition-all duration-300">
-                        <div className={cn("flex-1 min-w-0 h-full", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
+                        <div key={viewMode} className={cn("flex-1 min-w-0 h-full animate-in fade-in zoom-in-[0.98] duration-300", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
                             {viewMode === 'list' ? (
                                 <BookmarkList
                                     bookmarks={displayBookmarks}

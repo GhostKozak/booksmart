@@ -3,7 +3,7 @@ import { BookmarkRowDesktop } from './bookmark/BookmarkRowDesktop'
 import { BookmarkRowMobile } from './bookmark/BookmarkRowMobile'
 import { cn } from '../lib/utils'
 
-export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, className, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) => {
+export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, className, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) => {
     if (!bookmark) return null
 
     const isSelected = selectedIds.has(bookmark.id)
@@ -47,12 +47,13 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
 
     return (
         <div
+            style={{ animationDelay: `${(index || 0) * 50}ms` }}
             className={cn(
                 borderClass,
                 "transition-all duration-300",
                 "flex flex-col p-3 gap-3",
                 "lg:p-0 lg:gap-0 lg:border-b",
-                "animate-in fade-in slide-in-from-bottom-2",
+                "animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-300",
                 className,
                 rowBgClass
             )}
@@ -63,6 +64,7 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
     )
 }, (prevProps, nextProps) => {
     return (
+        prevProps.index === nextProps.index &&
         prevProps.bookmark === nextProps.bookmark &&
         prevProps.selectedIds === nextProps.selectedIds &&
         prevProps.linkHealth === nextProps.linkHealth &&

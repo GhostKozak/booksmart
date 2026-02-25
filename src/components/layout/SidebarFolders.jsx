@@ -43,11 +43,11 @@ export function SidebarFolders({
                                 key={folder.id}
                                 onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
                                 className={cn(
-                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-all border border-transparent group",
                                     activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
                                 )}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">
                                     <Folder className="h-4 w-4" style={{ color: folder.color }} />
                                     <span>{folder.name}</span>
                                 </div>
@@ -70,11 +70,11 @@ export function SidebarFolders({
                                         <button
                                             onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
                                             className={cn(
-                                                "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent italic opacity-70",
+                                                "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-all border border-transparent italic opacity-70 group",
                                                 activeFolder === folder.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
                                             )}
                                         >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">
                                                 <Folder className="h-4 w-4 text-slate-400" />
                                                 <span>{folder.name}</span>
                                             </div>

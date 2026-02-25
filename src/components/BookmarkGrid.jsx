@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 
 // Extracted Item Component for state management
-const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails }) => {
+const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, context, showThumbnails }) => {
     const { t } = useTranslation();
     const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
 
@@ -24,9 +24,10 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
         <div className="h-full flex flex-col">
             <Card
                 className={cn(
-                    "h-full flex flex-col transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-500",
+                    "h-full flex flex-col transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-500 fill-mode-both",
                     isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
                 )}
+                style={{ animationDelay: `${index * 50}ms` }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -55,7 +56,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                 src={`https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
                                 alt={`Screenshot of ${bookmark.title}`}
                                 className={cn(
-                                    "w-full h-full object-cover transition-opacity duration-500 group-hover:scale-105",
+                                    "w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105",
                                     imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'
                                 )}
                                 loading="lazy"
@@ -215,6 +216,7 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
         return (
             <GridItem
                 bookmark={bookmark}
+                index={index}
                 isSelected={isSelected}
                 folderColor={folderColor}
                 folderName={folderName}

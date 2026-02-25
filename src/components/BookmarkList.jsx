@@ -65,6 +65,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                     }}
                     itemContent={(index, bookmark, context) => (
                         <BookmarkRow
+                            index={index}
                             bookmark={bookmark}
                             selectedIds={context.selectedIds}
                             toggleSelection={context.toggleSelection}

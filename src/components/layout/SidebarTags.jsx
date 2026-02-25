@@ -44,11 +44,11 @@ export function SidebarTags({
                                 key={tag.name}
                                 onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
                                 className={cn(
-                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent",
+                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-all border border-transparent group",
                                     activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
                                 )}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#64748b' }} />
                                     <span>#{tag.name}</span>
                                 </div>
@@ -71,11 +71,11 @@ export function SidebarTags({
                                         <button
                                             onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
                                             className={cn(
-                                                "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-colors border border-transparent italic opacity-70",
+                                                "flex items-center justify-between flex-1 px-2 py-1.5 text-sm rounded-md transition-all border border-transparent italic opacity-70 group",
                                                 activeTag === tag.name ? "bg-accent text-accent-foreground font-medium border-border" : "text-muted-foreground hover:bg-muted"
                                             )}
                                         >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">
                                                 <div className="w-2 h-2 rounded-full bg-slate-400" />
                                                 <span>#{tag.name}</span>
                                             </div>
