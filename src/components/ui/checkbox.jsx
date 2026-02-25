@@ -18,7 +18,7 @@ const Checkbox = React.forwardRef(({ className, checked, onChange, onCheckedChan
             aria-checked={checked}
             ref={ref}
             className={cn(
-                "peer h-5 w-5 shrink-0 rounded-md border-2 border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center transition-colors duration-200",
+                "peer h-5 w-5 shrink-0 rounded-md border-2 border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed cursor-pointer disabled:opacity-50 flex items-center justify-center transition-colors duration-200",
                 checked
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-transparent border-input hover:bg-muted",

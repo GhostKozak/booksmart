@@ -42,7 +42,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
     ]
 
     return (
-        <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+        <div className="h-full flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
             {/* Background gradient blobs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/5 rounded-full blur-3xl animate-pulse" />
@@ -55,7 +55,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
                     {/* Step content */}
                     <div
                         className={cn(
-                            "p-6 sm:p-10 min-h-[380px] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out",
+                            "p-4 sm:p-8 min-h-[380px] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out",
                             direction > 0 ? "animate-slide-in-right" : "animate-slide-in-left"
                         )}
                         key={currentStep}
@@ -121,7 +121,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
 function WelcomeStep({ t }) {
     return (
         <>
-            <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-5 rounded-2xl mb-6 ring-1 ring-primary/10">
+            <div className="bg-linear-to-br from-primary/10 to-primary/5 p-5 rounded-2xl mb-6 ring-1 ring-primary/10">
                 <Logo className="h-16 w-16 sm:h-20 sm:w-20" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
@@ -144,7 +144,7 @@ function ImportStep({ t }) {
 
     return (
         <>
-            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 p-5 rounded-2xl mb-6 ring-1 ring-blue-500/10">
+            <div className="bg-linear-to-br from-blue-500/10 to-cyan-500/5 p-5 rounded-2xl mb-6 ring-1 ring-blue-500/10">
                 <Upload className="h-12 w-12 sm:h-14 sm:w-14 text-blue-500" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">
@@ -177,7 +177,7 @@ function OrganizeStep({ t }) {
 
     return (
         <>
-            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/5 p-5 rounded-2xl mb-6 ring-1 ring-purple-500/10">
+            <div className="bg-linear-to-br from-purple-500/10 to-pink-500/5 p-5 rounded-2xl mb-6 ring-1 ring-purple-500/10">
                 <Sparkles className="h-12 w-12 sm:h-14 sm:w-14 text-purple-500" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">
@@ -201,7 +201,7 @@ function OrganizeStep({ t }) {
 function GetStartedStep({ t, onUploadClick, onLoadDemo, getInputProps }) {
     return (
         <>
-            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 p-5 rounded-2xl mb-6 ring-1 ring-green-500/10">
+            <div className="bg-linear-to-br from-green-500/10 to-emerald-500/5 p-5 rounded-2xl mb-6 ring-1 ring-green-500/10">
                 <ArrowRight className="h-12 w-12 sm:h-14 sm:w-14 text-green-500" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">

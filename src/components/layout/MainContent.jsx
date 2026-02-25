@@ -46,7 +46,7 @@ export function MainContent({
 
     if (!hasFileLoaded && showOnboarding) {
         return (
-            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 relative focus:outline-none">
                 <OnboardingWizard
                     onUploadClick={() => { }}
                     onLoadDemo={() => {
