@@ -67,7 +67,8 @@ function App() {
     showBackupModal, setShowBackupModal,
     isShortcutsOpen, setIsShortcutsOpen,
     isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection,
-    previewBookmark, setPreviewBookmark
+    previewBookmark, setPreviewBookmark,
+    showOnboarding
   } = useAppStore()
 
   // Selection
@@ -202,6 +203,7 @@ function App() {
   }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
   const hasFileLoaded = rawBookmarks.length > 0
+  const isOnboardingActive = !hasFileLoaded && showOnboarding
 
   // ── Collection filtering ──
   const collectionFilteredBookmarks = useMemo(() => {
@@ -234,40 +236,48 @@ function App() {
       >
         {t('accessibility.skipToMain')}
       </a>
-      <Header
-        canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
-        past={past} future={future}
-        duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
-        cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
-        checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
-        openExportModal={() => actions.guardedExport(exporter.openExportModal)}
-        hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
-        bookmarkCount={worker.bookmarks.length}
-        clearAll={actions.clearAll}
-      />
+      <div
+        className={`header-slide relative z-40 ${isOnboardingActive ? 'h-0 overflow-hidden opacity-0 pointer-events-none' : 'opacity-100'}`}
+      >
+        <Header
+          canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
+          past={past} future={future}
+          duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
+          cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
+          checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
+          openExportModal={() => actions.guardedExport(exporter.openExportModal)}
+          hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
+          bookmarkCount={worker.bookmarks.length}
+          clearAll={actions.clearAll}
+        />
+      </div>
 
       <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar
-          uniqueTags={worker.uniqueTags} availableTags={taxonomy.availableTags}
-          discoveredTags={taxonomy.discoveredTags}
-          availableFolders={taxonomy.availableFolders} uniqueFolders={worker.uniqueFolders}
-          discoveredFolders={taxonomy.discoveredFolders} bookmarks={worker.bookmarks}
-          smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
-          rules={rules} startEditing={ruleManager.startEditing}
-          deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
-          saveToTaxonomy={taxonomy.saveToTaxonomy}
-          collections={collectionsHook.collections}
-          onCreateCollection={() => {
-            setEditingCollection(null)
-            setIsCollectionModalOpen(true)
-          }}
-          onEditCollection={(collection) => {
-            setEditingCollection(collection)
-            setIsCollectionModalOpen(true)
-          }}
-          onDeleteCollection={collectionsHook.deleteCollection}
-          onShareCollection={collectionsHook.shareCollection}
-        />
+        <div
+          className={`sidebar-slide relative z-30 ${isOnboardingActive ? '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden' : 'translate-x-0 opacity-100'}`}
+        >
+          <Sidebar
+            uniqueTags={worker.uniqueTags} availableTags={taxonomy.availableTags}
+            discoveredTags={taxonomy.discoveredTags}
+            availableFolders={taxonomy.availableFolders} uniqueFolders={worker.uniqueFolders}
+            discoveredFolders={taxonomy.discoveredFolders} bookmarks={worker.bookmarks}
+            smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
+            rules={rules} startEditing={ruleManager.startEditing}
+            deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
+            saveToTaxonomy={taxonomy.saveToTaxonomy}
+            collections={collectionsHook.collections}
+            onCreateCollection={() => {
+              setEditingCollection(null)
+              setIsCollectionModalOpen(true)
+            }}
+            onEditCollection={(collection) => {
+              setEditingCollection(collection)
+              setIsCollectionModalOpen(true)
+            }}
+            onDeleteCollection={collectionsHook.deleteCollection}
+            onShareCollection={collectionsHook.shareCollection}
+          />
+        </div>
 
         <MainContent
           hasFileLoaded={hasFileLoaded}
