@@ -90,6 +90,18 @@ export const useAppStore = create((set, get) => ({
         get().setTheme(get().theme)
     },
 
+    // --- Onboarding Slice ---
+    hasSeenOnboarding: localStorage.getItem('booksmart_onboarding_done') === 'true',
+    showOnboarding: localStorage.getItem('booksmart_onboarding_done') !== 'true',
+    setOnboardingComplete: () => {
+        localStorage.setItem('booksmart_onboarding_done', 'true')
+        set({ hasSeenOnboarding: true, showOnboarding: false })
+    },
+    resetOnboarding: () => {
+        localStorage.removeItem('booksmart_onboarding_done')
+        set({ hasSeenOnboarding: false, showOnboarding: true })
+    },
+
     // --- Selection Slice ---
     selectedIds: new Set(),
     setSelectedIds: (ids) => set({ selectedIds: ids }),

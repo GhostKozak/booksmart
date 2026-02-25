@@ -5,9 +5,11 @@ import { BookmarkList } from '../BookmarkList'
 import { BookmarkGrid } from '../BookmarkGrid'
 import { PreviewPane } from '../PreviewPane'
 import { AnalyticsDashboard } from '../AnalyticsDashboard'
+import { OnboardingWizard } from '../OnboardingWizard'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
+
 
 export function MainContent({
     hasFileLoaded,
@@ -28,7 +30,9 @@ export function MainContent({
     // Batch
     handleBatchMoveDocs,
     // Preview
-    previewBookmark, handlePreview, setPreviewBookmark
+    previewBookmark, handlePreview, setPreviewBookmark,
+    // Onboarding
+    loadDemoData
 }) {
     const { t } = useTranslation()
     const {
@@ -37,6 +41,24 @@ export function MainContent({
         smartFilter, setSmartFilter,
         setSearchQuery, setActiveTag, setActiveFolder
     } = useAppStore()
+    const showOnboarding = useAppStore(state => state.showOnboarding)
+    const setOnboardingComplete = useAppStore(state => state.setOnboardingComplete)
+
+    if (!hasFileLoaded && showOnboarding) {
+        return (
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
+                <OnboardingWizard
+                    onUploadClick={() => { }}
+                    onLoadDemo={() => {
+                        setOnboardingComplete()
+                        loadDemoData()
+                    }}
+                    getInputProps={getInputProps}
+                />
+            </main>
+        )
+    }
+
     if (!hasFileLoaded) {
         return (
             <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">

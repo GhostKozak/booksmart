@@ -532,6 +532,39 @@
             "footer": "{{count}} bookmarks shared via BookSmart"
         }
     },
+    "onboarding": {
+        "next": "Next",
+        "back": "Back",
+        "skip": "Skip",
+        "welcome": {
+            "title": "Welcome to BookSmart!",
+            "desc": "Your smart bookmark organizer. Import, clean, and organize thousands of bookmarks with AI-powered tools."
+        },
+        "import": {
+            "title": "Import Your Bookmarks",
+            "desc": "Export bookmarks from any browser and drag them here. We support multiple formats.",
+            "html": "Browser Export",
+            "json": "Data Backup",
+            "csv": "Spreadsheet",
+            "md": "Markdown"
+        },
+        "organize": {
+            "title": "Powerful Tools",
+            "desc": "Everything you need to tame your bookmark chaos.",
+            "folders": "Folders",
+            "tags": "Tags",
+            "filters": "Smart Filters",
+            "ai": "AI Sort",
+            "collections": "Collections",
+            "rules": "Auto Rules"
+        },
+        "getStarted": {
+            "title": "Ready to Go!",
+            "desc": "Upload your bookmark file to start organizing, or try the demo to explore the features.",
+            "upload": "Upload File",
+            "demo": "Try Demo"
+        }
+    },
     "accessibility": {
         "skipToMain": "Skip to main content"
     }

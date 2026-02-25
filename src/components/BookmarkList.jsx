@@ -12,9 +12,9 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
 
     // Common grid layout to ensure perfect alignment
     // Checkbox | Eye | Title | Location | Status | Health
-    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,3fr)_minmax(0,2fr)_80px_80px_40px] lg:gap-4 lg:items-center lg:px-4"
+    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,2fr)_minmax(0,1.5fr)_90px_90px_60px] lg:gap-4 lg:items-center lg:px-4 lg:pr-6"
 
-    const Header = () => (
+    const header = (
         <div className={cn(
             "bg-background z-10 sticky top-0 border-b py-2 sm:py-3 font-medium uppercase text-[10px] sm:text-xs text-muted-foreground w-full",
             "flex items-center px-3", // Mobile: Flex layout
@@ -24,7 +24,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
             <div className="flex items-center gap-3 lg:justify-center">
                 <Checkbox
                     checked={isAllSelected}
-                    onCheckedChange={toggleAll}
+                    onCheckedChange={() => toggleAll(bookmarks)}
                 />
                 <span className="lg:hidden normal-case font-semibold text-foreground/80">
                     {t('common.selectAll')}
@@ -43,8 +43,8 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
 
     return (
         <div className="bg-card rounded-xl border shadow-sm overflow-hidden h-full flex flex-col">
-            {/* Header - Fixed Outside Virtuoso (Forced Visibility) */}
-            <Header />
+            {/* Header - Fixed Outside Virtuoso */}
+            {header}
 
             {/* List Body with Virtuoso */}
             <div className="flex-1 min-h-0 overflow-x-auto">

@@ -531,6 +531,39 @@
             "footer": "{{count}} marcadores compartidos a través de BookSmart"
         }
     },
+    "onboarding": {
+        "next": "Siguiente",
+        "back": "Atrás",
+        "skip": "Omitir",
+        "welcome": {
+            "title": "¡Bienvenido a BookSmart!",
+            "desc": "Tu organizador inteligente de marcadores. Importa, limpia y organiza miles de marcadores con herramientas de IA."
+        },
+        "import": {
+            "title": "Importa tus Marcadores",
+            "desc": "Exporta los marcadores de cualquier navegador y arrástralos aquí. Soportamos múltiples formatos.",
+            "html": "Export. Navegador",
+            "json": "Copia de Datos",
+            "csv": "Hoja de Cálculo",
+            "md": "Markdown"
+        },
+        "organize": {
+            "title": "Herramientas Potentes",
+            "desc": "Todo lo que necesitas para dominar el caos de tus marcadores.",
+            "folders": "Carpetas",
+            "tags": "Etiquetas",
+            "filters": "Filtros Inteligentes",
+            "ai": "Orden IA",
+            "collections": "Colecciones",
+            "rules": "Reglas Auto"
+        },
+        "getStarted": {
+            "title": "¡Listo para Empezar!",
+            "desc": "Sube tu archivo de marcadores para comenzar a organizar, o prueba la demo para explorar las funciones.",
+            "upload": "Subir Archivo",
+            "demo": "Probar Demo"
+        }
+    },
     "accessibility": {
         "skipToMain": "Saltar al contenido principal"
     }

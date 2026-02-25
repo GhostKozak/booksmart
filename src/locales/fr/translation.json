@@ -531,6 +531,39 @@
             "footer": "{{count}} signets partagés via BookSmart"
         }
     },
+    "onboarding": {
+        "next": "Suivant",
+        "back": "Retour",
+        "skip": "Passer",
+        "welcome": {
+            "title": "Bienvenue sur BookSmart !",
+            "desc": "Votre organisateur de signets intelligent. Importez, nettoyez et organisez des milliers de signets avec des outils d'IA."
+        },
+        "import": {
+            "title": "Importez vos Signets",
+            "desc": "Exportez les signets depuis n'importe quel navigateur et déposez-les ici. Nous supportons plusieurs formats.",
+            "html": "Export Navigateur",
+            "json": "Sauvegarde",
+            "csv": "Tableur",
+            "md": "Markdown"
+        },
+        "organize": {
+            "title": "Outils Puissants",
+            "desc": "Tout ce dont vous avez besoin pour maîtriser le chaos de vos signets.",
+            "folders": "Dossiers",
+            "tags": "Étiquettes",
+            "filters": "Filtres Intelligents",
+            "ai": "Tri IA",
+            "collections": "Collections",
+            "rules": "Règles Auto"
+        },
+        "getStarted": {
+            "title": "Prêt à Commencer !",
+            "desc": "Téléchargez votre fichier de signets pour commencer à organiser, ou essayez la démo pour explorer les fonctionnalités.",
+            "upload": "Télécharger un Fichier",
+            "demo": "Essayer la Démo"
+        }
+    },
     "accessibility": {
         "skipToMain": "Passer au contenu principal"
     }

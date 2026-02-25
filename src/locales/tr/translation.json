@@ -532,6 +532,39 @@
             "footer": "{{count}} yer imi BookSmart ile paylaşıldı"
         }
     },
+    "onboarding": {
+        "next": "İleri",
+        "back": "Geri",
+        "skip": "Atla",
+        "welcome": {
+            "title": "BookSmart'a Hoş Geldiniz!",
+            "desc": "Akıllı yer imi düzenleyiciniz. Binlerce yer imini yapay zeka destekli araçlarla içe aktarın, temizleyin ve düzenleyin."
+        },
+        "import": {
+            "title": "Yer İmlerinizi İçe Aktarın",
+            "desc": "Herhangi bir tarayıcıdan yer imlerinizi dışa aktarın ve buraya sürükleyin. Birden fazla format destekliyoruz.",
+            "html": "Tarayıcı Dışa Aktarma",
+            "json": "Veri Yedeği",
+            "csv": "E-Tablo",
+            "md": "Markdown"
+        },
+        "organize": {
+            "title": "Güçlü Araçlar",
+            "desc": "Yer imi kaosunuzu kontrol altına almak için ihtiyacınız olan her şey.",
+            "folders": "Klasörler",
+            "tags": "Etiketler",
+            "filters": "Akıllı Filtreler",
+            "ai": "YZ Sıralama",
+            "collections": "Koleksiyonlar",
+            "rules": "Otomatik Kurallar"
+        },
+        "getStarted": {
+            "title": "Hazırsınız!",
+            "desc": "Düzenlemeye başlamak için yer imi dosyanızı yükleyin veya özellikleri keşfetmek için demoyu deneyin.",
+            "upload": "Dosya Yükle",
+            "demo": "Demoyu Dene"
+        }
+    },
     "accessibility": {
         "skipToMain": "Ana içeriğe atla"
     }

@@ -49,9 +49,10 @@ export const BookmarkRow = memo(({ bookmark, selectedIds, toggleSelection, linkH
         <div
             className={cn(
                 borderClass,
-                "transition-colors duration-200",
+                "transition-all duration-300",
                 "flex flex-col p-3 gap-3",
                 "lg:p-0 lg:gap-0 lg:border-b",
+                "animate-in fade-in slide-in-from-bottom-2",
                 className,
                 rowBgClass
             )}

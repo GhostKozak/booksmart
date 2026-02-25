@@ -531,6 +531,39 @@
             "footer": "{{count}} Lesezeichen über BookSmart geteilt"
         }
     },
+    "onboarding": {
+        "next": "Weiter",
+        "back": "Zurück",
+        "skip": "Überspringen",
+        "welcome": {
+            "title": "Willkommen bei BookSmart!",
+            "desc": "Ihr intelligenter Lesezeichen-Organizer. Importieren, bereinigen und organisieren Sie Tausende von Lesezeichen mit KI-Werkzeugen."
+        },
+        "import": {
+            "title": "Lesezeichen Importieren",
+            "desc": "Exportieren Sie Lesezeichen aus einem beliebigen Browser und ziehen Sie sie hierher. Wir unterstützen mehrere Formate.",
+            "html": "Browser-Export",
+            "json": "Daten-Backup",
+            "csv": "Tabelle",
+            "md": "Markdown"
+        },
+        "organize": {
+            "title": "Leistungsstarke Werkzeuge",
+            "desc": "Alles, was Sie brauchen, um Ihr Lesezeichen-Chaos zu bändigen.",
+            "folders": "Ordner",
+            "tags": "Tags",
+            "filters": "Intelligente Filter",
+            "ai": "KI-Sortierung",
+            "collections": "Sammlungen",
+            "rules": "Auto-Regeln"
+        },
+        "getStarted": {
+            "title": "Bereit zum Start!",
+            "desc": "Laden Sie Ihre Lesezeichen-Datei hoch, um mit dem Organisieren zu beginnen, oder probieren Sie die Demo aus.",
+            "upload": "Datei Hochladen",
+            "demo": "Demo Testen"
+        }
+    },
     "accessibility": {
         "skipToMain": "Zum Hauptinhalt springen"
     }

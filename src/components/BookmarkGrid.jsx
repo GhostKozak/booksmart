@@ -24,7 +24,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
         <div className="h-full flex flex-col">
             <Card
                 className={cn(
-                    "h-full flex flex-col transition-all duration-200 cursor-pointer hover:shadow-md border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
+                    "h-full flex flex-col transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-500",
                     isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
                 )}
                 role="button"

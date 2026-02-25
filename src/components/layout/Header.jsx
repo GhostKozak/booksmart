@@ -184,20 +184,25 @@ export function Header({
                         </Button>
                     }
                 >
-                    <DropdownLabel>{t('common.actions')}</DropdownLabel>
+                    <div className="px-2 pt-2 pb-1">
+                        <DropdownLabel className="text-sm font-bold text-foreground mb-2 px-1 flex items-center gap-2">
+                            <MoreVertical className="h-4 w-4" />
+                            {t('common.actions')}
+                        </DropdownLabel>
+                    </div>
 
                     {hasMaintenanceActions && (
-                        <div className="bg-muted/30 rounded-lg p-1 sm:p-2 my-1">
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-1 px-1">{t('header.maintenance')}</DropdownLabel>
+                        <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-2 mx-2 mb-2 border border-destructive/10">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 text-destructive/80 font-bold">{t('header.maintenance')}</DropdownLabel>
                             {duplicateCount > 0 && (
-                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                                    <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-destructive hover:text-destructive-foreground">
+                                    <Layers className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
                                     {t('header.removeDuplicates', { count: duplicateCount })}
                                 </DropdownItem>
                             )}
                             {cleanableCount > 0 && (
-                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                                    <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600">
+                                    <Sparkles className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
                                     {t('header.cleanUrls', { count: cleanableCount })}
                                 </DropdownItem>
                             )}
@@ -205,28 +210,28 @@ export function Header({
                     )}
 
                     {bookmarkCount > 0 && (
-                        <>
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('header.view')}</DropdownLabel>
-                            <div className="grid grid-cols-2 gap-1 sm:gap-2 mb-1">
-                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'list' && "bg-accent")}>
-                                    <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                        <div className="px-2">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.view')}</DropdownLabel>
+                            <div className="grid grid-cols-2 gap-2 mb-2">
+                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-2 sm:py-2.5 font-medium", viewMode === 'list' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <List className="h-4 w-4 mr-2" />
                                     <span>{t('header.listView')}</span>
                                 </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-1.5 sm:py-2 text-[11px] sm:text-sm", viewMode === 'grid' && "bg-accent")}>
-                                    <LayoutGrid className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-2 sm:py-2.5 font-medium", viewMode === 'grid' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <LayoutGrid className="h-4 w-4 mr-2" />
                                     <span>{t('header.gridView')}</span>
                                 </DropdownItem>
                             </div>
 
-                            <div className={cn("grid gap-1 sm:gap-2 mb-1", viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1")}>
-                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-1.5 sm:py-2 text-[11px] sm:text-sm justify-center", viewMode === 'analytics' && "bg-accent")}>
-                                    <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                            <div className={cn("grid gap-2 mb-2", viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1")}>
+                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-2 sm:py-2.5 justify-center font-medium", viewMode === 'analytics' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <BarChart3 className="h-4 w-4 mr-2" />
                                     {t('header.analytics')}
                                 </DropdownItem>
 
                                 {viewMode === 'grid' && (
-                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-1.5 sm:py-2 text-[11px] sm:text-sm justify-center">
-                                        <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-2 sm:py-2.5 justify-center font-medium">
+                                        <Image className="h-4 w-4 mr-2" />
                                         {showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
                                     </DropdownItem>
                                 )}
@@ -234,8 +239,8 @@ export function Header({
 
                             <DropdownSeparator />
 
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('header.sort.label')}</DropdownLabel>
-                            <div className="grid grid-cols-2 gap-1 sm:gap-2 max-h-40 sm:max-h-60 overflow-y-auto pr-1">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.sort.label')}</DropdownLabel>
+                            <div className="grid grid-cols-2 gap-1.5 sm:max-h-60 overflow-y-auto pb-2">
                                 {[
                                     { key: 'default', label: t('header.sort.default') },
                                     { key: 'title-az', label: t('header.sort.titleAz') },
@@ -248,7 +253,7 @@ export function Header({
                                     <DropdownItem
                                         key={opt.key}
                                         onClick={() => setSortBy(opt.key)}
-                                        className={cn("text-[10px] sm:text-[11px] py-1.5 sm:py-2 h-auto truncate justify-center sm:justify-start", sortBy === opt.key && "bg-accent text-accent-foreground font-bold border border-accent-foreground/10")}
+                                        className={cn("text-[11px] sm:text-xs py-2 truncate", sortBy === opt.key ? "bg-accent text-accent-foreground font-semibold shadow-sm ring-1 ring-border" : "text-muted-foreground")}
                                     >
                                         {opt.label}
                                     </DropdownItem>
@@ -256,77 +261,80 @@ export function Header({
                             </div>
 
                             <DropdownSeparator />
-                        </>
+                        </div>
                     )}
 
-                    <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1">{t('settings.language.label')}</DropdownLabel>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2 mb-1 px-1">
-                        {[
-                            { code: 'tr', flag: '🇹🇷' },
-                            { code: 'en', flag: '🇺🇸' },
-                            { code: 'es', flag: '🇪🇸' },
-                            { code: 'fr', flag: '🇫🇷' },
-                            { code: 'de', flag: '🇩🇪' },
-                        ].map(lang => (
-                            <DropdownItem
-                                key={lang.code}
-                                onClick={() => i18n.changeLanguage(lang.code)}
-                                className={cn("justify-center py-1.5 sm:py-2 h-10 sm:h-12 text-lg sm:text-xl", i18n.language.startsWith(lang.code) && "bg-accent border")}
-                            >
-                                <span className="drop-shadow-sm">{lang.flag}</span>
+                    <div className="px-2">
+                        <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('settings.language.label')}</DropdownLabel>
+                        <div className="grid grid-cols-5 gap-1.5 mb-2">
+                            {[
+                                { code: 'tr', flag: '🇹🇷' },
+                                { code: 'en', flag: '🇺🇸' },
+                                { code: 'es', flag: '🇪🇸' },
+                                { code: 'fr', flag: '🇫🇷' },
+                                { code: 'de', flag: '🇩🇪' },
+                            ].map(lang => (
+                                <DropdownItem
+                                    key={lang.code}
+                                    onClick={() => i18n.changeLanguage(lang.code)}
+                                    className={cn("justify-center py-2 h-10 sm:h-12 text-xl transition-all hover:scale-105", i18n.language.startsWith(lang.code) && "bg-accent shadow-inner ring-1 ring-border")}
+                                >
+                                    <span className="drop-shadow-md">{lang.flag}</span>
+                                </DropdownItem>
+                            ))}
+                        </div>
+
+                        <DropdownSeparator />
+
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                            <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-2.5 font-medium">
+                                {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2.5 animate-spin" /> : <Activity className="h-4 w-4 mr-2.5 text-rose-500" />}
+                                <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
                             </DropdownItem>
-                        ))}
-                    </div>
 
-                    <DropdownSeparator />
+                            <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="py-2.5 font-medium">
+                                {theme === "dark" ? <Sun className="h-4 w-4 mr-2.5 text-amber-500" /> : <Moon className="h-4 w-4 mr-2.5 text-indigo-400" />}
+                                <span>{theme === "dark" ? t('header.lightMode') : t('header.darkMode')}</span>
+                            </DropdownItem>
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1">
-                        <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                            {isCheckingLinks ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 animate-spin" /> : <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 text-rose-500" />}
-                            <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
-                        </DropdownItem>
+                        <DropdownSeparator />
 
-                        <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                            {theme === "dark" ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />}
-                            <span>{theme === "dark" ? t('header.lightMode') : t('header.darkMode')}</span>
-                        </DropdownItem>
-                    </div>
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                            <DropdownItem onClick={() => setIsShortcutsOpen(true)} className="py-2.5">
+                                <HelpCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
+                                {t('header.shortcuts')}
+                            </DropdownItem>
 
-                    <DropdownSeparator />
+                            <DropdownItem onClick={() => openSettings('folders')} className="py-2.5">
+                                <Settings className="h-4 w-4 mr-2.5 text-muted-foreground" />
+                                {t('header.settings')}
+                            </DropdownItem>
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1">
-                        <DropdownItem onClick={() => setIsShortcutsOpen(true)} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                            <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                            {t('header.shortcuts')}
-                        </DropdownItem>
+                        {hasFileLoaded && (
+                            <>
+                                <DropdownSeparator />
 
-                        <DropdownItem onClick={() => openSettings('folders')} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                            <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                            {t('header.settings')}
-                        </DropdownItem>
-                    </div>
-
-                    {hasFileLoaded && (
-                        <>
-                            <DropdownSeparator />
-                            <div className="grid grid-cols-2 gap-1 sm:gap-2 px-1 mb-1">
-                                <DropdownItem onClick={openExportModal} className="sm:hidden py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                                    <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                                <DropdownItem onClick={openExportModal} className="sm:hidden w-full py-3.5 font-medium mb-2 justify-center border border-border/60 text-foreground hover:bg-accent">
+                                    <Download className="h-4 w-4 mr-2.5" />
                                     {t('header.export')}
                                 </DropdownItem>
 
-                                <DropdownItem onClick={closeFile} className="py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                                    <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                    <span>{t('header.closeFile')}</span>
-                                </DropdownItem>
-                            </div>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <DropdownItem onClick={closeFile} className="py-2.5 font-medium text-muted-foreground hover:text-foreground justify-center bg-muted/30">
+                                        <LogOut className="h-4 w-4 mr-2" />
+                                        <span>{t('header.closeFile')}</span>
+                                    </DropdownItem>
 
-                            <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 py-1.5 sm:py-2 text-[11px] sm:text-sm">
-                                <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                                {t('common.clearAll')}
-                            </DropdownItem>
-                        </>
-                    )}
+                                    <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 py-2.5 font-semibold hover:bg-destructive hover:text-destructive-foreground justify-center bg-destructive/5 border border-destructive/10">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        {t('common.clearAll')}
+                                    </DropdownItem>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </DropdownMenu>
 
                 <div className="hidden sm:flex items-center border-l pl-2 ml-2">

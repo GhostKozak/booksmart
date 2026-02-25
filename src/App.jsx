@@ -19,6 +19,7 @@ import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 import { saveAutoBackup } from './lib/backup-manager'
+import { demoBookmarks } from './lib/demo-bookmarks'
 import { useAppStore } from './store/useAppStore'
 
 // Layout Components
@@ -133,6 +134,13 @@ function App() {
   const ruleManager = useRuleManager({ rules, addCommand })
   const fileUpload = useFileUpload()
   const collectionsHook = useCollections({ addCommand })
+
+  const loadDemoData = useCallback(async () => {
+    await db.transaction('rw', db.bookmarks, async () => {
+      await db.bookmarks.clear()
+      await db.bookmarks.bulkAdd(demoBookmarks)
+    })
+  }, [])
 
   const exporter = useExport({
     bookmarks: worker.bookmarks,
@@ -269,6 +277,7 @@ function App() {
           smartCounts={worker.smartCounts}
           handleBatchMoveDocs={operations.handleBatchMoveDocs}
           clearAll={actions.clearAll}
+          loadDemoData={loadDemoData}
         />
 
         <FloatingActionBar
