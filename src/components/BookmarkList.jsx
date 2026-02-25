@@ -25,6 +25,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                 <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={() => toggleAll(bookmarks)}
+                    aria-label={t('common.selectAll')}
                 />
                 <span className="lg:hidden normal-case font-semibold text-foreground/80">
                     {t('common.selectAll')}
