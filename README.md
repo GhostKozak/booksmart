@@ -1,5 +1,8 @@
 # BookSmart 📚
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
+
 A modern, privacy-focused bookmark manager that runs entirely in your browser. Organize, clean up, and analyze your bookmarks with ease using advanced tools and analytics.
 
 ![BookSmart Screenshot](/images/homepage_screenshot.png)
@@ -7,7 +10,6 @@ A modern, privacy-focused bookmark manager that runs entirely in your browser. O
 ## 🤖 AI-Native Development
 
 This project was developed entirely using Artificial Intelligence within the AntiGravity IDE.
-
 
 ## ✨ Features
 
@@ -19,11 +21,15 @@ This project was developed entirely using Artificial Intelligence within the Ant
 - **🔗 Dead Link Checker**: Automatically identifies broken links (404s) and timeouts to keep your library clean.
 - **🏷️ Smart Rules**: "If this, then that" automation to organize bookmarks by URL patterns or keywords.
 - **⚡ Advanced Search**: Fuzzy search (typo-tolerant), Regex support, and date range filters.
-- **🌍 Internationalization**: Fully localized interface in English and Turkish (Türkçe).
+- **🌍 Internationalization**: Fully localized interface in English, Turkish (Türkçe), German, French, and Spanish.
+- **🌗 Theme System**: Sleek light, dark, and system theme support.
+- **🚀 Onboarding Wizard**: A smooth step-by-step onboarding experience.
+- **✨ Premium Animations**: Smooth, fluid micro-interactions for a premium feel.
+- **🤏 Drag & Drop**: Easily move bookmarks between folders and collections.
 - **🛡️ Data Safety**: Automatic local backups for settings and full JSON export capability.
 - **↩️ Version History**: Robust Undo/Redo system ensures mistake-proof organization.
-- **🌗 Dark Mode**: Sleek, eye-friendly dark theme support.
 - **📱 PWA Support**: Install as a native app on desktop and mobile devices.
+- **🔋 Resilient Architecture**: Uninterrupted offline usage with Offline Indicators and graceful Error Boundaries.
 
 ## 📝 Roadmap
 
@@ -31,7 +37,8 @@ This project was developed entirely using Artificial Intelligence within the Ant
 - [x] **PWA Support**: Install as a native app on desktop and mobile.
 - [x] **Keyboard Shortcuts**: Navigate and manage bookmarks with keyboard.
 - [x] **Undo/Redo**: Mistake-proof management.
-- [x] **Internationalization**: English & Turkish support.
+- [x] **Internationalization**: English, Turkish, Spanish, French, German support.
+- [x] **Drag & Drop**: Native drag and drop support.
 - [ ] **Browser Extension**: Capture bookmarks directly from the toolbar.
 - [ ] **Sync Server**: Optional self-hosted sync server.
 - [ ] **Archivebox Integration**: Auto-archive content for offline access.
@@ -40,11 +47,14 @@ This project was developed entirely using Artificial Intelligence within the Ant
 
 - **Core**: React 19, Vite
 - **State/Database**: Dexie.js (IndexedDB), Zustand
-- **Styling**: TailwindCSS, Shadcn/UI
+- **Styling & Animations**: TailwindCSS v4, Tailwindcss-animate, clsx, tailwind-merge
+- **Drag & Drop & Uploads**: @dnd-kit, react-dropzone
+- **Search**: Fuse.js
 - **Performance**: Web Workers, React Virtuoso (Virtualization)
+- **Time/Date**: date-fns
 - **AI Integration**: Internal API clients for OpenAI, Anthropic, Gemini, and Ollama
 - **Internationalization**: i18next
-- **Icons**: Lucide React
+- **Icons & UI**: Lucide React, Sonner (Toasts)
 - **Charts**: Recharts
 
 ## 🚀 Getting Started
@@ -52,7 +62,7 @@ This project was developed entirely using Artificial Intelligence within the Ant
 ### For Users
 
 1.  **Export** your bookmarks from your browser (Chrome, Firefox, Edge, etc.) as an HTML file.
-2.  **Open** BookSmart and drag & drop your bookmarks file.
+2.  **Open** BookSmart and follow the Onboarding Wizard to get started, or drag & drop your bookmarks file.
 3.  **Setup AI (Optional)**: Head to Settings and configure your preferred AI provider (Ollama, OpenAI, Gemini, or Anthropic) to enable Magic Sort.
 4.  **Analyze** your collection using the Dashboard to understand your habits.
 5.  **Organize** by using AI Magic Sort, fast code-based Auto Sort, creating Rules, or filtering manually.
@@ -60,6 +70,8 @@ This project was developed entirely using Artificial Intelligence within the Ant
 7.  **Export** the organized list back to your browser when done.
 
 ### For Developers
+
+**Prerequisites:** Node.js >= 20
 
 To run the project locally:
 
