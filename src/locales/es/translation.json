@@ -57,7 +57,8 @@
             "dateOld": "Fecha (Más antiguo)",
             "domain": "Dominio",
             "folder": "Carpeta"
-        }
+        },
+        "themeLabel": "Tema"
     },
     "sidebar": {
         "allBookmarks": "Todos",

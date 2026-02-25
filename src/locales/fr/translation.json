@@ -57,7 +57,8 @@
             "dateOld": "Date (Plus ancien)",
             "domain": "Domaine",
             "folder": "Dossier"
-        }
+        },
+        "themeLabel": "Thème"
     },
     "sidebar": {
         "allBookmarks": "Tous les signets",

@@ -74,20 +74,38 @@ export const useAppStore = create((set, get) => ({
 
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",
+    resolvedTheme: "light",
     setTheme: (theme) => {
         localStorage.setItem("theme", theme)
-        set({ theme })
         const root = window.document.documentElement
         root.classList.remove("light", "dark")
+
+        let resolved = theme
         if (theme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-            root.classList.add(systemTheme)
-        } else {
-            root.classList.add(theme)
+            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
         }
+        root.classList.add(resolved)
+        set({ theme, resolvedTheme: resolved })
     },
     initTheme: () => {
         get().setTheme(get().theme)
+
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+        const handleChange = (e) => {
+            if (get().theme === "system") {
+                const resolved = e.matches ? "dark" : "light"
+                const root = window.document.documentElement
+                root.classList.remove("light", "dark")
+                root.classList.add(resolved)
+                set({ resolvedTheme: resolved })
+            }
+        }
+
+        if (window.__themeChangeListener) {
+            mediaQuery.removeEventListener("change", window.__themeChangeListener)
+        }
+        window.__themeChangeListener = handleChange
+        mediaQuery.addEventListener("change", handleChange)
     },
 
     // --- Onboarding Slice ---

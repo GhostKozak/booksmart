@@ -57,7 +57,8 @@
             "dateOld": "Datum (Älteste)",
             "domain": "Domain",
             "folder": "Ordner"
-        }
+        },
+        "themeLabel": "Design"
     },
     "sidebar": {
         "allBookmarks": "Alle Lesezeichen",

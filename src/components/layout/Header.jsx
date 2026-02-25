@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown } from 'lucide-react'
+import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -286,16 +286,47 @@ export function Header({
 
                         <DropdownSeparator />
 
-                        <div className="grid grid-cols-2 gap-2 mb-2">
-                            <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-2.5 font-medium">
+                        <div className="px-1 mb-2">
+                            <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-2.5 font-medium justify-center border border-border/50">
                                 {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2.5 animate-spin" /> : <Activity className="h-4 w-4 mr-2.5 text-rose-500" />}
                                 <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
                             </DropdownItem>
+                        </div>
 
-                            <DropdownItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="py-2.5 font-medium">
-                                {theme === "dark" ? <Sun className="h-4 w-4 mr-2.5 text-amber-500" /> : <Moon className="h-4 w-4 mr-2.5 text-indigo-400" />}
-                                <span>{theme === "dark" ? t('header.lightMode') : t('header.darkMode')}</span>
-                            </DropdownItem>
+                        <div className="px-1 mb-2">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.themeLabel')}</DropdownLabel>
+                            <div className="flex items-center gap-1 p-1 bg-accent/30 border border-border/50 rounded-lg">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setTheme('system') }}
+                                    className={cn(
+                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
+                                        theme === 'system' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                    )}
+                                >
+                                    <Monitor className={cn("h-3.5 w-3.5", t('header.system') ? "sm:mr-1.5" : "")} />
+                                    <span className="hidden sm:inline">{t('header.system')}</span>
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setTheme('light') }}
+                                    className={cn(
+                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
+                                        theme === 'light' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                    )}
+                                >
+                                    <Sun className={cn("h-3.5 w-3.5", t('header.lightMode') ? "sm:mr-1.5" : "")} />
+                                    <span className="hidden sm:inline">{t('header.lightMode')}</span>
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setTheme('dark') }}
+                                    className={cn(
+                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
+                                        theme === 'dark' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                    )}
+                                >
+                                    <Moon className={cn("h-3.5 w-3.5", t('header.darkMode') ? "sm:mr-1.5" : "")} />
+                                    <span className="hidden sm:inline">{t('header.darkMode')}</span>
+                                </button>
+                            </div>
                         </div>
 
                         <DropdownSeparator />

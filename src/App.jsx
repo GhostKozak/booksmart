@@ -61,7 +61,7 @@ function App() {
   // ── UI State from Store ──
   const {
     searchQuery, searchMode, activeTag, activeFolder, smartFilter,
-    dateFilter, sortBy, activeCollection, theme, initTheme,
+    dateFilter, sortBy, activeCollection, theme, resolvedTheme, initTheme,
     settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen,
     isConflictModalOpen, setIsConflictModalOpen,
     showBackupModal, setShowBackupModal,
@@ -482,7 +482,7 @@ function App() {
         <OfflineIndicator />
         <PWAUpdatePrompt />
       </div>
-      <Toaster position="bottom-right" richColors closeButton theme={theme} />
+      <Toaster position="bottom-right" richColors closeButton theme={resolvedTheme} />
     </div>
   )
 }

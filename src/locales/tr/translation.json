@@ -57,7 +57,8 @@
             "dateOld": "Tarih (En Eski)",
             "domain": "Alan Adı",
             "folder": "Klasör"
-        }
+        },
+        "themeLabel": "Tema"
     },
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
