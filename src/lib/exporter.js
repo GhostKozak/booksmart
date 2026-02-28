@@ -19,6 +19,21 @@
  * @param {Array} bookmarks - Array of bookmark objects.
  * @returns {string} - The HTML string.
  */
+/**
+ * Escapes HTML entities to prevent XSS in exported content.
+ * @param {string} str - The string to escape.
+ * @returns {string} - The escaped string.
+ */
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 export const exportBookmarks = (bookmarks) => {
     // 1. Initialize Root Node
     const root = {
@@ -63,19 +78,19 @@ export const exportBookmarks = (bookmarks) => {
 
         // A. Render Bookmarks at this level
         node.__bookmarks__.forEach(b => {
-            const tagsAttr = b.tags && b.tags.length > 0 ? ` TAGS="${b.tags.join(',')}"` : '';
-            const addDateAttr = b.addDate ? ` ADD_DATE="${b.addDate}"` : '';
-            const iconAttr = b.icon ? ` ICON="${b.icon}"` : '';
+            const escapedTags = b.tags && b.tags.length > 0 ? ` TAGS="${escapeHtml(b.tags.join(','))}"` : '';
+            const addDateAttr = b.addDate ? ` ADD_DATE="${escapeHtml(String(b.addDate))}"` : '';
+            const iconAttr = b.icon ? ` ICON="${escapeHtml(b.icon)}"` : '';
 
-            output += `${indent}<DT><A HREF="${b.url}"${addDateAttr}${iconAttr}${tagsAttr}>${b.title}</A>\n`;
+            output += `${indent}<DT><A HREF="${escapeHtml(b.url)}"${addDateAttr}${iconAttr}${escapedTags}>${escapeHtml(b.title)}</A>\n`;
             if (b.note) {
-                output += `${indent}<DD>${b.note}\n`;
+                output += `${indent}<DD>${escapeHtml(b.note)}\n`;
             }
         });
 
         // B. Render Subfolders
         for (const [folderName, subNode] of Object.entries(node.__subfolders__)) {
-            output += `${indent}<DT><H3 ADD_DATE="${Date.now()}">${folderName}</H3>\n`;
+            output += `${indent}<DT><H3 ADD_DATE="${Date.now()}">${escapeHtml(folderName)}</H3>\n`;
             output += `${indent}<DL><p>\n`;
 
             // Recurse

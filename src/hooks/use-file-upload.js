@@ -7,6 +7,13 @@ export function useFileUpload() {
     const onDrop = useCallback((acceptedFiles) => {
         const file = acceptedFiles[0]
         if (file) {
+            // Limit file size to 50MB to prevent DOS
+            const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+            if (file.size > MAX_FILE_SIZE) {
+                console.error("File too large. Maximum allowed size is 50MB.")
+                return
+            }
+
             const reader = new FileReader()
             reader.onload = async (e) => {
                 const text = e.target.result

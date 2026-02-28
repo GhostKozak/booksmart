@@ -1,5 +1,35 @@
 import Fuse from 'fuse.js'
 
+// --- Security Helpers ---
+
+/**
+ * Validate URL scheme - blocks dangerous protocols like javascript: and data:
+ * @param {string} url - URL to check.
+ * @returns {boolean} - true if URL has a safe scheme.
+ */
+function isSafeUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim().toLowerCase();
+    // Block javascript:, data:, vbscript: and other dangerous schemes
+    if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
+    return true;
+}
+
+/**
+ * Safely compile a regex from user input, with length limits and fallback.
+ * Prevents ReDoS by limiting pattern length.
+ * @param {string} pattern - User-supplied pattern.
+ * @returns {RegExp|null} - Compiled regex or null if invalid/dangerous.
+ */
+function safeRegex(pattern) {
+    if (!pattern || pattern.length > 200) return null;
+    try {
+        return new RegExp(pattern, 'i');
+    } catch {
+        return null;
+    }
+}
+
 // --- Utility Functions ---
 
 function isDoc(url) {
@@ -72,16 +102,16 @@ const processData = ({
             const result = fuse.search(searchQuery);
             filtered = result.map(r => r.item);
         } else if (searchMode === 'regex') {
-            try {
-                const regex = new RegExp(searchQuery, 'i');
+            const regex = safeRegex(searchQuery);
+            if (regex) {
                 filtered = filtered.filter(b => {
                     const bTags = Array.isArray(b.tags) ? b.tags : (typeof b.tags === 'string' ? b.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
                     return regex.test(b.title || '') ||
                         regex.test(b.url || '') ||
                         bTags.some(t => regex.test(t));
                 });
-            } catch {
-                // Fallback to simple contains
+            } else {
+                // Fallback to simple contains for invalid regex
                 filtered = filtered.filter(b =>
                     (b.title || '').toLowerCase().includes(query) ||
                     (b.url || '').toLowerCase().includes(query)

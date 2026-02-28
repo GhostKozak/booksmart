@@ -22,7 +22,7 @@ export function Favicon({ url, className = "w-4 h-4" }) {
 
     return (
         <img
-            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+            src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`}
             alt=""
             className={cn("rounded-sm object-contain", className)}
             onError={() => setError(true)}

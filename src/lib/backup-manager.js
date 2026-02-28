@@ -54,19 +54,41 @@ export function downloadBackup(backupData) {
  * @returns {Promise<void>}
  */
 export async function restoreBackup(backupData) {
-    if (!backupData || !backupData.data) {
+    if (!backupData || typeof backupData !== 'object') {
         throw new Error("Invalid backup file format");
+    }
+
+    // Validate backup structure
+    if (!backupData.data || typeof backupData.data !== 'object') {
+        throw new Error("Invalid backup file format: missing data field");
+    }
+
+    if (backupData.version !== undefined && typeof backupData.version !== 'number') {
+        throw new Error("Invalid backup file format: invalid version");
     }
 
     const { rules, folders, tags, ignoredUrls, collections } = backupData.data;
 
-    await db.transaction('rw', db.rules, db.folders, db.tags, db.ignoredUrls, db.collections, async () => {
-        // We can decide to wipe and replace, or merge. 
-        // "Restore" usually implies getting back to a state, so wipe and text is often safer for consistent state,
-        // but might lose new things. 
-        // Let's go with: Clear existing config tables and re-populate.
-        // This is safer to avoid ID conflicts or duplicate logic.
+    // Validate each data array is actually an array (or undefined)
+    const validateArray = (arr, name) => {
+        if (arr === undefined || arr === null) return [];
+        if (!Array.isArray(arr)) {
+            throw new Error(`Invalid backup data: ${name} must be an array`);
+        }
+        // Limit size to prevent DOS
+        if (arr.length > 50000) {
+            throw new Error(`Invalid backup data: ${name} exceeds maximum allowed entries (50000)`);
+        }
+        return arr;
+    };
 
+    const safeRules = validateArray(rules, 'rules');
+    const safeFolders = validateArray(folders, 'folders');
+    const safeTags = validateArray(tags, 'tags');
+    const safeIgnoredUrls = validateArray(ignoredUrls, 'ignoredUrls');
+    const safeCollections = validateArray(collections, 'collections');
+
+    await db.transaction('rw', db.rules, db.folders, db.tags, db.ignoredUrls, db.collections, async () => {
         await Promise.all([
             db.rules.clear(),
             db.folders.clear(),
@@ -75,11 +97,11 @@ export async function restoreBackup(backupData) {
             db.collections.clear()
         ]);
 
-        if (rules?.length) await db.rules.bulkAdd(rules);
-        if (folders?.length) await db.folders.bulkAdd(folders);
-        if (tags?.length) await db.tags.bulkAdd(tags);
-        if (ignoredUrls?.length) await db.ignoredUrls.bulkAdd(ignoredUrls);
-        if (collections?.length) await db.collections.bulkAdd(collections);
+        if (safeRules.length) await db.rules.bulkAdd(safeRules);
+        if (safeFolders.length) await db.folders.bulkAdd(safeFolders);
+        if (safeTags.length) await db.tags.bulkAdd(safeTags);
+        if (safeIgnoredUrls.length) await db.ignoredUrls.bulkAdd(safeIgnoredUrls);
+        if (safeCollections.length) await db.collections.bulkAdd(safeCollections);
     });
 }
 

@@ -36,7 +36,7 @@ export function BookmarkHealthStatus({ url, status, onToggleIgnore, mini = false
                             className="h-6 w-6"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                window.open(`https://web.archive.org/web/*/${url}`, '_blank');
+                                window.open(`https://web.archive.org/web/*/${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
                             }}
                             title={t('bookmarks.health.archive')}
                         >

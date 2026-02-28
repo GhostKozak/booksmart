@@ -1,6 +1,17 @@
 import { generateUUID } from './utils';
 
 /**
+ * Validates that a URL uses a safe scheme.
+ * Blocks javascript:, data:, vbscript: and other dangerous protocols.
+ */
+function isSafeUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim().toLowerCase();
+    if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
+    return true;
+}
+
+/**
  * Parses a Netscape Bookmark HTML content string.
  * Flattens the folder structure but preserves the path.
  * 
@@ -36,6 +47,10 @@ export const parseBookmarks = (htmlContent) => {
                     // Check for Link (A) inside DT
                     const a = child.querySelector('a');
                     if (a) {
+                        const href = a.href;
+                        // Skip dangerous URL schemes
+                        if (!isSafeUrl(href)) return;
+
                         // Check for <DD> note — it's the next sibling of this DT
                         let note = '';
                         const nextSibling = child.nextElementSibling;
@@ -46,7 +61,7 @@ export const parseBookmarks = (htmlContent) => {
                         bookmarks.push({
                             id: generateUUID(),
                             title: a.textContent,
-                            url: a.href,
+                            url: href,
                             addDate: a.getAttribute('add_date'),
                             icon: a.getAttribute('icon'),
                             tags: a.getAttribute('tags') ? a.getAttribute('tags').split(',').map(t => t.trim()) : [],
@@ -85,12 +100,14 @@ export const parseJson = (jsonContent) => {
     try {
         const data = JSON.parse(jsonContent);
         if (Array.isArray(data)) {
-            return data.map(b => ({
-                ...b,
-                id: b.id || generateUUID(),
-                note: b.note || '',
-                status: 'unchanged'
-            }));
+            return data
+                .filter(b => isSafeUrl(b.url)) // Filter out dangerous URLs
+                .map(b => ({
+                    ...b,
+                    id: b.id || generateUUID(),
+                    note: b.note || '',
+                    status: 'unchanged'
+                }));
         }
         return [];
     } catch (e) {
@@ -148,7 +165,7 @@ export const parseCsv = (csvContent) => {
             }
         }
 
-        if (url) {
+        if (url && isSafeUrl(url)) {
             bookmarks.push({
                 id: generateUUID(),
                 title: title || url,
@@ -190,6 +207,9 @@ export const parseMarkdown = (mdContent) => {
             if (match) {
                 const title = match[1];
                 const url = match[2];
+
+                // Skip dangerous URL schemes
+                if (!isSafeUrl(url)) return;
 
                 const tags = [];
                 let tagMatch;

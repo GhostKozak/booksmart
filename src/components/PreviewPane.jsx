@@ -8,6 +8,17 @@ import { db } from '../db';
 import { summarizeContent } from '../services/ai-service';
 import { toast } from 'sonner';
 
+/**
+ * Validate URL scheme - blocks dangerous protocols.
+ * @param {string} url - URL to check.
+ * @returns {boolean} - true if URL has a safe scheme.
+ */
+function isSafeUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim().toLowerCase();
+    return /^https?:\/\//i.test(trimmed);
+}
+
 export function PreviewPane({ bookmark, onClose, className }) {
     const { t } = useTranslation();
     const [isLoading, setIsLoading] = useState(true);
@@ -140,14 +151,15 @@ export function PreviewPane({ bookmark, onClose, className }) {
 
                 <iframe
                     key={`${bookmark.id}-${refreshKey}`}
-                    src={bookmark.url}
+                    src={isSafeUrl(bookmark.url) ? bookmark.url : 'about:blank'}
                     className="w-full h-full border-0 bg-white"
                     title={`Preview of ${bookmark.title}`}
                     onLoad={() => setIsLoading(false)}
                     onError={() => {
                         setIsLoading(false);
                     }}
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                    referrerPolicy="no-referrer"
                 />
 
                 {/* Overlay for potential errors */}
@@ -156,7 +168,11 @@ export function PreviewPane({ bookmark, onClose, className }) {
                         <p className="mb-2 text-muted-foreground">
                             {t('preview.error')}
                         </p>
-                        <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => window.open(bookmark.url, '_blank')}>
+                        <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => {
+                            if (isSafeUrl(bookmark.url)) {
+                                window.open(bookmark.url, '_blank', 'noopener,noreferrer');
+                            }
+                        }}>
                             <ExternalLink className="h-3 w-3" /> {t('preview.openExternal')}
                         </Button>
                     </div>

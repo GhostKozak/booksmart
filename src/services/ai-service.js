@@ -107,7 +107,7 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
         url: b.url
     }));
 
-    const lang = localStorage.getItem('i18nextLng') || 'en';
+    const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
     const systemPrompt = `You are a bookmark organizer. Analyze the following list of bookmarks. 
   IMPORTANT: The user's preferred language is '${lang}'. You MUST translate all generated folder names and tags into '${lang}' natively.
   Return a JSON object where the key is the ID and the value is an object containing:
@@ -173,7 +173,7 @@ async function callOpenAI(messages, apiKey, model, asJson = true, signal) {
 }
 
 async function callGemini(messages, apiKey, model, asJson = true, signal) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
     // Convert standard messages to Gemini format
     let systemInstruction = undefined;
@@ -203,7 +203,8 @@ async function callGemini(messages, apiKey, model, asJson = true, signal) {
     const response = await fetch(url, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
         },
         body: JSON.stringify(body),
         signal
@@ -236,6 +237,45 @@ function cleanJsonString(text) {
         cleaned = cleaned.replace(/^```(?:json)?/, '').replace(/```$/, '');
     }
     return cleaned.trim();
+}
+
+/**
+ * Sanitize language code to prevent prompt injection.
+ * Only allows valid BCP 47-like codes (e.g., 'en', 'tr', 'zh-CN').
+ */
+function sanitizeLanguageCode(lang) {
+    if (!lang || typeof lang !== 'string') return 'en';
+    // Allow only alphanumeric, hyphens, underscores (max 10 chars)
+    const sanitized = lang.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10);
+    return sanitized || 'en';
+}
+
+/**
+ * Validate and sanitize Ollama base URL to prevent SSRF.
+ * Only allows http/https protocols and localhost/private network addresses.
+ */
+function sanitizeOllamaUrl(baseUrl) {
+    const cleanUrl = (baseUrl || 'http://localhost:11434').replace(/\/+$/, '');
+    try {
+        const parsed = new URL(cleanUrl);
+        // Only allow http and https protocols
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+            throw new Error('Invalid protocol for Ollama URL. Only http and https are allowed.');
+        }
+        // Only allow localhost and private network addresses
+        const hostname = parsed.hostname.toLowerCase();
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+        const isPrivateNetwork = hostname.startsWith('10.') ||
+            hostname.startsWith('192.168.') ||
+            /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname);
+        if (!isLocalhost && !isPrivateNetwork) {
+            throw new Error('Ollama URL must point to localhost or a private network address.');
+        }
+        return parsed.origin;
+    } catch (e) {
+        if (e.message.includes('Ollama')) throw e;
+        throw new Error('Invalid Ollama URL format.');
+    }
 }
 
 async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
@@ -279,7 +319,7 @@ async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
 }
 
 async function callOllama(messages, baseUrl, model, asJson = true, signal) {
-    const cleanUrl = (baseUrl || 'http://localhost:11434').replace(/\/$/, '');
+    const cleanUrl = sanitizeOllamaUrl(baseUrl);
     const url = `${cleanUrl}/v1/chat/completions`;
 
     const body = {
@@ -339,7 +379,7 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
         console.warn("Failed to fetch proxy content, falling back to URL only", e);
     }
 
-    const lang = localStorage.getItem('i18nextLng') || 'en';
+    const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
     const messages = [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Please summarize this page in '${lang}'. The summary MUST be translated natively to the language code '${lang}':\n${pageText}` }
@@ -374,7 +414,7 @@ export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortS
         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
         try {
             const simplified = chunk.map(b => ({ id: b.id, title: b.title, url: b.url }));
-            const lang = localStorage.getItem('i18nextLng') || 'en';
+            const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
             const systemPrompt = `You are a helpful bookmark assistant. Review the following bookmarks. Some have broken, messy, or missing titles.
 Fix the titles to be clean, readable, and professional based on their URL and current title.
 IMPORTANT: The user's preferred language is '${lang}'. If you need to generate a completely new title, and the URL is language-agnostic, attempt to write the new title natively in '${lang}'. Note that original names of brands/companies should remain untouched.
