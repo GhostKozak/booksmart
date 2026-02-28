@@ -7,6 +7,7 @@ import { cn } from '../lib/utils';
 import { Folder, ExternalLink, Eye } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
+import { LinkTooltip } from './bookmark/LinkTooltip';
 
 // Extracted Item Component for state management
 const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, context, showThumbnails }) => {
@@ -112,12 +113,14 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                             <Favicon url={bookmark.url} className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
-                                {bookmark.title || t('common.untitled')}
-                            </h3>
-                            <p className="text-[10px] text-muted-foreground line-clamp-1 break-all opacity-80">
-                                {bookmark.url}
-                            </p>
+                            <LinkTooltip bookmark={bookmark}>
+                                <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
+                                    {bookmark.title || t('common.untitled')}
+                                </h3>
+                                <p className="text-[10px] text-muted-foreground line-clamp-1 break-all opacity-80">
+                                    {bookmark.url}
+                                </p>
+                            </LinkTooltip>
                         </div>
                         {!showThumbnails && (
                             <div className="flex items-center gap-1 shrink-0 mt-0.5">

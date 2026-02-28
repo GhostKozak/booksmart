@@ -5,6 +5,7 @@ import { BookmarkHealthStatus } from './BookmarkHealthStatus'
 import { BookmarkTags } from './BookmarkTags'
 import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
+import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
 import { ArrowRight, Eye, Layers } from 'lucide-react'
 import { Button } from '../ui/button'
@@ -37,16 +38,18 @@ export function BookmarkRowDesktop({
 
             {/* Title / URL (Col 2) */}
             <div className="flex flex-col min-w-0 py-2">
-                <div className="flex items-center gap-2 min-w-0">
-                    <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
-                    <span className={cn(
-                        "font-medium truncate",
-                        (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
-                        (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
-                        healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
-                    )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
-                </div>
-                <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
+                <LinkTooltip bookmark={bookmark}>
+                    <div className="flex items-center gap-2 min-w-0">
+                        <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
+                        <span className={cn(
+                            "font-medium truncate",
+                            (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
+                            (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
+                            healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
+                        )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
+                </LinkTooltip>
 
                 <BookmarkTags
                     tags={bookmark.tags}
