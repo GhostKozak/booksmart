@@ -27,8 +27,6 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
                     let folder = prediction.folder ? prediction.folder.normalize("NFC").trim() : currentEffective;
                     if (!folder || folder.toLowerCase() === 'uncategorized') folder = currentEffective;
 
-                    console.log(`Debug Auto Sort: ${b.title} | Original: '${original}' | Current: '${currentEffective}' | New: '${folder}'`);
-
                     // Strict comparison against CURRENT state
                     const isSameFolder = folder === currentEffective ||
                         folder.toLocaleLowerCase() === currentEffective.toLocaleLowerCase() ||
@@ -43,7 +41,6 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
                         existingRuleTags.every(t => newRuleTags.includes(t));
 
                     if (isSameFolder && areTagsSame) {
-                        console.log(`Skipping update for ${b.title} because nothing changed (folder or tags).`);
                         return null;
                     }
 
@@ -62,13 +59,11 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
                 .filter(Boolean) // Filter out nulls
 
             if (updates.length > 0) {
-                console.log("Auto Sort Updates Payload:", updates); // DEBUG
                 if (onSortPreview) {
                     onSortPreview(updates);
                 } else {
                     // Fallback
                     await db.bookmarks.bulkPut(updates)
-                    console.log(`Updated ${updates.length} bookmarks with Auto Sort suggestions.`)
                     setSelectedIds(new Set())
                 }
 

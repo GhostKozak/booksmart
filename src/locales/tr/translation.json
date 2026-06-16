@@ -494,6 +494,7 @@
         "tagDeleted": "Etiket silindi",
         "sortApplied": "Akıllı Sıralama başarıyla uygulandı",
         "noteSaved": "Not kaydedildi",
+        "backupQuotaExceeded": "Otomatik yedekleme başarısız: depolama kotası aşıldı. Verilerinizi dışa aktarmayı düşünün.",
         "error": "Bir hata oluştu",
         "dbRestored": "Veritabanı başarıyla geri yüklendi",
         "collectionCreated": "Koleksiyon başarıyla oluşturuldu",

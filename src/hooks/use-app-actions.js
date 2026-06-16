@@ -54,7 +54,6 @@ export function useAppActions({
             description: t('actionbar.magicSort')
         })
 
-        console.log(`Applied ${updatesToApply.length} sort updates.`)
         useAppStore.getState().setSelectedIds(new Set())
         setPendingSortUpdates(null)
         toast.success(t('toast.sortApplied'))

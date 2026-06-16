@@ -498,6 +498,7 @@
         "aiTitlesFixed": "Fixed titles for {{count}} bookmarks.",
         "aiDupesFound": "{{count}} groups found.",
         "noteSaved": "Note saved",
+        "backupQuotaExceeded": "Auto-backup failed: storage quota exceeded. Consider exporting your data.",
         "error": "An error occurred",
         "dbRestored": "Database restored successfully",
         "collectionCreated": "Collection created successfully",

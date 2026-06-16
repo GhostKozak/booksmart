@@ -9,11 +9,7 @@ export const AI_MODELS = [
     { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
     { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
 
-    // --- Gemini 3.0 (Preview) ---
-    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (Preview)', provider: 'gemini' },
-    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)', provider: 'gemini' },
-
-    // --- Gemini 2.5 (Stable/Preview) ---
+    // --- Gemini 2.5 (Stable) ---
     { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'gemini' },
     { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'gemini' },
     { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', provider: 'gemini' },

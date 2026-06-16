@@ -1,3 +1,5 @@
+import { useState, useCallback } from 'react'
+
 const MAX_HISTORY = 50;
 
 export function useUndoRedo() {
