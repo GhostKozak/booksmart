@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowMobile({
@@ -126,6 +126,13 @@ export function BookmarkRowMobile({
                     allCollections={allCollections}
                     onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
                 />
+
+                {bookmark.note && (
+                    <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground/60 mt-0.5">
+                        <StickyNote className="w-3 h-3 mt-0.5 shrink-0" />
+                        <span className="line-clamp-2">{bookmark.note}</span>
+                    </div>
+                )}
             </div>
         </div>
     )

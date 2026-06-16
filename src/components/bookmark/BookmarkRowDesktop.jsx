@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -63,11 +63,17 @@ export function BookmarkRowDesktop({
                     onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
                 />
 
-                {bookmark.addDate && (
-                    <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground/60">
-                        <span>{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
-                    </div>
-                )}
+                <div className="flex items-center gap-1 mt-0.5">
+                    {bookmark.addDate && (
+                        <span className="text-[10px] text-muted-foreground/60">{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
+                    )}
+                    {bookmark.note && (
+                        <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5 ml-1" title={bookmark.note}>
+                            <StickyNote className="w-3 h-3" />
+                            {bookmark.note.length > 30 ? bookmark.note.slice(0, 30) + '...' : bookmark.note}
+                        </span>
+                    )}
+                </div>
 
                 {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
