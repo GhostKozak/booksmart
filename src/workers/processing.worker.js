@@ -68,6 +68,24 @@ const NEWS_DOMAINS = [
     'theguardian.com', 'washingtonpost.com', 'hurriyet.com.tr', 'sozcu.com.tr'
 ];
 
+function normalizeUrl(url) {
+    if (!url) return '';
+    try {
+        const parsed = new URL(url);
+        parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        parsed.protocol = parsed.protocol.toLowerCase();
+        if ((parsed.protocol === 'http:' && parsed.port === '80') ||
+            (parsed.protocol === 'https:' && parsed.port === '443')) {
+            parsed.port = '';
+        }
+        let normalized = parsed.href;
+        if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
+        return normalized;
+    } catch {
+        return url.trim().toLowerCase().replace(/\/+$/, '');
+    }
+}
+
 function domainMatch(url, domains) {
     url = (url || '').toLowerCase();
     return domains.some(d => {
@@ -196,7 +214,7 @@ const processData = ({
     // 6. Duplicate Detection Setup
     const urlMap = new Map();
     filtered.forEach(b => {
-        const u = b.url;
+        const u = normalizeUrl(b.url);
         if (!urlMap.has(u)) {
             urlMap.set(u, []);
         }
@@ -211,7 +229,7 @@ const processData = ({
         let conflictingFolders = [];
 
         // Check duplicate status
-        const siblings = urlMap.get(b.url);
+        const siblings = urlMap.get(normalizeUrl(b.url));
         const isMulti = siblings && siblings.length > 1;
         const indexInSiblings = siblings ? siblings.findIndex(s => s.id === b.id) : 0;
         const isDuplicate = isMulti && indexInSiblings > 0;
@@ -411,10 +429,11 @@ const processData = ({
         if (domainMatch(b.url, SHOPPING_DOMAINS)) shopping++;
         if (domainMatch(b.url, NEWS_DOMAINS)) news++;
         // Duplicate count
-        if (seenUrls.has(b.url)) {
+        const normalized = normalizeUrl(b.url);
+        if (seenUrls.has(normalized)) {
             duplicateCount++;
         } else {
-            seenUrls.add(b.url);
+            seenUrls.add(normalized);
         }
     });
 
