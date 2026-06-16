@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export const useAppStore = create((set, get) => ({
     // --- UI Slice ---
-    isSidebarOpen: window.innerWidth >= 1024,
+    isSidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 1024 : true,
     setIsSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
 
     collapsedSections: { tags: false, folders: false, filters: false, rules: false, collections: false },
