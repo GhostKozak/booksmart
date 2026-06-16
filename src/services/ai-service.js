@@ -262,11 +262,12 @@ async function callGemini(messages, apiKey, model, asJson = true, signal) {
 function cleanJsonString(text) {
     if (!text) return "{}";
     let cleaned = text.trim();
-    // Remove markdown code blocks if present
-    if (cleaned.startsWith('```')) {
-        cleaned = cleaned.replace(/^```(?:json)?/, '').replace(/```$/, '');
+    // Remove markdown code blocks — handles multi-line fences and extra backticks
+    const fenceMatch = cleaned.match(/^`{3,}(?:json)?\s*\n?([\s\S]*?)`{3,}\s*$/);
+    if (fenceMatch) {
+        cleaned = fenceMatch[1].trim();
     }
-    return cleaned.trim();
+    return cleaned;
 }
 
 /**
