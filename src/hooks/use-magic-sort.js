@@ -47,8 +47,6 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
                     const original = (b.originalFolder || 'Uncategorized').normalize("NFC").trim();
                     const currentEffective = (b.newFolder || b.originalFolder || 'Uncategorized').normalize("NFC").trim();
 
-                    console.log(`Debug Magic Sort: ${b.title} | Original: '${original}' | Current: '${currentEffective}' | New: '${folder}'`);
-
                     // Strict comparison against CURRENT state (so we don't re-suggest if already sorted)
                     const isSameFolder = folder === currentEffective ||
                         folder.toLocaleLowerCase() === currentEffective.toLocaleLowerCase() ||
@@ -69,7 +67,6 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
                     // (since we only add, if length is same, then all new tags were already present)
 
                     if (isSameFolder && areTagsSame) {
-                        console.log(`Skipping update for ${b.title} because folder is same and no new tags.`);
                         return null; // Don't include in updates
                     }
 
@@ -94,11 +91,8 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
                 } else {
                     // Fallback if no preview handler provided (shouldn't happen in new flow)
                     await db.bookmarks.bulkPut(updates)
-                    console.log(`Updated ${updates.length} bookmarks with AI suggestions.`)
                     setSelectedIds(new Set())
                 }
-            } else {
-                console.warn("AI returned results but no matching bookmarks were found in rawBookmarks or results were empty.", results)
             }
 
         } catch (error) {
