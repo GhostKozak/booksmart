@@ -1,5 +1,5 @@
 import { db } from './schema';
-import { generateUUID } from '../lib/utils';
+import { generateUUID, pickTagColor } from '../lib/utils';
 
 let isMigrating = false;
 
@@ -26,7 +26,7 @@ export async function migrateFromLocalStorage() {
         // Parse Tags (Handle legacy string[] vs object[])
         const tags = tagsRaw.map((t, index) => {
             if (typeof t === 'string') {
-                return { id: generateUUID(), name: t, color: '#10b981', order: index };
+                return { id: generateUUID(), name: t, color: pickTagColor(t), order: index };
             }
             return t;
         });

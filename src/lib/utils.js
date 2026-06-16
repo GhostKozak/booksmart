@@ -5,6 +5,17 @@ export function cn(...inputs) {
     return twMerge(clsx(inputs))
 }
 
+const TAG_COLORS = ['#f43f5e','#ec4899','#a855f7','#8b5cf6','#6366f1','#3b82f6','#0ea5e9','#06b6d4','#14b8a6','#10b981','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
+
+export function pickTagColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = ((hash << 5) - hash) + name.charCodeAt(i);
+        hash |= 0;
+    }
+    return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+}
+
 export function generateUUID() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();

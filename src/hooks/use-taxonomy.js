@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
-import { generateUUID } from '../lib/utils'
+import { generateUUID, pickTagColor } from '../lib/utils'
 
 const EMPTY_ARRAY = []
 
@@ -56,7 +56,7 @@ export function useTaxonomy({ workerUniqueTags, workerUniqueFolders }) {
 
     const saveToTaxonomy = async (name, type) => {
         if (type === 'tag') {
-            await db.tags.add({ id: generateUUID(), name, color: '#10b981', order: availableTags.length })
+            await db.tags.add({ id: generateUUID(), name, color: pickTagColor(name), order: availableTags.length })
         } else {
             await db.folders.add({ id: generateUUID(), name, color: '#3b82f6', order: availableFolders.length })
         }

@@ -1,5 +1,5 @@
 import { db } from './schema';
-import { generateUUID } from '../lib/utils';
+import { generateUUID, pickTagColor } from '../lib/utils';
 
 // Helper to seed defaults if empty (and not migrated)
 export async function seedDefaults() {
@@ -20,7 +20,7 @@ export async function seedDefaults() {
         const defaultTags = ['important', 'read-later', 'tutorial', 'tool', 'inspiration'].map((name, index) => ({
             id: generateUUID(),
             name,
-            color: '#10b981',
+            color: pickTagColor(name),
             order: index
         }));
         await db.tags.bulkAdd(defaultTags);

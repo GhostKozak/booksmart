@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { db } from '../db'
-import { generateUUID } from '../lib/utils'
+import { generateUUID, pickTagColor } from '../lib/utils'
 import { cleanUrl, countCleanableUrls } from '../lib/url-cleaner'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -234,7 +234,6 @@ export function useBookmarkOperations({
             const originalStates = bookmarksToUpdate.map(b => ({ id: b.id, tags: b.tags }))
 
             await db.transaction('rw', db.bookmarks, db.tags, async () => {
-                const distinctColor = '#10b981'
                 const allExistingTags = await db.tags.toArray()
                 const existingTagNames = new Set(allExistingTags.map(t => t.name))
 
@@ -243,7 +242,7 @@ export function useBookmarkOperations({
                     await db.tags.bulkAdd(tagsToCreate.map(t => ({
                         id: generateUUID(),
                         name: t,
-                        color: distinctColor,
+                        color: pickTagColor(t),
                         order: allExistingTags.length
                     })))
                 }

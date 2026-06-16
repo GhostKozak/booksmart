@@ -148,6 +148,6 @@ describe('useTaxonomy hook', () => {
 
         const tag = await db.tags.where('name').equals('New Tag').first();
         expect(tag).toBeDefined();
-        expect(tag.color).toBe('#10b981'); // Default tag color
+        expect(tag.color).toMatch(/^#[0-9a-f]{6}$/); // Picked from palette
     });
 });
