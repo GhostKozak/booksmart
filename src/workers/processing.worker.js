@@ -157,24 +157,9 @@ const processData = ({
     }
 
     // 4. Folder Filter
+    // Filters by the persisted newFolder (from previous rule/AI runs) or original folder.
+    // Rule application happens later in step 7, so the filtered set reflects the persisted state.
     if (activeFolder) {
-        // Note: We need to filter based on the *processed* folder (newFolder), 
-        // but at this stage we haven't applied rules yet if we do it in this order.
-        // However, the original code applied filters then rules.
-        // Wait, the original code applied filters *before* rule processing logic?
-        // Let's check App.jsx:
-        // It filters `rawBookmarks` into `filtered`.
-        // Then it maps `filtered` to `processed`.
-        // Inside `processed`, it determines `newFolder`.
-        // BUT the original filter logic (lines 258-260) checked:
-        // `if (activeFolder) filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)`
-        // This implies `newFolder` might already be there? No, `rawBookmarks` usually don't have `newFolder` unless persisted.
-        // If the intention is to filter by the *resulting* folder, we should apply rules first?
-        // In `App.jsx`, the "Folder Filter" (0.55) runs on `filtered` which comes from `rawBookmarks`.
-        // `rawBookmarks` are from `db.bookmarks`.
-        // If `db.bookmarks` stores `newFolder`, then it's fine.
-        // If `newFolder` is purely derived at runtime from rules, then filtering before rules means we filter based on *persisted* newFolder.
-        // Let's assume the standard behavior: Filter based on current state.
         filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)
     }
 
