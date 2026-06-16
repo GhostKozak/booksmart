@@ -48,7 +48,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
                     onSortPreview(updates);
                 } else {
                     await db.bookmarks.bulkPut(updates);
-                    toast.success(`Fixed titles for ${updates.length} bookmarks.`);
+                    toast.success(t('toast.aiTitlesFixed', { count: updates.length }));
                     setSelectedIds(new Set());
                 }
             } else {
@@ -120,7 +120,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
                         onSortPreview(updates);
                     } else {
                         await db.bookmarks.bulkPut(updates);
-                        toast.success(`${groups.length} groups found.`);
+                        toast.success(t('toast.aiDupesFound', { count: groups.length }));
                         setSelectedIds(new Set());
                     }
                 } else {

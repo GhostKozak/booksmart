@@ -493,6 +493,8 @@
         "tagUpdated": "Tag updated successfully",
         "tagDeleted": "Tag deleted",
         "sortApplied": "Smart Sort applied successfully",
+        "aiTitlesFixed": "Fixed titles for {{count}} bookmarks.",
+        "aiDupesFound": "{{count}} groups found.",
         "noteSaved": "Note saved",
         "error": "An error occurred",
         "dbRestored": "Database restored successfully",
