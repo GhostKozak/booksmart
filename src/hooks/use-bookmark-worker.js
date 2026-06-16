@@ -8,6 +8,7 @@ export function useBookmarkWorker({
     searchMode,
     activeTag,
     activeFolder,
+    activeCollection,
     smartFilter,
     dateFilter,
     sortBy,
@@ -89,13 +90,14 @@ export function useBookmarkWorker({
                 searchMode,
                 activeTag,
                 activeFolder,
+                activeCollection,
                 smartFilter,
                 dateFilter,
                 sortBy,
                 fuseOptions
             }
         })
-    }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, smartFilter, dateFilter, sortBy, fuseOptions])
+    }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, activeCollection, smartFilter, dateFilter, sortBy, fuseOptions])
 
     const checkAllLinks = useCallback(async () => {
         if (!workerRef.current) {

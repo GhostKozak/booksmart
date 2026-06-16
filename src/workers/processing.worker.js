@@ -104,6 +104,7 @@ const processData = ({
     searchMode,
     activeTag,
     activeFolder,
+    activeCollection,
     smartFilter,
     dateFilter,
     sortBy,
@@ -211,7 +212,12 @@ const processData = ({
         filtered = filtered.filter(b => domainMatch(b.url, NEWS_DOMAINS));
     }
 
-    // 6. Duplicate Detection Setup
+    // 6. Collection Filter
+    if (activeCollection) {
+        filtered = filtered.filter(b => b.collections && b.collections.includes(activeCollection))
+    }
+
+    // 7. Duplicate Detection Setup
     const urlMap = new Map();
     filtered.forEach(b => {
         const u = normalizeUrl(b.url);
@@ -221,7 +227,7 @@ const processData = ({
         urlMap.get(u).push({ id: b.id, folder: b.originalFolder });
     });
 
-    // 7. Rule Application & Processing
+    // 8. Rule Application & Processing
     const processed = filtered.map(b => {
         let matchedRules = [];
         let newFolder = b.newFolder || b.originalFolder;
@@ -335,7 +341,7 @@ const processData = ({
         };
     });
 
-    // 8. Sorting
+    // 9. Sorting
     processed.sort((a, b) => {
         const aDup = a.isDuplicate || a.hasDuplicate;
         const bDup = b.isDuplicate || b.hasDuplicate;
@@ -356,7 +362,7 @@ const processData = ({
         return 0;
     });
 
-    // 8b. User-requested Sorting
+    // 9b. User-requested Sorting
     if (sortBy && sortBy !== 'default') {
         const getDomain = (url) => {
             try { return new URL(url).hostname.replace('www.', ''); } catch { return url || ''; }
@@ -388,7 +394,7 @@ const processData = ({
         });
     }
 
-    // 9. Statistics Calculation (single pass over bookmarks)
+    // 10. Statistics Calculation (single pass over bookmarks)
     const tagsMap = new Map();
     const foldersMap = new Map();
     const seenUrls = new Set();

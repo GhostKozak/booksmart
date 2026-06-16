@@ -101,7 +101,7 @@ function App() {
   const worker = useBookmarkWorker({
     rawBookmarks, rules,
     searchQuery, searchMode,
-    activeTag, activeFolder,
+    activeTag, activeFolder, activeCollection,
     smartFilter, dateFilter,
     sortBy, fuseOptions
   })
@@ -205,17 +205,11 @@ function App() {
   const hasFileLoaded = rawBookmarks.length > 0
   const isOnboardingActive = !hasFileLoaded && showOnboarding
 
-  // ── Collection filtering ──
+  // ── Merge pending AI sort preview updates ──
   const collectionFilteredBookmarks = useMemo(() => {
-    let base = worker.displayBookmarks
-    if (activeCollection) {
-      base = base.filter(b => b.collections && b.collections.includes(activeCollection))
-    }
-
-    // Merge pending AI updates so we see "Eski -> Yeni" transitions in the list
     if (actions.pendingSortUpdates && actions.pendingSortUpdates.length > 0) {
       const updatesMap = new Map(actions.pendingSortUpdates.map(u => [u.id, u]))
-      return base.map(b => {
+      return worker.displayBookmarks.map(b => {
         const update = updatesMap.get(b.id)
         if (update) {
           return { ...b, ...update }
@@ -223,9 +217,8 @@ function App() {
         return b
       })
     }
-
-    return base
-  }, [worker.displayBookmarks, activeCollection, actions.pendingSortUpdates])
+    return worker.displayBookmarks
+  }, [worker.displayBookmarks, actions.pendingSortUpdates])
 
   // ── Render ──
   return (
