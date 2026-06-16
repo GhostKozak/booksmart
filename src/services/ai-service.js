@@ -365,18 +365,18 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
     const systemPrompt = `You are a helpful assistant. Summarize the main content, topic, and purpose of the given URL or text in a short paragraph (2-3 sentences). Write the summary in the same language as the website content. Do not include introductory phrases.`;
 
     let pageText = `URL: ${url}`;
+    // Try direct fetch first — privacy-first approach, no third-party proxy.
+    // If CORS blocks it, we fall back to just the URL for AI summarization.
     try {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const res = await fetch(proxyUrl, { signal: abortSignal });
-        const data = await res.json();
-        if (data.contents) {
-            // Strip html tags roughly
-            const doc = new DOMParser().parseFromString(data.contents, 'text/html');
-            const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 15000) : data.contents.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').substring(0, 15000);
+        const res = await fetch(url, { signal: abortSignal });
+        if (res.ok) {
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 15000) : html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').substring(0, 15000);
             pageText = `Content from URL (${url}):\n\n${textOnly}`;
         }
     } catch (e) {
-        console.warn("Failed to fetch proxy content, falling back to URL only", e);
+        console.warn("Could not fetch page content directly (CORS), summarizing from URL only.", e);
     }
 
     const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
