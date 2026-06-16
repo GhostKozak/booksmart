@@ -13,16 +13,19 @@ vi.mock('react-i18next', () => ({
 // But standard Radix UI Dialog might need a root provider or proper triggering
 // For speed, let's assume Dialog behaves like a standard div/modal for tests
 
-// Mock LocalStorage
-const localStorageMock = (() => {
+// Mock Storage (sessionStorage for sensitive keys, localStorage for fallback)
+const createStorageMock = () => {
     let store = {};
     return {
         getItem: vi.fn(key => store[key] || null),
         setItem: vi.fn((key, value) => { store[key] = value.toString(); }),
         clear: vi.fn(() => { store = {}; })
     };
-})();
+};
+const localStorageMock = createStorageMock();
+const sessionStorageMock = createStorageMock();
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
 
 describe('SettingsModal', () => {
     const defaultProps = {
@@ -34,6 +37,7 @@ describe('SettingsModal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorageMock.clear();
+        sessionStorageMock.clear();
     });
 
     it('renders correctly when open', () => {
@@ -43,9 +47,9 @@ describe('SettingsModal', () => {
         expect(screen.getByLabelText('settings.ai.apiKey')).toBeInTheDocument();
     });
 
-    it('loads settings from localStorage on open', () => {
-        localStorageMock.setItem('bs_api_key', 'test-key');
-        localStorageMock.setItem('bs_model', 'gpt-4o');
+    it('loads settings from sessionStorage on open', () => {
+        sessionStorageMock.setItem('bs_api_key', 'test-key');
+        sessionStorageMock.setItem('bs_model', 'gpt-4o');
 
         render(<SettingsModal {...defaultProps} />);
 
@@ -74,9 +78,9 @@ describe('SettingsModal', () => {
 
         fireEvent.click(screen.getByText('modals.settings.saveContinue'));
 
-        expect(localStorageMock.setItem).toHaveBeenCalledWith('bs_api_key', 'save-key');
-        expect(localStorageMock.setItem).toHaveBeenCalledWith('bs_model', 'gpt-4o');
-        expect(localStorageMock.setItem).toHaveBeenCalledWith('bs_provider', 'openai');
+        expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_api_key', 'save-key');
+        expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_model', 'gpt-4o');
+        expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_provider', 'openai');
 
         expect(defaultProps.onSave).toHaveBeenCalled();
         expect(defaultProps.onClose).toHaveBeenCalled();
