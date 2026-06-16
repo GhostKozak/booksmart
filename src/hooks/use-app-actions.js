@@ -81,12 +81,13 @@ export function useAppActions({
                 return
             }
         }
-        await db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, async () => {
+        await db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, db.collections, async () => {
             await db.bookmarks.clear()
             await db.rules.clear()
             await db.folders.clear()
             await db.tags.clear()
             await db.ignoredUrls.clear()
+            await db.collections.clear()
         })
         useAppStore.getState().setSelectedIds(new Set())
         useAppStore.getState().setShowBackupModal(false)
@@ -96,9 +97,13 @@ export function useAppActions({
     const clearAll = useCallback(() => useAppStore.getState().setShowBackupModal(true), [])
 
     const closeFile = useCallback(() => {
-        db.transaction('rw', db.bookmarks, db.rules, async () => {
+        db.transaction('rw', db.bookmarks, db.rules, db.folders, db.tags, db.ignoredUrls, db.collections, async () => {
             await db.bookmarks.clear()
             await db.rules.clear()
+            await db.folders.clear()
+            await db.tags.clear()
+            await db.ignoredUrls.clear()
+            await db.collections.clear()
         })
         const store = useAppStore.getState()
         store.setSelectedIds(new Set())
