@@ -91,7 +91,7 @@ describe('useBookmarkOperations', () => {
     });
 
     it('removeDuplicates should identify and delete duplicates', async () => {
-        db.bookmarks.bulkGet.mockResolvedValueOnce([rawBookmarks[2]]);
+        db.bookmarks.bulkGet.mockResolvedValueOnce([rawBookmarks[1]]);
 
         const { result } = renderHook(() => useBookmarkOperations(defaultProps));
 
@@ -99,7 +99,7 @@ describe('useBookmarkOperations', () => {
             await result.current.removeDuplicates();
         });
 
-        expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['3']);
+        expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['2']);
         expect(defaultProps.addCommand).toHaveBeenCalled();
     });
 
