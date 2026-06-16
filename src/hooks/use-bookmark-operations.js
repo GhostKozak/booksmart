@@ -22,13 +22,14 @@ export function useBookmarkOperations({
     const removeDuplicates = async () => {
         const urls = new Set()
         const toDeleteIds = []
-        const sortedBookmarks = [...rawBookmarks].sort((a, b) => a.addDate - b.addDate)
+        const sortedBookmarks = [...rawBookmarks].sort((a, b) => b.addDate - a.addDate)
 
         sortedBookmarks.forEach(b => {
-            if (urls.has(b.url)) {
+            const normalized = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+            if (urls.has(normalized)) {
                 toDeleteIds.push(b.id)
             } else {
-                urls.add(b.url)
+                urls.add(normalized)
             }
         })
 
