@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+const MAX_HISTORY = 50;
 
 export function useUndoRedo() {
     const [past, setPast] = useState([]);
@@ -8,8 +8,10 @@ export function useUndoRedo() {
     const canRedo = future.length > 0;
 
     const addCommand = useCallback((command) => {
-        // command: { undo: () => Promise<void>, redo: () => Promise<void>, description: string }
-        setPast((prev) => [...prev, command]);
+        setPast((prev) => {
+            const next = [...prev, command];
+            return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
+        });
         setFuture([]); // Clear future on new action
     }, []);
 
