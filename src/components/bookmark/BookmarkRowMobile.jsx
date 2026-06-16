@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowMobile({
@@ -17,6 +17,7 @@ export function BookmarkRowMobile({
     toggleSelection,
     toggleIgnoreUrl,
     onPreview,
+    onEdit,
     availableFolders,
     availableTags,
     allCollections,
@@ -46,6 +47,16 @@ export function BookmarkRowMobile({
                         )}>{bookmark.title || t('common.untitled')}</span>
 
                         <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-7 h-7 text-muted-foreground"
+                                onClick={() => onEdit?.(bookmark)}
+                                title={t('common.edit')}
+                                aria-label={t('common.edit')}
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </Button>
                             <Button
                                 variant="ghost"
                                 size="icon"

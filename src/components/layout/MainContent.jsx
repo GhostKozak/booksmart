@@ -31,6 +31,8 @@ export function MainContent({
     handleBatchMoveDocs,
     // Preview
     previewBookmark, handlePreview, setPreviewBookmark,
+    // Edit
+    onEditBookmark,
     // Onboarding
     loadDemoData
 }) {
@@ -155,6 +157,7 @@ export function MainContent({
                                     ignoredUrls={ignoredUrls}
                                     toggleIgnoreUrl={toggleIgnoreUrl}
                                     onPreview={handlePreview}
+                                    onEdit={onEditBookmark}
                                     availableFolders={availableFolders}
                                     availableTags={availableTags}
                                     allCollections={allCollections}
@@ -166,6 +169,7 @@ export function MainContent({
                                     selectedIds={selectedIds}
                                     toggleSelection={toggleSelection}
                                     onPreview={handlePreview}
+                                    onEdit={onEditBookmark}
                                     showThumbnails={showThumbnails}
                                     availableFolders={availableFolders}
                                     availableTags={availableTags}

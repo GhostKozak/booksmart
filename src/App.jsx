@@ -44,6 +44,7 @@ const ClearAllModal = lazy(() => import('./components/modals/ClearAllModal').the
 const ShortcutsModal = lazy(() => import('./components/modals/ShortcutsModal').then(m => ({ default: m.ShortcutsModal })))
 const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirmationModal').then(m => ({ default: m.SortConfirmationModal })))
 const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
+const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').then(m => ({ default: m.EditBookmarkModal })))
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -67,6 +68,7 @@ function App() {
     showBackupModal, setShowBackupModal,
     isShortcutsOpen, setIsShortcutsOpen,
     isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection,
+    editingBookmark, setEditingBookmark,
     previewBookmark, setPreviewBookmark,
     showOnboarding
   } = useAppStore()
@@ -193,6 +195,24 @@ function App() {
     setPreviewBookmark(bookmark)
   }, [setPreviewBookmark])
 
+  const handleEdit = useCallback((bookmark) => {
+    setEditingBookmark(bookmark)
+  }, [setEditingBookmark])
+
+  const handleEditSave = useCallback(async ({ id, title, url, note }) => {
+    const previous = await db.bookmarks.get(id)
+    await db.bookmarks.update(id, { title, url, note })
+    addCommand({
+      undo: async () => {
+        if (previous) await db.bookmarks.update(id, previous)
+      },
+      redo: async () => {
+        await db.bookmarks.update(id, { title, url, note })
+      },
+      description: t('bookmarks.editModal.undoDesc', { title: previous?.title || title })
+    })
+  }, [addCommand, t])
+
   // ── Auto-Backup ──
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -291,6 +311,7 @@ function App() {
           previewBookmark={previewBookmark}
           setPreviewBookmark={setPreviewBookmark}
           handlePreview={handlePreview}
+          onEditBookmark={handleEdit}
         />
 
         <FloatingActionBar
@@ -339,6 +360,15 @@ function App() {
                   await collectionsHook.createCollection(data)
                 }
               }}
+            />
+          )}
+
+          {editingBookmark && (
+            <EditBookmarkModal
+              isOpen={!!editingBookmark}
+              onClose={() => setEditingBookmark(null)}
+              bookmark={editingBookmark}
+              onSave={handleEditSave}
             />
           )}
         </Suspense>

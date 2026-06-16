@@ -158,6 +158,7 @@
         }
     },
     "common": {
+        "title": "Titel",
         "save": "Speichern",
         "cancel": "Abbrechen",
         "delete": "Löschen",
@@ -457,6 +458,11 @@
         "row": {
             "added": "Hinzugefügt {{time}}",
             "duplicateIn": "Duplikat in: {{locations}}"
+        },
+        "editModal": {
+            "title": "Lesezeichen bearbeiten",
+            "titlePlaceholder": "Lesezeichen-Titel",
+            "undoDesc": "„{{title}}\" bearbeitet"
         }
     },
     "main": {

@@ -158,6 +158,7 @@
         }
     },
     "common": {
+        "title": "Başlık",
         "save": "Kaydet",
         "cancel": "İptal",
         "delete": "Sil",
@@ -456,8 +457,13 @@
             "unignore": "Yoksaymayı Kaldır"
         },
         "row": {
-            "added": "Eklendi {{time}}",
-            "duplicateIn": "Şurada kopya: {{locations}}"
+            "added": "Eklenme: {{time}}",
+            "duplicateIn": "Şununla yinelenen: {{locations}}"
+        },
+        "editModal": {
+            "title": "Yer İmini Düzenle",
+            "titlePlaceholder": "Yer imi başlığı",
+            "undoDesc": "\"{{title}}\" düzenlendi"
         }
     },
     "main": {

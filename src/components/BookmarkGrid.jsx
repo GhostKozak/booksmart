@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
@@ -88,6 +88,19 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    context.onEdit?.(bookmark);
+                                }}
+                                title={t('common.edit')}
+                                aria-label={t('common.edit')}
+                            >
+                                <Pencil className="w-3 h-3" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     context.onPreview(bookmark);
                                 }}
                                 title={t('preview.open')}
@@ -123,6 +136,19 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                         </div>
                         {!showThumbnails && (
                             <div className="flex items-center gap-1 mt-0.5 shrink-0">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        context.onEdit?.(bookmark);
+                                    }}
+                                    title={t('common.edit')}
+                                    aria-label={t('common.edit')}
+                                >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -203,7 +229,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
     );
 };
 
-export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, showThumbnails, availableFolders = [], availableTags = [] }) {
+export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, onEdit, showThumbnails, availableFolders = [], availableTags = [] }) {
 
 
     // Define the grid item structure
@@ -239,9 +265,10 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                 selectedIds,
                 toggleSelection,
                 onPreview,
+                onEdit,
                 showThumbnails,
                 availableFolders,
-                availableTags // Although not used here yet (no tags in grid), passing for consistency/future
+                availableTags
             }}
             data={displayData}
             itemContent={ItemContent}

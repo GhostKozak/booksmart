@@ -160,6 +160,7 @@
         }
     },
     "common": {
+        "title": "Title",
         "save": "Save",
         "cancel": "Cancel",
         "delete": "Delete",
@@ -460,6 +461,11 @@
         "row": {
             "added": "Added {{time}}",
             "duplicateIn": "Duplicate in: {{locations}}"
+        },
+        "editModal": {
+            "title": "Edit Bookmark",
+            "titlePlaceholder": "Bookmark title",
+            "undoDesc": "Edit \"{{title}}\""
         }
     },
     "main": {

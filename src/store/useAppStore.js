@@ -19,6 +19,9 @@ export const useAppStore = create((set, get) => ({
     previewBookmark: null,
     setPreviewBookmark: (bookmark) => set({ previewBookmark: bookmark }),
 
+    editingBookmark: null,
+    setEditingBookmark: (bookmark) => set({ editingBookmark: bookmark }),
+
     searchQuery: '',
     setSearchQuery: (query) => set({ searchQuery: query }),
 

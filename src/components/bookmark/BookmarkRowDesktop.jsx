@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -18,6 +18,7 @@ export function BookmarkRowDesktop({
     toggleSelection,
     toggleIgnoreUrl,
     onPreview,
+    onEdit,
     availableFolders,
     availableTags,
     allCollections,
@@ -133,8 +134,18 @@ export function BookmarkRowDesktop({
                 />
             </div>
 
-            {/* Preview Button (Col 6) */}
-            <div className="flex justify-center">
+            {/* Action Buttons (Col 6) */}
+            <div className="flex justify-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-primary/10 w-8 h-8 hover:text-primary transition-colors"
+                    onClick={() => onEdit?.(bookmark)}
+                    title={t('common.edit')}
+                    aria-label={t('common.edit')}
+                >
+                    <Pencil className="w-4 h-4" />
+                </Button>
                 <Button
                     variant="ghost"
                     size="icon"

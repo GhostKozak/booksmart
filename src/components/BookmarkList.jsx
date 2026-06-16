@@ -5,14 +5,14 @@ import { BookmarkRow } from './BookmarkRow'
 import { cn } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 
-export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) {
+export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) {
     // Determine if all visible/loaded bookmarks are selected
     const { t } = useTranslation();
     const isAllSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length
 
     // Common grid layout to ensure perfect alignment
     // Checkbox | Eye | Title | Location | Status | Health
-    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,2fr)_minmax(0,1.5fr)_90px_90px_60px] lg:gap-4 lg:items-center lg:px-4 lg:pr-6"
+    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,2fr)_minmax(0,1.5fr)_90px_90px_80px] lg:gap-4 lg:items-center lg:px-4 lg:pr-6"
 
     const header = (
         <div className={cn(
@@ -59,6 +59,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                         ignoredUrls,
                         toggleIgnoreUrl,
                         onPreview,
+                        onEdit,
                         availableFolders,
                         availableTags,
                         allCollections,
@@ -74,6 +75,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                             ignoredUrls={context.ignoredUrls}
                             toggleIgnoreUrl={context.toggleIgnoreUrl}
                             onPreview={context.onPreview}
+                            onEdit={context.onEdit}
                             className={gridLayout}
                             availableFolders={context.availableFolders}
                             availableTags={context.availableTags}
