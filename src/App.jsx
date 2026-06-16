@@ -2,7 +2,7 @@
  * BookSmart - Copyright (C) 2026 BookSmart Contributors
  * Licensed under the GNU GPLv3 or later.
  */
-import { useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
+import { useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { useTaxonomy } from './hooks/use-taxonomy'
 import { useAppActions } from './hooks/use-app-actions'
@@ -87,6 +87,7 @@ function App() {
   }, [initTheme])
 
   // ── Data from IndexedDB ──
+  const searchInputRef = useRef(null)
   const rawBookmarks = useLiveQuery(() => db.bookmarks.toArray()) || EMPTY_ARRAY
   const rules = useLiveQuery(() => db.rules.toArray()) || EMPTY_ARRAY
 
@@ -184,7 +185,7 @@ function App() {
     bookmarks: worker.bookmarks,
     handleBatchDelete: operations.handleBatchDelete,
     undo, redo,
-    searchInputRef: { current: document.querySelector('input[type="search"]') },
+    searchInputRef,
     setIsShortcutsOpen
   })
 
@@ -242,6 +243,7 @@ function App() {
           hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
           bookmarkCount={worker.bookmarks.length}
           clearAll={actions.clearAll}
+          searchInputRef={searchInputRef}
         />
       </div>
 

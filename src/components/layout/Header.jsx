@@ -20,6 +20,7 @@ export function Header({
     openExportModal,
     // File
     hasFileLoaded, closeFile, bookmarkCount, clearAll,
+    searchInputRef
 }) {
     const { t, i18n } = useTranslation()
     const [isMobileSearchActive, setIsMobileSearchActive] = useState(false)
@@ -118,6 +119,7 @@ export function Header({
                     <div className="relative flex-1 min-w-0">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
+                            ref={searchInputRef}
                             type="search"
                             aria-label={t('app.searchPlaceholder')}
                             placeholder={searchMode === 'regex' ? t('header.regexPlaceholder') : t('app.searchPlaceholder')}
