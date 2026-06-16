@@ -271,7 +271,18 @@ export function useCollections({ addCommand }) {
             })
         }
 
-        await navigator.clipboard.writeText(output)
+        try {
+            await navigator.clipboard.writeText(output)
+        } catch {
+            const textarea = document.createElement('textarea')
+            textarea.value = output
+            textarea.style.position = 'fixed'
+            textarea.style.opacity = '0'
+            document.body.appendChild(textarea)
+            textarea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textarea)
+        }
         toast.success(t('collections.share.copied', { count: bookmarks.length }))
     }, [t])
 
