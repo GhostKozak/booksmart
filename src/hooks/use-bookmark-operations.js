@@ -33,7 +33,7 @@ export function useBookmarkOperations({
         })
 
         if (toDeleteIds.length > 0) {
-            const bookmarksToDelete = await db.bookmarks.bulkGet(toDeleteIds)
+            const bookmarksToDelete = (await db.bookmarks.bulkGet(toDeleteIds)).filter(Boolean)
             await db.bookmarks.bulkDelete(toDeleteIds)
 
             addCommand({
@@ -121,7 +121,7 @@ export function useBookmarkOperations({
     const handleBatchDelete = useCallback(async () => {
         const idsToDelete = [...selectedIds]
         if (idsToDelete.length > 0) {
-            const bookmarksToDelete = await db.bookmarks.bulkGet(idsToDelete)
+            const bookmarksToDelete = (await db.bookmarks.bulkGet(idsToDelete)).filter(Boolean)
             await db.bookmarks.bulkDelete(idsToDelete)
 
             addCommand({
