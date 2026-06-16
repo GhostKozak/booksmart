@@ -163,6 +163,8 @@
         "cancel": "İptal",
         "delete": "Sil",
         "edit": "Düzenle",
+        "add": "Ekle",
+        "remove": "Kaldır",
         "create": "Oluştur",
         "actions": "İşlemler",
         "cancelled": "İptal Edildi",
@@ -463,6 +465,8 @@
         "editModal": {
             "title": "Yer İmini Düzenle",
             "titlePlaceholder": "Yer imi başlığı",
+            "folderPlaceholder": "Klasör seçin veya yazın",
+            "tagsPlaceholder": "Etiket yazıp Enter'a basın",
             "undoDesc": "\"{{title}}\" düzenlendi"
         }
     },

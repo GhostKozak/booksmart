@@ -199,15 +199,18 @@ function App() {
     setEditingBookmark(bookmark)
   }, [setEditingBookmark])
 
-  const handleEditSave = useCallback(async ({ id, title, url, note }) => {
+  const handleEditSave = useCallback(async ({ id, title, url, note, folder, tags }) => {
     const previous = await db.bookmarks.get(id)
-    await db.bookmarks.update(id, { title, url, note })
+    const updates = { title, url, note }
+    if (folder !== undefined) updates.newFolder = folder
+    if (tags !== undefined) updates.tags = tags
+    await db.bookmarks.update(id, updates)
     addCommand({
       undo: async () => {
         if (previous) await db.bookmarks.update(id, previous)
       },
       redo: async () => {
-        await db.bookmarks.update(id, { title, url, note })
+        await db.bookmarks.update(id, updates)
       },
       description: t('bookmarks.editModal.undoDesc', { title: previous?.title || title })
     })
@@ -369,6 +372,8 @@ function App() {
               onClose={() => setEditingBookmark(null)}
               bookmark={editingBookmark}
               onSave={handleEditSave}
+              availableFolders={taxonomy.availableFolders}
+              availableTags={taxonomy.availableTags}
             />
           )}
         </Suspense>

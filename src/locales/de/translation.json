@@ -163,6 +163,8 @@
         "cancel": "Abbrechen",
         "delete": "Löschen",
         "edit": "Bearbeiten",
+        "add": "Hinzufügen",
+        "remove": "Entfernen",
         "create": "Erstellen",
         "actions": "Aktionen",
         "cancelled": "Abgebrochen",
@@ -462,6 +464,8 @@
         "editModal": {
             "title": "Lesezeichen bearbeiten",
             "titlePlaceholder": "Lesezeichen-Titel",
+            "folderPlaceholder": "Ordner auswählen oder eingeben",
+            "tagsPlaceholder": "Tag eingeben und Enter drücken",
             "undoDesc": "„{{title}}\" bearbeitet"
         }
     },

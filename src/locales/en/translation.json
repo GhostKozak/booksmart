@@ -165,6 +165,8 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",
+        "add": "Add",
+        "remove": "Remove",
         "create": "Create",
         "actions": "Actions",
         "cancelled": "Cancelled",
@@ -465,6 +467,8 @@
         "editModal": {
             "title": "Edit Bookmark",
             "titlePlaceholder": "Bookmark title",
+            "folderPlaceholder": "Select or type a folder",
+            "tagsPlaceholder": "Type tag and press Enter",
             "undoDesc": "Edit \"{{title}}\""
         }
     },
