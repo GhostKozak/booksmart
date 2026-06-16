@@ -117,15 +117,50 @@ export const parseJson = (jsonContent) => {
 };
 
 /**
+ * Parse a single CSV line respecting RFC 4180 quoting rules.
+ * Handles quoted fields with commas, escaped quotes (""), and empty fields.
+ */
+function parseCsvLine(line) {
+    const parts = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+
+        if (inQuotes) {
+            if (char === '"' && nextChar === '"') {
+                current += '"';
+                i++;
+            } else if (char === '"') {
+                inQuotes = false;
+            } else {
+                current += char;
+            }
+        } else {
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === ',') {
+                parts.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+    }
+    parts.push(current);
+
+    return parts;
+}
+
+/**
  * Parses CSV content.
  * Expected headers: Title, URL, Folder, Tags, Date Added
  */
 export const parseCsv = (csvContent) => {
     const lines = csvContent.split('\n');
     const bookmarks = [];
-
-    // Simple CSV parser (doesn't handle newlines in quotes perfectly but good enough for now)
-    // We assume the export format we generated: "Title","URL","Folder","Tags","Date Added"
 
     // Skip header likely
     const startIndex = lines[0].toLowerCase().includes('title') ? 1 : 0;
@@ -134,18 +169,11 @@ export const parseCsv = (csvContent) => {
         const line = lines[i].trim();
         if (!line) continue;
 
-        // Naive split by comma, but handling quotes would be better.
-        // Let's use a regex for splitting CSV lines respecting quotes
-        const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-
+        const parts = parseCsvLine(line);
         if (!parts || parts.length < 2) continue;
 
         const clean = (str) => {
             if (!str) return '';
-            str = str.trim();
-            if (str.startsWith('"') && str.endsWith('"')) {
-                str = str.slice(1, -1);
-            }
             return str.replace(/""/g, '"');
         };
 
