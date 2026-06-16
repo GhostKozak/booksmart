@@ -370,9 +370,12 @@ const processData = ({
         });
     }
 
-    // 9. Statistics Calculation
+    // 9. Statistics Calculation (single pass over bookmarks)
     const tagsMap = new Map();
     const foldersMap = new Map();
+    const seenUrls = new Set();
+    const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
+    let old = 0, http = 0, untitled = 0, docs = 0, longurl = 0, media = 0, social = 0, shopping = 0, news = 0, duplicateCount = 0;
 
     bookmarks.forEach(b => {
         // Tags
@@ -381,19 +384,37 @@ const processData = ({
             tags = tags.split(',').map(t => t.trim()).filter(Boolean);
         }
         if (Array.isArray(tags) && tags.length > 0) {
-            tags.forEach(t => {
-                const count = tagsMap.get(t) || 0;
-                tagsMap.set(t, count + 1);
-            });
+            for (let t = 0; t < tags.length; t++) {
+                tagsMap.set(tags[t], (tagsMap.get(tags[t]) || 0) + 1);
+            }
         }
         // Folders
         if (b.originalFolder) {
-            const count = foldersMap.get(b.originalFolder) || 0;
-            foldersMap.set(b.originalFolder, count + 1);
+            foldersMap.set(b.originalFolder, (foldersMap.get(b.originalFolder) || 0) + 1);
         }
         if (b.newFolder && b.newFolder !== b.originalFolder) {
-            const count = foldersMap.get(b.newFolder) || 0;
-            foldersMap.set(b.newFolder, count + 1);
+            foldersMap.set(b.newFolder, (foldersMap.get(b.newFolder) || 0) + 1);
+        }
+        // Smart counts
+        if (b.addDate) {
+            const date = parseInt(b.addDate) * 1000;
+            if (date < fiveYearsAgo) old++;
+        }
+        if (b.url && b.url.startsWith('http://')) http++;
+        const title = (b.title || '').trim().toLowerCase();
+        const url = (b.url || '').trim().toLowerCase();
+        if (!title || title === 'untitled' || title === 'page' || title === url || url.includes(title)) untitled++;
+        if (isDoc(url)) docs++;
+        if ((b.url || '').length >= 200) longurl++;
+        if (domainMatch(b.url, MEDIA_DOMAINS)) media++;
+        if (domainMatch(b.url, SOCIAL_DOMAINS)) social++;
+        if (domainMatch(b.url, SHOPPING_DOMAINS)) shopping++;
+        if (domainMatch(b.url, NEWS_DOMAINS)) news++;
+        // Duplicate count
+        if (seenUrls.has(b.url)) {
+            duplicateCount++;
+        } else {
+            seenUrls.add(b.url);
         }
     });
 
@@ -405,55 +426,7 @@ const processData = ({
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
-    // Smart Counts
-    const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-    let old = 0;
-    let http = 0;
-    let untitled = 0;
-    let docs = 0;
-    let longurl = 0;
-    let media = 0;
-    let social = 0;
-    let shopping = 0;
-    let news = 0;
-
-
-    bookmarks.forEach(b => {
-        if (b.addDate) {
-            const date = parseInt(b.addDate) * 1000;
-            if (date < fiveYearsAgo) old++;
-        }
-
-        if (b.url && b.url.startsWith('http://')) http++;
-
-        const title = (b.title || '').trim().toLowerCase();
-        const url = (b.url || '').trim().toLowerCase();
-        if (!title || title === 'untitled' || title === 'page' || title === url || url.includes(title)) {
-            untitled++;
-        }
-
-        if (isDoc(url)) {
-            docs++;
-        }
-
-        if ((b.url || '').length >= 200) longurl++;
-        if (domainMatch(b.url, MEDIA_DOMAINS)) media++;
-        if (domainMatch(b.url, SOCIAL_DOMAINS)) social++;
-        if (domainMatch(b.url, SHOPPING_DOMAINS)) shopping++;
-        if (domainMatch(b.url, NEWS_DOMAINS)) news++;
-    });
     const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news };
-
-    // Duplicate Count
-    const urls = new Set();
-    let duplicateCount = 0;
-    bookmarks.forEach(b => {
-        if (urls.has(b.url)) {
-            duplicateCount++;
-        } else {
-            urls.add(b.url);
-        }
-    });
 
     return {
         processedBookmarks: processed,
