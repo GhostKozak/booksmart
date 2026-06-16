@@ -28,9 +28,6 @@ export const AI_MODELS = [
     { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' },
     { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash-8B', provider: 'gemini' },
 
-    // --- Deep Research ---
-    { id: 'deep-research-pro-preview-12-2025', name: 'Deep Research Pro (Preview)', provider: 'gemini' },
-
     // --- OpenRouter ---
     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (via OpenRouter)', provider: 'openrouter' },
     { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus (via OpenRouter)', provider: 'openrouter' },
