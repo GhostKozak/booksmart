@@ -69,7 +69,7 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave }) {
 
                 <div className="flex justify-end gap-2 pt-4 border-t">
                     <Button variant="ghost" onClick={onClose}>
-                        {t('modals.sortConf.cancel')}
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={handleSave} disabled={saving}>
                         {t('common.save')}
