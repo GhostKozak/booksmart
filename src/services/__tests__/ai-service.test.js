@@ -60,10 +60,10 @@ describe('AI Service', () => {
     it('summarizeContent should use proxy and call provider API', async () => {
         const url = 'https://example.com';
 
-        // Mock proxy fetch
+        // Mock direct URL content fetch
         fetch.mockResolvedValueOnce({
             ok: true,
-            json: async () => ({ contents: '<html><body>Main content</body></html>' })
+            text: async () => '<html><body>Main content</body></html>'
         });
 
         // Mock AI provider fetch (OpenAI default)
