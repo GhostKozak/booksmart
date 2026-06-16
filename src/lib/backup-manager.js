@@ -1,4 +1,5 @@
 import { db } from '../db';
+import { toast } from 'sonner';
 
 /**
  * Creates a backup object containing rules, folders, tags, and ignored URLs.
@@ -118,6 +119,7 @@ export async function saveAutoBackup() {
         localStorage.setItem('booksmart_autosave_timestamp', new Date().toISOString());
     } catch (e) {
         console.warn("Auto-backup failed (likely quota exceeded):", e);
+        toast.warning("Auto-backup failed: storage quota exceeded. Consider exporting your data.");
     }
 }
 
