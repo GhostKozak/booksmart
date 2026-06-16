@@ -42,6 +42,29 @@ export const DEFAULT_MODEL = 'gpt-4o-mini';
 
 const CHUNK_SIZE = 20;
 const MAX_CONCURRENCY = 3;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function withRetry(fn, signal) {
+    let lastError;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+        try {
+            return await fn();
+        } catch (error) {
+            if (error.name === 'AbortError') throw error;
+            lastError = error;
+            const isRateLimit = error.message?.includes('429') || error.message?.includes('rate limit');
+            const isServerError = error.message?.includes('500') || error.message?.includes('502') || error.message?.includes('503');
+            if (!isRateLimit && !isServerError) throw error;
+            if (attempt < MAX_RETRIES) {
+                const delay = RETRY_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
+    }
+    throw lastError;
+}
 
 /**
  * Categorize a list of bookmarks using an LLM.
@@ -146,20 +169,22 @@ async function callOpenAI(messages, apiKey, model, asJson = true, signal) {
         body.response_format = { type: "json_object" };
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(body),
-        signal
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || "OpenAI API Error");
-    }
+    const response = await withRetry(async () => {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(body),
+            signal
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error?.message || "OpenAI API Error");
+        }
+        return res;
+    }, signal);
 
     const data = await response.json();
     const text = data.choices[0].message.content;
@@ -203,20 +228,22 @@ async function callGemini(messages, apiKey, model, asJson = true, signal) {
         body.generationConfig = { response_mime_type: "application/json" };
     }
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify(body),
-        signal
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || "Gemini API Error");
-    }
+    const response = await withRetry(async () => {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey
+            },
+            body: JSON.stringify(body),
+            signal
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error?.message || "Gemini API Error");
+        }
+        return res;
+    }, signal);
 
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -290,22 +317,24 @@ async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
         body.response_format = { type: "json_object" };
     }
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`,
-            "HTTP-Referer": window.location.href, // Required by OpenRouter
-            "X-Title": "BookSmart"
-        },
-        body: JSON.stringify(body),
-        signal
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || "OpenRouter API Error");
-    }
+    const response = await withRetry(async () => {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+                "HTTP-Referer": window.location.href, // Required by OpenRouter
+                "X-Title": "BookSmart"
+            },
+            body: JSON.stringify(body),
+            signal
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.error?.message || "OpenRouter API Error");
+        }
+        return res;
+    }, signal);
 
     const data = await response.json();
     const text = data.choices[0].message.content;
@@ -334,21 +363,23 @@ async function callAnthropic(messages, apiKey, model, asJson = true, signal) {
         body.system = systemMessages;
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify(body),
-        signal
-    });
-
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error?.message || "Anthropic API Error");
-    }
+    const response = await withRetry(async () => {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01"
+            },
+            body: JSON.stringify(body),
+            signal
+        });
+        if (!res.ok) {
+            const error = await res.json().catch(() => ({}));
+            throw new Error(error.error?.message || "Anthropic API Error");
+        }
+        return res;
+    }, signal);
 
     const data = await response.json();
     const text = data.content?.[0]?.text || "";
@@ -376,19 +407,21 @@ async function callOllama(messages, baseUrl, model, asJson = true, signal) {
         body.response_format = { type: "json_object" };
     }
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body),
-        signal
-    });
-
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error?.message || "Ollama API Error. Is Ollama running?");
-    }
+    const response = await withRetry(async () => {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+            signal
+        });
+        if (!res.ok) {
+            const error = await res.json().catch(() => ({}));
+            throw new Error(error.error?.message || "Ollama API Error. Is Ollama running?");
+        }
+        return res;
+    }, signal);
 
     const data = await response.json();
     const text = data.choices[0].message.content;
