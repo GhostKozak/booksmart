@@ -40,6 +40,7 @@ export function AISettings() {
     const geminiModels = AI_MODELS.filter(m => m.provider === 'gemini')
     const openrouterModels = AI_MODELS.filter(m => m.provider === 'openrouter')
     const ollamaModels = AI_MODELS.filter(m => m.provider === 'ollama')
+    const anthropicModels = AI_MODELS.filter(m => m.provider === 'anthropic')
 
     const selectedProvider = AI_MODELS.find(m => m.id === selectedModel)?.provider
 
@@ -65,6 +66,11 @@ export function AISettings() {
                         </optgroup>
                         <optgroup label={t('settings.ai.providers.google')}>
                             {geminiModels.map(model => (
+                                <option key={model.id} value={model.id}>{model.name}</option>
+                            ))}
+                        </optgroup>
+                        <optgroup label={t('settings.ai.providers.anthropic')}>
+                            {anthropicModels.map(model => (
                                 <option key={model.id} value={model.id}>{model.name}</option>
                             ))}
                         </optgroup>
@@ -96,6 +102,7 @@ export function AISettings() {
                     {selectedProvider === 'openai' && t('settings.ai.reqOpenAI')}
                     {selectedProvider === 'gemini' && t('settings.ai.reqGemini')}
                     {selectedProvider === 'openrouter' && t('settings.ai.reqOpenRouter')}
+                    {selectedProvider === 'anthropic' && t('settings.ai.reqAnthropic')}
                     {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
                 </p>
             </div>

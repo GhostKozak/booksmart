@@ -28,6 +28,10 @@ export const AI_MODELS = [
     { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' },
     { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash-8B', provider: 'gemini' },
 
+    // --- Anthropic (Direct) ---
+    { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic' },
+    { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
+
     // --- OpenRouter ---
     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (via OpenRouter)', provider: 'openrouter' },
     { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus (via OpenRouter)', provider: 'openrouter' },
@@ -126,6 +130,8 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
         return callOpenRouter(messages, apiKey, modelId, true, signal);
     } else if (provider === 'ollama') {
         return callOllama(messages, apiKey, modelId, true, signal);
+    } else if (provider === 'anthropic') {
+        return callAnthropic(messages, apiKey, modelId, true, signal);
     }
 
     throw new Error("Invalid provider");
@@ -315,6 +321,49 @@ async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
     return text;
 }
 
+async function callAnthropic(messages, apiKey, model, asJson = true, signal) {
+    const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    const chatMessages = messages.filter(m => m.role !== 'system');
+
+    const body = {
+        model: model,
+        max_tokens: 4096,
+        messages: chatMessages.map(m => ({ role: m.role, content: m.content }))
+    };
+    if (systemMessages) {
+        body.system = systemMessages;
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01"
+        },
+        body: JSON.stringify(body),
+        signal
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error?.message || "Anthropic API Error");
+    }
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || "";
+
+    if (asJson) {
+        try {
+            return JSON.parse(cleanJsonString(text));
+        } catch (e) {
+            console.error("Failed to parse Anthropic response", e);
+            return {};
+        }
+    }
+    return text;
+}
+
 async function callOllama(messages, baseUrl, model, asJson = true, signal) {
     const cleanUrl = sanitizeOllamaUrl(baseUrl);
     const url = `${cleanUrl}/v1/chat/completions`;
@@ -390,6 +439,8 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
         return callOpenRouter(messages, apiKey, modelId, false, abortSignal);
     } else if (provider === 'ollama') {
         return callOllama(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'anthropic') {
+        return callAnthropic(messages, apiKey, modelId, false, abortSignal);
     }
     throw new Error("Invalid provider");
 }
@@ -432,6 +483,8 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
                 chunkResults = await callOpenRouter(messages, apiKey, modelId, true, abortSignal);
             } else if (provider === 'ollama') {
                 chunkResults = await callOllama(messages, apiKey, modelId, true, abortSignal);
+            } else if (provider === 'anthropic') {
+                chunkResults = await callAnthropic(messages, apiKey, modelId, true, abortSignal);
             }
             if (!abortSignal?.aborted) Object.assign(results, chunkResults);
         } catch (error) {
@@ -509,6 +562,8 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
                 resultJson = await handleResponse(callOpenRouter);
             } else if (provider === 'ollama') {
                 resultJson = await handleResponse(callOllama);
+            } else if (provider === 'anthropic') {
+                resultJson = await handleResponse(callAnthropic);
             }
 
             if (!abortSignal?.aborted && Array.isArray(resultJson)) {
