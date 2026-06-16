@@ -22,13 +22,12 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
     }, [showThumbnails, bookmark.id]);
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="flex flex-col h-full">
             <Card
                 className={cn(
-                    "h-full flex flex-col transition-all cursor-pointer hover:shadow-lg hover:-translate-y-1 border overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-500 fill-mode-both",
+                    "group relative flex flex-col hover:shadow-lg border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background focus-visible:ring-offset-2 h-full overflow-hidden transition-all hover:-translate-y-1 cursor-pointer",
                     isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
                 )}
-                style={{ animationDelay: `${index * 50}ms` }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -51,13 +50,13 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
             >
                 {/* Screenshot Thumbnail */}
                 {showThumbnails && (
-                    <div className="relative aspect-video w-full bg-muted/30 overflow-hidden border-b">
+                    <div className="relative bg-muted/30 border-b w-full aspect-video overflow-hidden">
                         {imageStatus !== 'error' && (
                             <img
                                 src={`https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
                                 alt={`Screenshot of ${bookmark.title}`}
                                 className={cn(
-                                    "w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105",
+                                    "w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out",
                                     imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'
                                 )}
                                 loading="lazy"
@@ -68,25 +67,25 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
 
                         {/* Loading State or Error Fallback */}
                         {(imageStatus === 'loading' || imageStatus === 'error') && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-secondary/50">
-                                <Favicon url={bookmark.url} className="w-12 h-12 opacity-50 grayscale" />
+                            <div className="absolute inset-0 flex justify-center items-center bg-secondary/50">
+                                <Favicon url={bookmark.url} className="opacity-50 grayscale w-12 h-12" />
                             </div>
                         )}
 
                         {/* Selection Overlay */}
                         {isSelected && (
-                            <div className="absolute inset-0 bg-primary/10 flex items-center justify-center z-[5]">
-                                <div className="bg-primary text-primary-foreground rounded-full p-1">
+                            <div className="z-5 absolute inset-0 flex justify-center items-center bg-primary/10">
+                                <div className="bg-primary p-1 rounded-full text-primary-foreground">
                                     <Folder className="w-6 h-6" />
                                 </div>
                             </div>
                         )}
 
-                        <div className="absolute top-2 right-2 z-10 flex gap-1">
+                        <div className="top-2 right-2 z-10 absolute flex gap-1">
                             <Button
                                 variant="secondary"
                                 size="icon"
-                                className="h-6 w-6 bg-background/80 backdrop-blur-sm shadow-sm hover:bg-primary hover:text-primary-foreground transition-all"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     context.onPreview(bookmark);
@@ -94,22 +93,22 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 title={t('preview.open')}
                                 aria-label={t('preview.open')}
                             >
-                                <Eye className="h-3 w-3" />
+                                <Eye className="w-3 h-3" />
                             </Button>
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => context.toggleSelection(bookmark.id)}
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-background/80 backdrop-blur-sm shadow-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground focus-visible:ring-2"
+                                className="bg-background/80 data-[state=checked]:bg-primary shadow-sm backdrop-blur-sm focus-visible:ring-2 data-[state=checked]:text-primary-foreground"
                                 aria-label={t('common.select')}
                             />
                         </div>
                     </div>
                 )}
 
-                <div className="p-3 flex flex-col flex-1 gap-2">
+                <div className="flex flex-col flex-1 gap-2 p-3">
                     <div className="flex items-start gap-2">
-                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted/50 shrink-0 mt-0.5">
+                        <div className="flex justify-center items-center bg-muted/50 mt-0.5 rounded-full w-6 h-6 shrink-0">
                             <Favicon url={bookmark.url} className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -117,17 +116,17 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
                                     {bookmark.title || t('common.untitled')}
                                 </h3>
-                                <p className="text-[10px] text-muted-foreground line-clamp-1 break-all opacity-80">
+                                <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">
                                     {bookmark.url}
                                 </p>
                             </LinkTooltip>
                         </div>
                         {!showThumbnails && (
-                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                            <div className="flex items-center gap-1 mt-0.5 shrink-0">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         context.onPreview(bookmark);
@@ -135,7 +134,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                     title={t('preview.open')}
                                     aria-label={t('preview.open')}
                                 >
-                                    <Eye className="h-3.5 w-3.5" />
+                                    <Eye className="w-3.5 h-3.5" />
                                 </Button>
                                 <Checkbox
                                     checked={isSelected}
@@ -148,7 +147,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                     </div>
 
                     {bookmark.tags && bookmark.tags.length > 0 && (
-                        <div className="flex gap-1 flex-wrap overflow-hidden h-5">
+                        <div className="flex flex-wrap gap-1 h-5 overflow-hidden">
                             {bookmark.tags.slice(0, 3).map(tag => {
                                 const tagConfig = context.availableTags?.find(t => t.name === tag);
                                 const customColor = tagConfig ? tagConfig.color : null;
@@ -163,7 +162,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                     <span key={tag}
                                         style={style}
                                         className={cn(
-                                            "px-1 py-0.5 rounded-[3px] text-[8px] font-medium border whitespace-nowrap",
+                                            "px-1 py-0.5 border rounded-[3px] font-medium text-[8px] whitespace-nowrap",
                                             !customColor && "bg-purple-100/50 text-purple-700/70 border-purple-200/50 dark:bg-purple-900/10 dark:text-purple-400/70 dark:border-purple-800/30"
                                         )}>
                                         #{tag}
@@ -171,14 +170,14 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 )
                             })}
                             {bookmark.tags.length > 3 && (
-                                <span className="text-[8px] text-muted-foreground self-center opacity-60">
+                                <span className="self-center opacity-60 text-[8px] text-muted-foreground">
                                     +{bookmark.tags.length - 3}
                                 </span>
                             )}
                         </div>
                     )}
 
-                    <div className="pt-2 mt-auto border-t flex items-center justify-between text-[10px] text-muted-foreground">
+                    <div className="flex justify-between items-center mt-auto pt-2 border-t text-[10px] text-muted-foreground">
                         <div className="flex items-center gap-1 max-w-[70%]">
                             <Folder
                                 className="w-3 h-3 shrink-0"

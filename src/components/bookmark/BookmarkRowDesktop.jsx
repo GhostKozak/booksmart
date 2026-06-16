@@ -37,10 +37,10 @@ export function BookmarkRowDesktop({
             </div>
 
             {/* Title / URL (Col 2) */}
-            <div className="flex flex-col min-w-0 py-2">
+            <div className="flex flex-col py-2 min-w-0 overflow-hidden">
                 <LinkTooltip bookmark={bookmark}>
                     <div className="flex items-center gap-2 min-w-0">
-                        <Favicon url={bookmark.url} className="w-4 h-4 flex-shrink-0" />
+                        <Favicon url={bookmark.url} className="w-4 h-4 shrink-0" />
                         <span className={cn(
                             "font-medium truncate",
                             (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
@@ -48,7 +48,7 @@ export function BookmarkRowDesktop({
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground truncate" title={bookmark.url}>{bookmark.url}</span>
+                    <span className="text-muted-foreground text-xs break-words truncate" title={bookmark.url}>{bookmark.url}</span>
                 </LinkTooltip>
 
                 <BookmarkTags
@@ -64,14 +64,14 @@ export function BookmarkRowDesktop({
                 />
 
                 {bookmark.addDate && (
-                    <div className="text-[10px] text-muted-foreground/60 mt-0.5 flex items-center gap-1">
+                    <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground/60">
                         <span>{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
                     </div>
                 )}
 
                 {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                        <Layers className="h-3 w-3" />
+                        <Layers className="w-3 h-3" />
                         <span>{t('bookmarks.row.duplicateIn', { locations: bookmark.otherLocations.join(', ') })}</span>
                     </div>
                 )}
@@ -93,7 +93,7 @@ export function BookmarkRowDesktop({
                                     availableFolders={availableFolders}
                                     className="opacity-50 shrink-0"
                                 />
-                                <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                                <ArrowRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
                                 <BookmarkFolderBadge
                                     folderName={bookmark.newFolder}
                                     availableFolders={availableFolders}
@@ -132,12 +132,12 @@ export function BookmarkRowDesktop({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="hover:bg-primary/10 w-8 h-8 hover:text-primary transition-colors"
                     onClick={() => onPreview(bookmark)}
                     title={t('preview.open')}
                     aria-label={t('preview.open')}
                 >
-                    <Eye className="h-4 w-4" />
+                    <Eye className="w-4 h-4" />
                 </Button>
             </div>
         </div>

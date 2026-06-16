@@ -42,20 +42,20 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
     ]
 
     return (
-        <div className="h-full flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
+        <div className="relative flex flex-col justify-center items-center p-2 sm:p-4 h-full overflow-hidden">
             {/* Background gradient blobs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/5 rounded-full blur-3xl animate-pulse [animation-delay:1s]" />
+                <div className="-top-1/4 -left-1/4 absolute bg-primary/5 blur-3xl rounded-full w-1/2 h-1/2 animate-pulse" />
+                <div className="-right-1/4 -bottom-1/4 absolute bg-primary/5 blur-3xl rounded-full w-1/2 h-1/2 animate-pulse [animation-delay:1s]" />
             </div>
 
             {/* Card */}
-            <div className="relative z-10 w-full max-w-xl">
-                <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl shadow-black/5 overflow-hidden">
+            <div className="z-10 relative w-full max-w-xl">
+                <div className="bg-card/80 shadow-2xl shadow-black/5 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden">
                     {/* Step content */}
                     <div
                         className={cn(
-                            "p-4 sm:p-8 min-h-[380px] flex flex-col items-center justify-center text-center transition-all duration-300 ease-out",
+                            "flex flex-col justify-center items-center p-4 sm:p-8 min-h-96 text-center transition-all duration-300 ease-out",
                             direction > 0 ? "animate-slide-in-right" : "animate-slide-in-left"
                         )}
                         key={currentStep}
@@ -64,7 +64,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
                     </div>
 
                     {/* Footer: progress dots + navigation */}
-                    <div className="px-6 sm:px-10 pb-6 sm:pb-8 flex items-center justify-between">
+                    <div className="flex justify-between items-center px-6 sm:px-10 pb-6 sm:pb-8">
                         <Button
                             variant="ghost"
                             size="sm"
@@ -72,7 +72,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
                             disabled={currentStep === 0}
                             className={cn("gap-1 text-muted-foreground", currentStep === 0 && "invisible")}
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="w-4 h-4" />
                             {t('onboarding.back')}
                         </Button>
 
@@ -86,7 +86,7 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
                                         setCurrentStep(i)
                                     }}
                                     className={cn(
-                                        "w-2 h-2 rounded-full transition-all duration-300",
+                                        "rounded-full w-2 h-2 transition-all duration-300",
                                         i === currentStep
                                             ? "bg-primary w-6"
                                             : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
@@ -104,10 +104,10 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
                                 className="gap-1 text-muted-foreground"
                             >
                                 {t('onboarding.next')}
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="w-4 h-4" />
                             </Button>
                         ) : (
-                            <div className="w-[72px]" /> // spacer to balance layout
+                            <div className="w-20" /> // spacer to balance layout
                         )}
                     </div>
                 </div>
@@ -121,13 +121,13 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
 function WelcomeStep({ t }) {
     return (
         <>
-            <div className="bg-linear-to-br from-primary/10 to-primary/5 p-5 rounded-2xl mb-6 ring-1 ring-primary/10">
-                <Logo className="h-16 w-16 sm:h-20 sm:w-20" />
+            <div className="bg-linear-to-br from-primary/10 to-primary/5 mb-6 p-5 rounded-2xl ring-1 ring-primary/10">
+                <Logo className="w-16 sm:w-20 h-16 sm:h-20" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            <h2 className="mb-3 font-bold text-2xl sm:text-3xl tracking-tight">
                 {t('onboarding.welcome.title')}
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
+            <p className="max-w-md text-muted-foreground text-sm sm:text-base leading-relaxed">
                 {t('onboarding.welcome.desc')}
             </p>
         </>
@@ -144,20 +144,20 @@ function ImportStep({ t }) {
 
     return (
         <>
-            <div className="bg-linear-to-br from-blue-500/10 to-cyan-500/5 p-5 rounded-2xl mb-6 ring-1 ring-blue-500/10">
-                <Upload className="h-12 w-12 sm:h-14 sm:w-14 text-blue-500" />
+            <div className="bg-linear-to-br from-blue-500/10 to-cyan-500/5 mb-6 p-5 rounded-2xl ring-1 ring-blue-500/10">
+                <Upload className="w-12 sm:w-14 h-12 sm:h-14 text-blue-500" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">
+            <h2 className="mb-3 font-bold text-xl sm:text-2xl tracking-tight">
                 {t('onboarding.import.title')}
             </h2>
-            <p className="text-muted-foreground text-sm max-w-md mb-5">
+            <p className="mb-5 max-w-md text-muted-foreground text-sm">
                 {t('onboarding.import.desc')}
             </p>
-            <div className="grid grid-cols-2 gap-2 w-full max-w-xs">
+            <div className="gap-2 grid grid-cols-2 w-full max-w-xs">
                 {formats.map(f => (
-                    <div key={f.ext} className="bg-secondary/50 rounded-lg p-2.5 text-center">
-                        <span className="text-xs font-bold text-primary">{f.ext}</span>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{f.desc}</p>
+                    <div key={f.ext} className="bg-secondary/50 p-2.5 rounded-lg text-center">
+                        <span className="font-bold text-primary text-xs">{f.ext}</span>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">{f.desc}</p>
                     </div>
                 ))}
             </div>
@@ -177,20 +177,20 @@ function OrganizeStep({ t }) {
 
     return (
         <>
-            <div className="bg-linear-to-br from-purple-500/10 to-pink-500/5 p-5 rounded-2xl mb-6 ring-1 ring-purple-500/10">
-                <Sparkles className="h-12 w-12 sm:h-14 sm:w-14 text-purple-500" />
+            <div className="bg-linear-to-br from-purple-500/10 to-pink-500/5 mb-6 p-5 rounded-2xl ring-1 ring-purple-500/10">
+                <Sparkles className="w-12 sm:w-14 h-12 sm:h-14 text-purple-500" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">
+            <h2 className="mb-3 font-bold text-xl sm:text-2xl tracking-tight">
                 {t('onboarding.organize.title')}
             </h2>
-            <p className="text-muted-foreground text-sm max-w-md mb-5">
+            <p className="mb-5 max-w-md text-muted-foreground text-sm">
                 {t('onboarding.organize.desc')}
             </p>
-            <div className="grid grid-cols-3 gap-2.5 w-full max-w-sm">
+            <div className="gap-2.5 grid grid-cols-3 w-full max-w-sm">
                 {features.map(({ icon: Icon, label, color }) => (
-                    <div key={label} className="bg-secondary/50 rounded-lg p-3 flex flex-col items-center gap-1.5 hover:bg-secondary/80 transition-colors">
-                        <Icon className={cn("h-5 w-5", color)} />
-                        <span className="text-[11px] font-medium leading-tight">{label}</span>
+                    <div key={label} className="flex flex-col items-center gap-1.5 bg-secondary/50 hover:bg-secondary/80 p-3 rounded-lg transition-colors">
+                        <Icon className={cn("w-5 h-5", color)} />
+                        <span className="font-medium text-[11px] leading-tight">{label}</span>
                     </div>
                 ))}
             </div>
@@ -201,33 +201,33 @@ function OrganizeStep({ t }) {
 function GetStartedStep({ t, onUploadClick, onLoadDemo, getInputProps }) {
     return (
         <>
-            <div className="bg-linear-to-br from-green-500/10 to-emerald-500/5 p-5 rounded-2xl mb-6 ring-1 ring-green-500/10">
-                <ArrowRight className="h-12 w-12 sm:h-14 sm:w-14 text-green-500" />
+            <div className="bg-linear-to-br from-green-500/10 to-emerald-500/5 mb-6 p-5 rounded-2xl ring-1 ring-green-500/10">
+                <ArrowRight className="w-12 sm:w-14 h-12 sm:h-14 text-green-500" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">
+            <h2 className="mb-3 font-bold text-xl sm:text-2xl tracking-tight">
                 {t('onboarding.getStarted.title')}
             </h2>
-            <p className="text-muted-foreground text-sm max-w-md mb-6">
+            <p className="mb-6 max-w-md text-muted-foreground text-sm">
                 {t('onboarding.getStarted.desc')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+            <div className="flex sm:flex-row flex-col gap-3 w-full max-w-sm">
                 <label className="flex-1 cursor-pointer">
                     <input {...getInputProps()} />
                     <Button
                         variant="default"
-                        className="w-full gap-2 h-11 font-semibold"
+                        className="gap-2 w-full h-11 font-semibold"
                         onClick={onUploadClick}
                     >
-                        <Upload className="h-4 w-4" />
+                        <Upload className="w-4 h-4" />
                         {t('onboarding.getStarted.upload')}
                     </Button>
                 </label>
                 <Button
                     variant="outline"
-                    className="flex-1 gap-2 h-11 font-semibold border-dashed"
+                    className="flex-1 gap-2 border-dashed h-11 font-semibold"
                     onClick={onLoadDemo}
                 >
-                    <Sparkles className="h-4 w-4" />
+                    <Sparkles className="w-4 h-4" />
                     {t('onboarding.getStarted.demo')}
                 </Button>
             </div>

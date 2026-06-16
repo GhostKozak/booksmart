@@ -16,7 +16,7 @@ export function MainContent({
     displayBookmarks,
     rawBookmarks,
     // Dropzone
-    getRootProps, getInputProps, isDragActive,
+    getRootProps, getInputProps, isDragActive, openFileDialog,
     // Link health
     linkHealth,
     ignoredUrls, toggleIgnoreUrl,
@@ -46,9 +46,9 @@ export function MainContent({
 
     if (!hasFileLoaded && showOnboarding) {
         return (
-            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 relative focus:outline-none">
+            <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 focus:outline-none overflow-x-hidden overflow-y-auto">
                 <OnboardingWizard
-                    onUploadClick={() => { }}
+                    onUploadClick={openFileDialog}
                     onLoadDemo={() => {
                         setOnboardingComplete()
                         loadDemoData()
@@ -61,21 +61,21 @@ export function MainContent({
 
     if (!hasFileLoaded) {
         return (
-            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
-                <div className="h-full flex flex-col items-center justify-center p-4 sm:p-8">
+            <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 p-3 sm:p-6 focus:outline-none overflow-x-hidden overflow-y-auto">
+                <div className="flex flex-col justify-center items-center p-4 sm:p-8 h-full">
                     <div
                         {...getRootProps()}
                         className={cn(
-                            "border-4 border-dashed rounded-3xl p-8 sm:p-16 flex flex-col items-center justify-center text-center transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 max-w-2xl w-full",
+                            "flex flex-col justify-center items-center hover:bg-primary/5 p-8 sm:p-16 border-4 hover:border-primary/50 border-dashed rounded-3xl w-full max-w-2xl text-center transition-all cursor-pointer",
                             isDragActive ? "border-primary bg-primary/10 scale-105" : "border-muted-foreground/25"
                         )}
                     >
                         <input {...getInputProps()} />
-                        <div className="bg-primary/10 p-4 sm:p-6 rounded-full mb-4 sm:mb-6">
-                            <Logo className="h-12 w-12 sm:h-16 sm:w-16" />
+                        <div className="bg-primary/10 mb-4 sm:mb-6 p-4 sm:p-6 rounded-full">
+                            <Logo className="w-12 sm:w-16 h-12 sm:h-16" />
                         </div>
-                        <h3 className="text-xl sm:text-2xl font-bold mb-2">{t('main.dropzone.title')}</h3>
-                        <p className="text-sm sm:text-base text-muted-foreground max-w-md">
+                        <h3 className="mb-2 font-bold text-xl sm:text-2xl">{t('main.dropzone.title')}</h3>
+                        <p className="max-w-md text-muted-foreground text-sm sm:text-base">
                             {t('main.dropzone.desc')}
                         </p>
                         <Button variant="outline" className="mt-6 sm:mt-8">{t('main.dropzone.browse')}</Button>
@@ -87,13 +87,13 @@ export function MainContent({
 
     if (displayBookmarks.length === 0) {
         return (
-            <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
-                <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-muted p-6 rounded-full mb-6 animate-float shadow-sm">
-                        <Logo className="h-12 w-12 grayscale opacity-50" />
+            <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 p-3 sm:p-6 focus:outline-none overflow-x-hidden overflow-y-auto">
+                <div className="slide-in-from-bottom-4 flex flex-col justify-center items-center p-8 h-full text-center animate-in duration-500 fade-in">
+                    <div className="bg-muted shadow-sm mb-6 p-6 rounded-full animate-float">
+                        <Logo className="opacity-50 grayscale w-12 h-12" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{t('main.empty.title')}</h3>
-                    <p className="text-muted-foreground max-w-sm mb-6">
+                    <h3 className="mb-2 font-semibold text-xl">{t('main.empty.title')}</h3>
+                    <p className="mb-6 max-w-sm text-muted-foreground">
                         {t('main.empty.desc')}
                     </p>
                     <Button
@@ -113,10 +113,10 @@ export function MainContent({
     }
 
     return (
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-hidden overflow-y-auto bg-secondary/10 p-3 sm:p-6 relative focus:outline-none">
-            <div className="space-y-4 max-w-[1600px] mx-auto">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold tracking-tight" aria-live="polite">{t('main.header.title')} ({displayBookmarks.length})</h2>
+        <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 p-3 sm:p-6 focus:outline-none overflow-x-hidden overflow-y-auto">
+            <div className="space-y-4 mx-auto max-w-[1600px]">
+                <div className="flex justify-between items-center">
+                    <h2 className="font-bold text-2xl tracking-tight" aria-live="polite">{t('main.header.title')} ({displayBookmarks.length})</h2>
                     <div className="flex gap-2">
                         {smartFilter === 'docs' && displayBookmarks.length > 0 && (
                             <Button
@@ -125,7 +125,7 @@ export function MainContent({
                                 onClick={handleBatchMoveDocs}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-                                <Folder className="h-4 w-4 mr-2" />
+                                <Folder className="mr-2 w-4 h-4" />
                                 {t('main.header.moveDocs', { count: displayBookmarks.length })}
                             </Button>
                         )}
@@ -143,8 +143,8 @@ export function MainContent({
                         oldBookmarksCount={smartCounts ? smartCounts.old : 0}
                     />
                 ) : (
-                    <div className="flex h-[calc(100vh-250px)] gap-4 transition-all duration-300">
-                        <div key={viewMode} className={cn("flex-1 min-w-0 h-full animate-in fade-in zoom-in-[0.98] duration-300", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
+                    <div className="flex gap-4 h-[calc(100vh-250px)] transition-all duration-300">
+                        <div key={viewMode} className={cn("flex-1 min-w-0 h-full animate-in duration-300 fade-in zoom-in-[0.98]", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
                             {viewMode === 'list' ? (
                                 <BookmarkList
                                     bookmarks={displayBookmarks}
@@ -174,7 +174,7 @@ export function MainContent({
                         </div>
 
                         {previewBookmark && (
-                            <div className="flex-1 xl:basis-2/5 h-full min-w-0 border rounded-lg overflow-hidden shadow-lg animate-in fade-in slide-in-from-right-4">
+                            <div className="slide-in-from-right-4 flex-1 shadow-lg border rounded-lg min-w-0 h-full overflow-hidden animate-in xl:basis-2/5 fade-in">
                                 <PreviewPane
                                     bookmark={previewBookmark}
                                     onClose={() => setPreviewBookmark(null)}

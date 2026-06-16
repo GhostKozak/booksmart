@@ -47,13 +47,11 @@ export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection
 
     return (
         <div
-            style={{ animationDelay: `${(index || 0) * 50}ms` }}
             className={cn(
                 borderClass,
                 "transition-all duration-300",
                 "flex flex-col p-3 gap-3",
                 "lg:p-0 lg:gap-0 lg:border-b",
-                "animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-300",
                 className,
                 rowBgClass
             )}

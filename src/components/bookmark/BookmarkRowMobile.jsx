@@ -30,16 +30,16 @@ export function BookmarkRowMobile({
                 <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(bookmark.id)}
-                    className="mt-1 shrink-0 z-20"
+                    className="z-20 mt-1 shrink-0"
                     aria-label={t('common.select')}
                 />
 
-                <Favicon url={bookmark.url} className="w-5 h-5 mt-0.5 shrink-0" />
+                <Favicon url={bookmark.url} className="mt-0.5 w-5 h-5 shrink-0" />
 
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex justify-between items-start gap-2">
                         <span className={cn(
-                            "font-medium text-sm break-words leading-snug",
+                            "font-medium text-sm wrap-break-word leading-snug",
                             (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
@@ -49,16 +49,16 @@ export function BookmarkRowMobile({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-muted-foreground"
+                                className="w-7 h-7 text-muted-foreground"
                                 onClick={() => onPreview(bookmark)}
                                 title={t('preview.open')}
                                 aria-label={t('preview.open')}
                             >
-                                <Eye className="h-3.5 w-3.5" />
+                                <Eye className="w-3.5 h-3.5" />
                             </Button>
-                            {bookmark.isDuplicate && <XCircle className="h-4 w-4 text-red-500" />}
-                            {bookmark.hasDuplicate && <Layers className="h-4 w-4 text-yellow-500" />}
-                            {(bookmark.status === 'matched' || bookmark.status === 'conflict') && <Check className="h-4 w-4 text-emerald-500" />}
+                            {bookmark.isDuplicate && <XCircle className="w-4 h-4 text-red-500" />}
+                            {bookmark.hasDuplicate && <Layers className="w-4 h-4 text-yellow-500" />}
+                            {(bookmark.status === 'matched' || bookmark.status === 'conflict') && <Check className="w-4 h-4 text-emerald-500" />}
 
                             <BookmarkHealthStatus
                                 url={bookmark.url}
@@ -69,7 +69,7 @@ export function BookmarkRowMobile({
                         </div>
                     </div>
 
-                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground block truncate mt-0.5 hover:underline">
+                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block mt-0.5 text-muted-foreground text-xs hover:underline wrap-break-word truncate">
                         {bookmark.url}
                     </a>
                 </div>
@@ -91,14 +91,14 @@ export function BookmarkRowMobile({
                                     <BookmarkFolderBadge
                                         folderName={bookmark.originalFolder || ''}
                                         availableFolders={availableFolders}
-                                        className="whitespace-normal text-left opacity-50"
+                                        className="opacity-50 text-left whitespace-normal"
                                     />
                                     <ArrowRight className="w-3 h-3 text-muted-foreground/50 shrink-0" />
                                     <BookmarkFolderBadge
                                         folderName={bookmark.newFolder}
                                         availableFolders={availableFolders}
                                         isMatched={true}
-                                        className="whitespace-normal text-left"
+                                        className="text-left whitespace-normal"
                                     />
                                 </>
                             );

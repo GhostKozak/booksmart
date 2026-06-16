@@ -42,7 +42,7 @@ export function useFileUpload() {
         }
     }, [])
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
         onDrop,
         accept: {
             'text/html': ['.html'],
@@ -52,5 +52,5 @@ export function useFileUpload() {
         }
     })
 
-    return { getRootProps, getInputProps, isDragActive }
+    return { getRootProps, getInputProps, isDragActive, open }
 }

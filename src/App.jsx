@@ -229,10 +229,10 @@ function App() {
 
   // ── Render ──
   return (
-    <div className="h-dvh bg-background text-foreground flex flex-col font-sans overflow-hidden">
+    <div className="flex flex-col bg-background h-dvh overflow-hidden font-sans text-foreground">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:p-4 focus:bg-background focus:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-br shadow-lg top-0 left-0 font-semibold"
+        className="sr-only focus:not-sr-only top-0 left-0 focus:z-100 focus:absolute focus:bg-background shadow-lg focus:p-4 rounded-br focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-semibold focus:text-foreground"
       >
         {t('accessibility.skipToMain')}
       </a>
@@ -252,7 +252,7 @@ function App() {
         />
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="relative flex flex-1 overflow-hidden">
         <div
           className={`sidebar-slide relative z-30 ${isOnboardingActive ? '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden' : 'translate-x-0 opacity-100'}`}
         >
@@ -283,7 +283,7 @@ function App() {
           hasFileLoaded={hasFileLoaded}
           displayBookmarks={collectionFilteredBookmarks}
           rawBookmarks={rawBookmarks}
-          getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps}
+          getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps} openFileDialog={fileUpload.open}
           isDragActive={fileUpload.isDragActive}
           linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
           availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
@@ -354,7 +354,7 @@ function App() {
           onClose={() => setIsSettingsOpen(false)}
           title={t('settings.title')}
         >
-          <Suspense fallback={<div className="p-8 text-center text-muted-foreground">{t('common.loading', 'Loading...')}</div>}>
+          <Suspense fallback={<div className="p-8 text-muted-foreground text-center">{t('common.loading', 'Loading...')}</div>}>
             {settingsTab === 'backup' ? (
               <BackupSettings />
             ) : settingsTab === 'ai' ? (
@@ -371,12 +371,12 @@ function App() {
               />
             )}
           </Suspense>
-          <div className="flex justify-center gap-2 mt-4 border-t pt-2">
+          <div className="flex justify-center gap-2 mt-4 pt-2 border-t">
             <Button
               variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSettingsTab('folders')}
-              className="text-xs h-7"
+              className="h-7 text-xs"
             >
               {t('sidebar.sections.library')}
             </Button>
@@ -384,7 +384,7 @@ function App() {
               variant={settingsTab === 'ai' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSettingsTab('ai')}
-              className="text-xs h-7"
+              className="h-7 text-xs"
             >
               {t('settings.tabs.ai')}
             </Button>
@@ -392,7 +392,7 @@ function App() {
               variant={settingsTab === 'backup' ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSettingsTab('backup')}
-              className="text-xs h-7"
+              className="h-7 text-xs"
             >
               {t('settings.tabs.backup')}
             </Button>

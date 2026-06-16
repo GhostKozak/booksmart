@@ -27,7 +27,7 @@ export function TagBulkPopover({ allTags, onApply, isOpen, onToggle, isVertical 
         <div className={cn("relative", isVertical && "w-full")}>
             {isOpen && (
                 <div className={cn(
-                    "bg-popover border rounded-lg p-3 shadow-xl animate-in zoom-in-95 duration-200 flex flex-col gap-2 z-[110]",
+                    "bg-popover border rounded-lg p-3 shadow-xl animate-in zoom-in-95 duration-200 flex flex-col gap-2 z-110",
                     isVertical
                         ? "relative mt-1 mb-2 w-full left-0 translate-x-0"
                         : "absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64"
