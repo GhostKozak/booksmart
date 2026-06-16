@@ -40,9 +40,11 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const [isSummarizing, setIsSummarizing] = useState(false);
 
     const handleSummarize = async () => {
-        const provider = localStorage.getItem('bs_provider') || 'openai';
-        const apiKey = provider === 'ollama' ? localStorage.getItem('bs_ollama_url') : localStorage.getItem('bs_api_key');
-        const modelId = localStorage.getItem('bs_model') || 'gpt-4o-mini';
+        const provider = sessionStorage.getItem('bs_provider') || localStorage.getItem('bs_provider') || 'openai';
+        const apiKey = provider === 'ollama'
+            ? (sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url'))
+            : (sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key'));
+        const modelId = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || 'gpt-4o-mini';
 
         if (!apiKey && provider !== 'ollama') {
             toast.error(t('settings.ai.reqOpenAI') || 'API key required');

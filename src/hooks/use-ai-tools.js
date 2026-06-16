@@ -18,9 +18,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
     }, []);
 
     const handleFixTitles = useCallback(async () => {
-        const provider = localStorage.getItem("bs_provider") || 'openai';
-        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
-        const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
+        const provider = sessionStorage.getItem("bs_provider") || localStorage.getItem("bs_provider") || 'openai';
+        const apiKey = provider === 'ollama'
+            ? (sessionStorage.getItem("bs_ollama_url") || localStorage.getItem("bs_ollama_url"))
+            : (sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key"));
+        const model = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model") || 'gpt-4o-mini';
 
         if (!apiKey && provider !== 'ollama') {
             openSettings('ai');
@@ -69,9 +71,11 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
     }, [selectedIds, setSelectedIds, rawBookmarks, openSettings]);
 
     const handleFindSmartDuplicates = useCallback(async () => {
-        const provider = localStorage.getItem("bs_provider") || 'openai';
-        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key");
-        const model = localStorage.getItem("bs_model") || 'gpt-4o-mini';
+        const provider = sessionStorage.getItem("bs_provider") || localStorage.getItem("bs_provider") || 'openai';
+        const apiKey = provider === 'ollama'
+            ? (sessionStorage.getItem("bs_ollama_url") || localStorage.getItem("bs_ollama_url"))
+            : (sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key"));
+        const model = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model") || 'gpt-4o-mini';
 
         if (!apiKey && provider !== 'ollama') {
             openSettings('ai');

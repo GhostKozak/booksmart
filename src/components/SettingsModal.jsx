@@ -14,21 +14,21 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
 
     useEffect(() => {
         if (isOpen) {
-            const storedKey = localStorage.getItem("bs_api_key")
-            const storedModel = localStorage.getItem("bs_model")
+            const storedKey = sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key")
+            const storedModel = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model")
             if (storedKey) setApiKey(storedKey)
             if (storedModel) setSelectedModel(storedModel)
         }
     }, [isOpen])
 
     const handleSave = () => {
-        localStorage.setItem("bs_api_key", apiKey)
-        localStorage.setItem("bs_model", selectedModel)
+        sessionStorage.setItem("bs_api_key", apiKey)
+        sessionStorage.setItem("bs_model", selectedModel)
 
         // Find provider from model for backwards compatibility if needed, but App.jsx uses model now
         const modelInfo = AI_MODELS.find(m => m.id === selectedModel)
         if (modelInfo) {
-            localStorage.setItem("bs_provider", modelInfo.provider)
+            sessionStorage.setItem("bs_provider", modelInfo.provider)
         }
 
         onSave()

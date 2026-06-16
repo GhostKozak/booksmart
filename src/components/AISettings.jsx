@@ -13,22 +13,22 @@ export function AISettings() {
     const [saved, setSaved] = useState(false)
 
     useEffect(() => {
-        const storedKey = localStorage.getItem('bs_api_key')
-        const storedOllamaUrl = localStorage.getItem('bs_ollama_url')
-        const storedModel = localStorage.getItem('bs_model')
+        const storedKey = sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key')
+        const storedOllamaUrl = sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url')
+        const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
         if (storedKey) setApiKey(storedKey)
         if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
         if (storedModel) setSelectedModel(storedModel)
     }, [])
 
     const handleSave = () => {
-        localStorage.setItem('bs_api_key', apiKey)
-        localStorage.setItem('bs_ollama_url', ollamaUrl)
-        localStorage.setItem('bs_model', selectedModel)
+        sessionStorage.setItem('bs_api_key', apiKey)
+        sessionStorage.setItem('bs_ollama_url', ollamaUrl)
+        sessionStorage.setItem('bs_model', selectedModel)
 
         const modelInfo = AI_MODELS.find(m => m.id === selectedModel)
         if (modelInfo) {
-            localStorage.setItem('bs_provider', modelInfo.provider)
+            sessionStorage.setItem('bs_provider', modelInfo.provider)
         }
 
         setSaved(true)

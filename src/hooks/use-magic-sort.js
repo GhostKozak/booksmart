@@ -17,9 +17,11 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
     }, []);
 
     const handleMagicSort = useCallback(async () => {
-        const provider = localStorage.getItem("bs_provider") || 'openai'
-        const apiKey = provider === 'ollama' ? localStorage.getItem("bs_ollama_url") : localStorage.getItem("bs_api_key")
-        const model = localStorage.getItem("bs_model") || 'gpt-4o-mini'
+        const provider = sessionStorage.getItem("bs_provider") || localStorage.getItem("bs_provider") || 'openai'
+        const apiKey = provider === 'ollama'
+            ? (sessionStorage.getItem("bs_ollama_url") || localStorage.getItem("bs_ollama_url"))
+            : (sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key"))
+        const model = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model") || 'gpt-4o-mini'
 
         if (!apiKey && provider !== 'ollama') {
             openSettings('ai')
