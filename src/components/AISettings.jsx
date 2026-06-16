@@ -4,6 +4,10 @@ import { Input } from './ui/input'
 import { AI_MODELS, DEFAULT_MODEL } from '../services/ai-service'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import {
+    unlockVault, lockVault, saveSecret, loadSecret,
+    isVaultUnlocked, hasVault, clearVault, migrateFromLocalStorage
+} from '../lib/key-vault'
 
 export function AISettings() {
     const { t } = useTranslation()
@@ -11,29 +15,95 @@ export function AISettings() {
     const [ollamaUrl, setOllamaUrl] = useState('')
     const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
     const [saved, setSaved] = useState(false)
+    const [vaultPassword, setVaultPassword] = useState('')
+    const [vaultNewPassword, setVaultNewPassword] = useState('')
+    const [unlocked, setUnlocked] = useState(isVaultUnlocked())
+    const [vaultExists, setVaultExists] = useState(hasVault())
+    const [unlockError, setUnlockError] = useState('')
 
     useEffect(() => {
-        const storedKey = sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key')
+        if (isVaultUnlocked()) {
+            loadSecret().then(k => {
+                if (k) setApiKey(k)
+            })
+        }
         const storedOllamaUrl = sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url')
         const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
-        if (storedKey) setApiKey(storedKey)
         if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
         if (storedModel) setSelectedModel(storedModel)
     }, [])
 
-    const handleSave = () => {
-        sessionStorage.setItem('bs_api_key', apiKey)
+    const existingKey = !vaultExists && (sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key'))
+
+    const handleUnlock = async () => {
+        setUnlockError('')
+        try {
+            await unlockVault(vaultPassword)
+            const key = await loadSecret()
+            if (key) setApiKey(key)
+            setUnlocked(true)
+            setVaultPassword('')
+            const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
+            if (storedModel) setSelectedModel(storedModel)
+        } catch {
+            setUnlockError(t('settings.vault.wrongPassword'))
+        }
+    }
+
+    const handleCreateVault = async () => {
+        if (!vaultNewPassword) {
+            toast.error(t('settings.vault.enterPassword'))
+            return
+        }
+        try {
+            const keyToStore = apiKey || existingKey || ''
+            await unlockVault(vaultNewPassword)
+            if (keyToStore) await saveSecret(keyToStore)
+            if (!apiKey && keyToStore) setApiKey(keyToStore)
+            await migrateFromLocalStorage()
+            setVaultExists(true)
+            setUnlocked(true)
+            setVaultNewPassword('')
+            toast.success(t('settings.vault.created'))
+        } catch (e) {
+            toast.error(t('settings.vault.createError'))
+        }
+    }
+
+    const handleLock = () => {
+        lockVault()
+        setUnlocked(false)
+        setApiKey('')
+    }
+
+    const handleSave = async () => {
+        if (unlocked) {
+            const keyToStore = apiKey
+            if (keyToStore) await saveSecret(keyToStore)
+        } else if (vaultExists) {
+            toast.error(t('settings.vault.saveLocked'))
+            return
+        }
         sessionStorage.setItem('bs_ollama_url', ollamaUrl)
         sessionStorage.setItem('bs_model', selectedModel)
-
         const modelInfo = AI_MODELS.find(m => m.id === selectedModel)
-        if (modelInfo) {
-            sessionStorage.setItem('bs_provider', modelInfo.provider)
+        if (modelInfo) sessionStorage.setItem('bs_provider', modelInfo.provider)
+        if (!vaultExists) {
+            sessionStorage.setItem('bs_api_key', apiKey)
         }
-
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
         toast.success(t('toast.settingsSaved'))
+    }
+
+    const handleClearVault = () => {
+        clearVault()
+        setUnlocked(false)
+        setVaultExists(false)
+        setApiKey('')
+        setVaultPassword('')
+        setVaultNewPassword('')
+        toast.success(t('settings.vault.cleared'))
     }
 
     const openaiModels = AI_MODELS.filter(m => m.provider === 'openai')
@@ -41,11 +111,46 @@ export function AISettings() {
     const openrouterModels = AI_MODELS.filter(m => m.provider === 'openrouter')
     const ollamaModels = AI_MODELS.filter(m => m.provider === 'ollama')
     const anthropicModels = AI_MODELS.filter(m => m.provider === 'anthropic')
-
     const selectedProvider = AI_MODELS.find(m => m.id === selectedModel)?.provider
+
+    if (vaultExists && !unlocked) {
+        return (
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('settings.vault.title')}</label>
+                    <p className="text-xs text-muted-foreground">{t('settings.vault.lockedDesc')}</p>
+                    <Input
+                        type="password"
+                        value={vaultPassword}
+                        onChange={e => { setVaultPassword(e.target.value); setUnlockError('') }}
+                        onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+                        placeholder={t('settings.vault.passwordPlaceholder')}
+                    />
+                    {unlockError && <p className="text-xs text-destructive">{unlockError}</p>}
+                </div>
+                <Button onClick={handleUnlock} className="w-full" size="sm">
+                    {t('settings.vault.unlock')}
+                </Button>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-4">
+            {unlocked && (
+                <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{t('settings.vault.unlockedBadge')}</span>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={handleLock}>
+                            {t('settings.vault.lock')}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={handleClearVault}>
+                            {t('settings.vault.clear')}
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             <div className="space-y-2">
                 <label className="text-sm font-medium">{t('settings.ai.model')}</label>
                 <div className="relative">
@@ -96,7 +201,7 @@ export function AISettings() {
                     type={selectedProvider === 'ollama' ? 'text' : 'password'}
                     value={selectedProvider === 'ollama' ? ollamaUrl : apiKey}
                     onChange={(e) => selectedProvider === 'ollama' ? setOllamaUrl(e.target.value) : setApiKey(e.target.value)}
-                    placeholder={selectedProvider === 'ollama' ? "http://localhost:11434" : "sk-... or AIza... or sk-or-..."}
+                    placeholder={selectedProvider === 'ollama' ? 'http://localhost:11434' : 'sk-... or AIza... or sk-or-...'}
                 />
                 <p className="text-[10px] text-muted-foreground">
                     {selectedProvider === 'openai' && t('settings.ai.reqOpenAI')}
@@ -106,6 +211,27 @@ export function AISettings() {
                     {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
                 </p>
             </div>
+
+            {!vaultExists && (
+                <div className="space-y-2 border rounded-md p-3">
+                    <label className="text-sm font-medium">{t('settings.vault.setupTitle')}</label>
+                    <p className="text-xs text-muted-foreground">{t('settings.vault.setupDesc')}</p>
+                    <Input
+                        type="password"
+                        value={vaultNewPassword}
+                        onChange={e => setVaultNewPassword(e.target.value)}
+                        placeholder={t('settings.vault.newPasswordPlaceholder')}
+                    />
+                    {existingKey && (
+                        <p className="text-xs text-muted-foreground">
+                            {t('settings.vault.willEncrypt')}
+                        </p>
+                    )}
+                    <Button variant="outline" size="sm" onClick={handleCreateVault} className="w-full">
+                        {t('settings.vault.createButton')}
+                    </Button>
+                </div>
+            )}
 
             <Button onClick={handleSave} className="w-full" size="sm">
                 {saved ? '✓ ' + t('settings.ai.saved') : t('settings.ai.save')}

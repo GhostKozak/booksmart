@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { db } from '../db';
 import { summarizeContent } from '../services/ai-service';
 import { toast } from 'sonner';
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault';
 
 /**
  * Validate URL scheme - blocks dangerous protocols.
@@ -40,13 +41,11 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const [isSummarizing, setIsSummarizing] = useState(false);
 
     const handleSummarize = async () => {
-        const provider = sessionStorage.getItem('bs_provider') || localStorage.getItem('bs_provider') || 'openai';
-        const apiKey = provider === 'ollama'
-            ? (sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url'))
-            : (sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key'));
-        const modelId = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || 'gpt-4o-mini';
+        const provider = getStoredProvider();
+        const apiKey = await getEffectiveApiKey(provider);
+        const modelId = getStoredModel();
 
-        if (!apiKey && provider !== 'ollama') {
+        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             toast.error(t('settings.ai.reqOpenAI') || 'API key required');
             return;
         }

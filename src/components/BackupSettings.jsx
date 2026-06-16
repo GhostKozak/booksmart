@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Upload, AlertCircle, CheckCircle2, History } from 'lucide-react';
+import { Download, Upload, AlertCircle, CheckCircle2, History, Lock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { createBackup, downloadBackup, restoreBackup, getLastAutoBackupTime } from '../lib/backup-manager';
 import { toast } from 'sonner';
+import { lockVault, isVaultUnlocked, hasVault } from '../lib/key-vault';
 
 export function BackupSettings() {
     const { t } = useTranslation();
@@ -148,6 +149,21 @@ export function BackupSettings() {
                     </div>
                 </div>
             </div>
+
+            {hasVault() && isVaultUnlocked() && (
+                <div className="border rounded-md p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">{t('settings.vault.title')}</span>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => { lockVault(); toast.success(t('settings.vault.cleared')); }}>
+                            {t('settings.vault.lock')}
+                        </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t('settings.vault.unlockedBadge')}</p>
+                </div>
+            )}
 
             <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900 p-3 rounded-md flex gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />

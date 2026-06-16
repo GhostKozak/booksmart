@@ -3,6 +3,7 @@ import { db } from '../db'
 import { categorizeBookmarks } from '../services/ai-service'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault'
 
 export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview }) {
     const { t } = useTranslation()
@@ -17,13 +18,11 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
     }, []);
 
     const handleMagicSort = useCallback(async () => {
-        const provider = sessionStorage.getItem("bs_provider") || localStorage.getItem("bs_provider") || 'openai'
-        const apiKey = provider === 'ollama'
-            ? (sessionStorage.getItem("bs_ollama_url") || localStorage.getItem("bs_ollama_url"))
-            : (sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key"))
-        const model = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model") || 'gpt-4o-mini'
+        const provider = getStoredProvider()
+        const apiKey = await getEffectiveApiKey(provider)
+        const model = getStoredModel()
 
-        if (!apiKey && provider !== 'ollama') {
+        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai')
             return
         }

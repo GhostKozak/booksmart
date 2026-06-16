@@ -130,6 +130,25 @@
             "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
             "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın"
         },
+        "vault": {
+            "title": "API Anahtarı Kasası",
+            "lockedDesc": "API anahtarlarınız şifrelendi. Açmak için kasa şifrenizi girin.",
+            "passwordPlaceholder": "Kasa şifresi",
+            "unlock": "Aç",
+            "lock": "Kilitle",
+            "clear": "Kasayı Temizle",
+            "wrongPassword": "Yanlış şifre veya bozuk kasa",
+            "saveLocked": "Kaydedilemez: kasa kilitli",
+            "setupTitle": "Kasa Oluştur (İsteğe Bağlı)",
+            "setupDesc": "API anahtarınızı bir şifreyle şifreleyin. Her oturumda girmeniz gerekir.",
+            "newPasswordPlaceholder": "Kasa şifresi belirleyin",
+            "createButton": "Kasa Oluştur ve Şifrele",
+            "created": "Kasa oluşturuldu ve API anahtarı şifrelendi",
+            "createError": "Kasa oluşturulamadı",
+            "cleared": "Kasa temizlendi",
+            "willEncrypt": "Mevcut API anahtarınız kasaya şifrelenecek.",
+            "unlockedBadge": "Kasa açık"
+        },
         "languages": {
             "en": "İngilizce",
             "tr": "Türkçe",

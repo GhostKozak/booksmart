@@ -130,6 +130,25 @@
             "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
             "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden"
         },
+        "vault": {
+            "title": "API-Schlüssel-Tresor",
+            "lockedDesc": "Ihre API-Schlüssel sind verschlüsselt. Geben Sie Ihr Tresor-Passwort ein.",
+            "passwordPlaceholder": "Tresor-Passwort",
+            "unlock": "Entsperren",
+            "lock": "Sperren",
+            "clear": "Tresor leeren",
+            "wrongPassword": "Falsches Passwort oder beschädigter Tresor",
+            "saveLocked": "Speichern nicht möglich: Tresor ist gesperrt",
+            "setupTitle": "Tresor erstellen (optional)",
+            "setupDesc": "Verschlüsseln Sie Ihren API-Schlüssel mit einem Passwort bei jedem Start.",
+            "newPasswordPlaceholder": "Tresor-Passwort wählen",
+            "createButton": "Tresor erstellen & verschlüsseln",
+            "created": "Tresor erstellt und API-Schlüssel verschlüsselt",
+            "createError": "Tresor konnte nicht erstellt werden",
+            "cleared": "Tresor geleert",
+            "willEncrypt": "Ihr vorhandener API-Schlüssel wird in den Tresor verschlüsselt.",
+            "unlockedBadge": "Tresor entsperrt"
+        },
         "languages": {
             "en": "Englisch",
             "tr": "Türkisch",

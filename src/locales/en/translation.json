@@ -132,6 +132,25 @@
             "reqAnthropic": "Requires Anthropic API Key",
             "reqOllama": "Leave empty to use http://localhost:11434"
         },
+        "vault": {
+            "title": "API Key Vault",
+            "lockedDesc": "Your API keys are encrypted. Enter your vault password to unlock.",
+            "passwordPlaceholder": "Vault password",
+            "unlock": "Unlock",
+            "lock": "Lock",
+            "clear": "Clear Vault",
+            "wrongPassword": "Wrong password or corrupted vault",
+            "saveLocked": "Cannot save: vault is locked",
+            "setupTitle": "Create Vault (Optional)",
+            "setupDesc": "Encrypt your API key with a password. You'll need it each session.",
+            "newPasswordPlaceholder": "Choose a vault password",
+            "createButton": "Create Vault & Encrypt",
+            "created": "Vault created and API key encrypted",
+            "createError": "Failed to create vault",
+            "cleared": "Vault cleared",
+            "willEncrypt": "Your existing API key will be encrypted into the vault.",
+            "unlockedBadge": "Vault unlocked"
+        },
         "languages": {
             "en": "English",
             "tr": "Turkish",
