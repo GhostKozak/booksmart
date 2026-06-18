@@ -35,13 +35,21 @@ describe('Simple UI Components', () => {
 
         it('renders a fallback icon when image fails to load', () => {
             const { container } = render(<Favicon url="https://fail.com" />);
-            const img = container.querySelector('img');
+            let img = container.querySelector('img');
             expect(img).toBeInTheDocument();
+            expect(img).toHaveAttribute('src', 'https://www.google.com/s2/favicons?domain=fail.com&sz=128');
 
-            // Trigger error
+            // Trigger error on Google favicon -> falls back to DuckDuckGo
             fireEvent.error(img);
 
-            // After error, image should be gone and fallback SVG should appear
+            img = container.querySelector('img');
+            expect(img).toBeInTheDocument();
+            expect(img).toHaveAttribute('src', 'https://icons.duckduckgo.com/ip3/fail.com.ico');
+
+            // Trigger error on DuckDuckGo favicon -> falls back to Globe SVG
+            fireEvent.error(img);
+
+            // After second error, image should be gone and fallback SVG should appear
             expect(container.querySelector('img')).not.toBeInTheDocument();
             expect(container.querySelector('svg')).toBeInTheDocument();
         });
