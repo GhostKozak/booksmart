@@ -22,7 +22,8 @@ export function BookmarkRowDesktop({
     availableFolders,
     availableTags,
     allCollections,
-    onRemoveFromCollection
+    onRemoveFromCollection,
+    compact
 }) {
     const { t } = useTranslation();
     return (
@@ -38,49 +39,55 @@ export function BookmarkRowDesktop({
             </div>
 
             {/* Title / URL (Col 2) */}
-            <div className="flex flex-col py-2 min-w-0 overflow-hidden">
-                <LinkTooltip bookmark={bookmark}>
+            <div className={cn("flex flex-col min-w-0 overflow-hidden", compact ? "py-1.5" : "py-2")}>
+                <LinkTooltip bookmark={bookmark} className="w-full min-w-0 block">
                     <div className="flex items-center gap-2 min-w-0">
                         <Favicon url={bookmark.url} className="w-4 h-4 shrink-0" />
                         <span className={cn(
-                            "font-medium truncate",
+                            "font-medium truncate text-sm",
                             (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
                     </div>
-                    <span className="text-muted-foreground text-xs break-words truncate" title={bookmark.url}>{bookmark.url}</span>
+                    {!compact && (
+                        <span className="text-muted-foreground text-xs break-words truncate" title={bookmark.url}>{bookmark.url}</span>
+                    )}
                 </LinkTooltip>
 
-                <BookmarkTags
-                    tags={bookmark.tags}
-                    ruleTags={bookmark.ruleTags}
-                    availableTags={availableTags}
-                />
+                {!compact && (
+                    <>
+                        <BookmarkTags
+                            tags={bookmark.tags}
+                            ruleTags={bookmark.ruleTags}
+                            availableTags={availableTags}
+                        />
 
-                <BookmarkCollections
-                    collectionIds={bookmark.collections}
-                    allCollections={allCollections}
-                    onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
-                />
+                        <BookmarkCollections
+                            collectionIds={bookmark.collections}
+                            allCollections={allCollections}
+                            onRemove={onRemoveFromCollection ? (collectionId) => onRemoveFromCollection(bookmark.id, collectionId) : undefined}
+                        />
 
-                <div className="flex items-center gap-1 mt-0.5">
-                    {bookmark.addDate && (
-                        <span className="text-[10px] text-muted-foreground/60">{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
-                    )}
-                    {bookmark.note && (
-                        <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5 ml-1" title={bookmark.note}>
-                            <StickyNote className="w-3 h-3" />
-                            {bookmark.note.length > 30 ? bookmark.note.slice(0, 30) + '...' : bookmark.note}
-                        </span>
-                    )}
-                </div>
+                        <div className="flex items-center gap-1 mt-0.5">
+                            {bookmark.addDate && (
+                                <span className="text-[10px] text-muted-foreground/60">{t('bookmarks.row.added', { time: getRelativeTime(bookmark.addDate, t) })}</span>
+                            )}
+                            {bookmark.note && (
+                                <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5 ml-1" title={bookmark.note}>
+                                    <StickyNote className="w-3 h-3" />
+                                    {bookmark.note.length > 30 ? bookmark.note.slice(0, 30) + '...' : bookmark.note}
+                                </span>
+                            )}
+                        </div>
 
-                {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
-                    <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                        <Layers className="w-3 h-3" />
-                        <span>{t('bookmarks.row.duplicateIn', { locations: bookmark.otherLocations.join(', ') })}</span>
-                    </div>
+                        {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
+                            <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                                <Layers className="w-3 h-3" />
+                                <span>{t('bookmarks.row.duplicateIn', { locations: bookmark.otherLocations.join(', ') })}</span>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 

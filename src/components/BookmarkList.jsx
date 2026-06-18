@@ -5,7 +5,7 @@ import { BookmarkRow } from './BookmarkRow'
 import { cn } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 
-export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) {
+export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection, compact = false }) {
     // Determine if all visible/loaded bookmarks are selected
     const { t } = useTranslation();
     const isAllSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length
@@ -35,7 +35,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
             <div className="hidden lg:block text-left">{t('sidebar.sections.folders')}</div>
             <div className="hidden lg:block text-center">{t('bookmarks.columns.status')}</div>
             <div className="hidden lg:block text-center">{t('bookmarks.columns.health')}</div>
-            <div className="hidden lg:block text-center">{t('header.view')}</div>
+            <div className="hidden lg:block text-center">{t('common.actions')}</div>
         </div>
     )
 
@@ -44,14 +44,14 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
 
     return (
         <div className="bg-card rounded-xl border shadow-sm overflow-hidden h-full flex flex-col">
-            {/* Header - Fixed Outside Virtuoso */}
-            {header}
-
             {/* List Body with Virtuoso */}
             <div className="flex-1 min-h-0 overflow-x-auto">
                 <Virtuoso
                     style={{ height: '100%' }}
                     data={displayData}
+                    components={{
+                        Header: () => header
+                    }}
                     context={{
                         selectedIds,
                         toggleSelection,
@@ -63,7 +63,8 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                         availableFolders,
                         availableTags,
                         allCollections,
-                        onRemoveFromCollection
+                        onRemoveFromCollection,
+                        compact
                     }}
                     itemContent={(index, bookmark, context) => (
                         <BookmarkRow
@@ -81,6 +82,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                             availableTags={context.availableTags}
                             allCollections={context.allCollections}
                             onRemoveFromCollection={context.onRemoveFromCollection}
+                            compact={context.compact}
                         />
                     )}
                     overscan={200}

@@ -22,6 +22,7 @@ export function BookmarkFolderBadge({ folderName, availableFolders = [], isMatch
                 className
             )}
             style={style}
+            title={folderName}
         >
             {folderName}
         </span>

@@ -6,6 +6,8 @@ import { BookmarkGrid } from '../BookmarkGrid'
 import { PreviewPane } from '../PreviewPane'
 import { AnalyticsDashboard } from '../AnalyticsDashboard'
 import { OnboardingWizard } from '../OnboardingWizard'
+import { BookmarkTable } from '../BookmarkTable'
+import { BookmarkTree } from '../BookmarkTree'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
@@ -147,34 +149,42 @@ export function MainContent({
                 ) : (
                     <div className="flex gap-4 h-[calc(100vh-250px)] transition-all duration-300">
                         <div key={viewMode} className={cn("flex-1 min-w-0 h-full animate-in duration-300 fade-in zoom-in-[0.98]", previewBookmark ? "hidden xl:block xl:basis-3/5" : "basis-full")}>
-                            {viewMode === 'list' ? (
-                                <BookmarkList
-                                    bookmarks={displayBookmarks}
-                                    selectedIds={selectedIds}
-                                    toggleSelection={toggleSelection}
-                                    toggleAll={toggleAll}
-                                    linkHealth={linkHealth}
-                                    ignoredUrls={ignoredUrls}
-                                    toggleIgnoreUrl={toggleIgnoreUrl}
-                                    onPreview={handlePreview}
-                                    onEdit={onEditBookmark}
-                                    availableFolders={availableFolders}
-                                    availableTags={availableTags}
-                                    allCollections={allCollections}
-                                    onRemoveFromCollection={onRemoveFromCollection}
-                                />
-                            ) : (
-                                <BookmarkGrid
-                                    bookmarks={displayBookmarks}
-                                    selectedIds={selectedIds}
-                                    toggleSelection={toggleSelection}
-                                    onPreview={handlePreview}
-                                    onEdit={onEditBookmark}
-                                    showThumbnails={showThumbnails}
-                                    availableFolders={availableFolders}
-                                    availableTags={availableTags}
-                                />
-                            )}
+                            {(() => {
+                                const commonProps = {
+                                    bookmarks: displayBookmarks,
+                                    selectedIds,
+                                    toggleSelection,
+                                    toggleAll,
+                                    linkHealth,
+                                    ignoredUrls,
+                                    toggleIgnoreUrl,
+                                    onPreview: handlePreview,
+                                    onEdit: onEditBookmark,
+                                    availableFolders,
+                                    availableTags,
+                                    allCollections,
+                                    onRemoveFromCollection
+                                }
+                                if (viewMode === 'list') {
+                                    return <BookmarkList {...commonProps} compact={false} />
+                                }
+                                if (viewMode === 'compact') {
+                                    return <BookmarkList {...commonProps} compact={true} />
+                                }
+                                if (viewMode === 'grid') {
+                                    return <BookmarkGrid {...commonProps} detailed={false} showThumbnails={showThumbnails} />
+                                }
+                                if (viewMode === 'card') {
+                                    return <BookmarkGrid {...commonProps} detailed={true} showThumbnails={true} />
+                                }
+                                if (viewMode === 'table') {
+                                    return <BookmarkTable {...commonProps} />
+                                }
+                                if (viewMode === 'tree') {
+                                    return <BookmarkTree {...commonProps} />
+                                }
+                                return null
+                            })()}
                         </div>
 
                         {previewBookmark && (

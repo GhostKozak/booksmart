@@ -30,7 +30,11 @@
         "removeDuplicates": "Supprimer {{count}} doublons",
         "cleanUrls": "Nettoyer {{count}} URLs",
         "listView": "Vue en liste",
+        "compactView": "Compact",
         "gridView": "Vue en grille",
+        "cardView": "Cartes",
+        "tableView": "Tableau",
+        "treeView": "Arborescence",
         "analytics": "Analytique",
         "showThumbnails": "Afficher les miniatures",
         "hideThumbnails": "Masquer les miniatures",
@@ -421,7 +425,9 @@
         "columns": {
             "title": "Titre / URL",
             "status": "Statut",
-            "health": "Santé"
+            "health": "Santé",
+            "added": "Ajouté",
+            "actions": "Actions"
         },
         "status": {
             "duplicate": "Doublon (Sera supprimé)",
@@ -442,6 +448,10 @@
         "row": {
             "added": "Ajouté {{time}}",
             "duplicateIn": "Doublon dans : {{locations}}"
+        },
+        "tree": {
+            "expandAll": "Tout développer",
+            "collapseAll": "Tout réduire"
         }
     },
     "main": {

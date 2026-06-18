@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown } from 'lucide-react'
+import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -215,26 +215,42 @@ export function Header({
                         <div className="px-2">
                             <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.view')}</DropdownLabel>
                             <div className="grid grid-cols-2 gap-2 mb-2">
-                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-2 sm:py-2.5 font-medium", viewMode === 'list' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <List className="h-4 w-4 mr-2" />
-                                    <span>{t('header.listView')}</span>
+                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'list' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <List className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.listView') || 'List'}</span>
                                 </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-2 sm:py-2.5 font-medium", viewMode === 'grid' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <LayoutGrid className="h-4 w-4 mr-2" />
-                                    <span>{t('header.gridView')}</span>
+                                <DropdownItem onClick={() => setViewMode('compact')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'compact' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <AlignJustify className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.compactView') || 'Compact'}</span>
+                                </DropdownItem>
+                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'grid' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <LayoutGrid className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.gridView') || 'Grid'}</span>
+                                </DropdownItem>
+                                <DropdownItem onClick={() => setViewMode('card')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'card' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <CreditCard className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.cardView') || 'Cards'}</span>
+                                </DropdownItem>
+                                <DropdownItem onClick={() => setViewMode('table')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'table' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <Table className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.tableView') || 'Table'}</span>
+                                </DropdownItem>
+                                <DropdownItem onClick={() => setViewMode('tree')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'tree' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <FolderTree className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.treeView') || 'Folder Tree'}</span>
                                 </DropdownItem>
                             </div>
 
-                            <div className={cn("grid gap-2 mb-2", viewMode === 'grid' ? "grid-cols-2" : "grid-cols-1")}>
-                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-2 sm:py-2.5 justify-center font-medium", viewMode === 'analytics' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <BarChart3 className="h-4 w-4 mr-2" />
-                                    {t('header.analytics')}
+                            <div className={cn("grid gap-2 mb-2", (viewMode === 'grid' || viewMode === 'card') ? "grid-cols-2" : "grid-cols-1")}>
+                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-1.5 sm:py-2 justify-center font-medium text-xs", viewMode === 'analytics' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
+                                    <BarChart3 className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                    <span className="truncate">{t('header.analytics')}</span>
                                 </DropdownItem>
 
-                                {viewMode === 'grid' && (
-                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-2 sm:py-2.5 justify-center font-medium">
-                                        <Image className="h-4 w-4 mr-2" />
-                                        {showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}
+                                {(viewMode === 'grid' || viewMode === 'card') && (
+                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-1.5 sm:py-2 justify-center font-medium text-xs">
+                                        <Image className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                        <span className="truncate">{showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}</span>
                                     </DropdownItem>
                                 )}
                             </div>

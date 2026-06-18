@@ -30,7 +30,11 @@
         "removeDuplicates": "Remove {{count}} Duplicates",
         "cleanUrls": "Clean {{count}} URLs",
         "listView": "List View",
+        "compactView": "Compact",
         "gridView": "Grid View",
+        "cardView": "Cards",
+        "tableView": "Table",
+        "treeView": "Folder Tree",
         "analytics": "Analytics",
         "showThumbnails": "Show Thumbnails",
         "hideThumbnails": "Hide Thumbnails",
@@ -445,7 +449,9 @@
         "columns": {
             "title": "Title / URL",
             "status": "Status",
-            "health": "Health"
+            "health": "Health",
+            "added": "Added",
+            "actions": "Actions"
         },
         "status": {
             "duplicate": "Duplicate (Will be removed)",
@@ -474,6 +480,10 @@
             "folderPlaceholder": "Select or type a folder",
             "tagsPlaceholder": "Type tag and press Enter",
             "undoDesc": "Edit \"{{title}}\""
+        },
+        "tree": {
+            "expandAll": "Expand All",
+            "collapseAll": "Collapse All"
         }
     },
     "main": {

@@ -8,18 +8,20 @@ import { Folder, ExternalLink, Eye, Pencil } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
+import { BookmarkTags } from './bookmark/BookmarkTags';
+import { BookmarkCollections } from './bookmark/BookmarkCollections';
 
 // Extracted Item Component for state management
-const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, context, showThumbnails }) => {
+const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
     const { t } = useTranslation();
     const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
 
     // Reset loading state if thumbnail visibility toggles or bookmark changes
     React.useEffect(() => {
-        if (showThumbnails) {
+        if (showThumbnails || detailed) {
             setImageStatus('loading');
         }
-    }, [showThumbnails, bookmark.id]);
+    }, [showThumbnails, detailed, bookmark.id]);
 
     return (
         <div className="flex flex-col h-full">
@@ -49,7 +51,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                 }}
             >
                 {/* Screenshot Thumbnail */}
-                {showThumbnails && (
+                {(showThumbnails || detailed) && (
                     <div className="relative bg-muted/30 border-b w-full aspect-video overflow-hidden">
                         {imageStatus !== 'error' && (
                             <img
@@ -93,7 +95,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 title={t('common.edit')}
                                 aria-label={t('common.edit')}
                             >
-                                <Pencil className="w-3 h-3" />
+                                <Pencil className="w-3.5 h-3.5" />
                             </Button>
                             <Button
                                 variant="secondary"
@@ -106,7 +108,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 title={t('preview.open')}
                                 aria-label={t('preview.open')}
                             >
-                                <Eye className="w-3 h-3" />
+                                <Eye className="w-3.5 h-3.5" />
                             </Button>
                             <Checkbox
                                 checked={isSelected}
@@ -134,7 +136,7 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                                 </p>
                             </LinkTooltip>
                         </div>
-                        {!showThumbnails && (
+                        {!(showThumbnails || detailed) && (
                             <div className="flex items-center gap-1 mt-0.5 shrink-0">
                                 <Button
                                     variant="ghost"
@@ -172,35 +174,62 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
                         )}
                     </div>
 
-                    {bookmark.tags && bookmark.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 h-5 overflow-hidden">
-                            {bookmark.tags.slice(0, 3).map(tag => {
-                                const tagConfig = context.availableTags?.find(t => t.name === tag);
-                                const customColor = tagConfig ? tagConfig.color : null;
+                    {/* Notes / Descriptions */}
+                    {detailed && bookmark.note && (
+                        <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap break-words leading-relaxed max-h-24 overflow-y-auto pr-1">
+                            {bookmark.note}
+                        </p>
+                    )}
 
-                                const style = customColor ? {
-                                    backgroundColor: customColor + '15',
-                                    color: customColor,
-                                    borderColor: customColor + '40'
-                                } : {};
+                    {/* Tags */}
+                    {detailed ? (
+                        <BookmarkTags
+                            tags={bookmark.tags}
+                            ruleTags={bookmark.ruleTags}
+                            availableTags={context.availableTags}
+                            className="mt-1 max-h-20 overflow-y-auto"
+                        />
+                    ) : (
+                        bookmark.tags && bookmark.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 h-5 overflow-hidden">
+                                {bookmark.tags.slice(0, 3).map(tag => {
+                                    const tagConfig = context.availableTags?.find(t => t.name === tag);
+                                    const customColor = tagConfig ? tagConfig.color : null;
 
-                                return (
-                                    <span key={tag}
-                                        style={style}
-                                        className={cn(
-                                            "px-1 py-0.5 border rounded-[3px] font-medium text-[8px] whitespace-nowrap",
-                                            !customColor && "bg-purple-100/50 text-purple-700/70 border-purple-200/50 dark:bg-purple-900/10 dark:text-purple-400/70 dark:border-purple-800/30"
-                                        )}>
-                                        #{tag}
+                                    const style = customColor ? {
+                                        backgroundColor: customColor + '15',
+                                        color: customColor,
+                                        borderColor: customColor + '40'
+                                    } : {};
+
+                                    return (
+                                        <span key={tag}
+                                            style={style}
+                                            className={cn(
+                                                "px-1 py-0.5 border rounded-[3px] font-medium text-[8px] whitespace-nowrap",
+                                                !customColor && "bg-purple-100/50 text-purple-700/70 border-purple-200/50 dark:bg-purple-900/10 dark:text-purple-400/70 dark:border-purple-800/30"
+                                            )}>
+                                            #{tag}
+                                        </span>
+                                    )
+                                })}
+                                {bookmark.tags.length > 3 && (
+                                    <span className="self-center opacity-60 text-[8px] text-muted-foreground">
+                                        +{bookmark.tags.length - 3}
                                     </span>
-                                )
-                            })}
-                            {bookmark.tags.length > 3 && (
-                                <span className="self-center opacity-60 text-[8px] text-muted-foreground">
-                                    +{bookmark.tags.length - 3}
-                                </span>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )
+                    )}
+
+                    {/* Collections */}
+                    {detailed && bookmark.collections && bookmark.collections.length > 0 && (
+                        <BookmarkCollections
+                            collectionIds={bookmark.collections}
+                            allCollections={context.allCollections}
+                            onRemove={context.onRemoveFromCollection ? (collectionId) => context.onRemoveFromCollection(bookmark.id, collectionId) : undefined}
+                            className="mt-1"
+                        />
                     )}
 
                     <div className="flex justify-between items-center mt-auto pt-2 border-t text-[10px] text-muted-foreground">
@@ -229,8 +258,19 @@ const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, contex
     );
 };
 
-export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPreview, onEdit, showThumbnails, availableFolders = [], availableTags = [] }) {
-
+export function BookmarkGrid({
+    bookmarks,
+    selectedIds,
+    toggleSelection,
+    onPreview,
+    onEdit,
+    showThumbnails,
+    availableFolders = [],
+    availableTags = [],
+    detailed = false,
+    allCollections = [],
+    onRemoveFromCollection
+}) {
 
     // Define the grid item structure
     const ItemContent = (index, bookmark, context) => {
@@ -250,6 +290,7 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                 folderName={folderName}
                 context={ctx}
                 showThumbnails={showThumbnails} // Pass directly from prop closure
+                detailed={detailed}
             />
         );
     };
@@ -268,7 +309,9 @@ export function BookmarkGrid({ bookmarks, selectedIds, toggleSelection, onPrevie
                 onEdit,
                 showThumbnails,
                 availableFolders,
-                availableTags
+                availableTags,
+                allCollections,
+                onRemoveFromCollection
             }}
             data={displayData}
             itemContent={ItemContent}

@@ -21,11 +21,12 @@ export function BookmarkRowMobile({
     availableFolders,
     availableTags,
     allCollections,
-    onRemoveFromCollection
+    onRemoveFromCollection,
+    compact
 }) {
     const { t } = useTranslation();
     return (
-        <div className="lg:hidden flex flex-col gap-2">
+        <div className={cn("lg:hidden flex flex-col", compact ? "gap-0.5" : "gap-2")}>
             {/* Row 1: Checkbox, Icon, Title */}
             <div className="flex items-start gap-3">
                 <Checkbox
@@ -80,14 +81,17 @@ export function BookmarkRowMobile({
                         </div>
                     </div>
 
-                    <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block mt-0.5 text-muted-foreground text-xs hover:underline wrap-break-word truncate">
-                        {bookmark.url}
-                    </a>
+                    {!compact && (
+                        <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block mt-0.5 text-muted-foreground text-xs hover:underline wrap-break-word truncate">
+                            {bookmark.url}
+                        </a>
+                    )}
                 </div>
             </div>
 
             {/* Row 2: Metadata Badges */}
-            <div className="flex flex-col gap-1 pl-8 text-xs">
+            {!compact && (
+                <div className="flex flex-col gap-1 pl-8 text-xs">
                 {/* Folder Path */}
                 <div className="flex flex-wrap items-center gap-1.5 leading-relaxed">
                     {(() => {
@@ -145,6 +149,7 @@ export function BookmarkRowMobile({
                     </div>
                 )}
             </div>
+            )}
         </div>
     )
 }

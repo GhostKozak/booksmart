@@ -3,7 +3,7 @@ import { BookmarkRowDesktop } from './bookmark/BookmarkRowDesktop'
 import { BookmarkRowMobile } from './bookmark/BookmarkRowMobile'
 import { cn } from '../lib/utils'
 
-export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, className, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection }) => {
+export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, className, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection, compact = false }) => {
     if (!bookmark) return null
 
     const isSelected = selectedIds.has(bookmark.id)
@@ -43,7 +43,8 @@ export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection
         availableFolders,
         availableTags,
         allCollections,
-        onRemoveFromCollection
+        onRemoveFromCollection,
+        compact
     }
 
     return (
@@ -51,8 +52,7 @@ export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection
             className={cn(
                 borderClass,
                 "transition-all duration-300",
-                "flex flex-col p-3 gap-3",
-                "lg:p-0 lg:gap-0 lg:border-b",
+                compact ? "flex flex-col p-1.5 gap-1.5 lg:p-0 lg:gap-0 lg:border-b" : "flex flex-col p-3 gap-3 lg:p-0 lg:gap-0 lg:border-b",
                 className,
                 rowBgClass
             )}
@@ -70,6 +70,7 @@ export const BookmarkRow = memo(({ index, bookmark, selectedIds, toggleSelection
         prevProps.availableTags === nextProps.availableTags &&
         prevProps.availableFolders === nextProps.availableFolders &&
         prevProps.allCollections === nextProps.allCollections &&
+        prevProps.compact === nextProps.compact &&
         (prevProps.ignoredUrls?.has(prevProps.bookmark.url) === nextProps.ignoredUrls?.has(nextProps.bookmark.url))
     )
 })

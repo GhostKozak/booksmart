@@ -30,7 +30,11 @@
         "removeDuplicates": "{{count}} Yinelemeyi Kaldır",
         "cleanUrls": "{{count}} URL'yi Temizle",
         "listView": "Liste Görünümü",
+        "compactView": "Kompakt Liste",
         "gridView": "Izgara Görünümü",
+        "cardView": "Görsel Kartlar",
+        "tableView": "Tablo Görünümü",
+        "treeView": "Klasör Ağacı",
         "analytics": "Analiz",
         "showThumbnails": "Küçük Resimleri Göster",
         "hideThumbnails": "Küçük Resimleri Gizle",
@@ -443,7 +447,9 @@
         "columns": {
             "title": "Başlık / URL",
             "status": "Durum",
-            "health": "Sağlık"
+            "health": "Sağlık",
+            "added": "Eklenme Tarihi",
+            "actions": "İşlemler"
         },
         "status": {
             "duplicate": "Kopya (Silinecek)",
@@ -472,6 +478,10 @@
             "folderPlaceholder": "Klasör seçin veya yazın",
             "tagsPlaceholder": "Etiket yazıp Enter'a basın",
             "undoDesc": "\"{{title}}\" düzenlendi"
+        },
+        "tree": {
+            "expandAll": "Tümünü Aç",
+            "collapseAll": "Tümünü Kapat"
         }
     },
     "main": {

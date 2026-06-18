@@ -30,7 +30,11 @@
         "removeDuplicates": "{{count}} Duplikate entfernen",
         "cleanUrls": "{{count}} URLs bereinigen",
         "listView": "Listenansicht",
+        "compactView": "Kompakt",
         "gridView": "Rasteransicht",
+        "cardView": "Karten",
+        "tableView": "Tabelle",
+        "treeView": "Ordnerstruktur",
         "analytics": "Analytik",
         "showThumbnails": "Miniaturansichten anzeigen",
         "hideThumbnails": "Miniaturansichten ausblenden",
@@ -443,7 +447,9 @@
         "columns": {
             "title": "Titel / URL",
             "status": "Status",
-            "health": "Gesundheit"
+            "health": "Gesundheit",
+            "added": "Hinzugefügt",
+            "actions": "Aktionen"
         },
         "status": {
             "duplicate": "Duplikat (Wird entfernt)",
@@ -471,6 +477,10 @@
             "folderPlaceholder": "Ordner auswählen oder eingeben",
             "tagsPlaceholder": "Tag eingeben und Enter drücken",
             "undoDesc": "„{{title}}\" bearbeitet"
+        },
+        "tree": {
+            "expandAll": "Alle erweitern",
+            "collapseAll": "Alle reduzieren"
         }
     },
     "main": {

@@ -30,7 +30,11 @@
         "removeDuplicates": "Eliminar {{count}} duplicados",
         "cleanUrls": "Limpiar {{count}} URLs",
         "listView": "Vista de lista",
+        "compactView": "Compacto",
         "gridView": "Vista de cuadrícula",
+        "cardView": "Tarjetas",
+        "tableView": "Tabla",
+        "treeView": "Árbol de Carpetas",
         "analytics": "Analítica",
         "showThumbnails": "Mostrar miniaturas",
         "hideThumbnails": "Ocultar miniaturas",
@@ -421,7 +425,9 @@
         "columns": {
             "title": "Título / URL",
             "status": "Estado",
-            "health": "Salud"
+            "health": "Salud",
+            "added": "Añadido",
+            "actions": "Acciones"
         },
         "status": {
             "duplicate": "Duplicado (Será eliminado)",
@@ -442,6 +448,10 @@
         "row": {
             "added": "Añadido {{time}}",
             "duplicateIn": "Duplicado en: {{locations}}"
+        },
+        "tree": {
+            "expandAll": "Expandir todo",
+            "collapseAll": "Contraer todo"
         }
     },
     "main": {
