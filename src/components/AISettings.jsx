@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
     unlockVault, lockVault, saveSecret, loadSecret,
-    isVaultUnlocked, hasVault, clearVault, migrateFromLocalStorage
+    isVaultUnlocked, hasVault, clearVault, migrateFromLocalStorage,
+    getStoredCorsProxy, saveStoredCorsProxy
 } from '../lib/key-vault'
 
 export function AISettings() {
@@ -20,6 +21,7 @@ export function AISettings() {
     const [unlocked, setUnlocked] = useState(isVaultUnlocked())
     const [vaultExists, setVaultExists] = useState(hasVault())
     const [unlockError, setUnlockError] = useState('')
+    const [corsProxy, setCorsProxy] = useState('')
 
     useEffect(() => {
         if (isVaultUnlocked()) {
@@ -29,8 +31,10 @@ export function AISettings() {
         }
         const storedOllamaUrl = sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url')
         const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
+        const storedCorsProxy = getStoredCorsProxy()
         if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
         if (storedModel) setSelectedModel(storedModel)
+        if (storedCorsProxy) setCorsProxy(storedCorsProxy)
     }, [])
 
     const existingKey = !vaultExists && (sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key'))
@@ -91,6 +95,7 @@ export function AISettings() {
         if (!vaultExists) {
             sessionStorage.setItem('bs_api_key', apiKey)
         }
+        saveStoredCorsProxy(corsProxy)
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
         toast.success(t('toast.settingsSaved'))
@@ -209,6 +214,19 @@ export function AISettings() {
                     {selectedProvider === 'openrouter' && t('settings.ai.reqOpenRouter')}
                     {selectedProvider === 'anthropic' && t('settings.ai.reqAnthropic')}
                     {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
+                </p>
+            </div>
+
+            <div className="space-y-2 border-t pt-3">
+                <label className="text-sm font-medium">{t('settings.network.corsProxy')}</label>
+                <Input
+                    type="text"
+                    value={corsProxy}
+                    onChange={(e) => setCorsProxy(e.target.value)}
+                    placeholder="e.g. https://api.allorigins.win/get?url="
+                />
+                <p className="text-[10px] text-muted-foreground">
+                    {t('settings.network.corsProxyDesc')}
                 </p>
             </div>
 

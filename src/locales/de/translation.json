@@ -130,6 +130,10 @@
             "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
             "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden"
         },
+        "network": {
+            "corsProxy": "CORS Proxy URL",
+            "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
+        },
         "vault": {
             "title": "API-Schlüssel-Tresor",
             "lockedDesc": "Ihre API-Schlüssel sind verschlüsselt. Geben Sie Ihr Tresor-Passwort ein.",

@@ -132,6 +132,10 @@
             "reqAnthropic": "Requires Anthropic API Key",
             "reqOllama": "Leave empty to use http://localhost:11434"
         },
+        "network": {
+            "corsProxy": "CORS Proxy URL",
+            "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
+        },
         "vault": {
             "title": "API Key Vault",
             "lockedDesc": "Your API keys are encrypted. Enter your vault password to unlock.",

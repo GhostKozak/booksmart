@@ -130,6 +130,10 @@
             "reqOpenRouter": "Requiere clave API de OpenRouter",
             "reqOllama": "Dejar vacío para el predeterminado http://localhost:11434"
         },
+        "network": {
+            "corsProxy": "CORS Proxy URL",
+            "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
+        },
         "languages": {
             "en": "Inglés",
             "tr": "Turco",

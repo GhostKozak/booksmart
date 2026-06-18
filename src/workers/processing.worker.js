@@ -175,9 +175,13 @@ const processData = ({
         filtered = filtered.filter(b => b.tags && b.tags.includes(activeTag))
     }
 
-    // 4. Folder Filter
-    // Filters by the persisted newFolder (from previous rule/AI runs) or original folder.
-    // Rule application happens later in step 7, so the filtered set reflects the persisted state.
+    // 4. Folder Filter — Filters by persisted DB state (from previous rule/AI runs or manual moves)
+    //
+    // DESIGN DECISION: This filter only uses folder assignments already saved in IndexedDB
+    // (i.e. b.newFolder or b.originalFolder).
+    // Rule application (Step 8) calculates newFolder dynamically in memory and does NOT persist it.
+    // Therefore, this step filters based on "already moved/persisted" folders, not "matching rules".
+    // To persist rule actions, the user must explicitly apply the rules (saving them to DB via bulkPut).
     if (activeFolder) {
         filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)
     }
@@ -462,12 +466,30 @@ const processData = ({
     };
 };
 
-const checkLink = async (url) => {
+function getProxiedUrl(url, corsProxy) {
+    if (!corsProxy) return url;
+    const cleanProxy = corsProxy.trim();
+    if (!cleanProxy) return url;
+    if (cleanProxy.includes('?url=')) {
+        return `${cleanProxy}${encodeURIComponent(url)}`;
+    }
+    if (cleanProxy.endsWith('/')) {
+        return `${cleanProxy}${url}`;
+    }
+    return `${cleanProxy}/${url}`;
+}
+
+const checkLink = async (url, corsProxy) => {
     try {
-        // Mode 'no-cors' allows us to send request without CORS errors blocking the JS,
-        // but we can't read status. However, if it doesn't throw, it's likely alive (DNS/TCP ok).
-        // If it throws (NetworkError), it's dead.
-        await fetch(url, { mode: 'no-cors', method: 'HEAD' });
+        const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
+        const fetchOptions = corsProxy ? {} : { mode: 'no-cors' };
+        const res = await fetch(fetchUrl, {
+            ...fetchOptions,
+            method: corsProxy ? 'GET' : 'HEAD'
+        });
+        if (corsProxy) {
+            return { url, status: res.status < 400 ? 'alive' : 'dead' };
+        }
         return { url, status: 'alive' };
     } catch {
         return { url, status: 'dead' };
@@ -488,13 +510,13 @@ self.onmessage = async (e) => {
             self.postMessage({ type: 'ERROR', payload: error.message });
         }
     } else if (type === 'CHECK_LINKS') {
-        const { urls } = payload;
+        const { urls, corsProxy } = payload;
         // Process in batches to avoid overwhelming network
         const batchSize = 5;
 
         for (let i = 0; i < urls.length; i += batchSize) {
             const batch = urls.slice(i, i + batchSize);
-            const results = await Promise.all(batch.map(url => checkLink(url)));
+            const results = await Promise.all(batch.map(url => checkLink(url, corsProxy)));
 
             // Send incremental updates
             self.postMessage({ type: 'LINK_STATUS_UPDATE', payload: results });

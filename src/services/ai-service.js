@@ -434,7 +434,20 @@ async function callOllama(messages, baseUrl, model, asJson = true, signal) {
     return text;
 }
 
-export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {}) {
+function getProxiedUrl(url, corsProxy) {
+    if (!corsProxy) return url;
+    const cleanProxy = corsProxy.trim();
+    if (!cleanProxy) return url;
+    if (cleanProxy.includes('?url=')) {
+        return `${cleanProxy}${encodeURIComponent(url)}`;
+    }
+    if (cleanProxy.endsWith('/')) {
+        return `${cleanProxy}${url}`;
+    }
+    return `${cleanProxy}/${url}`;
+}
+
+export async function summarizeContent(url, apiKey, modelId, { abortSignal, corsProxy } = {}) {
     const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
@@ -444,7 +457,8 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal } = {
     // Try direct fetch first — privacy-first approach, no third-party proxy.
     // If CORS blocks it, we fall back to just the URL for AI summarization.
     try {
-        const res = await fetch(url, { signal: abortSignal });
+        const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
+        const res = await fetch(fetchUrl, { signal: abortSignal });
         if (res.ok) {
             const html = await res.text();
             const doc = new DOMParser().parseFromString(html, 'text/html');

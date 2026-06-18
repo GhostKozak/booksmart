@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import ProcessingWorker from '../workers/processing.worker.js?worker'
+import { getStoredCorsProxy } from '../lib/key-vault'
 
 export function useBookmarkWorker({
     rawBookmarks,
@@ -106,7 +107,8 @@ export function useBookmarkWorker({
         }
         setIsCheckingLinks(true)
         const urls = [...new Set(bookmarks.map(b => b.url))]
-        workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls } })
+        const corsProxy = getStoredCorsProxy()
+        workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls, corsProxy } })
     }, [bookmarks])
 
     const resolveConflict = useCallback((bookmarkId, chosenFolder) => {

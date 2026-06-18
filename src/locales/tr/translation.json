@@ -130,6 +130,10 @@
             "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
             "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın"
         },
+        "network": {
+            "corsProxy": "CORS Proxy Adresi",
+            "corsProxyDesc": "Bağlantı kontrolü ve sayfa özetleme için CORS kısıtlamalarını aşmakta kullanılacak isteğe bağlı proxy."
+        },
         "vault": {
             "title": "API Anahtarı Kasası",
             "lockedDesc": "API anahtarlarınız şifrelendi. Açmak için kasa şifrenizi girin.",

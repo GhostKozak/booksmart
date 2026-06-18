@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { db } from '../db';
 import { summarizeContent } from '../services/ai-service';
 import { toast } from 'sonner';
-import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault';
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault, getStoredCorsProxy } from '../lib/key-vault';
 
 /**
  * Validate URL scheme - blocks dangerous protocols.
@@ -54,7 +54,8 @@ export function PreviewPane({ bookmark, onClose, className }) {
         setIsNoteOpen(true);
 
         try {
-            const summary = await summarizeContent(bookmark.url, apiKey, modelId);
+            const corsProxy = getStoredCorsProxy();
+            const summary = await summarizeContent(bookmark.url, apiKey, modelId, { corsProxy });
             const newNote = noteValue ? `${noteValue}\n\n---\n**AI Summary:**\n${summary}` : `**AI Summary:**\n${summary}`;
             await saveNote(newNote);
             toast.success(t('preview.summarySuccess') || 'AI Summary generated');

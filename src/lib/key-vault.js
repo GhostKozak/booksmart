@@ -133,3 +133,13 @@ export async function getEffectiveApiKey(provider) {
     }
     return sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key');
 }
+
+export function getStoredCorsProxy() {
+    return sessionStorage.getItem('bs_cors_proxy') || localStorage.getItem('bs_cors_proxy') || '';
+}
+
+export function saveStoredCorsProxy(url) {
+    const cleanUrl = url ? url.trim() : '';
+    sessionStorage.setItem('bs_cors_proxy', cleanUrl);
+    localStorage.setItem('bs_cors_proxy', cleanUrl);
+}
