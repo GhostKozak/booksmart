@@ -54,6 +54,8 @@
             "push": "Exportar al navegador",
             "syncBtn": "Sincronizar Navegador"
         },
+        "extensionNotConnectedDesc": "Habilita comprobaciones sin CORS y sincronización bidireccional con tu navegador.",
+        "installExtensionBtn": "Instalar extensión complementaria",
         "view": "Opciones de vista",
         "tools": "Herramientas",
         "system": "Sistema",
@@ -736,5 +738,13 @@
             "ai": "Herramientas IA",
             "system": "Preferencias y Sistema"
         }
+    },
+    "extensionPrompt": {
+        "title": "Potencia con la extensión complementaria",
+        "tagline": "Comprobación sin CORS y sincronización bidireccional",
+        "desc": "Instala la extensión ligera para comprobar enlaces caídos sin servidor, sincronizar marcadores y guardar pestañas en 1 clic.",
+        "installGuide": "Configurar extensión",
+        "later": "Más tarde",
+        "permanentTip": "¿Cerrado? Siempre puedes acceder a la extensión desde el menú ⋯."
     }
 }

@@ -37,6 +37,7 @@ export function Header({
         viewMode, setViewMode, showThumbnails, setShowThumbnails,
         sortBy, setSortBy,
         openSettings,
+        openExtensionGuide,
         isSidebarOpen, setIsSidebarOpen,
         setIsShortcutsOpen,
         setIsCommandPaletteOpen
@@ -210,34 +211,71 @@ export function Header({
                         </DropdownLabel>
                     </div>
 
-                    {isExtensionConnected && (
-                        <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-2 mx-2 mb-2 border border-primary/20">
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 text-primary font-bold flex items-center justify-between">
-                                <span>{t('header.browserSync.label', 'Browser Sync')}</span>
-                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-normal">Active</span>
-                            </DropdownLabel>
-                            {twoWaySync && (
-                                <DropdownItem onClick={twoWaySync} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10">
-                                    <RefreshCw className={cn("h-4 w-4 mr-2.5 text-primary", isSyncing && "animate-spin")} />
-                                    <span>{t('header.browserSync.twoWay', 'Two-Way Sync')}</span>
+                    {/* Companion Extension Section */}
+                    <div className={cn(
+                        "rounded-xl p-2 mx-2 mb-2 border",
+                        isExtensionConnected
+                            ? "bg-primary/5 dark:bg-primary/10 border-primary/20"
+                            : "bg-sky-500/5 dark:bg-sky-500/10 border-sky-500/20"
+                    )}>
+                        <DropdownLabel className={cn(
+                            "text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 font-bold flex items-center justify-between",
+                            isExtensionConnected ? "text-primary" : "text-sky-600 dark:text-sky-400"
+                        )}>
+                            <span>{t('header.browserSync.label', 'Companion Extension')}</span>
+                            <span className={cn(
+                                "text-[9px] px-1.5 py-0.5 rounded font-normal",
+                                isExtensionConnected
+                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                    : "bg-muted text-muted-foreground"
+                            )}>
+                                {isExtensionConnected ? t('modals.extensionGuide.statusActive', 'Active') : t('settings.network.extensionNotDetected', 'Not Installed')}
+                            </span>
+                        </DropdownLabel>
+
+                        {isExtensionConnected ? (
+                            <>
+                                {twoWaySync && (
+                                    <DropdownItem onClick={twoWaySync} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
+                                        <RefreshCw className={cn("h-4 w-4 mr-2.5 text-primary", isSyncing && "animate-spin")} />
+                                        <span>{t('header.browserSync.twoWay', 'Two-Way Sync')}</span>
+                                    </DropdownItem>
+                                )}
+                                <div className="grid grid-cols-2 gap-1.5 mb-1">
+                                    {importFromBrowser && (
+                                        <DropdownItem onClick={importFromBrowser} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
+                                            <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500" />
+                                            <span className="truncate">{t('header.browserSync.pull', 'Pull')}</span>
+                                        </DropdownItem>
+                                    )}
+                                    {pushToBrowser && (
+                                        <DropdownItem onClick={() => pushToBrowser()} disabled={isSyncing || bookmarkCount === 0} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
+                                            <CloudUpload className="h-3.5 w-3.5 mr-1 text-emerald-500" />
+                                            <span className="truncate">{t('header.browserSync.push', 'Push')}</span>
+                                        </DropdownItem>
+                                    )}
+                                </div>
+                                <DropdownItem onClick={() => openExtensionGuide?.()} className="py-1.5 text-xs text-muted-foreground hover:text-foreground justify-center cursor-pointer">
+                                    <HelpCircle className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                                    <span>{t('modals.extensionGuide.title', 'Extension Guide')}</span>
                                 </DropdownItem>
-                            )}
-                            <div className="grid grid-cols-2 gap-1.5">
-                                {importFromBrowser && (
-                                    <DropdownItem onClick={importFromBrowser} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center">
-                                        <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500" />
-                                        <span className="truncate">{t('header.browserSync.pull', 'Pull')}</span>
-                                    </DropdownItem>
-                                )}
-                                {pushToBrowser && (
-                                    <DropdownItem onClick={() => pushToBrowser()} disabled={isSyncing || bookmarkCount === 0} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center">
-                                        <CloudUpload className="h-3.5 w-3.5 mr-1 text-emerald-500" />
-                                        <span className="truncate">{t('header.browserSync.push', 'Push')}</span>
-                                    </DropdownItem>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-[11px] text-muted-foreground px-1 mb-2 leading-relaxed">
+                                    {t('header.extensionNotConnectedDesc', 'Enable serverless CORS-free health checks & 2-way sync with your browser.')}
+                                </p>
+                                <DropdownItem onClick={() => openExtensionGuide?.()} className="py-2 text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-400 bg-background/80 hover:bg-sky-500/10 mb-1 cursor-pointer">
+                                    <Sparkles className="h-4 w-4 mr-2 text-sky-500 shrink-0" />
+                                    <span>{t('header.installExtensionBtn', 'Install Companion Extension')}</span>
+                                </DropdownItem>
+                                <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-1.5 text-xs text-muted-foreground hover:text-foreground justify-center cursor-pointer">
+                                    <RefreshCw className={cn("h-3.5 w-3.5 mr-1", isCheckingLinks && "animate-spin")} />
+                                    <span>{t('settings.network.extensionRetryBtn', 'Check Connection')}</span>
+                                </DropdownItem>
+                            </>
+                        )}
+                    </div>
 
                     {hasMaintenanceActions && (
                         <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-2 mx-2 mb-2 border border-destructive/10">

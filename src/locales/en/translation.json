@@ -54,6 +54,8 @@
             "push": "Push to Browser",
             "syncBtn": "Browser Sync"
         },
+        "extensionNotConnectedDesc": "Enable serverless CORS-free health checks & 2-way sync with your browser.",
+        "installExtensionBtn": "Install Companion Extension",
         "view": "View Options",
         "tools": "Tools",
         "system": "System",
@@ -736,5 +738,13 @@
             "ai": "AI Tools",
             "system": "Preferences & System"
         }
+    },
+    "extensionPrompt": {
+        "title": "Supercharge with Companion Extension",
+        "tagline": "CORS-Free Health & 2-Way Browser Sync",
+        "desc": "Install the lightweight companion extension to check dead links serverlessly, sync with browser bookmarks, and save active tabs in 1-click.",
+        "installGuide": "Setup Extension",
+        "later": "Later",
+        "permanentTip": "Dismissed? You can always access extension setup anytime from the ⋯ menu."
     }
 }

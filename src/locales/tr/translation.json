@@ -54,6 +54,8 @@
             "push": "Tarayıcıya Gönder",
             "syncBtn": "Tarayıcı Eşitle"
         },
+        "extensionNotConnectedDesc": "Sunucusuz CORS'suz link kontrolleri ve tarayıcınızla 2 yönlü eşitlemeyi etkinleştirin.",
+        "installExtensionBtn": "Eklenti Kurulum Rehberi",
         "view": "Görünüm",
         "tools": "Araçlar",
         "system": "Sistem",
@@ -736,5 +738,13 @@
             "ai": "Yapay Zeka",
             "system": "Tercihler ve Sistem"
         }
+    },
+    "extensionPrompt": {
+        "title": "BookSmart Eklentisi ile Güçlendirin",
+        "tagline": "CORS'suz Link Kontrolü ve 2 Yönlü Eşitleme",
+        "desc": "Sunucusuz kırık link kontrolü, tarayıcı yer imleriyle iki yönlü eşitleme ve tek tıkla sekme kaydetme için hafif tarayıcı eklentisini kurun.",
+        "installGuide": "Eklentiyi Kur",
+        "later": "Daha Sonra",
+        "permanentTip": "Kapatırsanız, dilediğiniz zaman yukarıdaki ⋯ menüsünden eklentiye ulaşabilirsiniz."
     }
 }

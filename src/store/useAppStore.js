@@ -57,6 +57,10 @@ export const useAppStore = create((set, get) => ({
     showBackupModal: false,
     setShowBackupModal: (show) => set({ showBackupModal: show }),
 
+    isExtensionGuideOpen: false,
+    setIsExtensionGuideOpen: (isOpen) => set({ isExtensionGuideOpen: isOpen }),
+    openExtensionGuide: () => set({ isExtensionGuideOpen: true }),
+
     isSettingsOpen: false,
     setIsSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
 

@@ -48,6 +48,8 @@ const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirm
 const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
 const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').then(m => ({ default: m.EditBookmarkModal })))
 const AICostModal = lazy(() => import('./components/modals/AICostModal').then(m => ({ default: m.AICostModal })))
+const ExtensionGuideModal = lazy(() => import('./components/modals/ExtensionGuideModal').then(m => ({ default: m.ExtensionGuideModal })))
+import { ExtensionPromptBanner } from './components/modals/ExtensionPromptBanner'
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
@@ -75,6 +77,7 @@ function App() {
     isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection,
     editingBookmark, setEditingBookmark,
     previewBookmark, setPreviewBookmark,
+    isExtensionGuideOpen, setIsExtensionGuideOpen, openExtensionGuide,
     showOnboarding
   } = useAppStore()
 
@@ -614,6 +617,21 @@ function App() {
 
         <OfflineIndicator />
         <PWAUpdatePrompt />
+
+        <ExtensionPromptBanner
+          isExtensionConnected={worker.isExtensionConnected}
+          onOpenGuide={openExtensionGuide}
+        />
+
+        <Suspense fallback={null}>
+          {isExtensionGuideOpen && (
+            <ExtensionGuideModal
+              isOpen={isExtensionGuideOpen}
+              onClose={() => setIsExtensionGuideOpen(false)}
+              isConnected={worker.isExtensionConnected}
+            />
+          )}
+        </Suspense>
       </div>
       <Toaster position="bottom-right" richColors closeButton theme={resolvedTheme} />
     </div>

@@ -54,6 +54,8 @@
             "push": "In Browser exportieren",
             "syncBtn": "Browser-Sync"
         },
+        "extensionNotConnectedDesc": "Aktivieren Sie serverlose CORS-freie Link-Prüfungen & 2-Wege-Sync mit Ihrem Browser.",
+        "installExtensionBtn": "Begleiter-Erweiterung installieren",
         "view": "Ansichtsoptionen",
         "tools": "Werkzeuge",
         "system": "System",
@@ -736,5 +738,13 @@
             "ai": "KI-Werkzeuge",
             "system": "Einstellungen & System"
         }
+    },
+    "extensionPrompt": {
+        "title": "Mit Begleiter-Erweiterung erweitern",
+        "tagline": "CORS-freie Linkprüfung & 2-Wege-Browser-Sync",
+        "desc": "Installieren Sie die schlanke Begleiter-Erweiterung für serverlose Link-Prüfungen, 2-Wege-Synchronisation und 1-Klick-Tab-Speicherung.",
+        "installGuide": "Erweiterung einrichten",
+        "later": "Später",
+        "permanentTip": "Geschlossen? Sie können die Erweiterung jederzeit über das ⋯ Menü aufrufen."
     }
 }

@@ -54,6 +54,8 @@
             "push": "Exporter vers le navigateur",
             "syncBtn": "Sync Navigateur"
         },
+        "extensionNotConnectedDesc": "Activez les vérifications sans CORS et la synchronisation bidirectionnelle avec votre navigateur.",
+        "installExtensionBtn": "Installer l'extension compagnon",
         "view": "Options d'affichage",
         "tools": "Outils",
         "system": "Système",
@@ -736,5 +738,13 @@
             "ai": "Outils IA",
             "system": "Préférences et Système"
         }
+    },
+    "extensionPrompt": {
+        "title": "Boostez avec l'extension compagnon",
+        "tagline": "Contrôle sans CORS & synchro bidirectionnelle",
+        "desc": "Installez l'extension légère pour vérifier les liens morts sans serveur, synchroniser vos signets et enregistrer les onglets en 1 clic.",
+        "installGuide": "Installer l'extension",
+        "later": "Plus tard",
+        "permanentTip": "Fermé ? Vous pouvez accéder à l'extension à tout moment depuis le menu ⋯."
     }
 }
