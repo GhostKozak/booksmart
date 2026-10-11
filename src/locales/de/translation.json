@@ -498,7 +498,7 @@
     "main": {
         "dropzone": {
             "title": "Legen Sie Ihre Lesezeichen hier ab",
-            "desc": "Ziehen Sie Ihre exportierten Netscape HTML-, JSON-, CSV- oder Markdown-Dateien hierher.",
+            "desc": "Ziehen Sie HTML (Browser, Pocket), JSON (Raindrop, Pinboard), CSV oder Markdown hierher, um zu beginnen.",
             "browse": "Dateien Durchsuchen"
         },
         "empty": {

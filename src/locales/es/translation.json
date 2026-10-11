@@ -498,7 +498,7 @@
     "main": {
         "dropzone": {
             "title": "Suelta tus marcadores aquí",
-            "desc": "Arrastra y suelta tus archivos Netscape HTML (Recomendado), JSON, CSV o Markdown exportados para comenzar.",
+            "desc": "Arrastra y suelta archivos HTML (Navegadores, Pocket), JSON (Raindrop, Pinboard), CSV o Markdown para comenzar.",
             "browse": "Examinar Archivos"
         },
         "empty": {

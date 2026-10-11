@@ -498,7 +498,7 @@
     "main": {
         "dropzone": {
             "title": "Drop your bookmarks here",
-            "desc": "Drag and drop your exported Netscape HTML (Recommended), JSON, CSV, or Markdown files to get started.",
+            "desc": "Drag and drop HTML (Browsers, Pocket), JSON (Raindrop, Pinboard), CSV, or Markdown files to get started.",
             "browse": "Browse Files"
         },
         "empty": {

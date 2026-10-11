@@ -498,7 +498,7 @@
     "main": {
         "dropzone": {
             "title": "Yer imlerinizi buraya bırakın",
-            "desc": "Başlamak için dışa aktarılan Netscape HTML (Önerilen), JSON, CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
+            "desc": "Başlamak için HTML (Tarayıcılar, Pocket), JSON (Raindrop, Pinboard), CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
             "browse": "Dosyalara Göz At"
         },
         "empty": {

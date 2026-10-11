@@ -498,7 +498,7 @@
     "main": {
         "dropzone": {
             "title": "Déposez vos signets ici",
-            "desc": "Glissez et déposez vos fichiers Netscape HTML, JSON, CSV ou Markdown exportés pour commencer.",
+            "desc": "Glissez-déposez des fichiers HTML (Navigateurs, Pocket), JSON (Raindrop, Pinboard), CSV ou Markdown pour commencer.",
             "browse": "Parcourir"
         },
         "empty": {
