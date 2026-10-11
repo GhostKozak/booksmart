@@ -28,6 +28,7 @@
         },
         "clearSearch": "Borrar búsqueda",
         "removeDuplicates": "Eliminar {{count}} duplicados",
+        "mergeDuplicates": "Fusionar {{count}} duplicados",
         "cleanUrls": "Limpiar {{count}} URLs",
         "listView": "Vista de lista",
         "compactView": "Compacto",
@@ -472,7 +473,8 @@
         },
         "row": {
             "added": "Añadido {{time}}",
-            "duplicateIn": "Duplicado en: {{locations}}"
+            "duplicateIn": "Duplicado en: {{locations}}",
+            "mergeAction": "Fusionar"
         },
         "tree": {
             "expandAll": "Expandir todo",
@@ -620,5 +622,8 @@
     "network": {
         "corsProxy": "URL del proxy CORS",
         "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
+    },
+    "notifications": {
+        "duplicatesMerged": "{{count}} duplicados fusionados con éxito"
     }
 }

@@ -28,6 +28,7 @@
         },
         "clearSearch": "Suche leeren",
         "removeDuplicates": "{{count}} Duplikate entfernen",
+        "mergeDuplicates": "{{count}} Duplikate zusammenführen",
         "cleanUrls": "{{count}} URLs bereinigen",
         "listView": "Listenansicht",
         "compactView": "Kompakt",
@@ -472,7 +473,8 @@
         },
         "row": {
             "added": "Hinzugefügt {{time}}",
-            "duplicateIn": "Duplikat in: {{locations}}"
+            "duplicateIn": "Duplikat in: {{locations}}",
+            "mergeAction": "Zusammenführen"
         },
         "editModal": {
             "title": "Lesezeichen bearbeiten",
@@ -620,5 +622,8 @@
     "network": {
         "corsProxy": "CORS-Proxy-URL",
         "corsProxyDesc": "Optionaler Proxy zur Umgehung von CORS-Beschränkungen für Link-Prüfung und Zusammenfassungen."
+    },
+    "notifications": {
+        "duplicatesMerged": "{{count}} Duplikate erfolgreich zusammengeführt"
     }
 }

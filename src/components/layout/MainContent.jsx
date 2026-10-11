@@ -33,8 +33,9 @@ export function MainContent({
     handleBatchMoveDocs,
     // Preview
     previewBookmark, handlePreview, setPreviewBookmark,
-    // Edit
+    // Edit / Actions
     onEditBookmark,
+    onMergeDuplicate,
     // Onboarding
     loadDemoData
 }) {
@@ -163,7 +164,8 @@ export function MainContent({
                                     availableFolders,
                                     availableTags,
                                     allCollections,
-                                    onRemoveFromCollection
+                                    onRemoveFromCollection,
+                                    onMergeDuplicate
                                 }
                                 if (viewMode === 'list') {
                                     return <BookmarkList {...commonProps} compact={false} />

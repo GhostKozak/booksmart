@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree } from 'lucide-react'
+import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -14,7 +14,7 @@ export function Header({
     // Undo/Redo
     canUndo, canRedo, undo, redo, past, future,
     // Actions
-    duplicateCount, removeDuplicates,
+    duplicateCount, removeDuplicates, mergeDuplicates,
     cleanableCount, cleanAllUrls,
     checkAllLinks, isCheckingLinks,
     openExportModal,
@@ -197,10 +197,18 @@ export function Header({
                         <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-2 mx-2 mb-2 border border-destructive/10">
                             <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 text-destructive/80 font-bold">{t('header.maintenance')}</DropdownLabel>
                             {duplicateCount > 0 && (
-                                <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-destructive hover:text-destructive-foreground">
-                                    <Layers className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
-                                    {t('header.removeDuplicates', { count: duplicateCount })}
-                                </DropdownItem>
+                                <>
+                                    {mergeDuplicates && (
+                                        <DropdownItem onClick={mergeDuplicates} className="text-primary py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10">
+                                            <GitMerge className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
+                                            {t('header.mergeDuplicates', { count: duplicateCount })}
+                                        </DropdownItem>
+                                    )}
+                                    <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-destructive hover:text-destructive-foreground">
+                                        <Layers className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
+                                        {t('header.removeDuplicates', { count: duplicateCount })}
+                                    </DropdownItem>
+                                </>
                             )}
                             {cleanableCount > 0 && (
                                 <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600">

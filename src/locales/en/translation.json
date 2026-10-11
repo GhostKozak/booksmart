@@ -28,6 +28,7 @@
         },
         "clearSearch": "Clear search",
         "removeDuplicates": "Remove {{count}} Duplicates",
+        "mergeDuplicates": "Merge {{count}} Duplicates",
         "cleanUrls": "Clean {{count}} URLs",
         "listView": "List View",
         "compactView": "Compact",
@@ -472,7 +473,8 @@
         },
         "row": {
             "added": "Added {{time}}",
-            "duplicateIn": "Duplicate in: {{locations}}"
+            "duplicateIn": "Duplicate in: {{locations}}",
+            "mergeAction": "Merge"
         },
         "editModal": {
             "title": "Edit Bookmark",
@@ -616,5 +618,8 @@
     },
     "accessibility": {
         "skipToMain": "Skip to main content"
+    },
+    "notifications": {
+        "duplicatesMerged": "Successfully merged {{count}} duplicate bookmarks"
     }
 }

@@ -5,7 +5,7 @@ import { BookmarkRow } from './BookmarkRow'
 import { cn } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 
-export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection, compact = false }) {
+export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAll, linkHealth, ignoredUrls, toggleIgnoreUrl, onPreview, onEdit, onMergeDuplicate, availableFolders = [], availableTags = [], allCollections = [], onRemoveFromCollection, compact = false }) {
     // Determine if all visible/loaded bookmarks are selected
     const { t } = useTranslation();
     const isAllSelected = bookmarks.length > 0 && selectedIds.size === bookmarks.length
@@ -60,6 +60,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                         toggleIgnoreUrl,
                         onPreview,
                         onEdit,
+                        onMergeDuplicate,
                         availableFolders,
                         availableTags,
                         allCollections,
@@ -77,6 +78,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
                             toggleIgnoreUrl={context.toggleIgnoreUrl}
                             onPreview={context.onPreview}
                             onEdit={context.onEdit}
+                            onMergeDuplicate={context.onMergeDuplicate}
                             className={gridLayout}
                             availableFolders={context.availableFolders}
                             availableTags={context.availableTags}

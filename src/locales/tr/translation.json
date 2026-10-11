@@ -28,6 +28,7 @@
         },
         "clearSearch": "Aramayı Temizle",
         "removeDuplicates": "{{count}} Yinelemeyi Kaldır",
+        "mergeDuplicates": "{{count}} Yinelemeyi Birleştir",
         "cleanUrls": "{{count}} URL'yi Temizle",
         "listView": "Liste Görünümü",
         "compactView": "Kompakt Liste",
@@ -472,7 +473,8 @@
         },
         "row": {
             "added": "Eklenme: {{time}}",
-            "duplicateIn": "Şununla yinelenen: {{locations}}"
+            "duplicateIn": "Şununla yinelenen: {{locations}}",
+            "mergeAction": "Birleştir"
         },
         "editModal": {
             "title": "Yer İmini Düzenle",
@@ -616,5 +618,8 @@
     },
     "accessibility": {
         "skipToMain": "Ana içeriğe atla"
+    },
+    "notifications": {
+        "duplicatesMerged": "{{count}} yinelenen yer imi başarıyla birleştirildi"
     }
 }

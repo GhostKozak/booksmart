@@ -116,6 +116,59 @@ describe('useBookmarkOperations', () => {
         });
     });
 
+    describe('mergeDuplicates', () => {
+        it('should merge tags, notes and delete duplicates', async () => {
+            const bookmarksWithTags = [
+                { id: '1', url: 'https://test.com', title: 'Test 1', addDate: 10, tags: ['tag1'], note: 'Note 1' },
+                { id: '2', url: 'https://test.com', title: 'Test 2', addDate: 20, tags: ['tag2'], note: 'Note 2', description: 'Desc 2' }
+            ];
+            db.tags.toArray.mockResolvedValueOnce([]);
+            const props = { ...defaultProps, rawBookmarks: bookmarksWithTags };
+            const { result } = renderHook(() => useBookmarkOperations(props));
+
+            await act(async () => {
+                await result.current.mergeDuplicates();
+            });
+
+            // id: 2 is newest (addDate 20), so id: 1 should be deleted and id: 2 updated
+            expect(db.bookmarks.update).toHaveBeenCalledWith('2', expect.objectContaining({
+                tags: expect.arrayContaining(['tag1', 'tag2']),
+                note: expect.stringContaining('Note 1'),
+                description: 'Desc 2'
+            }));
+            expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['1']);
+            expect(defaultProps.addCommand).toHaveBeenCalled();
+        });
+
+        it('should not do anything when no duplicates exist', async () => {
+            const props = { ...defaultProps, rawBookmarks: [rawBookmarks[0]] };
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            await act(async () => {
+                await result.current.mergeDuplicates();
+            });
+            expect(db.bookmarks.bulkDelete).not.toHaveBeenCalled();
+        });
+
+        it('should merge specific duplicate group with mergeDuplicateGroup', async () => {
+            const bookmarksWithTags = [
+                { id: '1', url: 'https://group.com', title: 'G1', addDate: 5, tags: ['a'], note: 'Note A' },
+                { id: '2', url: 'https://group.com', title: 'G2', addDate: 15, tags: ['b'], note: 'Note B' }
+            ];
+            db.tags.toArray.mockResolvedValueOnce([]);
+            const props = { ...defaultProps, rawBookmarks: bookmarksWithTags };
+            const { result } = renderHook(() => useBookmarkOperations(props));
+
+            await act(async () => {
+                await result.current.mergeDuplicateGroup(bookmarksWithTags[0]);
+            });
+
+            expect(db.bookmarks.update).toHaveBeenCalledWith('2', expect.objectContaining({
+                tags: expect.arrayContaining(['a', 'b'])
+            }));
+            expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['1']);
+        });
+    });
+
     describe('cleanAllUrls', () => {
         it('should clean URLs with tracking params', async () => {
             const { result } = renderHook(() => useBookmarkOperations(defaultProps));

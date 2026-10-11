@@ -260,6 +260,7 @@ function App() {
           canUndo={canUndo} canRedo={canRedo} undo={undo} redo={redo}
           past={past} future={future}
           duplicateCount={worker.duplicateCount} removeDuplicates={operations.removeDuplicates}
+          mergeDuplicates={operations.mergeDuplicates}
           cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
           checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
           openExportModal={() => actions.guardedExport(exporter.openExportModal)}
@@ -315,6 +316,7 @@ function App() {
           setPreviewBookmark={setPreviewBookmark}
           handlePreview={handlePreview}
           onEditBookmark={handleEdit}
+          onMergeDuplicate={operations.mergeDuplicateGroup}
         />
 
         <FloatingActionBar

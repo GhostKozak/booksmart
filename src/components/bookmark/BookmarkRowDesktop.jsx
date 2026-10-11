@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote, Pencil } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -19,6 +19,7 @@ export function BookmarkRowDesktop({
     toggleIgnoreUrl,
     onPreview,
     onEdit,
+    onMergeDuplicate,
     availableFolders,
     availableTags,
     allCollections,
@@ -82,9 +83,23 @@ export function BookmarkRowDesktop({
                         </div>
 
                         {(bookmark.isDuplicate || bookmark.hasDuplicate) && bookmark.otherLocations.length > 0 && (
-                            <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                            <div className="flex items-center gap-1.5 mt-1 text-[10px] text-muted-foreground">
                                 <Layers className="w-3 h-3" />
                                 <span>{t('bookmarks.row.duplicateIn', { locations: bookmark.otherLocations.join(', ') })}</span>
+                                {onMergeDuplicate && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onMergeDuplicate(bookmark)
+                                        }}
+                                        className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                                        title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                                    >
+                                        <GitMerge className="w-3 h-3" />
+                                        <span>{t('bookmarks.row.mergeAction') || 'Merge'}</span>
+                                    </button>
+                                )}
                             </div>
                         )}
                     </>
@@ -143,6 +158,18 @@ export function BookmarkRowDesktop({
 
             {/* Action Buttons (Col 6) */}
             <div className="flex justify-center gap-1">
+                {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-primary/10 w-8 h-8 text-primary hover:text-primary transition-colors"
+                        onClick={() => onMergeDuplicate(bookmark)}
+                        title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                        aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                    >
+                        <GitMerge className="w-4 h-4" />
+                    </Button>
+                )}
                 <Button
                     variant="ghost"
                     size="icon"

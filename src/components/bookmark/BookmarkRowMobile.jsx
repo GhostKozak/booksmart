@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowMobile({
@@ -18,6 +18,7 @@ export function BookmarkRowMobile({
     toggleIgnoreUrl,
     onPreview,
     onEdit,
+    onMergeDuplicate,
     availableFolders,
     availableTags,
     allCollections,
@@ -68,6 +69,18 @@ export function BookmarkRowMobile({
                             >
                                 <Eye className="w-3.5 h-3.5" />
                             </Button>
+                            {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-7 h-7 text-primary hover:bg-primary/10"
+                                    onClick={() => onMergeDuplicate(bookmark)}
+                                    title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                                    aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                                >
+                                    <GitMerge className="w-3.5 h-3.5" />
+                                </Button>
+                            )}
                             {bookmark.isDuplicate && <XCircle className="w-4 h-4 text-red-500" />}
                             {bookmark.hasDuplicate && <Layers className="w-4 h-4 text-yellow-500" />}
                             {(bookmark.status === 'matched' || bookmark.status === 'conflict') && <Check className="w-4 h-4 text-emerald-500" />}

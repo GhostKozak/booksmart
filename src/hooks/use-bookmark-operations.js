@@ -45,6 +45,243 @@ export function useBookmarkOperations({
         }
     }
 
+    const mergeDuplicates = async () => {
+        const groups = new Map()
+        const sortedBookmarks = [...rawBookmarks].sort((a, b) => (parseInt(b.addDate) || 0) - (parseInt(a.addDate) || 0))
+
+        sortedBookmarks.forEach(b => {
+            const normalized = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+            if (!normalized) return
+            if (!groups.has(normalized)) {
+                groups.set(normalized, [])
+            }
+            groups.get(normalized).push(b)
+        })
+
+        const primaryUpdates = []
+        const toDeleteIds = []
+        const bookmarksToDelete = []
+        const allNewTags = new Set()
+
+        for (const [, items] of groups) {
+            if (items.length <= 1) continue
+
+            const primary = items[0]
+            const duplicates = items.slice(1)
+
+            // Merge tags
+            const primaryTags = Array.isArray(primary.tags)
+                ? primary.tags
+                : (typeof primary.tags === 'string' && primary.tags ? primary.tags.split(',').map(t => t.trim()) : [])
+            const mergedTagsSet = new Set(primaryTags.filter(Boolean))
+
+            duplicates.forEach(d => {
+                const dTags = Array.isArray(d.tags)
+                    ? d.tags
+                    : (typeof d.tags === 'string' && d.tags ? d.tags.split(',').map(t => t.trim()) : [])
+                dTags.filter(Boolean).forEach(t => {
+                    mergedTagsSet.add(t)
+                    allNewTags.add(t)
+                })
+            })
+            const mergedTags = Array.from(mergedTagsSet)
+
+            // Merge notes
+            const notes = [primary.note, ...duplicates.map(d => d.note)]
+                .map(n => (n || '').trim())
+                .filter(Boolean)
+            const uniqueNotes = Array.from(new Set(notes))
+            const mergedNote = uniqueNotes.join('\n\n---\n\n')
+
+            // Fallback description
+            const mergedDescription = primary.description || duplicates.find(d => (d.description || '').trim())?.description || ''
+
+            // Collections merge
+            const primaryCollections = Array.isArray(primary.collections) ? primary.collections : []
+            const mergedCollectionsSet = new Set(primaryCollections)
+            duplicates.forEach(d => {
+                if (Array.isArray(d.collections)) {
+                    d.collections.forEach(c => mergedCollectionsSet.add(c))
+                }
+            })
+            const mergedCollections = Array.from(mergedCollectionsSet)
+
+            primaryUpdates.push({
+                id: primary.id,
+                original: { ...primary },
+                updated: {
+                    tags: mergedTags,
+                    note: mergedNote,
+                    description: mergedDescription,
+                    collections: mergedCollections
+                }
+            })
+
+            duplicates.forEach(d => {
+                toDeleteIds.push(d.id)
+                bookmarksToDelete.push({ ...d })
+            })
+        }
+
+        if (toDeleteIds.length === 0) return
+
+        await db.transaction('rw', [db.bookmarks, db.tags], async () => {
+            for (const { id, updated } of primaryUpdates) {
+                await db.bookmarks.update(id, updated)
+            }
+            await db.bookmarks.bulkDelete(toDeleteIds)
+
+            if (allNewTags.size > 0 && db.tags) {
+                const existingTags = await db.tags.toArray()
+                const existingTagNames = new Set((existingTags || []).map(t => t.name?.toLowerCase()))
+                const tagsToAdd = []
+                for (const tagName of allNewTags) {
+                    if (!existingTagNames.has(tagName.toLowerCase())) {
+                        tagsToAdd.push({ id: generateUUID(), name: tagName, color: pickTagColor() })
+                        existingTagNames.add(tagName.toLowerCase())
+                    }
+                }
+                if (tagsToAdd.length > 0) {
+                    await db.tags.bulkAdd(tagsToAdd)
+                }
+            }
+        })
+
+        toast.success(t('notifications.duplicatesMerged', { count: toDeleteIds.length }) || `Merged ${toDeleteIds.length} duplicate bookmarks`)
+
+        addCommand({
+            undo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    for (const { id, original } of primaryUpdates) {
+                        await db.bookmarks.update(id, {
+                            tags: original.tags,
+                            note: original.note,
+                            description: original.description,
+                            collections: original.collections
+                        })
+                    }
+                    await db.bookmarks.bulkAdd(bookmarksToDelete)
+                })
+            },
+            redo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    for (const { id, updated } of primaryUpdates) {
+                        await db.bookmarks.update(id, updated)
+                    }
+                    await db.bookmarks.bulkDelete(toDeleteIds)
+                })
+            },
+            description: `Merge ${toDeleteIds.length} Duplicate Bookmarks`
+        })
+    }
+
+    const mergeDuplicateGroup = async (targetBookmarkOrUrl) => {
+        const targetUrl = typeof targetBookmarkOrUrl === 'string' ? targetBookmarkOrUrl : targetBookmarkOrUrl?.url
+        if (!targetUrl) return
+        const normalizedTarget = targetUrl.toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+
+        const matching = rawBookmarks.filter(b => {
+            const norm = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+            return norm === normalizedTarget
+        }).sort((a, b) => (parseInt(b.addDate) || 0) - (parseInt(a.addDate) || 0))
+
+        if (matching.length <= 1) return
+
+        const primary = matching[0]
+        const duplicates = matching.slice(1)
+        const toDeleteIds = duplicates.map(d => d.id)
+        const bookmarksToDelete = duplicates.map(d => ({ ...d }))
+
+        // Merge tags
+        const primaryTags = Array.isArray(primary.tags)
+            ? primary.tags
+            : (typeof primary.tags === 'string' && primary.tags ? primary.tags.split(',').map(t => t.trim()) : [])
+        const mergedTagsSet = new Set(primaryTags.filter(Boolean))
+        const allNewTags = new Set()
+
+        duplicates.forEach(d => {
+            const dTags = Array.isArray(d.tags)
+                ? d.tags
+                : (typeof d.tags === 'string' && d.tags ? d.tags.split(',').map(t => t.trim()) : [])
+            dTags.filter(Boolean).forEach(t => {
+                mergedTagsSet.add(t)
+                allNewTags.add(t)
+            })
+        })
+        const mergedTags = Array.from(mergedTagsSet)
+
+        // Merge notes
+        const notes = [primary.note, ...duplicates.map(d => d.note)]
+            .map(n => (n || '').trim())
+            .filter(Boolean)
+        const uniqueNotes = Array.from(new Set(notes))
+        const mergedNote = uniqueNotes.join('\n\n---\n\n')
+
+        // Fallback description
+        const mergedDescription = primary.description || duplicates.find(d => (d.description || '').trim())?.description || ''
+
+        // Collections
+        const primaryCollections = Array.isArray(primary.collections) ? primary.collections : []
+        const mergedCollectionsSet = new Set(primaryCollections)
+        duplicates.forEach(d => {
+            if (Array.isArray(d.collections)) {
+                d.collections.forEach(c => mergedCollectionsSet.add(c))
+            }
+        })
+        const mergedCollections = Array.from(mergedCollectionsSet)
+
+        const updated = {
+            tags: mergedTags,
+            note: mergedNote,
+            description: mergedDescription,
+            collections: mergedCollections
+        }
+
+        const original = { ...primary }
+
+        await db.transaction('rw', [db.bookmarks, db.tags], async () => {
+            await db.bookmarks.update(primary.id, updated)
+            await db.bookmarks.bulkDelete(toDeleteIds)
+            if (allNewTags.size > 0 && db.tags) {
+                const existingTags = await db.tags.toArray()
+                const existingTagNames = new Set((existingTags || []).map(t => t.name?.toLowerCase()))
+                const tagsToAdd = []
+                for (const tagName of allNewTags) {
+                    if (!existingTagNames.has(tagName.toLowerCase())) {
+                        tagsToAdd.push({ id: generateUUID(), name: tagName, color: pickTagColor() })
+                        existingTagNames.add(tagName.toLowerCase())
+                    }
+                }
+                if (tagsToAdd.length > 0) {
+                    await db.tags.bulkAdd(tagsToAdd)
+                }
+            }
+        })
+
+        toast.success(t('notifications.duplicatesMerged', { count: toDeleteIds.length }) || `Merged ${toDeleteIds.length} duplicate bookmarks`)
+
+        addCommand({
+            undo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    await db.bookmarks.update(primary.id, {
+                        tags: original.tags,
+                        note: original.note,
+                        description: original.description,
+                        collections: original.collections
+                    })
+                    await db.bookmarks.bulkAdd(bookmarksToDelete)
+                })
+            },
+            redo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    await db.bookmarks.update(primary.id, updated)
+                    await db.bookmarks.bulkDelete(toDeleteIds)
+                })
+            },
+            description: `Merge Duplicate Group for ${primary.title || primary.url}`
+        })
+    }
+
     const cleanAllUrls = async () => {
         const updates = []
         const originalStates = []
@@ -290,6 +527,8 @@ export function useBookmarkOperations({
     return {
         cleanableCount,
         removeDuplicates,
+        mergeDuplicates,
+        mergeDuplicateGroup,
         cleanAllUrls,
         cleanSelectedUrls,
         handleBatchDelete,
