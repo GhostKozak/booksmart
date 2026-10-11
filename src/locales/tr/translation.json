@@ -174,7 +174,13 @@
             "createError": "Kasa oluşturulamadı",
             "cleared": "Kasa temizlendi",
             "willEncrypt": "Mevcut API anahtarınız kasaya şifrelenecek.",
-            "unlockedBadge": "Kasa açık"
+            "unlockedBadge": "Kasa açık",
+            "enterPassword": "Lütfen kasa için bir şifre girin"
+        },
+        "theme": {
+            "light": "Açık Tema",
+            "dark": "Koyu Tema",
+            "system": "Sistem Teması"
         },
         "languages": {
             "en": "İngilizce",
@@ -185,6 +191,8 @@
         }
     },
     "common": {
+        "loading": "Yükleniyor...",
+        "bookmarks": "yer imi",
         "title": "Başlık",
         "save": "Kaydet",
         "cancel": "İptal",

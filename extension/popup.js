@@ -17,8 +17,19 @@ const BOOKSMART_URL_PATTERNS = [
     '*://localhost/*',
     '*://127.0.0.1/*',
     '*://booksmart.app/*',
+    '*://*.booksmart.app/*',
     '*://ghostkozak.github.io/booksmart/*'
 ];
+
+function getAppUrl(callback) {
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.get(['lastBooksmartUrl'], (data) => {
+            callback(data?.lastBooksmartUrl || 'http://localhost:5173');
+        });
+    } else {
+        callback('http://localhost:5173');
+    }
+}
 
 // 1. Save Current Tab
 document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
@@ -52,8 +63,16 @@ document.getElementById('sync-btn')?.addEventListener('click', () => {
                     }
                 });
             } else {
-                chrome.tabs.create({ url: 'http://localhost:5173?sync=auto' });
-                showStatus('Opening BookSmart to sync...', 4000);
+                getAppUrl((appUrl) => {
+                    try {
+                        const urlObj = new URL(appUrl);
+                        urlObj.searchParams.set('sync', 'auto');
+                        chrome.tabs.create({ url: urlObj.toString() });
+                    } catch {
+                        chrome.tabs.create({ url: 'http://localhost:5173?sync=auto' });
+                    }
+                    showStatus('Opening BookSmart to sync...', 4000);
+                });
             }
         });
     } catch (err) {
@@ -67,7 +86,9 @@ document.getElementById('open-app-btn')?.addEventListener('click', () => {
         if (tabs && tabs.length > 0) {
             chrome.tabs.update(tabs[0].id, { active: true });
         } else {
-            chrome.tabs.create({ url: 'http://localhost:5173' });
+            getAppUrl((appUrl) => {
+                chrome.tabs.create({ url: appUrl });
+            });
         }
     });
 });

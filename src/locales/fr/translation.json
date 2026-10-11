@@ -164,6 +164,11 @@
             "fr": "Français",
             "de": "Allemand"
         },
+        "theme": {
+            "light": "Thème clair",
+            "dark": "Thème sombre",
+            "system": "Thème du système"
+        },
         "vault": {
             "title": "Coffre-fort de clés API",
             "lockedDesc": "Vos clés API sont chiffrées. Entrez le mot de passe de votre coffre-fort pour déverrouiller.",
@@ -181,10 +186,13 @@
             "createError": "Échec de création du coffre-fort",
             "cleared": "Coffre-fort effacé",
             "willEncrypt": "Votre clé API existante sera chiffrée dans le coffre-fort.",
-            "unlockedBadge": "Coffre-fort déverrouillé"
+            "unlockedBadge": "Coffre-fort déverrouillé",
+            "enterPassword": "Veuillez saisir un mot de passe pour le coffre-fort"
         }
     },
     "common": {
+        "loading": "Chargement...",
+        "bookmarks": "signets",
         "save": "Enregistrer",
         "cancel": "Annuler",
         "delete": "Supprimer",

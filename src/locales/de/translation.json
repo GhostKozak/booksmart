@@ -174,7 +174,13 @@
             "createError": "Tresor konnte nicht erstellt werden",
             "cleared": "Tresor geleert",
             "willEncrypt": "Ihr vorhandener API-Schlüssel wird in den Tresor verschlüsselt.",
-            "unlockedBadge": "Tresor entsperrt"
+            "unlockedBadge": "Tresor entsperrt",
+            "enterPassword": "Bitte geben Sie ein Tresor-Passwort ein"
+        },
+        "theme": {
+            "light": "Helles Design",
+            "dark": "Dunkles Design",
+            "system": "Systemdesign"
         },
         "languages": {
             "en": "Englisch",
@@ -185,6 +191,8 @@
         }
     },
     "common": {
+        "loading": "Wird geladen...",
+        "bookmarks": "Lesezeichen",
         "title": "Titel",
         "save": "Speichern",
         "cancel": "Abbrechen",

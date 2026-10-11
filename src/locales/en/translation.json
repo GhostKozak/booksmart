@@ -174,7 +174,13 @@
             "createError": "Failed to create vault",
             "cleared": "Vault cleared",
             "willEncrypt": "Your existing API key will be encrypted into the vault.",
-            "unlockedBadge": "Vault unlocked"
+            "unlockedBadge": "Vault unlocked",
+            "enterPassword": "Please enter a vault password"
+        },
+        "theme": {
+            "light": "Light Theme",
+            "dark": "Dark Theme",
+            "system": "System Theme"
         },
         "languages": {
             "en": "English",
@@ -185,6 +191,8 @@
         }
     },
     "common": {
+        "loading": "Loading...",
+        "bookmarks": "bookmarks",
         "title": "Title",
         "save": "Save",
         "cancel": "Cancel",

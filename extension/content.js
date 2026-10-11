@@ -35,6 +35,17 @@
         document.addEventListener('DOMContentLoaded', announceReady);
     }
 
+    // Persist last valid BookSmart URL so popup can open directly to user's deployment
+    if (isOriginAllowed()) {
+        try {
+            if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                chrome.storage.local.set({ lastBooksmartUrl: window.location.href });
+            }
+        } catch {
+            // Ignored
+        }
+    }
+
     let activeCheckPort = null;
 
     // Listen for messages from background/popup

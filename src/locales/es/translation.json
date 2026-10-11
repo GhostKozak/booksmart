@@ -164,6 +164,11 @@
             "fr": "Francés",
             "de": "Alemán"
         },
+        "theme": {
+            "light": "Tema claro",
+            "dark": "Tema oscuro",
+            "system": "Tema del sistema"
+        },
         "vault": {
             "title": "Bóveda de claves API",
             "lockedDesc": "Sus claves API están cifradas. Ingrese la contraseña de su bóveda para desbloquear.",
@@ -181,10 +186,13 @@
             "createError": "Error al crear la bóveda",
             "cleared": "Bóveda limpiada",
             "willEncrypt": "Su clave API actual se cifrará en la bóveda.",
-            "unlockedBadge": "Bóveda desbloqueada"
+            "unlockedBadge": "Bóveda desbloqueada",
+            "enterPassword": "Por favor, introduce una contraseña para la bóveda"
         }
     },
     "common": {
+        "loading": "Cargando...",
+        "bookmarks": "marcadores",
         "save": "Guardar",
         "cancel": "Cancelar",
         "delete": "Eliminar",

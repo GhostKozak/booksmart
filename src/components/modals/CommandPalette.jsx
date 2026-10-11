@@ -237,28 +237,28 @@ export function CommandPalette({
             {
                 id: 'ai-auto-sort',
                 category: t('commandPalette.categories.ai', 'AI Tools'),
-                title: t('floatingBar.autoSort', 'Auto Categorize'),
+                title: t('actionbar.autoSort', 'Auto Categorize'),
                 icon: Sparkles,
                 action: () => handleAutoCategorize?.()
             },
             {
                 id: 'ai-magic-sort',
                 category: t('commandPalette.categories.ai', 'AI Tools'),
-                title: t('floatingBar.magicSort', 'AI Magic Sort'),
+                title: t('actionbar.magicSort', 'AI Magic Sort'),
                 icon: Sparkles,
                 action: () => handleMagicSort?.()
             },
             {
                 id: 'ai-fix-titles',
                 category: t('commandPalette.categories.ai', 'AI Tools'),
-                title: t('floatingBar.fixTitles', 'AI Fix Titles'),
+                title: t('actionbar.fixTitles', 'AI Fix Titles'),
                 icon: Pencil,
                 action: () => handleFixTitles?.()
             },
             {
                 id: 'ai-find-duplicates',
                 category: t('commandPalette.categories.ai', 'AI Tools'),
-                title: t('floatingBar.smartDuplicates', 'AI Semantic Duplicates'),
+                title: t('actionbar.smartDuplicates', 'AI Semantic Duplicates'),
                 icon: Layers,
                 action: () => handleFindSmartDuplicates?.()
             },
@@ -310,7 +310,7 @@ export function CommandPalette({
             {
                 id: 'system-clear-all',
                 category: t('commandPalette.categories.system', 'Preferences & System'),
-                title: t('clearAll.title', 'Clear All Data'),
+                title: t('modals.clearAll.title', 'Clear All Data'),
                 icon: Trash2,
                 action: () => clearAll?.()
             }

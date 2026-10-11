@@ -419,13 +419,27 @@ async function captureCurrentTab(options = {}) {
 
     // Broadcast to open BookSmart tabs to sync real-time
     try {
-        chrome.tabs.query({ url: ['*://localhost/*', '*://127.0.0.1/*', '*://*/*booksmart*'] }, (openTabs) => {
+        const BOOKSMART_TAB_PATTERNS = [
+            '*://localhost/*',
+            '*://127.0.0.1/*',
+            '*://booksmart.app/*',
+            '*://*.booksmart.app/*',
+            '*://ghostkozak.github.io/booksmart/*'
+        ];
+        chrome.tabs.query({ url: BOOKSMART_TAB_PATTERNS }, (openTabs) => {
             if (openTabs && openTabs.length > 0) {
                 for (const t of openTabs) {
-                    chrome.tabs.sendMessage(t.id, {
-                        action: 'BOOKSMART_TAB_CAPTURED',
-                        bookmark: bookmarkResult
-                    }).catch(() => {});
+                    try {
+                        const sendPromise = chrome.tabs.sendMessage(t.id, {
+                            action: 'BOOKSMART_TAB_CAPTURED',
+                            bookmark: bookmarkResult
+                        });
+                        if (sendPromise && typeof sendPromise.catch === 'function') {
+                            sendPromise.catch(() => {});
+                        }
+                    } catch {
+                        // Ignored if tab closed or content script not present
+                    }
                 }
             }
         });
