@@ -383,7 +383,10 @@
             "step2": "Enable Developer Mode",
             "step2Desc": "Toggle the switch in the top-right corner.",
             "step3": "Click \"Load unpacked\"",
-            "step4": "Select the extension folder in the BookSmart project (/extension)"
+            "step4": "Select the extension folder in the BookSmart project (/extension)",
+            "firefoxStep1": "Open Debugging page",
+            "firefoxStep2": "Click \"Load Temporary Add-on...\"",
+            "firefoxStep3": "Select the manifest file (/extension/manifest.json)"
         }
     },
     "backup": {

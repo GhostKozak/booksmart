@@ -383,7 +383,10 @@
             "step2": "Activez le Mode développeur",
             "step2Desc": "Activez le bouton dans le coin supérieur droit.",
             "step3": "Cliquez sur \"Charger l'extension non empaquetée\"",
-            "step4": "Sélectionnez le dossier de l'extension dans BookSmart (/extension)"
+            "step4": "Sélectionnez le dossier de l'extension dans BookSmart (/extension)",
+            "firefoxStep1": "Ouvrir la page de débogage",
+            "firefoxStep2": "Cliquer sur \"Charger un module temporaire...\"",
+            "firefoxStep3": "Sélectionner le fichier manifest (/extension/manifest.json)"
         }
     },
     "backup": {

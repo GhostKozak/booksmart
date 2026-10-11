@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Layers, Terminal } from 'lucide-react'
+import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Globe, Layers, Terminal } from 'lucide-react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +25,8 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
             setIsPinging(false)
         }
     }
+
+    const [activeBrowser, setActiveBrowser] = useState('chromium')
 
     return (
         <SimpleModal
@@ -79,48 +81,99 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                         {t('modals.extensionGuide.whyTitle', 'Why use the extension?')}
                     </div>
                     <p>
-                        {t('modals.extensionGuide.whyDesc', 'Enables bidirectional synchronization with browser bookmarks via the Chrome Bookmarks API (import, push, or two-way sync in 1-click), plus serverless CORS-free link health checks.')}
+                        {t('modals.extensionGuide.whyDesc', 'Enables bidirectional synchronization with browser bookmarks via the Bookmarks API (import, push, or two-way sync in 1-click), plus serverless CORS-free link health checks.')}
                     </p>
+                </div>
+
+                {/* Browser Selection Tabs */}
+                <div className="flex rounded-lg bg-muted p-1 gap-1 text-xs font-medium">
+                    <button
+                        type="button"
+                        onClick={() => setActiveBrowser('chromium')}
+                        className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1.5 ${
+                            activeBrowser === 'chromium'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        <Chrome className="h-3.5 w-3.5" />
+                        Chrome / Edge / Brave
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveBrowser('firefox')}
+                        className={`flex-1 py-1.5 px-2 rounded-md transition-all text-center flex items-center justify-center gap-1.5 ${
+                            activeBrowser === 'firefox'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                        <Globe className="h-3.5 w-3.5" />
+                        Firefox
+                    </button>
                 </div>
 
                 {/* Step by Step Guide */}
                 <div className="space-y-2">
-                    <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                        {t('modals.extensionGuide.stepsTitle', 'Installation Steps (Chrome / Edge / Brave / Arc)')}
-                    </div>
-
-                    <ol className="text-xs space-y-2 text-muted-foreground list-decimal list-inside pl-1">
-                        <li className="leading-relaxed">
-                            <span className="font-medium text-foreground">
-                                {t('modals.extensionGuide.step1', 'Open Extensions page')}
-                            </span>
-                            <div className="font-mono text-[11px] bg-muted px-2 py-0.5 rounded mt-0.5 inline-block text-foreground select-all">
-                                chrome://extensions
-                            </div>
-                        </li>
-                        <li className="leading-relaxed">
-                            <span className="font-medium text-foreground">
-                                {t('modals.extensionGuide.step2', 'Enable Developer Mode')}
-                            </span>
-                            <span className="block text-[11px]">
-                                {t('modals.extensionGuide.step2Desc', 'Toggle the switch in the top-right corner.')}
-                            </span>
-                        </li>
-                        <li className="leading-relaxed">
-                            <span className="font-medium text-foreground">
-                                {t('modals.extensionGuide.step3', 'Click "Load unpacked" (Paketlenmemiş öğe yükle)')}
-                            </span>
-                        </li>
-                        <li className="leading-relaxed">
-                            <span className="font-medium text-foreground">
-                                {t('modals.extensionGuide.step4', 'Select the extension folder')}
-                            </span>
-                            <div className="text-[11px] mt-0.5 flex items-center gap-1 font-mono bg-muted/60 px-2 py-0.5 rounded text-foreground">
-                                <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
-                                <span>/extension</span>
-                            </div>
-                        </li>
-                    </ol>
+                    {activeBrowser === 'chromium' ? (
+                        <ol className="text-xs space-y-2 text-muted-foreground list-decimal list-inside pl-1">
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.step1', 'Open Extensions page')}
+                                </span>
+                                <div className="font-mono text-[11px] bg-muted px-2 py-0.5 rounded mt-0.5 inline-block text-foreground select-all">
+                                    chrome://extensions
+                                </div>
+                            </li>
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.step2', 'Enable Developer Mode')}
+                                </span>
+                                <span className="block text-[11px]">
+                                    {t('modals.extensionGuide.step2Desc', 'Toggle the switch in the top-right corner.')}
+                                </span>
+                            </li>
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.step3', 'Click "Load unpacked" (Paketlenmemiş öğe yükle)')}
+                                </span>
+                            </li>
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.step4', 'Select the extension folder')}
+                                </span>
+                                <div className="text-[11px] mt-0.5 flex items-center gap-1 font-mono bg-muted/60 px-2 py-0.5 rounded text-foreground">
+                                    <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                    <span>/extension</span>
+                                </div>
+                            </li>
+                        </ol>
+                    ) : (
+                        <ol className="text-xs space-y-2 text-muted-foreground list-decimal list-inside pl-1">
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.firefoxStep1', 'Open Debugging page')}
+                                </span>
+                                <div className="font-mono text-[11px] bg-muted px-2 py-0.5 rounded mt-0.5 inline-block text-foreground select-all">
+                                    about:debugging#/runtime/this-firefox
+                                </div>
+                            </li>
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.firefoxStep2', 'Click "Load Temporary Add-on..."')}
+                                </span>
+                            </li>
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.firefoxStep3', 'Select the manifest file')}
+                                </span>
+                                <div className="text-[11px] mt-0.5 flex items-center gap-1 font-mono bg-muted/60 px-2 py-0.5 rounded text-foreground">
+                                    <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                    <span>/extension/manifest.json</span>
+                                </div>
+                            </li>
+                        </ol>
+                    )}
                 </div>
 
                 <div className="flex justify-end pt-2 border-t border-border/50">

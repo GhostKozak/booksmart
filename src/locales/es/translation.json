@@ -383,7 +383,10 @@
             "step2": "Activa el modo de desarrollador",
             "step2Desc": "Activa el interruptor en la esquina superior derecha.",
             "step3": "Haz clic en \"Cargar descomprimida\"",
-            "step4": "Selecciona la carpeta de la extensión en BookSmart (/extension)"
+            "step4": "Selecciona la carpeta de la extensión en BookSmart (/extension)",
+            "firefoxStep1": "Abrir la página de depuración",
+            "firefoxStep2": "Hacer clic en \"Cargar complemento temporal...\"",
+            "firefoxStep3": "Seleccionar el archivo de manifiesto (/extension/manifest.json)"
         }
     },
     "backup": {

@@ -383,7 +383,10 @@
             "step2": "Entwicklermodus aktivieren",
             "step2Desc": "Schalter oben rechts aktivieren.",
             "step3": "\"Entpackte Erweiterung laden\" klicken",
-            "step4": "Erweiterungsordner im BookSmart-Projekt auswählen (/extension)"
+            "step4": "Erweiterungsordner im BookSmart-Projekt auswählen (/extension)",
+            "firefoxStep1": "Debugging-Seite öffnen",
+            "firefoxStep2": "Auf \"Temporäres Add-on laden...\" klicken",
+            "firefoxStep3": "Manifest-Datei auswählen (/extension/manifest.json)"
         }
     },
     "backup": {

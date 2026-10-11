@@ -383,7 +383,10 @@
             "step2": "Geliştirici Modunu Açın",
             "step2Desc": "Sağ üst köşedeki anahtarı aktif hale getirin.",
             "step3": "\"Paketlenmemiş öğe yükle\" butonuna tıklayın",
-            "step4": "BookSmart proje dizinindeki eklenti klasörünü seçin (/extension)"
+            "step4": "BookSmart proje dizinindeki eklenti klasörünü seçin (/extension)",
+            "firefoxStep1": "Hata Ayıklama sayfasını açın",
+            "firefoxStep2": "\"Geçici Eklenti Yükle...\" butonuna tıklayın",
+            "firefoxStep3": "Eklenti manifest dosyasını seçin (/extension/manifest.json)"
         }
     },
     "backup": {

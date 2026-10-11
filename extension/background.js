@@ -180,7 +180,7 @@ async function getBrowserBookmarks() {
 async function getOrCreateTargetFolder(folderName = 'BookSmart') {
     const tree = await chrome.bookmarks.getTree();
     const root = tree[0];
-    const bar = root.children?.find(c => c.id === '1') || root.children?.[0] || root;
+    const bar = root.children?.find(c => c.id === '1' || c.id === 'toolbar_____') || root.children?.[0] || root;
     const parentId = bar.id;
 
     const existing = bar.children?.find(c => c.title === folderName && !c.url);
