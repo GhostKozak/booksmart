@@ -9,7 +9,10 @@ vi.mock('../../db', () => ({
         bookmarks: {
             bulkAdd: vi.fn(),
             bulkDelete: vi.fn(),
-            clear: vi.fn()
+            clear: vi.fn(),
+            toArray: vi.fn().mockResolvedValue([]),
+            add: vi.fn().mockResolvedValue(1),
+            delete: vi.fn().mockResolvedValue(1)
         },
         transaction: vi.fn((mode, table, cb) => cb())
     }
