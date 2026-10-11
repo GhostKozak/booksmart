@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { SimpleModal } from './ui/SimpleModal'
 import { Input } from './ui/input'
 import { SimpleCombobox } from './ui/SimpleCombobox'
@@ -17,16 +17,19 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
     const [tagInput, setTagInput] = useState('')
     const [saving, setSaving] = useState(false)
 
-    useEffect(() => {
+    const [prevSync, setPrevSync] = useState({ id: bookmark?.id, isOpen });
+
+    if (prevSync.id !== bookmark?.id || prevSync.isOpen !== isOpen) {
+        setPrevSync({ id: bookmark?.id, isOpen });
         if (bookmark && isOpen) {
-            setTitle(bookmark.title || '')
-            setUrl(bookmark.url || '')
-            setNote(bookmark.note || '')
-            setFolder(bookmark.newFolder || bookmark.originalFolder || '')
-            setTags(bookmark.tags || [])
-            setTagInput('')
+            setTitle(bookmark.title || '');
+            setUrl(bookmark.url || '');
+            setNote(bookmark.note || '');
+            setFolder(bookmark.newFolder || bookmark.originalFolder || '');
+            setTags(bookmark.tags || []);
+            setTagInput('');
         }
-    }, [bookmark, isOpen])
+    }
 
     const handleAddTag = (tagName) => {
         const name = tagName.trim()

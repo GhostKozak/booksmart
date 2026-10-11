@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -23,17 +23,20 @@ export function CollectionModal({ isOpen, onClose, onSave, editingCollection }) 
     const [icon, setIcon] = useState('📚')
     const [color, setColor] = useState('#8b5cf6')
 
-    useEffect(() => {
+    const [prevSync, setPrevSync] = useState({ id: editingCollection?.id, isOpen });
+
+    if (prevSync.id !== editingCollection?.id || prevSync.isOpen !== isOpen) {
+        setPrevSync({ id: editingCollection?.id, isOpen });
         if (editingCollection) {
-            setName(editingCollection.name || '')
-            setIcon(editingCollection.icon || '📚')
-            setColor(editingCollection.color || '#8b5cf6')
+            setName(editingCollection.name || '');
+            setIcon(editingCollection.icon || '📚');
+            setColor(editingCollection.color || '#8b5cf6');
         } else {
-            setName('')
-            setIcon('📚')
-            setColor('#8b5cf6')
+            setName('');
+            setIcon('📚');
+            setColor('#8b5cf6');
         }
-    }, [editingCollection, isOpen])
+    }
 
     const handleSave = () => {
         if (!name.trim()) return

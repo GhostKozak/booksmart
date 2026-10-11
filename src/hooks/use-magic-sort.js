@@ -110,7 +110,7 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
             setIsProcessingAI(false)
             abortControllerRef.current = null;
         }
-    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview])
+    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview, t])
 
     return { handleMagicSort, cancelMagicSort, isProcessingAI }
 }

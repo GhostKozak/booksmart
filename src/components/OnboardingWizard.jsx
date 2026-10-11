@@ -187,12 +187,15 @@ function OrganizeStep({ t }) {
                 {t('onboarding.organize.desc')}
             </p>
             <div className="gap-2.5 grid grid-cols-3 w-full max-w-sm">
-                {features.map(({ icon: Icon, label, color }) => (
-                    <div key={label} className="flex flex-col items-center gap-1.5 bg-secondary/50 hover:bg-secondary/80 p-3 rounded-lg transition-colors">
-                        <Icon className={cn("w-5 h-5", color)} />
-                        <span className="font-medium text-[11px] leading-tight">{label}</span>
-                    </div>
-                ))}
+                {features.map((f) => {
+                    const IconComponent = f.icon
+                    return (
+                        <div key={f.label} className="flex flex-col items-center gap-1.5 bg-secondary/50 hover:bg-secondary/80 p-3 rounded-lg transition-colors">
+                            <IconComponent className={cn("w-5 h-5", f.color)} />
+                            <span className="font-medium text-[11px] leading-tight">{f.label}</span>
+                        </div>
+                    )
+                })}
             </div>
         </>
     )

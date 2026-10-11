@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Download, Upload, AlertCircle, CheckCircle2, History, Lock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -10,22 +10,15 @@ import { lockVault, isVaultUnlocked, hasVault } from '../lib/key-vault';
 
 export function BackupSettings() {
     const { t } = useTranslation();
-    const [lastBackupTime, setLastBackupTime] = useState(null);
-    const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(false);
+    const [lastBackupTime] = useState(() => {
+        const time = getLastAutoBackupTime();
+        return time ? new Date(time).toLocaleString() : null;
+    });
+    const [isAutoBackupEnabled, setIsAutoBackupEnabled] = useState(() => {
+        return localStorage.getItem('booksmart_auto_backup_enabled') === 'true';
+    });
     const [isRestoring, setIsRestoring] = useState(false);
     const [restoreStatus, setRestoreStatus] = useState(null); // 'success' | 'error'
-
-    useEffect(() => {
-        // Load initial state
-        const autoEnabled = localStorage.getItem('booksmart_auto_backup_enabled') === 'true';
-        setIsAutoBackupEnabled(autoEnabled);
-
-        // Check last backup time
-        const time = getLastAutoBackupTime();
-        if (time) {
-            setLastBackupTime(new Date(time).toLocaleString());
-        }
-    }, []);
 
     const handleToggleAutoBackup = () => {
         const newValue = !isAutoBackupEnabled;

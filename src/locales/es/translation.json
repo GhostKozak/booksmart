@@ -123,7 +123,8 @@
                 "ollama": "IA Local (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
-                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+                "openrouter": "OpenRouter (Claude, Llama, etc.)",
+                "anthropic": "Anthropic (Claude)"
             },
             "apiKey": "Clave de API",
             "ollamaUrl": "Ollama Base URL",
@@ -132,7 +133,8 @@
             "reqOpenAI": "Requiere clave API de OpenAI",
             "reqGemini": "Requiere clave API de Google Gemini",
             "reqOpenRouter": "Requiere clave API de OpenRouter",
-            "reqOllama": "Dejar vacío para el predeterminado http://localhost:11434"
+            "reqOllama": "Dejar vacío para el predeterminado http://localhost:11434",
+            "reqAnthropic": "Requiere clave API de Anthropic"
         },
         "network": {
             "corsProxy": "CORS Proxy URL",
@@ -144,6 +146,25 @@
             "es": "Español",
             "fr": "Francés",
             "de": "Alemán"
+        },
+        "vault": {
+            "title": "Bóveda de claves API",
+            "lockedDesc": "Sus claves API están cifradas. Ingrese la contraseña de su bóveda para desbloquear.",
+            "passwordPlaceholder": "Contraseña de la bóveda",
+            "unlock": "Desbloquear",
+            "lock": "Bloquear",
+            "clear": "Limpiar bóveda",
+            "wrongPassword": "Contraseña incorrecta o bóveda dañada",
+            "saveLocked": "No se puede guardar: la bóveda está bloqueada",
+            "setupTitle": "Crear bóveda (Opcional)",
+            "setupDesc": "Cifre su clave API con una contraseña. La necesitará en cada sesión.",
+            "newPasswordPlaceholder": "Elija una contraseña para la bóveda",
+            "createButton": "Crear bóveda y cifrar",
+            "created": "Bóveda creada y clave API cifrada",
+            "createError": "Error al crear la bóveda",
+            "cleared": "Bóveda limpiada",
+            "willEncrypt": "Su clave API actual se cifrará en la bóveda.",
+            "unlockedBadge": "Bóveda desbloqueada"
         }
     },
     "common": {
@@ -175,7 +196,10 @@
             "yearsAgo": "hace {{count}}a"
         },
         "bookmarks_one": "marcador",
-        "bookmarks_other": "marcadores"
+        "bookmarks_other": "marcadores",
+        "title": "Título",
+        "add": "Añadir",
+        "remove": "Eliminar"
     },
     "modals": {
         "rules": {
@@ -434,7 +458,8 @@
             "original": "Original (Tiene duplicados)",
             "matched": "Coincide con regla",
             "conflict": "Conflicto de reglas",
-            "unknown": "Desconocido"
+            "unknown": "Desconocido",
+            "suggested": "Sugerencia de IA"
         },
         "health": {
             "checking": "Comprobando...",
@@ -452,6 +477,13 @@
         "tree": {
             "expandAll": "Expandir todo",
             "collapseAll": "Contraer todo"
+        },
+        "editModal": {
+            "title": "Editar marcador",
+            "titlePlaceholder": "Título del marcador",
+            "folderPlaceholder": "Seleccione o escriba una carpeta",
+            "tagsPlaceholder": "Escriba etiqueta y presione Enter",
+            "undoDesc": "Editar \"{{title}}\""
         }
     },
     "main": {
@@ -513,7 +545,10 @@
         "collectionUpdated": "Colección actualizada con éxito",
         "collectionDeleted": "Colección eliminada",
         "addedToCollection": "Añadido a \"{{name}}\"",
-        "removedFromCollection": "{{count}} marcadores eliminados de \"{{name}}\""
+        "removedFromCollection": "{{count}} marcadores eliminados de \"{{name}}\"",
+        "aiTitlesFixed": "Títulos corregidos para {{count}} marcadores.",
+        "aiDupesFound": "{{count}} grupos encontrados.",
+        "backupQuotaExceeded": "Copia automática fallida: cuota de almacenamiento excedida."
     },
     "collections": {
         "add": "Nueva Colección",
@@ -581,5 +616,9 @@
     },
     "accessibility": {
         "skipToMain": "Saltar al contenido principal"
+    },
+    "network": {
+        "corsProxy": "URL del proxy CORS",
+        "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
     }
 }

@@ -1,9 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { parseBookmarks, parseJson, parseCsv, parseMarkdown } from '../parser';
 
-vi.mock('../utils', () => ({
-    generateUUID: () => 'mock-id'
-}));
+vi.mock('../utils', async () => {
+    const actual = await vi.importActual('../utils');
+    return {
+        ...actual,
+        generateUUID: () => 'mock-id'
+    };
+});
 
 describe('parser', () => {
     describe('parseBookmarks (HTML)', () => {

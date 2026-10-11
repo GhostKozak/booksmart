@@ -1,16 +1,28 @@
 import '@testing-library/jest-dom';
 
-// Mock localStorage for vitest/jsdom (Node.js requires --localstorage-file flag)
-const localStorageMock = {
-    getItem: vi.fn(() => null),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-    length: 0,
-    key: vi.fn(),
-};
+function createStorageMock() {
+    let store = {};
+    return {
+        getItem: vi.fn((key) => (key in store ? store[key] : null)),
+        setItem: vi.fn((key, value) => { store[key] = String(value); }),
+        removeItem: vi.fn((key) => { delete store[key]; }),
+        clear: vi.fn(() => { store = {}; }),
+        get length() { return Object.keys(store).length; },
+        key: vi.fn((i) => Object.keys(store)[i] || null),
+    };
+}
+
+const localStorageMock = createStorageMock();
+const sessionStorageMock = createStorageMock();
+
 Object.defineProperty(globalThis, 'localStorage', {
     value: localStorageMock,
+    writable: true,
+    configurable: true,
+});
+
+Object.defineProperty(globalThis, 'sessionStorage', {
+    value: sessionStorageMock,
     writable: true,
     configurable: true,
 });

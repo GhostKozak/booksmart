@@ -4,9 +4,10 @@ import { Favicon } from './Favicon'
 import { BookmarkHealthStatus } from './bookmark/BookmarkHealthStatus'
 import { LinkTooltip } from './bookmark/LinkTooltip'
 import { Button } from './ui/button'
-import { Folder, ChevronDown, Pencil, Eye, FolderOpen, MoreVertical } from 'lucide-react'
+import { Folder, ChevronDown, Pencil, Eye, FolderOpen } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
+import { useAppStore } from '../store/useAppStore'
 
 // Bookmarks Leaf (File) Node
 const BookmarkLeaf = ({
@@ -129,9 +130,8 @@ const FolderNode = ({
     const isFolderAllSelected = folderBookmarkIds.length > 0 && folderBookmarkIds.every(id => selectedIds.has(id))
     const isFolderSomeSelected = folderBookmarkIds.some(id => selectedIds.has(id)) && !isFolderAllSelected
 
-    const handleCheckboxChange = (e) => {
+    const handleCheckboxChange = () => {
         // Toggle selection for all children
-        const useAppStore = require('../store/useAppStore').useAppStore
         const setSelectedIds = useAppStore.getState().setSelectedIds
         const currentSelected = new Set(selectedIds)
 
@@ -239,9 +239,7 @@ export function BookmarkTree({
     ignoredUrls,
     toggleIgnoreUrl,
     onPreview,
-    onEdit,
-    availableFolders = [],
-    availableTags = []
+    onEdit
 }) {
     const { t } = useTranslation()
 

@@ -13,15 +13,15 @@ import {
 export function AISettings() {
     const { t } = useTranslation()
     const [apiKey, setApiKey] = useState('')
-    const [ollamaUrl, setOllamaUrl] = useState('')
-    const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
+    const [ollamaUrl, setOllamaUrl] = useState(() => sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url') || '')
+    const [selectedModel, setSelectedModel] = useState(() => sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || DEFAULT_MODEL)
     const [saved, setSaved] = useState(false)
     const [vaultPassword, setVaultPassword] = useState('')
     const [vaultNewPassword, setVaultNewPassword] = useState('')
     const [unlocked, setUnlocked] = useState(isVaultUnlocked())
     const [vaultExists, setVaultExists] = useState(hasVault())
     const [unlockError, setUnlockError] = useState('')
-    const [corsProxy, setCorsProxy] = useState('')
+    const [corsProxy, setCorsProxy] = useState(() => getStoredCorsProxy())
 
     useEffect(() => {
         if (isVaultUnlocked()) {
@@ -29,12 +29,6 @@ export function AISettings() {
                 if (k) setApiKey(k)
             })
         }
-        const storedOllamaUrl = sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url')
-        const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
-        const storedCorsProxy = getStoredCorsProxy()
-        if (storedOllamaUrl) setOllamaUrl(storedOllamaUrl)
-        if (storedModel) setSelectedModel(storedModel)
-        if (storedCorsProxy) setCorsProxy(storedCorsProxy)
     }, [])
 
     const existingKey = !vaultExists && (sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key'))
@@ -69,7 +63,7 @@ export function AISettings() {
             setUnlocked(true)
             setVaultNewPassword('')
             toast.success(t('settings.vault.created'))
-        } catch (e) {
+        } catch {
             toast.error(t('settings.vault.createError'))
         }
     }

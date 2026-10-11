@@ -21,6 +21,10 @@
   ],
   "type": "module",
   "license": "GPL-3.0-or-later",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -70,9 +74,7 @@
     "tailwindcss": "^4.2.1",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^4.0.18"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "vitest": "^4.0.18",
+    "workbox-window": "^7.4.1"
   }
 }

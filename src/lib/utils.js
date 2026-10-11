@@ -5,6 +5,27 @@ export function cn(...inputs) {
     return twMerge(clsx(inputs))
 }
 
+/**
+ * Blocklist check: rejects javascript:, data: and vbscript: URLs.
+ * Other schemes (chrome://, file://, ftp://) are kept so imports don't lose bookmarks.
+ * @param {string} url - URL to validate.
+ * @returns {boolean}
+ */
+export function isSafeUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    return !/^(javascript|data|vbscript):/i.test(url.trim());
+}
+
+/**
+ * Strict check: only http(s) URLs. Use for iframes and network requests.
+ * @param {string} url - URL to validate.
+ * @returns {boolean}
+ */
+export function isHttpUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    return /^https?:\/\//i.test(url.trim());
+}
+
 const TAG_COLORS = ['#f43f5e','#ec4899','#a855f7','#8b5cf6','#6366f1','#3b82f6','#0ea5e9','#06b6d4','#14b8a6','#10b981','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
 
 export function pickTagColor(name) {

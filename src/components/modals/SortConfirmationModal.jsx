@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SimpleModal } from '../ui/SimpleModal';
 import { Button } from '../ui/button';
@@ -9,13 +9,16 @@ export function SortConfirmationModal({ isOpen, onClose, onConfirm, updates = []
 
     const [editableUpdates, setEditableUpdates] = useState([]);
 
-    useEffect(() => {
+    const [prevSync, setPrevSync] = useState({ isOpen: false, updates: null });
+
+    if (prevSync.isOpen !== isOpen || prevSync.updates !== updates) {
+        setPrevSync({ isOpen, updates });
         if (isOpen) {
             setEditableUpdates(JSON.parse(JSON.stringify(updates)));
         } else {
             setEditableUpdates([]);
         }
-    }, [isOpen, updates]);
+    }
 
     if (!isOpen) return null;
 

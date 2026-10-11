@@ -29,7 +29,11 @@ export function RuleConflictModal({
     }
 
     const handleSkip = () => {
-        onSkip(conflict.id)
+        if (onSkip) {
+            onSkip(conflict.id)
+        } else if (onClose) {
+            onClose()
+        }
         resetState()
     }
 
@@ -45,7 +49,7 @@ export function RuleConflictModal({
     return (
         <SimpleModal
             isOpen={isOpen}
-            onClose={handleSkip}
+            onClose={onClose || handleSkip}
             title={t('modals.ruleConflict.title')}
         >
             <div className="space-y-4">

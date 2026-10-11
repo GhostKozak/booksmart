@@ -13,7 +13,6 @@ export function BookmarkTags({ tags, ruleTags = [], availableTags = [], classNam
         <div className={cn("flex gap-1 mt-1 flex-wrap", className)}>
             {allTags.map(tag => {
                 const isRuleTag = uniqueRuleTags.has(tag) && !uniqueTags.has(tag); // Strictly rule-only
-                const isBoth = uniqueRuleTags.has(tag) && uniqueTags.has(tag);
 
                 const tagConfig = availableTags?.find(t => t.name === tag);
                 const customColor = tagConfig ? tagConfig.color : null;

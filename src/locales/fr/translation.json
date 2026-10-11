@@ -123,7 +123,8 @@
                 "ollama": "IA Locale (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
-                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+                "openrouter": "OpenRouter (Claude, Llama, etc.)",
+                "anthropic": "Anthropic (Claude)"
             },
             "apiKey": "Clé API",
             "ollamaUrl": "Ollama Base URL",
@@ -132,7 +133,8 @@
             "reqOpenAI": "Nécessite une clé API OpenAI",
             "reqGemini": "Nécessite une clé API Google Gemini",
             "reqOpenRouter": "Nécessite une clé API OpenRouter",
-            "reqOllama": "Laissez vide pour utiliser http://localhost:11434 par défaut"
+            "reqOllama": "Laissez vide pour utiliser http://localhost:11434 par défaut",
+            "reqAnthropic": "Nécessite une clé API Anthropic"
         },
         "network": {
             "corsProxy": "CORS Proxy URL",
@@ -144,6 +146,25 @@
             "es": "Espagnol",
             "fr": "Français",
             "de": "Allemand"
+        },
+        "vault": {
+            "title": "Coffre-fort de clés API",
+            "lockedDesc": "Vos clés API sont chiffrées. Entrez le mot de passe de votre coffre-fort pour déverrouiller.",
+            "passwordPlaceholder": "Mot de passe du coffre-fort",
+            "unlock": "Déverrouiller",
+            "lock": "Verrouiller",
+            "clear": "Effacer le coffre-fort",
+            "wrongPassword": "Mot de passe incorrect ou coffre-fort corrompu",
+            "saveLocked": "Impossible d'enregistrer : le coffre-fort est verrouillé",
+            "setupTitle": "Créer un coffre-fort (Optionnel)",
+            "setupDesc": "Chiffrez votre clé API avec un mot de passe. Vous en aurez besoin à chaque session.",
+            "newPasswordPlaceholder": "Choisissez un mot de passe",
+            "createButton": "Créer le coffre-fort et chiffrer",
+            "created": "Coffre-fort créé et clé API chiffrée",
+            "createError": "Échec de création du coffre-fort",
+            "cleared": "Coffre-fort effacé",
+            "willEncrypt": "Votre clé API existante sera chiffrée dans le coffre-fort.",
+            "unlockedBadge": "Coffre-fort déverrouillé"
         }
     },
     "common": {
@@ -175,7 +196,10 @@
             "yearsAgo": "il y a {{count}}a"
         },
         "bookmarks_one": "signet",
-        "bookmarks_other": "signets"
+        "bookmarks_other": "signets",
+        "title": "Titre",
+        "add": "Ajouter",
+        "remove": "Supprimer"
     },
     "modals": {
         "rules": {
@@ -434,7 +458,8 @@
             "original": "Original (A des doublons)",
             "matched": "Correspond à une Règle",
             "conflict": "Conflit de Règles",
-            "unknown": "Inconnu"
+            "unknown": "Inconnu",
+            "suggested": "Suggestion IA"
         },
         "health": {
             "checking": "Vérification...",
@@ -452,6 +477,13 @@
         "tree": {
             "expandAll": "Tout développer",
             "collapseAll": "Tout réduire"
+        },
+        "editModal": {
+            "title": "Modifier le marque-page",
+            "titlePlaceholder": "Titre du marque-page",
+            "folderPlaceholder": "Sélectionnez ou saisissez un dossier",
+            "tagsPlaceholder": "Saisissez un tag et appuyez sur Entrée",
+            "undoDesc": "Modifier \"{{title}}\""
         }
     },
     "main": {
@@ -513,7 +545,10 @@
         "collectionUpdated": "Collection mise à jour avec succès",
         "collectionDeleted": "Collection supprimée",
         "addedToCollection": "Ajouté à \"{{name}}\"",
-        "removedFromCollection": "{{count}} signets retirés de \"{{name}}\""
+        "removedFromCollection": "{{count}} signets retirés de \"{{name}}\"",
+        "aiTitlesFixed": "Titres corrigés pour {{count}} marque-pages.",
+        "aiDupesFound": "{{count}} groupes trouvés.",
+        "backupQuotaExceeded": "Échec de la sauvegarde automatique : quota de stockage dépassé."
     },
     "collections": {
         "add": "Nouvelle Collection",
@@ -581,5 +616,9 @@
     },
     "accessibility": {
         "skipToMain": "Passer au contenu principal"
+    },
+    "network": {
+        "corsProxy": "URL du proxy CORS",
+        "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages."
     }
 }

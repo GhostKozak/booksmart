@@ -123,7 +123,8 @@
                 "ollama": "Yerel YZ (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
-                "openrouter": "OpenRouter (Claude, Llama, vb.)"
+                "openrouter": "OpenRouter (Claude, Llama, vb.)",
+                "anthropic": "Anthropic (Claude)"
             },
             "apiKey": "API Anahtarı",
             "ollamaUrl": "Ollama Base URL",
@@ -132,7 +133,8 @@
             "reqOpenAI": "OpenAI API Anahtarı Gerekir",
             "reqGemini": "Google Gemini API Anahtarı Gerekir",
             "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
-            "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın"
+            "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın",
+            "reqAnthropic": "Anthropic API Anahtarı Gerekir"
         },
         "network": {
             "corsProxy": "CORS Proxy Adresi",
@@ -544,7 +546,9 @@
         "collectionUpdated": "Koleksiyon başarıyla güncellendi",
         "collectionDeleted": "Koleksiyon silindi",
         "addedToCollection": "\"{{name}}\" koleksiyonuna eklendi",
-        "removedFromCollection": "{{count}} yer imi \"{{name}}\" koleksiyonundan çıkarıldı"
+        "removedFromCollection": "{{count}} yer imi \"{{name}}\" koleksiyonundan çıkarıldı",
+        "aiTitlesFixed": "{{count}} yer imi başlığı düzeltildi.",
+        "aiDupesFound": "{{count}} grup bulundu."
     },
     "collections": {
         "add": "Yeni Koleksiyon",

@@ -67,7 +67,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
             setIsProcessingAITitles(false);
             abortControllerRef.current = null;
         }
-    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings]);
+    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview, t]);
 
     const handleFindSmartDuplicates = useCallback(async () => {
         const provider = getStoredProvider();
@@ -142,7 +142,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
             setIsProcessingAIDupes(false);
             abortControllerRef.current = null;
         }
-    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings]);
+    }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview, t]);
 
     return { handleFixTitles, handleFindSmartDuplicates, cancelAITools, isProcessingAITitles, isProcessingAIDupes };
 }

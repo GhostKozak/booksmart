@@ -7,7 +7,7 @@ import { AI_MODELS, DEFAULT_MODEL } from "../services/ai-service"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
-    unlockVault, lockVault, saveSecret, loadSecret,
+    unlockVault, loadSecret, saveSecret,
     isVaultUnlocked, hasVault, migrateFromLocalStorage
 } from "../lib/key-vault"
 
@@ -20,29 +20,33 @@ export function SettingsModal({ isOpen, onClose, onSave }) {
     const [vaultExists, setVaultExists] = useState(false)
     const [unlockError, setUnlockError] = useState("")
 
-    useEffect(() => {
-        if (isOpen) {
-            const vaultUnlocked = isVaultUnlocked()
-            const vaultPresent = hasVault()
-            setUnlocked(vaultUnlocked)
-            setVaultExists(vaultPresent)
+    const [prevOpen, setPrevOpen] = useState(false);
 
-            if (vaultUnlocked) {
-                loadSecret().then(k => {
-                    if (k) setApiKey(k)
-                })
-            }
-
-            if (!vaultPresent) {
-                const storedKey = sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key")
-                if (storedKey) setApiKey(storedKey)
-            }
-            const storedModel = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model")
-            if (storedModel) setSelectedModel(storedModel)
-            setVaultPassword("")
-            setUnlockError("")
+    if (isOpen && !prevOpen) {
+        setPrevOpen(true);
+        const vaultUnlocked = isVaultUnlocked();
+        const vaultPresent = hasVault();
+        setUnlocked(vaultUnlocked);
+        setVaultExists(vaultPresent);
+        if (!vaultPresent) {
+            const storedKey = sessionStorage.getItem("bs_api_key") || localStorage.getItem("bs_api_key");
+            if (storedKey) setApiKey(storedKey);
         }
-    }, [isOpen])
+        const storedModel = sessionStorage.getItem("bs_model") || localStorage.getItem("bs_model");
+        if (storedModel) setSelectedModel(storedModel);
+        setVaultPassword("");
+        setUnlockError("");
+    } else if (!isOpen && prevOpen) {
+        setPrevOpen(false);
+    }
+
+    useEffect(() => {
+        if (isOpen && isVaultUnlocked()) {
+            loadSecret().then(k => {
+                if (k) setApiKey(k);
+            });
+        }
+    }, [isOpen]);
 
     const handleUnlock = async () => {
         setUnlockError("")

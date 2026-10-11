@@ -366,7 +366,8 @@ async function callAnthropic(messages, apiKey, model, asJson = true, signal) {
             headers: {
                 "Content-Type": "application/json",
                 "x-api-key": apiKey,
-                "anthropic-version": "2023-06-01"
+                "anthropic-version": "2023-06-01",
+                "anthropic-dangerous-direct-browser-access": "true"
             },
             body: JSON.stringify(body),
             signal

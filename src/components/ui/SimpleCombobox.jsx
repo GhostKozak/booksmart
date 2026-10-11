@@ -19,14 +19,15 @@ export function SimpleCombobox({
     const containerRef = useRef(null);
     const inputRef = useRef(null);
 
-    // Sync internal query with value when value changes externally
-    useEffect(() => {
-        // If we are closed and the value changed, sync the query.
-        if (!isOpen && value !== query) {
+    const [prevValue, setPrevValue] = useState(value);
+
+    // Sync internal query with value when value changes externally while closed
+    if (value !== prevValue) {
+        setPrevValue(value);
+        if (!isOpen) {
             setQuery(value || '');
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, isOpen]);
+    }
 
     // Handle click outside to close
     useEffect(() => {

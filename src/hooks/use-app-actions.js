@@ -9,7 +9,6 @@ export function useAppActions({
     addCommand,
     workerSetLinkHealth,
     workerRuleConflicts,
-    displayBookmarks,
 }) {
     const { t } = useTranslation()
 
@@ -29,9 +28,9 @@ export function useAppActions({
 
         const previousState = await db.bookmarks.bulkGet(finalUpdates.map(u => u.id))
 
-        const updatesToApply = finalUpdates.map(({ originalTitle, originalFolder, originalTags, ...u }) => ({
+        const updatesToApply = finalUpdates.map(u => ({
             ...u,
-            originalFolder: originalFolder,
+            originalFolder: u.originalFolder,
             newFolder: u.newFolder || u.suggestedFolder,
             tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])],
             ruleTags: u.ruleTags || [],

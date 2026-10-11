@@ -2,23 +2,12 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from './ui/button';
 import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, isHttpUrl } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
 import { summarizeContent } from '../services/ai-service';
 import { toast } from 'sonner';
 import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault, getStoredCorsProxy } from '../lib/key-vault';
-
-/**
- * Validate URL scheme - blocks dangerous protocols.
- * @param {string} url - URL to check.
- * @returns {boolean} - true if URL has a safe scheme.
- */
-function isSafeUrl(url) {
-    if (!url || typeof url !== 'string') return false;
-    const trimmed = url.trim().toLowerCase();
-    return /^https?:\/\//i.test(trimmed);
-}
 
 export function PreviewPane({ bookmark, onClose, className }) {
     const { t } = useTranslation();
@@ -27,11 +16,13 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const [noteValue, setNoteValue] = useState(bookmark?.note || '');
     const [isNoteOpen, setIsNoteOpen] = useState(!!(bookmark?.note));
 
-    // Sync note state when bookmark changes
-    React.useEffect(() => {
+    const [prevSync, setPrevSync] = useState({ id: bookmark?.id, note: bookmark?.note });
+
+    if (prevSync.id !== bookmark?.id || prevSync.note !== bookmark?.note) {
+        setPrevSync({ id: bookmark?.id, note: bookmark?.note });
         setNoteValue(bookmark?.note || '');
         setIsNoteOpen(!!(bookmark?.note));
-    }, [bookmark?.id, bookmark?.note]);
+    }
 
     const handleReload = () => {
         setIsLoading(true);
@@ -71,7 +62,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
         if (!bookmark?.id) return;
         setNoteValue(value);
         await db.bookmarks.update(bookmark.id, { note: value });
-    }, [bookmark?.id]);
+    }, [bookmark]);
 
     if (!bookmark) return null;
 
@@ -153,7 +144,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
 
                 <iframe
                     key={`${bookmark.id}-${refreshKey}`}
-                    src={isSafeUrl(bookmark.url) ? bookmark.url : 'about:blank'}
+                    src={isHttpUrl(bookmark.url) ? bookmark.url : 'about:blank'}
                     className="w-full h-full border-0 bg-white"
                     title={`Preview of ${bookmark.title}`}
                     onLoad={() => setIsLoading(false)}
@@ -171,7 +162,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
                             {t('preview.error')}
                         </p>
                         <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => {
-                            if (isSafeUrl(bookmark.url)) {
+                            if (isHttpUrl(bookmark.url)) {
                                 window.open(bookmark.url, '_blank', 'noopener,noreferrer');
                             }
                         }}>

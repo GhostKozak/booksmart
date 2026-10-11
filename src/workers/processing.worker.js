@@ -3,16 +3,14 @@ import Fuse from 'fuse.js'
 // --- Security Helpers ---
 
 /**
- * Validate URL scheme - blocks dangerous protocols like javascript: and data:
+ * Strict http(s) check used before any network request from the worker.
+ * Kept local (not imported from utils) to keep the worker bundle small.
  * @param {string} url - URL to check.
- * @returns {boolean} - true if URL has a safe scheme.
+ * @returns {boolean}
  */
-function isSafeUrl(url) {
+function isHttpUrl(url) {
     if (!url || typeof url !== 'string') return false;
-    const trimmed = url.trim().toLowerCase();
-    // Block javascript:, data:, vbscript: and other dangerous schemes
-    if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
-    return true;
+    return /^https?:\/\//i.test(url.trim());
 }
 
 /**
@@ -480,17 +478,30 @@ function getProxiedUrl(url, corsProxy) {
 }
 
 const checkLink = async (url, corsProxy) => {
+    if (!isHttpUrl(url)) {
+        return { url, status: 'dead' };
+    }
     try {
         const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
-        const fetchOptions = corsProxy ? {} : { mode: 'no-cors' };
-        const res = await fetch(fetchUrl, {
-            ...fetchOptions,
-            method: corsProxy ? 'GET' : 'HEAD'
-        });
         if (corsProxy) {
+            // Try HEAD first to avoid downloading full bodies through proxy; fallback to GET if HEAD rejected
+            let res;
+            try {
+                res = await fetch(fetchUrl, { method: 'HEAD' });
+            } catch {
+                res = null;
+            }
+            if (!res || res.status === 405) {
+                res = await fetch(fetchUrl, { method: 'GET' });
+            }
             return { url, status: res.status < 400 ? 'alive' : 'dead' };
+        } else {
+            // Direct browser fetch (no corsProxy):
+            // mode: 'no-cors' generates an opaque response (type: 'opaque', status: 0).
+            // If the server is unreachable or DNS fails, fetch will reject (caught below).
+            await fetch(fetchUrl, { mode: 'no-cors', method: 'HEAD' });
+            return { url, status: 'alive' };
         }
-        return { url, status: 'alive' };
     } catch {
         return { url, status: 'dead' };
     }

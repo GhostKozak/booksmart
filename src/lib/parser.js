@@ -1,15 +1,4 @@
-import { generateUUID } from './utils';
-
-/**
- * Validates that a URL uses a safe scheme.
- * Blocks javascript:, data:, vbscript: and other dangerous protocols.
- */
-function isSafeUrl(url) {
-    if (!url || typeof url !== 'string') return false;
-    const trimmed = url.trim().toLowerCase();
-    if (/^(javascript|data|vbscript):/i.test(trimmed)) return false;
-    return true;
-}
+import { generateUUID, isSafeUrl } from './utils';
 
 /**
  * Parses a Netscape Bookmark HTML content string.

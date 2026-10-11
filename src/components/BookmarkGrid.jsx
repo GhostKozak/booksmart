@@ -12,16 +12,22 @@ import { BookmarkTags } from './bookmark/BookmarkTags';
 import { BookmarkCollections } from './bookmark/BookmarkCollections';
 
 // Extracted Item Component for state management
-const GridItem = ({ bookmark, index, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
+const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
     const { t } = useTranslation();
     const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
 
-    // Reset loading state if thumbnail visibility toggles or bookmark changes
-    React.useEffect(() => {
+    const [prevProps, setPrevProps] = React.useState({ id: bookmark.id, showThumbnails, detailed });
+
+    if (
+        prevProps.id !== bookmark.id ||
+        prevProps.showThumbnails !== showThumbnails ||
+        prevProps.detailed !== detailed
+    ) {
+        setPrevProps({ id: bookmark.id, showThumbnails, detailed });
         if (showThumbnails || detailed) {
             setImageStatus('loading');
         }
-    }, [showThumbnails, detailed, bookmark.id]);
+    }
 
     return (
         <div className="flex flex-col h-full">

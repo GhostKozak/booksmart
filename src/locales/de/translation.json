@@ -123,7 +123,8 @@
                 "ollama": "Lokale KI (Ollama)",
                 "openai": "OpenAI",
                 "google": "Google Gemini",
-                "openrouter": "OpenRouter (Claude, Llama, etc.)"
+                "openrouter": "OpenRouter (Claude, Llama, etc.)",
+                "anthropic": "Anthropic (Claude)"
             },
             "apiKey": "API-Schlüssel",
             "ollamaUrl": "Ollama Base URL",
@@ -132,7 +133,8 @@
             "reqOpenAI": "Benötigt OpenAI API-Schlüssel",
             "reqGemini": "Benötigt Google Gemini API-Schlüssel",
             "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
-            "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden"
+            "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden",
+            "reqAnthropic": "Erfordert Anthropic API-Schlüssel"
         },
         "network": {
             "corsProxy": "CORS Proxy URL",
@@ -456,7 +458,8 @@
             "original": "Original (Hat Duplikate)",
             "matched": "Regelübereinstimmung",
             "conflict": "Regelkonflikt",
-            "unknown": "Unbekannt"
+            "unknown": "Unbekannt",
+            "suggested": "KI-Vorschlag"
         },
         "health": {
             "checking": "Prüfe...",
@@ -542,7 +545,10 @@
         "collectionUpdated": "Sammlung erfolgreich aktualisiert",
         "collectionDeleted": "Sammlung gelöscht",
         "addedToCollection": "Hinzugefügt zu \"{{name}}\"",
-        "removedFromCollection": "{{count}} Lesezeichen aus \"{{name}}\" entfernt"
+        "removedFromCollection": "{{count}} Lesezeichen aus \"{{name}}\" entfernt",
+        "aiTitlesFixed": "Titel für {{count}} Lesezeichen korrigiert.",
+        "aiDupesFound": "{{count}} Gruppen gefunden.",
+        "backupQuotaExceeded": "Automatisches Backup fehlgeschlagen: Speicherplatz überschritten."
     },
     "collections": {
         "add": "Neue Sammlung",
@@ -610,5 +616,9 @@
     },
     "accessibility": {
         "skipToMain": "Zum Hauptinhalt springen"
+    },
+    "network": {
+        "corsProxy": "CORS-Proxy-URL",
+        "corsProxyDesc": "Optionaler Proxy zur Umgehung von CORS-Beschränkungen für Link-Prüfung und Zusammenfassungen."
     }
 }

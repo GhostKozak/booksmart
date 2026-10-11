@@ -62,7 +62,7 @@ function App() {
   // ── UI State from Store ──
   const {
     searchQuery, searchMode, activeTag, activeFolder, smartFilter,
-    dateFilter, sortBy, activeCollection, theme, resolvedTheme, initTheme,
+    dateFilter, sortBy, activeCollection, resolvedTheme, initTheme,
     settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen,
     isConflictModalOpen, setIsConflictModalOpen,
     showBackupModal, setShowBackupModal,

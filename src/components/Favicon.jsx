@@ -1,5 +1,5 @@
 import { Globe } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cn } from '../lib/utils';
 
 export function Favicon({ url, className = "w-4 h-4" }) {
@@ -16,10 +16,12 @@ export function Favicon({ url, className = "w-4 h-4" }) {
 
     const domain = getDomain(url);
 
-    // Reset fallback index when url changes
-    useEffect(() => {
+    const [prevUrl, setPrevUrl] = useState(url);
+
+    if (url !== prevUrl) {
+        setPrevUrl(url);
         setFallbackIndex(0);
-    }, [url]);
+    }
 
     if (!domain || fallbackIndex >= 2) {
         return <Globe className={cn("text-muted-foreground", className)} />;

@@ -1,10 +1,12 @@
 const VAULT_KEY = 'bs_vault';
 const SALT_KEY = 'bs_vault_salt';
-const PBKDF2_ITER = 100_000;
+const PBKDF2_ITER = 600_000;
+const LEGACY_PBKDF2_ITER = 100_000;
 const ENC_ALGO = 'AES-GCM';
 const KEY_LENGTH = 256;
 
 let _sessionKey = null;
+let _sessionIterations = PBKDF2_ITER;
 
 if (typeof window !== 'undefined') {
     window.addEventListener('beforeunload', () => { _sessionKey = null; });
@@ -32,17 +34,39 @@ export async function unlockVault(password) {
     const salt = getOrCreateSalt();
     const enc = new TextEncoder();
 
+    // Existing vaults remember their own iteration count; vaults created
+    // before it was stored used LEGACY_PBKDF2_ITER.
+    const raw = localStorage.getItem(VAULT_KEY);
+    let blob = null;
+    try { blob = raw ? JSON.parse(raw) : null; } catch { blob = null; }
+    const iterations = blob ? (blob.iterations || LEGACY_PBKDF2_ITER) : PBKDF2_ITER;
+
     const baseKey = await crypto.subtle.importKey(
         'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
     );
 
     _sessionKey = await crypto.subtle.deriveKey(
-        { name: 'PBKDF2', salt, iterations: PBKDF2_ITER, hash: 'SHA-256' },
+        { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
         baseKey,
         { name: ENC_ALGO, length: KEY_LENGTH },
         false,
         ['encrypt', 'decrypt']
     );
+    _sessionIterations = iterations;
+
+    // Verify the password against the stored secret; don't stay "unlocked" with a wrong key.
+    if (blob) {
+        try {
+            await crypto.subtle.decrypt(
+                { name: ENC_ALGO, iv: b64ToBuf(blob.iv) },
+                _sessionKey,
+                b64ToBuf(blob.ciphertext)
+            );
+        } catch {
+            _sessionKey = null;
+            throw new Error('Wrong password');
+        }
+    }
 }
 
 export function lockVault() {
@@ -72,7 +96,8 @@ export async function saveSecret(secret) {
     const blob = {
         iv: bufToB64(iv),
         ciphertext: bufToB64(ciphertext),
-        version: 1
+        iterations: _sessionIterations,
+        version: 2
     };
 
     localStorage.setItem(VAULT_KEY, JSON.stringify(blob));

@@ -16,13 +16,7 @@ Please note that this project is released with a Contributor Code of Conduct. By
     ```
 3.  **Install dependencies**.
     ```bash
-    npm install
-    # or
-    yarn install
-    # or
     pnpm install
-    # or
-    bun install
     ```
 4.  **Create a branch** for your feature or bug fix.
     ```bash
@@ -31,7 +25,7 @@ Please note that this project is released with a Contributor Code of Conduct. By
 5.  **Make your changes**.
 6.  **Run the linter** to ensure code quality.
     ```bash
-    npm run lint
+    pnpm lint
     ```
 7.  **Commit your changes**.
     ```bash
@@ -45,9 +39,9 @@ Please note that this project is released with a Contributor Code of Conduct. By
 
 ## Development
 
--   Run `npm run dev` to start the development server.
--   Run `npm run build` to build the production application.
--   Run `npm run preview` to preview the production build locally.
+-   Run `pnpm dev` to start the development server.
+-   Run `pnpm build` to build the production application.
+-   Run `pnpm preview` to preview the production build locally.
 
 ## Project Structure
 

@@ -48,8 +48,6 @@ export async function migrateFromLocalStorage() {
             const existingIgnoredCount = await db.ignoredUrls.count();
             if (ignoredUrls.length > 0 && existingIgnoredCount === 0) await db.ignoredUrls.bulkPut(ignoredUrls);
         });
-
-        console.log("Migration to IndexedDB successful!");
         localStorage.setItem('booksmart_db_migrated', 'true');
     } catch (error) {
         console.error("Migration failed:", error);

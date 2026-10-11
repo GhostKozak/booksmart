@@ -45,7 +45,6 @@ export async function deduplicateTaxonomy() {
         });
 
         if (duplicateFolderIds.length > 0) {
-            console.log(`Removing ${duplicateFolderIds.length} duplicate folders`);
             await db.folders.bulkDelete(duplicateFolderIds);
         }
 
@@ -64,7 +63,6 @@ export async function deduplicateTaxonomy() {
         });
 
         if (duplicateTagIds.length > 0) {
-            console.log(`Removing ${duplicateTagIds.length} duplicate tags`);
             await db.tags.bulkDelete(duplicateTagIds);
         }
     });
