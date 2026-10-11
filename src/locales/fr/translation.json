@@ -241,6 +241,39 @@
             "resolve": "Résoudre",
             "notificationText": "conflit(s) de règles trouvé(s)"
         },
+        "aiCost": {
+            "title": "Estimation du Coût et des Tokens de l'IA",
+            "bookmarksCount": "signets",
+            "modelLabel": "Modèle d'IA",
+            "estimatedCost": "Coût Estimé",
+            "estimatedTokens": "Tokens Totaux",
+            "batchSingular": "lot",
+            "batchPlural": "lots",
+            "inputTokens": "Prompt (Entrée) :",
+            "outputTokens": "Réponse (Sortie) :",
+            "batches": "Requêtes d'API par lot :",
+            "requests": "appels",
+            "localFreeNotice": "0 frais d'API (Hors ligne)",
+            "freeTier": "Offre gratuite",
+            "localBanner": "Fonctionne localement sur votre appareil via Ollama. Aucune donnée n'est envoyée à des API externes.",
+            "disclaimer": "Estimation basée sur le coût standard des tokens. Les frais réels peuvent légèrement varier.",
+            "dontAskAgain": "Ne plus afficher cette estimation pour cette session",
+            "confirmAndRun": "Confirmer et Exécuter",
+            "ops": {
+                "magicSort": {
+                    "title": "Tri Magique par IA",
+                    "desc": "Catégorisez et étiquetez automatiquement les signets à l'aide de l'IA."
+                },
+                "fixTitles": {
+                    "title": "Corriger les Titres par IA",
+                    "desc": "Nettoyez les titres désordonnés ou manquants avec l'IA."
+                },
+                "smartDuplicates": {
+                    "title": "Doublons Intelligents par IA",
+                    "desc": "Trouvez les doublons sémantiques avec l'IA."
+                }
+            }
+        },
         "export": {
             "title": "Exporter des Signets",
             "titleSelected": "Exporter la sélection ({{count}})",

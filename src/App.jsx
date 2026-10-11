@@ -2,7 +2,7 @@
  * BookSmart - Copyright (C) 2026 BookSmart Contributors
  * Licensed under the GNU GPLv3 or later.
  */
-import { useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { useTaxonomy } from './hooks/use-taxonomy'
 import { useAppActions } from './hooks/use-app-actions'
@@ -46,13 +46,15 @@ const CommandPalette = lazy(() => import('./components/modals/CommandPalette').t
 const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirmationModal').then(m => ({ default: m.SortConfirmationModal })))
 const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
 const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').then(m => ({ default: m.EditBookmarkModal })))
+const AICostModal = lazy(() => import('./components/modals/AICostModal').then(m => ({ default: m.AICostModal })))
 
 // PWA Components
 import OfflineIndicator from './components/OfflineIndicator'
 import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
-import { Toaster } from 'sonner'
+import { Toaster, toast } from 'sonner'
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from './lib/key-vault'
 
 const EMPTY_ARRAY = []
 
@@ -182,6 +184,35 @@ function App() {
     cancelMagicSort();
     if (aiTools.cancelAITools) aiTools.cancelAITools();
   }, [cancelMagicSort, aiTools]);
+
+  const [pendingAIOperation, setPendingAIOperation] = useState(null)
+
+  const requestAIOperation = useCallback(async (operationType, executeFn) => {
+    const selectedBookmarks = rawBookmarks.filter(b => selectedIds.has(b.id))
+    if (selectedBookmarks.length === 0) {
+      toast.info(t('modals.sortConf.selectMore', 'Please select at least one bookmark first'))
+      return
+    }
+
+    const provider = getStoredProvider()
+    const apiKey = await getEffectiveApiKey(provider)
+    if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+      useAppStore.getState().openSettings('ai')
+      return
+    }
+
+    const skipConfirm = sessionStorage.getItem('bs_skip_ai_cost_confirm') === 'true'
+    if (skipConfirm) {
+      executeFn()
+      return
+    }
+
+    setPendingAIOperation({
+      operation: operationType,
+      bookmarks: selectedBookmarks,
+      execute: (model) => executeFn(model)
+    })
+  }, [rawBookmarks, selectedIds, t])
 
   useKeyboardShortcuts({
     selectedIds,
@@ -332,10 +363,10 @@ function App() {
           onExportSelected={() => actions.guardedExport(exporter.openExportSelectedModal)}
           onCleanUrls={operations.cleanSelectedUrls}
           onAutoSort={autoCategorize.handleAutoCategorize}
-          onMagicSort={handleMagicSort}
+          onMagicSort={() => requestAIOperation('magicSort', handleMagicSort)}
           isProcessingAI={isProcessingAI}
-          onFixTitles={aiTools.handleFixTitles}
-          onFindSmartDuplicates={aiTools.handleFindSmartDuplicates}
+          onFixTitles={() => requestAIOperation('fixTitles', aiTools.handleFixTitles)}
+          onFindSmartDuplicates={() => requestAIOperation('smartDuplicates', aiTools.handleFindSmartDuplicates)}
           isProcessingAITitles={aiTools.isProcessingAITitles}
           isProcessingAIDupes={aiTools.isProcessingAIDupes}
           onCancelAITasks={handleCancelAITasks}
@@ -473,9 +504,9 @@ function App() {
               isCheckingLinks={worker.isCheckingLinks}
               openExportModal={() => actions.guardedExport(exporter.openExportModal)}
               handleAutoCategorize={autoCategorize.handleAutoCategorize}
-              handleMagicSort={handleMagicSort}
-              handleFixTitles={aiTools.handleFixTitles}
-              handleFindSmartDuplicates={aiTools.handleFindSmartDuplicates}
+              handleMagicSort={() => requestAIOperation('magicSort', handleMagicSort)}
+              handleFixTitles={() => requestAIOperation('fixTitles', aiTools.handleFixTitles)}
+              handleFindSmartDuplicates={() => requestAIOperation('smartDuplicates', aiTools.handleFindSmartDuplicates)}
               setTheme={useAppStore.getState().setTheme}
               setIsShortcutsOpen={setIsShortcutsOpen}
               openSettings={openSettings}
@@ -530,6 +561,20 @@ function App() {
                 }
               }}
               onSkip={() => setIsConflictModalOpen(false)}
+            />
+          )}
+          {pendingAIOperation && (
+            <AICostModal
+              isOpen={!!pendingAIOperation}
+              onClose={() => setPendingAIOperation(null)}
+              operation={pendingAIOperation.operation}
+              bookmarks={pendingAIOperation.bookmarks}
+              currentModel={getStoredModel()}
+              onConfirm={(chosenModel) => {
+                const exec = pendingAIOperation.execute
+                setPendingAIOperation(null)
+                exec(chosenModel)
+              }}
             />
           )}
         </Suspense>

@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
-import { db } from '../db';
-import { fixTitles, findSmartDuplicates } from '../services/ai-service';
+import { useState, useRef, useCallback } from 'react';
+import { fixTitles, findSmartDuplicates, AI_MODELS } from '../services/ai-service';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { db } from '../db';
 import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault';
 
 export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview }) {
@@ -18,14 +18,20 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
         }
     }, []);
 
-    const handleFixTitles = useCallback(async () => {
-        const provider = getStoredProvider();
+    const handleFixTitles = useCallback(async (overrideModel) => {
+        const model = overrideModel || getStoredModel();
+        const modelInfo = Array.isArray(AI_MODELS) ? AI_MODELS.find(m => m.id === model) : null;
+        const provider = modelInfo ? modelInfo.provider : getStoredProvider();
         const apiKey = await getEffectiveApiKey(provider);
-        const model = getStoredModel();
 
         if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai');
             return;
+        }
+
+        if (overrideModel) {
+            sessionStorage.setItem('bs_model', overrideModel);
+            sessionStorage.setItem('bs_provider', provider);
         }
 
         abortControllerRef.current = new AbortController();
@@ -69,14 +75,20 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
         }
     }, [selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview, t]);
 
-    const handleFindSmartDuplicates = useCallback(async () => {
-        const provider = getStoredProvider();
+    const handleFindSmartDuplicates = useCallback(async (overrideModel) => {
+        const model = overrideModel || getStoredModel();
+        const modelInfo = Array.isArray(AI_MODELS) ? AI_MODELS.find(m => m.id === model) : null;
+        const provider = modelInfo ? modelInfo.provider : getStoredProvider();
         const apiKey = await getEffectiveApiKey(provider);
-        const model = getStoredModel();
 
         if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai');
             return;
+        }
+
+        if (overrideModel) {
+            sessionStorage.setItem('bs_model', overrideModel);
+            sessionStorage.setItem('bs_provider', provider);
         }
 
         abortControllerRef.current = new AbortController();

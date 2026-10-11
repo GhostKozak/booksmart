@@ -241,6 +241,39 @@
             "resolve": "Resolver",
             "notificationText": "conflicto(s) de reglas encontrados"
         },
+        "aiCost": {
+            "title": "Estimación de Costo y Tokens de IA",
+            "bookmarksCount": "marcadores",
+            "modelLabel": "Modelo de IA",
+            "estimatedCost": "Costo Estimado",
+            "estimatedTokens": "Tokens Totales",
+            "batchSingular": "lote",
+            "batchPlural": "lotes",
+            "inputTokens": "Prompt (Entrada):",
+            "outputTokens": "Respuesta (Salida):",
+            "batches": "Solicitudes de API por Lote:",
+            "requests": "llamadas",
+            "localFreeNotice": "0 costo de API (Sin conexión)",
+            "freeTier": "Nivel gratuito",
+            "localBanner": "Se ejecuta localmente en tu dispositivo mediante Ollama. No se envían datos a APIs externas.",
+            "disclaimer": "Estimación basada en tarifas de tokens estándar. Los cargos reales pueden variar ligeramente.",
+            "dontAskAgain": "No volver a mostrar esta estimación en esta sesión",
+            "confirmAndRun": "Confirmar y Ejecutar",
+            "ops": {
+                "magicSort": {
+                    "title": "Orden Mágico con IA",
+                    "desc": "Categoriza y etiqueta marcadores automáticamente usando IA."
+                },
+                "fixTitles": {
+                    "title": "Corregir Títulos con IA",
+                    "desc": "Limpia títulos desordenados o faltantes con IA."
+                },
+                "smartDuplicates": {
+                    "title": "Duplicados Inteligentes con IA",
+                    "desc": "Encuentra duplicados semánticos con IA."
+                }
+            }
+        },
         "export": {
             "title": "Exportar Marcadores",
             "titleSelected": "Exportar Seleccionados ({{count}})",

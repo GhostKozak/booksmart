@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { db } from '../db'
-import { categorizeBookmarks } from '../services/ai-service'
+import { categorizeBookmarks, AI_MODELS } from '../services/ai-service'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault'
@@ -17,14 +17,20 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
         }
     }, []);
 
-    const handleMagicSort = useCallback(async () => {
-        const provider = getStoredProvider()
+    const handleMagicSort = useCallback(async (overrideModel) => {
+        const model = overrideModel || getStoredModel()
+        const modelInfo = Array.isArray(AI_MODELS) ? AI_MODELS.find(m => m.id === model) : null
+        const provider = modelInfo ? modelInfo.provider : getStoredProvider()
         const apiKey = await getEffectiveApiKey(provider)
-        const model = getStoredModel()
 
         if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai')
             return
+        }
+
+        if (overrideModel) {
+            sessionStorage.setItem('bs_model', overrideModel)
+            sessionStorage.setItem('bs_provider', provider)
         }
 
         abortControllerRef.current = new AbortController();

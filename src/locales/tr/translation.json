@@ -241,6 +241,39 @@
             "resolve": "Çöz",
             "notificationText": "kural çakışması bulundu"
         },
+        "aiCost": {
+            "title": "AI Maliyet ve Token Tahmini",
+            "bookmarksCount": "yer imi",
+            "modelLabel": "AI Modeli",
+            "estimatedCost": "Tahmini Ücret",
+            "estimatedTokens": "Toplam Token",
+            "batchSingular": "istek",
+            "batchPlural": "istek",
+            "inputTokens": "İstem (Girdi):",
+            "outputTokens": "Yanıt (Çıktı):",
+            "batches": "Toplu API İstekleri:",
+            "requests": "çağrı",
+            "localFreeNotice": "0 API ücreti (Çevrimdışı)",
+            "freeTier": "Ücretsiz tarife",
+            "localBanner": "Cihazınızda Ollama üzerinden yerel çalışır. Harici API'lara veri gönderilmez ve ücret oluşmaz.",
+            "disclaimer": "Tahmin standart token fiyatlandırmasına dayanır. Gerçek API ücreti sağlayıcıya göre küçük farklılıklar gösterebilir.",
+            "dontAskAgain": "Bu oturumda bir daha bu tahmini gösterme",
+            "confirmAndRun": "Onayla ve Çalıştır",
+            "ops": {
+                "magicSort": {
+                    "title": "AI Sihirli Sıralama",
+                    "desc": "Yer imlerini yapay zekâ ile otomatik sınıflandırın ve etiketleyin."
+                },
+                "fixTitles": {
+                    "title": "AI Başlık Düzeltme",
+                    "desc": "Bozuk, eksik veya ham URL başlıklarını yapay zekâ ile temizleyin."
+                },
+                "smartDuplicates": {
+                    "title": "AI Akıllı Yinelenen Bulma",
+                    "desc": "Anlamsal olarak yinelenen yer imlerini yapay zekâ ile tespit edin."
+                }
+            }
+        },
         "export": {
             "title": "Yer İmlerini Dışa Aktar",
             "titleSelected": "Seçilenleri Dışa Aktar ({{count}})",

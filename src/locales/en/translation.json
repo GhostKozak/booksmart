@@ -241,6 +241,39 @@
             "resolve": "Resolve",
             "notificationText": "rule conflict(s) found"
         },
+        "aiCost": {
+            "title": "AI Cost & Token Estimation",
+            "bookmarksCount": "bookmarks",
+            "modelLabel": "AI Model",
+            "estimatedCost": "Estimated Cost",
+            "estimatedTokens": "Total Tokens",
+            "batchSingular": "batch",
+            "batchPlural": "batches",
+            "inputTokens": "Prompt (Input):",
+            "outputTokens": "Response (Output):",
+            "batches": "Batch API Requests:",
+            "requests": "calls",
+            "localFreeNotice": "0 API fee (Offline)",
+            "freeTier": "Free tier",
+            "localBanner": "Runs locally on your device via Ollama. No data is sent to external APIs.",
+            "disclaimer": "Estimation based on standard token pricing. Actual API charges may vary slightly.",
+            "dontAskAgain": "Don't show this estimation again in this session",
+            "confirmAndRun": "Confirm & Run",
+            "ops": {
+                "magicSort": {
+                    "title": "AI Magic Sort",
+                    "desc": "Automatically categorize and tag bookmarks using AI."
+                },
+                "fixTitles": {
+                    "title": "AI Fix Titles",
+                    "desc": "Clean up messy, missing, or raw URL titles using AI."
+                },
+                "smartDuplicates": {
+                    "title": "AI Smart Duplicates",
+                    "desc": "Find semantic and near-duplicate bookmarks using AI."
+                }
+            }
+        },
         "export": {
             "title": "Export Bookmarks",
             "titleSelected": "Export Selected ({{count}})",

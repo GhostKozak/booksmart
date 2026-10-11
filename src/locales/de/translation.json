@@ -241,6 +241,39 @@
             "resolve": "Lösen",
             "notificationText": "Regelkonflikt(e) gefunden"
         },
+        "aiCost": {
+            "title": "KI-Kosten- und Token-Schätzung",
+            "bookmarksCount": "Lesezeichen",
+            "modelLabel": "KI-Modell",
+            "estimatedCost": "Geschätzte Kosten",
+            "estimatedTokens": "Token Gesamt",
+            "batchSingular": "Stapel",
+            "batchPlural": "Stapel",
+            "inputTokens": "Prompt (Eingabe):",
+            "outputTokens": "Antwort (Ausgabe):",
+            "batches": "API-Anfragen:",
+            "requests": "Aufrufe",
+            "localFreeNotice": "0 API-Gebühr (Offline)",
+            "freeTier": "Kostenlose Stufe",
+            "localBanner": "Läuft lokal auf Ihrem Gerät über Ollama. Keine externen API-Kosten.",
+            "disclaimer": "Schätzung basiert auf Standard-Token-Preisen. Reale Kosten können leicht abweichen.",
+            "dontAskAgain": "Diese Schätzung in dieser Sitzung nicht mehr anzeigen",
+            "confirmAndRun": "Bestätigen & Ausführen",
+            "ops": {
+                "magicSort": {
+                    "title": "KI-Magische Sortierung",
+                    "desc": "Lesezeichen automatisch mit KI kategorisieren und taggen."
+                },
+                "fixTitles": {
+                    "title": "KI-Titelkorrektur",
+                    "desc": "Unordentliche oder fehlende Titel mit KI bereinigen."
+                },
+                "smartDuplicates": {
+                    "title": "KI-Smarte Duplikate",
+                    "desc": "Semantische Duplikate mit KI erkennen."
+                }
+            }
+        },
         "export": {
             "title": "Lesezeichen Exportieren",
             "titleSelected": "Auswahl Exportieren ({{count}})",
