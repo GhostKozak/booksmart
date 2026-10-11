@@ -194,3 +194,54 @@ export const exportToMarkdown = (bookmarks) => {
 
     return md;
 };
+
+/**
+ * Calculates export content, MIME type, file extension, and estimated file size.
+ * 
+ * @param {Array} bookmarks - Array of bookmarks to export.
+ * @param {string} format - 'html' | 'json' | 'csv' | 'md'
+ * @returns {Object} - { content, type, extension, bytes, estimatedSize }
+ */
+export const getExportPayload = (bookmarks = [], format = 'html') => {
+    let content = '';
+    let type = '';
+    let extension = '';
+
+    switch (format) {
+        case 'json':
+            content = exportToJson(bookmarks);
+            type = 'application/json';
+            extension = 'json';
+            break;
+        case 'csv':
+            content = exportToCsv(bookmarks);
+            type = 'text/csv';
+            extension = 'csv';
+            break;
+        case 'md':
+            content = exportToMarkdown(bookmarks);
+            type = 'text/markdown';
+            extension = 'md';
+            break;
+        case 'html':
+        default:
+            content = exportBookmarks(bookmarks);
+            type = 'text/html';
+            extension = 'html';
+            break;
+    }
+
+    const bytes = typeof Blob !== 'undefined'
+        ? new Blob([content]).size
+        : (typeof TextEncoder !== 'undefined' ? new TextEncoder().encode(content).length : content.length);
+
+    let estimatedSize = `${bytes} B`;
+    if (bytes >= 1024 * 1024) {
+        estimatedSize = `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    } else if (bytes >= 1024) {
+        estimatedSize = `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return { content, type, extension, bytes, estimatedSize };
+};
+

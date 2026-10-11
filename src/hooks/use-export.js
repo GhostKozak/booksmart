@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { exportBookmarks, exportToJson, exportToCsv, exportToMarkdown } from '../lib/exporter'
+import { useState, useMemo } from 'react'
+import { getExportPayload } from '../lib/exporter'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -8,9 +8,11 @@ export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false)
     const [exportFormat, setExportFormat] = useState('html')
     const [exportOnlySelected, setExportOnlySelected] = useState(false)
+    const [selectedFolder, setSelectedFolder] = useState('all')
 
-    const openExportModal = () => {
+    const openExportModal = (initialFolder = 'all') => {
         setExportOnlySelected(false)
+        setSelectedFolder(initialFolder)
         setIsExportModalOpen(true)
     }
 
@@ -19,44 +21,39 @@ export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
         setIsExportModalOpen(true)
     }
 
+    const dataToExport = useMemo(() => {
+        let list = bookmarks || []
+        if (exportOnlySelected) {
+            list = list.filter(b => selectedIds.has(b.id))
+        } else if (selectedFolder && selectedFolder !== 'all') {
+            list = list.filter(b => {
+                const folder = b.newFolder || 'Root'
+                return folder === selectedFolder || folder.startsWith(selectedFolder + ' > ')
+            })
+        }
+        return list
+    }, [bookmarks, exportOnlySelected, selectedIds, selectedFolder])
+
+    const exportPayload = useMemo(() => {
+        return getExportPayload(dataToExport, exportFormat)
+    }, [dataToExport, exportFormat])
+
     const performExport = () => {
-        const dataToExport = exportOnlySelected
-            ? bookmarks.filter(b => selectedIds.has(b.id))
-            : bookmarks
+        const { content, type, extension } = exportPayload
 
-        let content = ''
-        let type = ''
-        let extension = ''
-
-        switch (exportFormat) {
-            case 'json':
-                content = exportToJson(dataToExport)
-                type = 'application/json'
-                extension = 'json'
-                break
-            case 'csv':
-                content = exportToCsv(dataToExport)
-                type = 'text/csv'
-                extension = 'csv'
-                break
-            case 'md':
-                content = exportToMarkdown(dataToExport)
-                type = 'text/markdown'
-                extension = 'md'
-                break
-            case 'html':
-            default:
-                content = exportBookmarks(dataToExport)
-                type = 'text/html'
-                extension = 'html'
-                break
+        let filename = 'bookmarks_organized'
+        if (exportOnlySelected) {
+            filename = 'bookmarks_selected'
+        } else if (selectedFolder && selectedFolder !== 'all') {
+            const sanitized = selectedFolder.replace(/[^a-zA-Z0-9_-]/g, '_')
+            filename = `bookmarks_${sanitized}`
         }
 
         const blob = new Blob([content], { type })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `bookmarks_${exportOnlySelected ? 'selected' : 'organized'}.${extension}`
+        a.download = `${filename}.${extension}`
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
@@ -72,6 +69,10 @@ export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
         exportFormat,
         setExportFormat,
         exportOnlySelected,
+        selectedFolder,
+        setSelectedFolder,
+        dataToExport,
+        exportPayload,
         openExportModal,
         openExportSelectedModal,
         performExport

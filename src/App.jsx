@@ -492,6 +492,11 @@ function App() {
               setExportFormat={exporter.setExportFormat}
               exportOnlySelected={exporter.exportOnlySelected}
               selectedCount={selectedIds.size}
+              selectedFolder={exporter.selectedFolder}
+              setSelectedFolder={exporter.setSelectedFolder}
+              availableFolders={taxonomy.availableFolders}
+              dataToExport={exporter.dataToExport}
+              exportPayload={exporter.exportPayload}
               onExport={exporter.performExport}
             />
           )}

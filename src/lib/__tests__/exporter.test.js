@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { exportBookmarks, exportToJson, exportToCsv, exportToMarkdown } from '../exporter';
+import { exportBookmarks, exportToJson, exportToCsv, exportToMarkdown, getExportPayload } from '../exporter';
 
 describe('exporter', () => {
     const testBookmarks = [
@@ -82,4 +82,43 @@ describe('exporter', () => {
             expect(md).toContain('- [Root Link](https://root.com) `#t2`');
         });
     });
+
+    describe('getExportPayload', () => {
+        it('should calculate export payload and estimated size for HTML', () => {
+            const payload = getExportPayload(testBookmarks, 'html');
+            expect(payload.type).toBe('text/html');
+            expect(payload.extension).toBe('html');
+            expect(payload.content).toContain('<!DOCTYPE NETSCAPE-Bookmark-file-1>');
+            expect(payload.bytes).toBeGreaterThan(0);
+            expect(payload.estimatedSize).toMatch(/B|KB/);
+        });
+
+        it('should calculate export payload for JSON', () => {
+            const payload = getExportPayload(testBookmarks, 'json');
+            expect(payload.type).toBe('application/json');
+            expect(payload.extension).toBe('json');
+            expect(JSON.parse(payload.content)).toHaveLength(3);
+        });
+
+        it('should calculate export payload for CSV', () => {
+            const payload = getExportPayload(testBookmarks, 'csv');
+            expect(payload.type).toBe('text/csv');
+            expect(payload.extension).toBe('csv');
+            expect(payload.content).toContain('Title,URL,Folder');
+        });
+
+        it('should calculate export payload for Markdown', () => {
+            const payload = getExportPayload(testBookmarks, 'md');
+            expect(payload.type).toBe('text/markdown');
+            expect(payload.extension).toBe('md');
+            expect(payload.content).toContain('# Bookmarks Export');
+        });
+
+        it('should handle empty bookmark list', () => {
+            const payload = getExportPayload([], 'html');
+            expect(payload.bytes).toBeGreaterThan(0); // html skeleton
+            expect(payload.content).toContain('<H1>Bookmarks</H1>');
+        });
+    });
 });
+

@@ -247,6 +247,14 @@
             "selectedCount_one": "<0>{{count}}</0> bookmark selected for export.",
             "selectedCount_other": "<0>{{count}}</0> bookmarks selected for export.",
             "formatSelect": "Select export format:",
+            "folderSelect": "Folder Scope",
+            "allFolders": "All Folders",
+            "preview": {
+                "title": "Export Preview",
+                "countSuffix": "items",
+                "noItems": "No bookmarks to export in this scope.",
+                "viewMore": "+{{count}} more bookmarks"
+            },
             "formats": {
                 "html": {
                     "label": "HTML Bookmarks",

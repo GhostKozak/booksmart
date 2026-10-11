@@ -247,6 +247,14 @@
             "selectedCount_one": "<0>{{count}}</0> Lesezeichen zum Exportieren ausgewählt.",
             "selectedCount_other": "<0>{{count}}</0> Lesezeichen zum Exportieren ausgewählt.",
             "formatSelect": "Exportformat wählen:",
+            "folderSelect": "Ordnerbereich",
+            "allFolders": "Alle Ordner",
+            "preview": {
+                "title": "Export-Vorschau",
+                "countSuffix": "Elemente",
+                "noItems": "Keine Lesezeichen in diesem Bereich zum Exportieren.",
+                "viewMore": "+{{count}} weitere Lesezeichen"
+            },
             "formats": {
                 "html": {
                     "label": "HTML-Lesezeichen",

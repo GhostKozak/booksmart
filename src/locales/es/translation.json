@@ -247,6 +247,14 @@
             "selectedCount_one": "<0>{{count}}</0> marcador seleccionado para exportar.",
             "selectedCount_other": "<0>{{count}}</0> marcadores seleccionados para exportar.",
             "formatSelect": "Seleccione el formato de exportación:",
+            "folderSelect": "Ámbito de Carpeta",
+            "allFolders": "Todas las Carpetas",
+            "preview": {
+                "title": "Vista Previa de Exportación",
+                "countSuffix": "elementos",
+                "noItems": "No hay marcadores para exportar en este ámbito.",
+                "viewMore": "+{{count}} marcadores más"
+            },
             "formats": {
                 "html": {
                     "label": "Marcadores HTML",

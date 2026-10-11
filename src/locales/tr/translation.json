@@ -247,6 +247,14 @@
             "selectedCount_one": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
             "selectedCount_other": "<0>{{count}}</0> yer imi dışa aktarılmak üzere seçildi.",
             "formatSelect": "Dışa aktarma formatını seçin:",
+            "folderSelect": "Klasör Kapsamı",
+            "allFolders": "Tüm Klasörler",
+            "preview": {
+                "title": "Dışa Aktarma Önizlemesi",
+                "countSuffix": "öğe",
+                "noItems": "Bu kapsamda dışa aktarılacak yer imi bulunmuyor.",
+                "viewMore": "+{{count}} yer imi daha"
+            },
             "formats": {
                 "html": {
                     "label": "HTML Yer İmleri",

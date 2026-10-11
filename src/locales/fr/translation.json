@@ -247,6 +247,14 @@
             "selectedCount_one": "<0>{{count}}</0> signet sélectionné pour l'exportation.",
             "selectedCount_other": "<0>{{count}}</0> signets sélectionnés pour l'exportation.",
             "formatSelect": "Sélectionnez le format d'exportation :",
+            "folderSelect": "Portée du dossier",
+            "allFolders": "Tous les dossiers",
+            "preview": {
+                "title": "Aperçu de l'exportation",
+                "countSuffix": "éléments",
+                "noItems": "Aucun signet à exporter dans cette portée.",
+                "viewMore": "+{{count}} signets supplémentaires"
+            },
             "formats": {
                 "html": {
                     "label": "Signets HTML",
