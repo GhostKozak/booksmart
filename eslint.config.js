@@ -50,4 +50,13 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+  {
+    files: ['extension/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.webextensions,
+      },
+    },
+  },
 ])

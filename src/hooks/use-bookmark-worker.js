@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import ProcessingWorker from '../workers/processing.worker.js?worker'
 import { getStoredCorsProxy } from '../lib/key-vault'
+import {
+    initExtensionBridge,
+    subscribeExtensionStatus,
+    pingExtension,
+    checkLinksWithExtension
+} from '../lib/extension-client'
 
 export function useBookmarkWorker({
     rawBookmarks,
@@ -23,9 +29,18 @@ export function useBookmarkWorker({
     const [linkHealth, setLinkHealth] = useState({})
     const [isCheckingLinks, setIsCheckingLinks] = useState(false)
     const [ruleConflicts, setRuleConflicts] = useState([])
+    const [isExtensionConnected, setIsExtensionConnected] = useState(false)
     // In-memory map: { bookmarkId: chosenFolder } — NOT persisted to DB
     const [resolvedConflicts, setResolvedConflicts] = useState({})
     const workerRef = useRef(null)
+
+    useEffect(() => {
+        initExtensionBridge()
+        const unsubscribe = subscribeExtensionStatus((state) => {
+            setIsExtensionConnected(Boolean(state.available))
+        })
+        return () => unsubscribe()
+    }, [])
 
     // Dead link count
     const deadLinkCount = useMemo(() => {
@@ -101,15 +116,54 @@ export function useBookmarkWorker({
     }, [rawBookmarks, rules, resolvedConflicts, searchQuery, searchMode, activeTag, activeFolder, activeCollection, smartFilter, dateFilter, sortBy, fuseOptions])
 
     const checkAllLinks = useCallback(async () => {
+        const source = bookmarks.length > 0 ? bookmarks : (rawBookmarks || [])
+        const urls = [...new Set(source.map(b => b.url))]
+        if (urls.length === 0) return
+
+        setIsCheckingLinks(true)
+
+        // Try companion extension first: 100% serverless, CORS-free accurate HTTP status check
+        const extStatus = await pingExtension(400)
+        if (extStatus.available) {
+            try {
+                await checkLinksWithExtension(urls, {
+                    onProgress: (batchResults) => {
+                        setLinkHealth(prev => {
+                            const next = { ...prev }
+                            batchResults.forEach(item => {
+                                next[item.url] = item.status
+                            })
+                            return next
+                        })
+                    },
+                    onComplete: () => {
+                        setIsCheckingLinks(false)
+                    },
+                    onError: (err) => {
+                        console.warn('Extension check failed, falling back to web worker:', err)
+                        const corsProxy = getStoredCorsProxy()
+                        if (workerRef.current) {
+                            workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls, corsProxy } })
+                        } else {
+                            setIsCheckingLinks(false)
+                        }
+                    }
+                })
+                return
+            } catch (e) {
+                console.warn('Extension link check error, falling back to worker:', e)
+            }
+        }
+
+        // Fallback to web worker if extension is not installed or failed
         if (!workerRef.current) {
             console.warn("Worker not initialized")
+            setIsCheckingLinks(false)
             return
         }
-        setIsCheckingLinks(true)
-        const urls = [...new Set(bookmarks.map(b => b.url))]
         const corsProxy = getStoredCorsProxy()
         workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls, corsProxy } })
-    }, [bookmarks])
+    }, [bookmarks, rawBookmarks])
 
     const resolveConflict = useCallback((bookmarkId, chosenFolder) => {
         // Store in memory only — NOT in DB
@@ -135,6 +189,7 @@ export function useBookmarkWorker({
         isCheckingLinks,
         deadLinkCount,
         checkAllLinks,
+        isExtensionConnected,
         ruleConflicts,
         resolveConflict,
         skipConflict

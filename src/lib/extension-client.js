@@ -1,0 +1,251 @@
+/**
+ * BookSmart Companion Extension Client Bridge
+ * Communicates with the companion browser extension for serverless, CORS-free health checks.
+ */
+
+let extensionState = {
+    available: false,
+    version: null,
+    lastChecked: null
+};
+
+const listeners = new Set();
+
+function notifyListeners() {
+    listeners.forEach(cb => {
+        try {
+            cb({ ...extensionState });
+        } catch (e) {
+            console.error('Error notifying extension listener:', e);
+        }
+    });
+}
+
+/**
+ * Resets internal state for unit testing.
+ */
+export function _resetExtensionStateForTesting() {
+    extensionState = {
+        available: false,
+        version: null,
+        lastChecked: null
+    };
+    bridgeInitialized = false;
+    listeners.clear();
+}
+
+/**
+ * Initializes the window message listener to detect the extension.
+ */
+let bridgeInitialized = false;
+export function initExtensionBridge() {
+    if (bridgeInitialized || typeof window === 'undefined') return;
+    bridgeInitialized = true;
+
+    window.addEventListener('message', (event) => {
+        if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
+            return;
+        }
+        if (event.source && event.source !== window) {
+            return;
+        }
+
+        const { type, version } = event.data;
+
+        if (type === 'BOOKSMART_EXTENSION_READY' || type === 'BOOKSMART_PONG') {
+            extensionState = {
+                available: true,
+                version: version || '1.0.0',
+                lastChecked: Date.now()
+            };
+            notifyListeners();
+        }
+    });
+
+    // Send an initial ping in case the content script is already injected
+    pingExtension(500).catch(() => {});
+}
+
+/**
+ * Subscribes to extension connection state changes.
+ * @param {Function} callback - ({ available, version }) => void
+ * @returns {Function} Unsubscribe function
+ */
+export function subscribeExtensionStatus(callback) {
+    listeners.add(callback);
+    // Notify immediately with current state
+    callback({ ...extensionState });
+    return () => {
+        listeners.delete(callback);
+    };
+}
+
+/**
+ * Synchronous check of the last known extension availability.
+ */
+export function isExtensionConnected() {
+    return extensionState.available;
+}
+
+/**
+ * Get current extension state.
+ */
+export function getExtensionState() {
+    return { ...extensionState };
+}
+
+/**
+ * Pings the extension via window.postMessage with a timeout.
+ * @param {number} timeoutMs
+ * @returns {Promise<{ available: boolean, version: string|null }>}
+ */
+export function pingExtension(timeoutMs = 1200) {
+    if (typeof window === 'undefined') {
+        return Promise.resolve({ available: false, version: null });
+    }
+
+    return new Promise((resolve) => {
+        const requestId = 'ping_' + Math.random().toString(36).slice(2, 9);
+        let resolved = false;
+
+        const onMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
+                return;
+            }
+            if (event.source && event.source !== window) {
+                return;
+            }
+
+            if (event.data.type === 'BOOKSMART_PONG' && (!event.data.requestId || event.data.requestId === requestId)) {
+                resolved = true;
+                window.removeEventListener('message', onMessage);
+                extensionState = {
+                    available: true,
+                    version: event.data.version || '1.0.0',
+                    lastChecked: Date.now()
+                };
+                notifyListeners();
+                resolve({ available: true, version: extensionState.version });
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_PING',
+            requestId
+        }, '*');
+
+        setTimeout(() => {
+            if (!resolved) {
+                window.removeEventListener('message', onMessage);
+                // If we haven't confirmed, don't immediately overwrite if already confirmed recently
+                if (Date.now() - (extensionState.lastChecked || 0) > 10000) {
+                    extensionState.available = false;
+                    notifyListeners();
+                }
+                resolve({ available: extensionState.available, version: extensionState.version });
+            }
+        }, timeoutMs);
+    });
+}
+
+/**
+ * Checks a batch of URLs using the companion extension.
+ * Completely serverless and bypasses CORS restrictions with accurate HTTP status codes.
+ *
+ * @param {string[]} urls
+ * @param {Object} options
+ * @param {Function} [options.onProgress] - (results, processed, total) => void
+ * @param {Function} [options.onComplete] - () => void
+ * @param {Function} [options.onError] - (error) => void
+ * @param {AbortSignal} [options.signal]
+ * @param {number} [options.batchSize]
+ * @returns {Promise<Array<{ url: string, status: 'alive'|'dead', statusCode?: number }>>}
+ */
+export function checkLinksWithExtension(urls, {
+    onProgress,
+    onComplete,
+    onError,
+    signal,
+    batchSize = 6
+} = {}) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    if (!urls || urls.length === 0) {
+        onComplete?.();
+        return Promise.resolve([]);
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'check_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        const accumulatedResults = [];
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+            if (signal) {
+                signal.removeEventListener('abort', handleAbort);
+            }
+        };
+
+        const handleAbort = () => {
+            window.postMessage({
+                source: 'BOOKSMART_PAGE',
+                type: 'BOOKSMART_CANCEL_CHECK',
+                requestId
+            }, '*');
+            cleanup();
+            reject(new Error('Link check cancelled by user'));
+        };
+
+        if (signal) {
+            if (signal.aborted) {
+                return reject(new Error('Link check aborted'));
+            }
+            signal.addEventListener('abort', handleAbort);
+        }
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
+                return;
+            }
+            if (event.source && event.source !== window) {
+                return;
+            }
+
+            if (event.data.requestId !== requestId) {
+                return;
+            }
+
+            if (event.data.type === 'BOOKSMART_LINK_STATUS_UPDATE') {
+                const batch = event.data.results || [];
+                accumulatedResults.push(...batch);
+                onProgress?.(batch, event.data.processed, event.data.total);
+            } else if (event.data.type === 'BOOKSMART_LINKS_CHECKED_COMPLETE') {
+                cleanup();
+                onComplete?.();
+                resolve(accumulatedResults);
+            } else if (event.data.type === 'BOOKSMART_LINKS_CHECKED_ERROR') {
+                cleanup();
+                const err = new Error(event.data.error || 'Extension link check failed');
+                onError?.(err);
+                reject(err);
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_CHECK_LINKS',
+            requestId,
+            payload: {
+                urls,
+                batchSize
+            }
+        }, '*');
+    });
+}

@@ -138,6 +138,15 @@
             "reqOllama": "Leave empty to use http://localhost:11434"
         },
         "network": {
+            "extensionTitle": "Serverless Health Check (Companion Extension)",
+            "extensionConnected": "Companion Extension Connected (CORS-Free)",
+            "extensionConnectedDesc": "Link health checks run directly through the extension background script with accurate HTTP status codes (200, 404, 500, etc.) without any server.",
+            "extensionNotDetected": "Companion Extension Not Detected",
+            "extensionNotDetectedDesc": "Without the extension, browser CORS restrictions make dead link checks unreliable. Load the extension or enter a CORS proxy below.",
+            "extensionGuideBtn": "Guide",
+            "extensionRetryBtn": "Check Connection",
+            "extensionDetectedToast": "Companion extension connected successfully!",
+            "extensionNotFoundToast": "Extension not detected yet.",
             "corsProxy": "CORS Proxy URL",
             "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
         },
@@ -355,6 +364,19 @@
             "desc": "Configure your AI model to enable \"Magic Sort\". API keys are stored locally.",
             "cancel": "Cancel",
             "saveContinue": "Save & Continue"
+        },
+        "extensionGuide": {
+            "title": "BookSmart Companion Extension",
+            "statusActive": "Active in background (CORS-free)",
+            "statusInactive": "Load unpacked extension to activate",
+            "whyTitle": "Why use the companion extension?",
+            "whyDesc": "Web browsers block direct access to external HTTP status codes due to CORS policies (causing 404 dead links to falsely appear alive). The companion extension runs a serverless background script with full host permissions, enabling 100% accurate, private link health checks.",
+            "stepsTitle": "Installation Steps (Chrome / Edge / Brave / Arc)",
+            "step1": "Open Extensions page",
+            "step2": "Enable Developer Mode",
+            "step2Desc": "Toggle the switch in the top-right corner.",
+            "step3": "Click \"Load unpacked\"",
+            "step4": "Select the extension folder in the BookSmart project (/extension)"
         }
     },
     "backup": {

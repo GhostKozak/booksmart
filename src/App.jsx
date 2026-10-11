@@ -297,6 +297,7 @@ function App() {
           mergeDuplicates={operations.mergeDuplicates}
           cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
           checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
+          isExtensionConnected={worker.isExtensionConnected}
           openExportModal={() => actions.guardedExport(exporter.openExportModal)}
           hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
           bookmarkCount={worker.bookmarks.length}

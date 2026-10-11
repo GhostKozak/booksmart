@@ -138,6 +138,15 @@
             "reqAnthropic": "Anthropic API Anahtarı Gerekir"
         },
         "network": {
+            "extensionTitle": "Sunucusuz Sağlık Kontrolü (Companion Eklentisi)",
+            "extensionConnected": "Companion Eklentisi Bağlı (CORS'suz)",
+            "extensionConnectedDesc": "Bağlantı kontrolleri eklenti arka plan betiği üzerinden doğrudan, sunucusuz ve %100 doğru HTTP durum kodlarıyla (200, 404, 500 vb.) çalışıyor.",
+            "extensionNotDetected": "Companion Eklentisi Algılanmadı",
+            "extensionNotDetectedDesc": "Tarayıcı CORS güvenlik kuralları nedeniyle eklentisiz modda ölü bağlantılar güvenilir tespit edilemeyebilir. Doğru ve sunucusuz kontrol için eklentiyi yükleyebilir veya aşağıdan CORS Proxy girebilirsiniz.",
+            "extensionGuideBtn": "Kılavuz",
+            "extensionRetryBtn": "Bağlantıyı Yenile",
+            "extensionDetectedToast": "Companion eklentisi başarıyla bağlandı!",
+            "extensionNotFoundToast": "Eklenti henüz algılanamadı.",
             "corsProxy": "CORS Proxy Adresi",
             "corsProxyDesc": "Bağlantı kontrolü ve sayfa özetleme için CORS kısıtlamalarını aşmakta kullanılacak isteğe bağlı proxy."
         },
@@ -355,6 +364,19 @@
             "desc": "\"Sihirli Sıralama\"yı etkinleştirmek için yapay zeka modelinizi yapılandırın. API anahtarları yerel olarak saklanır.",
             "cancel": "İptal",
             "saveContinue": "Kaydet ve Devam Et"
+        },
+        "extensionGuide": {
+            "title": "BookSmart Companion Eklentisi",
+            "statusActive": "Arka planda aktif (CORS'suz)",
+            "statusInactive": "Aktifleştirmek için eklentiyi yükleyin",
+            "whyTitle": "Neden companion eklentisi kullanılır?",
+            "whyDesc": "Web tarayıcıları CORS güvenlik politikası sebebiyle harici HTTP durum kodlarına (404, 500 vb.) web sayfası içinden erişimi engeller (bu nedenle ölü linkler yanlışlıkla çalışıyor görünebilir). Companion eklentisi, tam yetkili sunucusuz arka plan betiği çalıştırarak %100 doğru ve gizli bağlantı kontrolü sağlar.",
+            "stepsTitle": "Kurulum Adımları (Chrome / Edge / Brave / Arc)",
+            "step1": "Eklentiler sayfasını açın",
+            "step2": "Geliştirici Modunu Açın",
+            "step2Desc": "Sağ üst köşedeki anahtarı aktif hale getirin.",
+            "step3": "\"Paketlenmemiş öğe yükle\" butonuna tıklayın",
+            "step4": "BookSmart proje dizinindeki eklenti klasörünü seçin (/extension)"
         }
     },
     "backup": {

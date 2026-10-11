@@ -17,6 +17,7 @@ export function Header({
     duplicateCount, removeDuplicates, mergeDuplicates,
     cleanableCount, cleanAllUrls,
     checkAllLinks, isCheckingLinks,
+    isExtensionConnected = false,
     openExportModal,
     // File
     hasFileLoaded, closeFile, bookmarkCount, clearAll,
@@ -330,6 +331,11 @@ export function Header({
                             <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-2.5 font-medium justify-center border border-border/50">
                                 {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2.5 animate-spin" /> : <Activity className="h-4 w-4 mr-2.5 text-rose-500" />}
                                 <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
+                                {isExtensionConnected && (
+                                    <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-normal">
+                                        CORS-Free
+                                    </span>
+                                )}
                             </DropdownItem>
                         </div>
 

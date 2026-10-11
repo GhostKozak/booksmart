@@ -138,6 +138,15 @@
             "reqAnthropic": "Nécessite une clé API Anthropic"
         },
         "network": {
+            "extensionTitle": "Vérification Sans Serveur (Extension Compagnon)",
+            "extensionConnected": "Extension Connectée (Sans CORS)",
+            "extensionConnectedDesc": "Les vérifications de liens s'exécutent directement via le script d'arrière-plan de l'extension avec des codes d'état HTTP réels (200, 404, 500, etc.) sans aucun serveur.",
+            "extensionNotDetected": "Extension Non Détectée",
+            "extensionNotDetectedDesc": "Sans l'extension, les restrictions CORS du navigateur rendent les vérifications de liens morts peu fiables. Chargez l'extension ou saisissez un proxy CORS ci-dessous.",
+            "extensionGuideBtn": "Guide",
+            "extensionRetryBtn": "Vérifier la Connexion",
+            "extensionDetectedToast": "Extension compagnon connectée avec succès !",
+            "extensionNotFoundToast": "Extension non encore détectée.",
             "corsProxy": "CORS Proxy URL",
             "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
         },
@@ -355,6 +364,19 @@
             "desc": "Configurez votre modèle d'IA pour activer le \"Tri Magique\". Les clés API sont stockées localement.",
             "cancel": "Annuler",
             "saveContinue": "Enregistrer et Continuer"
+        },
+        "extensionGuide": {
+            "title": "Extension Compagnon BookSmart",
+            "statusActive": "Active en arrière-plan (Sans CORS)",
+            "statusInactive": "Charger l'extension pour activer",
+            "whyTitle": "Pourquoi utiliser l'extension compagnon ?",
+            "whyDesc": "Les navigateurs bloquent l'accès direct aux codes d'état HTTP externes en raison des règles CORS. L'extension exécute un script d'arrière-plan sans serveur avec des autorisations complètes, permettant des vérifications de liens 100 % précises et privées.",
+            "stepsTitle": "Étapes d'installation (Chrome / Edge / Brave / Arc)",
+            "step1": "Ouvrez la page des extensions",
+            "step2": "Activez le Mode développeur",
+            "step2Desc": "Activez le bouton dans le coin supérieur droit.",
+            "step3": "Cliquez sur \"Charger l'extension non empaquetée\"",
+            "step4": "Sélectionnez le dossier de l'extension dans BookSmart (/extension)"
         }
     },
     "backup": {

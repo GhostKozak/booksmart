@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
+import { ShieldCheck, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { AI_MODELS, DEFAULT_MODEL } from '../services/ai-service'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { ExtensionGuideModal } from './modals/ExtensionGuideModal'
+import { subscribeExtensionStatus } from '../lib/extension-client'
 import {
     unlockVault, lockVault, saveSecret, loadSecret,
     isVaultUnlocked, hasVault, clearVault, migrateFromLocalStorage,
@@ -22,6 +25,15 @@ export function AISettings() {
     const [vaultExists, setVaultExists] = useState(hasVault())
     const [unlockError, setUnlockError] = useState('')
     const [corsProxy, setCorsProxy] = useState(() => getStoredCorsProxy())
+    const [isExtensionConnected, setIsExtensionConnected] = useState(false)
+    const [isGuideOpen, setIsGuideOpen] = useState(false)
+
+    useEffect(() => {
+        const unsubscribe = subscribeExtensionStatus((status) => {
+            setIsExtensionConnected(Boolean(status.available))
+        })
+        return () => unsubscribe()
+    }, [])
 
     useEffect(() => {
         if (isVaultUnlocked()) {
@@ -211,17 +223,59 @@ export function AISettings() {
                 </p>
             </div>
 
-            <div className="space-y-2 border-t pt-3">
-                <label className="text-sm font-medium">{t('settings.network.corsProxy')}</label>
-                <Input
-                    type="text"
-                    value={corsProxy}
-                    onChange={(e) => setCorsProxy(e.target.value)}
-                    placeholder="e.g. https://api.allorigins.win/get?url="
-                />
-                <p className="text-[10px] text-muted-foreground">
-                    {t('settings.network.corsProxyDesc')}
-                </p>
+            <div className="space-y-3 border-t pt-3">
+                <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        {t('settings.network.extensionTitle', 'Serverless Health Check (Companion Extension)')}
+                    </label>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsGuideOpen(true)}
+                        className="h-6 px-2 text-xs text-primary hover:text-primary gap-1"
+                    >
+                        <HelpCircle className="h-3.5 w-3.5" />
+                        {t('settings.network.extensionGuideBtn', 'Guide')}
+                    </Button>
+                </div>
+
+                <div className={`p-3 rounded-lg border text-xs flex items-start gap-2.5 ${
+                    isExtensionConnected
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-muted/40 border-border/60 text-muted-foreground'
+                }`}>
+                    {isExtensionConnected ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    ) : (
+                        <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-1 flex-1">
+                        <div className="font-semibold text-foreground">
+                            {isExtensionConnected
+                                ? t('settings.network.extensionConnected', 'Companion Extension Active (CORS-Free)')
+                                : t('settings.network.extensionNotDetected', 'Companion Extension Not Detected')}
+                        </div>
+                        <p className="leading-relaxed">
+                            {isExtensionConnected
+                                ? t('settings.network.extensionConnectedDesc', 'Link health checks run directly via the extension background script without CORS restrictions and without any external server.')
+                                : t('settings.network.extensionNotDetectedDesc', 'Without the extension, browser CORS restrictions make dead link checks unreliable. Load the extension or enter a CORS proxy below.')}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                    <label className="text-xs font-medium text-muted-foreground">{t('settings.network.corsProxy')}</label>
+                    <Input
+                        type="text"
+                        value={corsProxy}
+                        onChange={(e) => setCorsProxy(e.target.value)}
+                        placeholder="e.g. https://api.allorigins.win/get?url="
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                        {t('settings.network.corsProxyDesc')}
+                    </p>
+                </div>
             </div>
 
             {!vaultExists && (
@@ -248,6 +302,13 @@ export function AISettings() {
             <Button onClick={handleSave} className="w-full" size="sm">
                 {saved ? '✓ ' + t('settings.ai.saved') : t('settings.ai.save')}
             </Button>
+
+            <ExtensionGuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                isConnected={isExtensionConnected}
+                onStatusChange={setIsExtensionConnected}
+            />
         </div>
     )
 }

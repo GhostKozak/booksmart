@@ -138,6 +138,15 @@
             "reqAnthropic": "Requiere clave API de Anthropic"
         },
         "network": {
+            "extensionTitle": "Comprobación de Estado sin Servidor (Extensión)",
+            "extensionConnected": "Extensión Conectada (Sin CORS)",
+            "extensionConnectedDesc": "Las comprobaciones de enlaces se ejecutan directamente mediante el script en segundo plano de la extensión con códigos de estado HTTP precisos (200, 404, 500, etc.) sin servidor.",
+            "extensionNotDetected": "Extensión No Detectada",
+            "extensionNotDetectedDesc": "Sin la extensión, las restricciones de CORS del navegador hacen que las comprobaciones de enlaces caídos no sean confiables. Carga la extensión o ingresa un proxy CORS.",
+            "extensionGuideBtn": "Guía",
+            "extensionRetryBtn": "Verificar Conexión",
+            "extensionDetectedToast": "¡Extensión complementaria conectada con éxito!",
+            "extensionNotFoundToast": "Extensión aún no detectada.",
             "corsProxy": "CORS Proxy URL",
             "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
         },
@@ -355,6 +364,19 @@
             "desc": "Configure su modelo de IA para habilitar \"Ordenación Mágica\". Las claves de API se almacenan localmente.",
             "cancel": "Cancelar",
             "saveContinue": "Guardar y Continuar"
+        },
+        "extensionGuide": {
+            "title": "Extensión Complementaria BookSmart",
+            "statusActive": "Activa en segundo plano (Sin CORS)",
+            "statusInactive": "Cargar extensión para activar",
+            "whyTitle": "¿Por qué usar la extensión?",
+            "whyDesc": "Los navegadores bloquean el acceso directo a los códigos de estado HTTP externos debido a las políticas de CORS. La extensión ejecuta un script en segundo plano sin servidor con todos los permisos, lo que permite comprobaciones de enlaces 100% precisas y privadas.",
+            "stepsTitle": "Pasos de instalación (Chrome / Edge / Brave / Arc)",
+            "step1": "Abre la página de extensiones",
+            "step2": "Activa el modo de desarrollador",
+            "step2Desc": "Activa el interruptor en la esquina superior derecha.",
+            "step3": "Haz clic en \"Cargar descomprimida\"",
+            "step4": "Selecciona la carpeta de la extensión en BookSmart (/extension)"
         }
     },
     "backup": {
