@@ -66,7 +66,7 @@ export function SidebarFolders({
                             {discoveredFolders.map(folder => {
                                 const folderInfo = uniqueFolders.find(uf => uf.name === folder.name)
                                 return (
-                                    <div key={folder.name} className="flex items-center gap-1 group/item">
+                                    <div key={`discovered-${folder.name}`} className="flex items-center gap-1 group/item">
                                         <button
                                             onClick={() => setActiveFolder(activeFolder === folder.name ? null : folder.name)}
                                             className={cn(

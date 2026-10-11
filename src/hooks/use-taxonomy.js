@@ -7,8 +7,28 @@ const EMPTY_ARRAY = []
 
 export function useTaxonomy({ workerUniqueTags, workerUniqueFolders }) {
     // Data from IndexedDB
-    const availableFolders = useLiveQuery(() => db.folders.orderBy('order').toArray()) || EMPTY_ARRAY
-    const availableTags = useLiveQuery(() => db.tags.orderBy('order').toArray()) || EMPTY_ARRAY
+    const rawFolders = useLiveQuery(() => db.folders.orderBy('order').toArray()) || EMPTY_ARRAY
+    const rawTags = useLiveQuery(() => db.tags.orderBy('order').toArray()) || EMPTY_ARRAY
+
+    const availableFolders = useMemo(() => {
+        const seen = new Set();
+        return rawFolders.filter(f => {
+            const key = (f.name || '').toLowerCase().trim();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [rawFolders]);
+
+    const availableTags = useMemo(() => {
+        const seen = new Set();
+        return rawTags.filter(t => {
+            const key = (t.name || '').toLowerCase().trim();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }, [rawTags]);
 
     // Ignored URLs
     const ignoredUrlsList = useLiveQuery(() => db.ignoredUrls.toArray()) || EMPTY_ARRAY

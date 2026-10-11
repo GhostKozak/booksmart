@@ -1,29 +1,44 @@
 import { db } from './schema';
 import { generateUUID, pickTagColor } from '../lib/utils';
 
+let seedPromise = null;
+
 // Helper to seed defaults if empty (and not migrated)
 export async function seedDefaults() {
-    const folderCount = await db.folders.count();
-    const tagCount = await db.tags.count();
+    if (seedPromise) return seedPromise;
+    seedPromise = (async () => {
+        await deduplicateTaxonomy();
 
-    if (folderCount === 0) {
-        const defaultFolders = ['Work', 'Personal', 'Reading List', 'Dev', 'News'].map((name, index) => ({
-            id: generateUUID(),
-            name,
-            color: '#3b82f6',
-            order: index
-        }));
-        await db.folders.bulkAdd(defaultFolders);
-    }
+        const folderCount = await db.folders.count();
+        const tagCount = await db.tags.count();
 
-    if (tagCount === 0) {
-        const defaultTags = ['important', 'read-later', 'tutorial', 'tool', 'inspiration'].map((name, index) => ({
-            id: generateUUID(),
-            name,
-            color: pickTagColor(name),
-            order: index
-        }));
-        await db.tags.bulkAdd(defaultTags);
+        if (folderCount === 0) {
+            const defaultFolders = ['Work', 'Personal', 'Reading List', 'Dev', 'News'].map((name, index) => ({
+                id: generateUUID(),
+                name,
+                color: '#3b82f6',
+                order: index
+            }));
+            await db.folders.bulkAdd(defaultFolders);
+        }
+
+        if (tagCount === 0) {
+            const defaultTags = ['important', 'read-later', 'tutorial', 'tool', 'inspiration'].map((name, index) => ({
+                id: generateUUID(),
+                name,
+                color: pickTagColor(name),
+                order: index
+            }));
+            await db.tags.bulkAdd(defaultTags);
+        }
+
+        await deduplicateTaxonomy();
+    })();
+
+    try {
+        await seedPromise;
+    } finally {
+        seedPromise = null;
     }
 }
 

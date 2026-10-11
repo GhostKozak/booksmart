@@ -5,7 +5,7 @@ describe('processing.worker', () => {
     let workerPostMessage;
     const BASE_BOOKMARKS = [
         { id: '1', url: 'https://reactjs.org', title: 'React', originalFolder: 'Dev', tags: ['frontend'], addDate: Math.floor((Date.now() - 10 * 365 * 24 * 60 * 60 * 1000) / 1000) },
-        { id: '2', url: 'https://vuejs.org', title: 'Vue', originalFolder: 'Design', tags: ['frontend', 'framework'], addDate: Math.floor((Date.now() - 1 * 24 * 60 * 60 * 1000) / 1000) },
+        { id: '2', url: 'https://vuejs.org', title: 'Vue', originalFolder: 'Design', tags: ['frontend', 'framework'], addDate: Math.floor((Date.now() - 5 * 24 * 60 * 60 * 1000) / 1000) },
         { id: '3', url: 'https://nodejs.org', title: 'Node.js', originalFolder: 'Dev', tags: ['backend'], addDate: Math.floor(Date.now() / 1000) },
     ];
 
@@ -117,7 +117,7 @@ describe('processing.worker', () => {
         });
 
         it('should filter by end date', async () => {
-            const endDate = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const endDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             const result = process({ dateFilter: { end: endDate } });
             // Bookmark 3 (added today) should be excluded
             expect(result.payload.processedBookmarks).toHaveLength(2);

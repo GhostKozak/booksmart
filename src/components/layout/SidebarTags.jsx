@@ -41,7 +41,7 @@ export function SidebarTags({
                         const count = tagStats ? tagStats.count : 0
                         return (
                             <button
-                                key={tag.name}
+                                key={tag.id || tag.name}
                                 onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
                                 className={cn(
                                     "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-all border border-transparent group",
@@ -67,7 +67,7 @@ export function SidebarTags({
                             {discoveredTags.map(tag => {
                                 const tagInfo = uniqueTags.find(ut => ut.name === tag.name)
                                 return (
-                                    <div key={tag.name} className="flex items-center gap-1 group/item">
+                                    <div key={`discovered-${tag.name}`} className="flex items-center gap-1 group/item">
                                         <button
                                             onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
                                             className={cn(

@@ -55,15 +55,22 @@ export function initExtensionBridge() {
         if (type === 'BOOKSMART_EXTENSION_READY' || type === 'BOOKSMART_PONG') {
             extensionState = {
                 available: true,
-                version: version || '1.0.0',
+                version: version || '1.1.0',
                 lastChecked: Date.now()
             };
             notifyListeners();
         }
     });
 
-    // Send an initial ping in case the content script is already injected
-    pingExtension(500).catch(() => {});
+    // Send initial ping, with graceful retry intervals if extension or page was just loaded
+    const tryPing = (timeout) => pingExtension(timeout).catch(() => {});
+    tryPing(1500);
+    setTimeout(() => {
+        if (!extensionState.available) tryPing(2000);
+    }, 800);
+    setTimeout(() => {
+        if (!extensionState.available) tryPing(3000);
+    }, 2500);
 }
 
 /**
@@ -99,7 +106,7 @@ export function getExtensionState() {
  * @param {number} timeoutMs
  * @returns {Promise<{ available: boolean, version: string|null }>}
  */
-export function pingExtension(timeoutMs = 1200) {
+export function pingExtension(timeoutMs = 1500) {
     if (typeof window === 'undefined') {
         return Promise.resolve({ available: false, version: null });
     }

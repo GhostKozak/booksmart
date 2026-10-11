@@ -451,9 +451,10 @@ async function captureCurrentTab(options = {}) {
 }
 
 const TRUSTED_ORIGIN_PATTERNS = [
-    /^http:\/\/localhost(:\d+)?$/,
-    /^http:\/\/127\.0\.0\.1(:\d+)?$/,
-    /^https:\/\/booksmart\.app$/,
+    /^https?:\/\/localhost(:\d+)?$/,
+    /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+    /^https?:\/\/\[::1\](:\d+)?$/,
+    /^https:\/\/.*booksmart\.app$/,
     /^https:\/\/ghostkozak\.github\.io$/
 ];
 

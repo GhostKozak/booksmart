@@ -5,9 +5,10 @@
     const EXTENSION_VERSION = '1.1.0';
 
     const TRUSTED_ORIGIN_PATTERNS = [
-        /^http:\/\/localhost(:\d+)?$/,
-        /^http:\/\/127\.0\.0\.1(:\d+)?$/,
-        /^https:\/\/booksmart\.app$/,
+        /^https?:\/\/localhost(:\d+)?$/,
+        /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+        /^https?:\/\/\[::1\](:\d+)?$/,
+        /^https:\/\/.*booksmart\.app$/,
         /^https:\/\/ghostkozak\.github\.io$/
     ];
 
@@ -29,11 +30,15 @@
         }, '*');
     }
 
-    // Announce immediately and shortly after page load
+    // Announce immediately, on load, and with staggered retries for async client hydration
     announceReady();
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', announceReady);
     }
+    window.addEventListener('load', announceReady);
+    setTimeout(announceReady, 200);
+    setTimeout(announceReady, 800);
+    setTimeout(announceReady, 2000);
 
     // Persist last valid BookSmart URL so popup can open directly to user's deployment
     if (isOriginAllowed()) {
@@ -84,18 +89,20 @@
 
         // 1. Health check ping
         if (type === 'BOOKSMART_PING') {
+            window.postMessage({
+                source: 'BOOKSMART_EXTENSION',
+                type: 'BOOKSMART_PONG',
+                requestId,
+                version: EXTENSION_VERSION
+            }, '*');
+
+            // Asynchronously warm up the background service worker
             try {
-                chrome.runtime.sendMessage({ action: 'PING' }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        return;
-                    }
-                    window.postMessage({
-                        source: 'BOOKSMART_EXTENSION',
-                        type: 'BOOKSMART_PONG',
-                        requestId,
-                        version: response?.version || EXTENSION_VERSION
-                    }, '*');
-                });
+                if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+                    chrome.runtime.sendMessage({ action: 'PING' }, () => {
+                        void chrome.runtime?.lastError;
+                    });
+                }
             } catch {
                 // Extension context invalidated or inactive
             }
