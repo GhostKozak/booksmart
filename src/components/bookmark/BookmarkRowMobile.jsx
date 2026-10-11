@@ -73,7 +73,7 @@ export function BookmarkRowMobile({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="w-7 h-7 text-primary hover:bg-primary/10"
+                                    className="w-7 h-7 text-primary hover:bg-primary/10 cursor-pointer"
                                     onClick={() => onMergeDuplicate(bookmark)}
                                     title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
                                     aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}

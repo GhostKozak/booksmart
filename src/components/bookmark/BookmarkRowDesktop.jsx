@@ -93,7 +93,7 @@ export function BookmarkRowDesktop({
                                             e.stopPropagation()
                                             onMergeDuplicate(bookmark)
                                         }}
-                                        className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                                        className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium cursor-pointer"
                                         title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
                                     >
                                         <GitMerge className="w-3 h-3" />
@@ -162,7 +162,7 @@ export function BookmarkRowDesktop({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="hover:bg-primary/10 w-8 h-8 text-primary hover:text-primary transition-colors"
+                        className="hover:bg-primary/10 w-8 h-8 text-primary hover:text-primary transition-colors cursor-pointer"
                         onClick={() => onMergeDuplicate(bookmark)}
                         title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
                         aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}

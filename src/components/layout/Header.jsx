@@ -245,7 +245,7 @@ export function Header({
                             {duplicateCount > 0 && (
                                 <>
                                     {mergeDuplicates && (
-                                        <DropdownItem onClick={mergeDuplicates} className="text-primary py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10">
+                                        <DropdownItem onClick={mergeDuplicates} className="text-primary py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
                                             <GitMerge className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
                                             {t('header.mergeDuplicates', { count: duplicateCount })}
                                         </DropdownItem>
