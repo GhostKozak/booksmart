@@ -21,8 +21,8 @@
       "matches": [
         "http://localhost/*",
         "http://127.0.0.1/*",
-        "https://*.github.io/*",
-        "https://booksmart.app/*"
+        "https://booksmart.app/*",
+        "https://ghostkozak.github.io/booksmart/*"
       ],
       "js": [
         "content.js"

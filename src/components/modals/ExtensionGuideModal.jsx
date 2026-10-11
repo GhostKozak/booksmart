@@ -169,7 +169,7 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                                 </span>
                                 <div className="text-[11px] mt-0.5 flex items-center gap-1 font-mono bg-muted/60 px-2 py-0.5 rounded text-foreground">
                                     <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
-                                    <span>/extension/manifest.json</span>
+                                    <span>/extension/manifest.firefox.json</span>
                                 </div>
                             </li>
                         </ol>

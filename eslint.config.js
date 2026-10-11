@@ -33,6 +33,7 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.node,
+        ...globals.webextensions,
         vi: 'readonly',
         describe: 'readonly',
         it: 'readonly',
@@ -45,7 +46,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['tailwind.config.js', 'postcss.config.js'],
+    files: ['tailwind.config.js', 'postcss.config.js', 'scripts/**/*.js'],
     languageOptions: {
       globals: globals.node,
     },
@@ -56,6 +57,7 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.webextensions,
+        module: 'readonly',
       },
     },
   },

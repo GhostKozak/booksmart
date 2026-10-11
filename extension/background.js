@@ -126,8 +126,11 @@ function generateBookmarkId() {
     return 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 }
 
+const SYSTEM_ROOT_FOLDER_IDS = new Set(['0', '1', '2', '3', 'toolbar_____', 'menu________', 'unfiled_____', 'mobile______']);
+
 /**
  * Recursively flattens a chrome.bookmarks tree into BookSmart bookmark format.
+ * Ignores invalid/non-web schemes (e.g. javascript:, place:, chrome:, about:).
  */
 function flattenBookmarkTree(nodes, currentPath = '') {
     const results = [];
@@ -135,6 +138,11 @@ function flattenBookmarkTree(nodes, currentPath = '') {
 
     for (const node of nodes) {
         if (node.url) {
+            const trimmedUrl = (node.url || '').trim();
+            // Filter non-web and dangerous schemes
+            if (!/^(https?|ftp|file):\/\//i.test(trimmedUrl)) {
+                continue;
+            }
             const addDate = node.dateAdded
                 ? Math.floor(node.dateAdded / 1000)
                 : Math.floor(Date.now() / 1000);
@@ -143,7 +151,7 @@ function flattenBookmarkTree(nodes, currentPath = '') {
                 id: generateBookmarkId(),
                 browserId: node.id,
                 title: node.title || node.url,
-                url: node.url,
+                url: trimmedUrl,
                 addDate,
                 tags: [],
                 originalFolder: folder,
@@ -154,7 +162,7 @@ function flattenBookmarkTree(nodes, currentPath = '') {
         } else if (node.children) {
             let folderName = (node.title || '').trim();
             let nextPath = currentPath;
-            if (node.id !== '0' && folderName) {
+            if (!SYSTEM_ROOT_FOLDER_IDS.has(node.id) && folderName) {
                 nextPath = currentPath ? `${currentPath} > ${folderName}` : folderName;
             }
             results.push(...flattenBookmarkTree(node.children, nextPath));
@@ -202,7 +210,7 @@ async function pushBookmarksToBrowser(bookmarks, { targetFolderName = 'BookSmart
 
     if (clean) {
         const subTree = await chrome.bookmarks.getSubTree(folderId);
-        if (subTree[0]?.children) {
+        if (subTree[0]?.children && subTree[0]?.title === targetFolderName) {
             for (const child of subTree[0].children) {
                 await chrome.bookmarks.removeTree(child.id);
             }
@@ -212,6 +220,23 @@ async function pushBookmarksToBrowser(bookmarks, { targetFolderName = 'BookSmart
     const folderCache = new Map();
     folderCache.set('', folderId);
     folderCache.set('Root', folderId);
+
+    const folderChildrenCache = new Map();
+
+    async function getExistingUrlsInFolder(parentId) {
+        if (folderChildrenCache.has(parentId)) {
+            return folderChildrenCache.get(parentId);
+        }
+        const children = await chrome.bookmarks.getChildren(parentId);
+        const urlSet = new Set(
+            children
+                .filter(c => c.url)
+                .map(c => normalizeBookmarkUrl(c.url))
+                .filter(Boolean)
+        );
+        folderChildrenCache.set(parentId, urlSet);
+        return urlSet;
+    }
 
     async function ensureFolderPath(path) {
         if (!path || path === 'Root') return folderId;
@@ -244,13 +269,28 @@ async function pushBookmarksToBrowser(bookmarks, { targetFolderName = 'BookSmart
     let createdCount = 0;
     for (const b of (bookmarks || [])) {
         if (!b.url) continue;
-        const targetParentId = await ensureFolderPath(b.newFolder || b.originalFolder);
-        await chrome.bookmarks.create({
-            parentId: targetParentId,
-            title: b.title || b.url,
-            url: b.url
-        });
-        createdCount++;
+        const norm = normalizeBookmarkUrl(b.url);
+        if (!norm) continue;
+
+        try {
+            const targetParentId = await ensureFolderPath(b.newFolder || b.originalFolder);
+            const existingUrls = await getExistingUrlsInFolder(targetParentId);
+
+            if (existingUrls.has(norm)) {
+                // Prevent duplicate bookmark creation in target folder
+                continue;
+            }
+
+            await chrome.bookmarks.create({
+                parentId: targetParentId,
+                title: b.title || b.url,
+                url: b.url
+            });
+            existingUrls.add(norm);
+            createdCount++;
+        } catch (err) {
+            console.warn('Failed to push bookmark to browser:', b.url, err);
+        }
     }
 
     return {
@@ -319,6 +359,7 @@ async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
 
 /**
  * Captures currently active tab to browser bookmarks.
+ * Prevents duplicates and notifies open BookSmart tabs in real-time.
  */
 async function captureCurrentTab(options = {}) {
     if (!chrome.tabs || !chrome.bookmarks) {
@@ -336,114 +377,205 @@ async function captureCurrentTab(options = {}) {
     const folderName = options.folderName || 'BookSmart';
     const { folderId } = await getOrCreateTargetFolder(folderName);
 
-    const created = await chrome.bookmarks.create({
-        parentId: folderId,
-        title: currentTab.title || currentTab.url,
-        url: currentTab.url
-    });
+    const norm = normalizeBookmarkUrl(currentTab.url);
+    const existingChildren = await chrome.bookmarks.getChildren(folderId);
+    const existing = existingChildren.find(c => c.url && normalizeBookmarkUrl(c.url) === norm);
 
-    return {
-        id: generateBookmarkId(),
-        browserId: created.id,
-        title: created.title,
-        url: created.url,
-        addDate: Math.floor(Date.now() / 1000),
-        originalFolder: folderName,
-        newFolder: folderName,
-        tags: [],
-        note: '',
-        status: 'unchanged'
-    };
+    let bookmarkResult;
+    if (existing) {
+        bookmarkResult = {
+            id: generateBookmarkId(),
+            browserId: existing.id,
+            title: existing.title || currentTab.title,
+            url: existing.url,
+            addDate: Math.floor(Date.now() / 1000),
+            originalFolder: folderName,
+            newFolder: folderName,
+            tags: [],
+            note: '',
+            status: 'unchanged',
+            alreadyExisted: true
+        };
+    } else {
+        const created = await chrome.bookmarks.create({
+            parentId: folderId,
+            title: currentTab.title || currentTab.url,
+            url: currentTab.url
+        });
+
+        bookmarkResult = {
+            id: generateBookmarkId(),
+            browserId: created.id,
+            title: created.title,
+            url: created.url,
+            addDate: Math.floor(Date.now() / 1000),
+            originalFolder: folderName,
+            newFolder: folderName,
+            tags: [],
+            note: '',
+            status: 'unchanged'
+        };
+    }
+
+    // Broadcast to open BookSmart tabs to sync real-time
+    try {
+        chrome.tabs.query({ url: ['*://localhost/*', '*://127.0.0.1/*', '*://*/*booksmart*'] }, (openTabs) => {
+            if (openTabs && openTabs.length > 0) {
+                for (const t of openTabs) {
+                    chrome.tabs.sendMessage(t.id, {
+                        action: 'BOOKSMART_TAB_CAPTURED',
+                        bookmark: bookmarkResult
+                    }).catch(() => {});
+                }
+            }
+        });
+    } catch {
+        // Ignored
+    }
+
+    return bookmarkResult;
+}
+
+const TRUSTED_ORIGIN_PATTERNS = [
+    /^http:\/\/localhost(:\d+)?$/,
+    /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+    /^https:\/\/booksmart\.app$/,
+    /^https:\/\/ghostkozak\.github\.io$/
+];
+
+function isSenderAuthorized(sender) {
+    if (!sender || !sender.url) return true; // Extension popup or internal service worker
+    try {
+        const url = new URL(sender.url);
+        if (url.protocol === 'chrome-extension:' || url.protocol === 'moz-extension:') {
+            return true;
+        }
+        return TRUSTED_ORIGIN_PATTERNS.some(p => p.test(url.origin));
+    } catch {
+        return false;
+    }
 }
 
 // 1. One-off Message Listener (Ping, Single Check, Bookmarks API)
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'PING') {
-        sendResponse({ success: true, version: '1.1.0', type: 'PONG' });
-        return true;
-    }
+if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'PING') {
+            sendResponse({ success: true, version: '1.1.0', type: 'PONG' });
+            return true;
+        }
 
-    if (request.action === 'CHECK_SINGLE_URL') {
-        checkUrlDirect(request.url, request.timeoutMs)
-            .then(result => sendResponse(result))
-            .catch(err => sendResponse({ url: request.url, status: 'dead', error: err.message }));
-        return true;
-    }
+        if (request.action === 'CHECK_SINGLE_URL') {
+            checkUrlDirect(request.url, request.timeoutMs)
+                .then(result => sendResponse(result))
+                .catch(err => sendResponse({ url: request.url, status: 'dead', error: err.message }));
+            return true;
+        }
 
-    if (request.action === 'GET_BROWSER_BOOKMARKS') {
-        getBrowserBookmarks()
-            .then(bookmarks => sendResponse({ success: true, bookmarks }))
-            .catch(err => sendResponse({ success: false, error: err.message }));
-        return true;
-    }
+        const SENSITIVE_ACTIONS = [
+            'GET_BROWSER_BOOKMARKS',
+            'PUSH_BROWSER_BOOKMARKS',
+            'SYNC_BROWSER_BOOKMARKS',
+            'CAPTURE_CURRENT_TAB'
+        ];
 
-    if (request.action === 'PUSH_BROWSER_BOOKMARKS') {
-        pushBookmarksToBrowser(request.bookmarks, request.options)
-            .then(result => sendResponse({ success: true, ...result }))
-            .catch(err => sendResponse({ success: false, error: err.message }));
-        return true;
-    }
+        if (SENSITIVE_ACTIONS.includes(request.action) && !isSenderAuthorized(sender)) {
+            sendResponse({ success: false, error: 'Unauthorized sender origin' });
+            return true;
+        }
 
-    if (request.action === 'SYNC_BROWSER_BOOKMARKS') {
-        syncBrowserBookmarks(request.bookmarks, request.options)
-            .then(result => sendResponse(result))
-            .catch(err => sendResponse({ success: false, error: err.message }));
-        return true;
-    }
+        if (request.action === 'GET_BROWSER_BOOKMARKS') {
+            getBrowserBookmarks()
+                .then(bookmarks => sendResponse({ success: true, bookmarks }))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
 
-    if (request.action === 'CAPTURE_CURRENT_TAB') {
-        captureCurrentTab(request.options)
-            .then(bookmark => sendResponse({ success: true, bookmark }))
-            .catch(err => sendResponse({ success: false, error: err.message }));
-        return true;
-    }
-});
+        if (request.action === 'PUSH_BROWSER_BOOKMARKS') {
+            pushBookmarksToBrowser(request.bookmarks, request.options)
+                .then(result => sendResponse({ success: true, ...result }))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+
+        if (request.action === 'SYNC_BROWSER_BOOKMARKS') {
+            syncBrowserBookmarks(request.bookmarks, request.options)
+                .then(result => sendResponse(result))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+
+        if (request.action === 'CAPTURE_CURRENT_TAB') {
+            captureCurrentTab(request.options)
+                .then(bookmark => sendResponse({ success: true, bookmark }))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+    });
+}
 
 // 2. Long-lived Port Listener for Streaming Batch Link Checks
-chrome.runtime.onConnect.addListener((port) => {
-    if (port.name === 'booksmart-link-check') {
-        let isCancelled = false;
+if (typeof chrome !== 'undefined' && chrome.runtime?.onConnect) {
+    chrome.runtime.onConnect.addListener((port) => {
+        if (port.name === 'booksmart-link-check') {
+            let isCancelled = false;
 
-        port.onDisconnect.addListener(() => {
-            isCancelled = true;
-        });
-
-        port.onMessage.addListener(async (msg) => {
-            if (msg.action === 'START_CHECK') {
-                const urls = Array.isArray(msg.urls) ? msg.urls : [];
-                const batchSize = Math.min(Math.max(1, msg.batchSize || BATCH_SIZE), 12);
-
-                for (let i = 0; i < urls.length; i += batchSize) {
-                    if (isCancelled) break;
-
-                    const batch = urls.slice(i, i + batchSize);
-                    const results = await Promise.all(batch.map(url => checkUrlDirect(url)));
-
-                    if (isCancelled) break;
-
-                    try {
-                        port.postMessage({
-                            type: 'BATCH_UPDATE',
-                            results,
-                            processed: Math.min(i + batchSize, urls.length),
-                            total: urls.length
-                        });
-                    } catch {
-                        isCancelled = true;
-                        break;
-                    }
-                }
-
-                if (!isCancelled) {
-                    try {
-                        port.postMessage({ type: 'COMPLETE' });
-                    } catch {
-                        // Port already closed
-                    }
-                }
-            } else if (msg.action === 'CANCEL_CHECK') {
+            port.onDisconnect.addListener(() => {
                 isCancelled = true;
-            }
-        });
-    }
-});
+            });
+
+            port.onMessage.addListener(async (msg) => {
+                if (msg.action === 'START_CHECK') {
+                    const urls = Array.isArray(msg.urls) ? msg.urls : [];
+                    const batchSize = Math.min(Math.max(1, msg.batchSize || BATCH_SIZE), 12);
+
+                    for (let i = 0; i < urls.length; i += batchSize) {
+                        if (isCancelled) break;
+
+                        const batch = urls.slice(i, i + batchSize);
+                        const results = await Promise.all(batch.map(url => checkUrlDirect(url)));
+
+                        if (isCancelled) break;
+
+                        try {
+                            port.postMessage({
+                                type: 'BATCH_UPDATE',
+                                results,
+                                processed: Math.min(i + batchSize, urls.length),
+                                total: urls.length
+                            });
+                        } catch {
+                            isCancelled = true;
+                            break;
+                        }
+                    }
+
+                    if (!isCancelled) {
+                        try {
+                            port.postMessage({ type: 'COMPLETE' });
+                        } catch {
+                            // Port already closed
+                        }
+                    }
+                } else if (msg.action === 'CANCEL_CHECK') {
+                    isCancelled = true;
+                }
+            });
+        }
+    });
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        isPrivateOrLoopbackUrl,
+        checkUrlDirect,
+        normalizeBookmarkUrl,
+        generateBookmarkId,
+        flattenBookmarkTree,
+        getOrCreateTargetFolder,
+        pushBookmarksToBrowser,
+        syncBrowserBookmarks,
+        captureCurrentTab,
+        isSenderAuthorized,
+        SYSTEM_ROOT_FOLDER_IDS
+    };
+}

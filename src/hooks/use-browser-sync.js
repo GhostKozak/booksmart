@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { db } from '../db'
 import {
     getBrowserBookmarks,
@@ -10,13 +10,31 @@ import { normalizeUrl } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+/**
+ * Deduplicates bookmarks both within the list and against existing library URLs.
+ */
+function deduplicateBookmarks(bookmarksList, existingUrlSet = new Set()) {
+    const seen = new Set(existingUrlSet)
+    const result = []
+    for (const b of bookmarksList) {
+        if (!b || !b.url) continue
+        const norm = normalizeUrl(b.url)
+        if (!norm) continue
+        if (!seen.has(norm)) {
+            seen.add(norm)
+            result.push(b)
+        }
+    }
+    return result
+}
+
 export function useBrowserSync({ rawBookmarks = [], addCommand }) {
     const { t } = useTranslation()
     const [isSyncing, setIsSyncing] = useState(false)
     const [lastSyncResult, setLastSyncResult] = useState(null)
 
     /**
-     * Imports bookmarks from the browser into BookSmart.
+     * Imports bookmarks from the browser into BookSmart with strict deduplication.
      */
     const importFromBrowser = useCallback(async () => {
         if (!isExtensionConnected()) {
@@ -32,32 +50,8 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
                 return { success: true, count: 0 }
             }
 
-            if (rawBookmarks.length === 0) {
-                // Initial import - load everything directly
-                await db.transaction('rw', db.bookmarks, async () => {
-                    await db.bookmarks.bulkAdd(browserBookmarks)
-                })
-
-                addCommand?.({
-                    undo: () => db.bookmarks.clear(),
-                    redo: () => db.bookmarks.bulkAdd(browserBookmarks),
-                    description: `Import ${browserBookmarks.length} Browser Bookmarks`
-                })
-
-                toast.success(t('notifications.browserImportedSuccess', {
-                    count: browserBookmarks.length,
-                    defaultValue: `Imported ${browserBookmarks.length} bookmarks from browser`
-                }))
-
-                return { success: true, count: browserBookmarks.length }
-            }
-
-            // Existing library - merge non-duplicate bookmarks
             const existingUrls = new Set(rawBookmarks.map(b => normalizeUrl(b.url)).filter(Boolean))
-            const newBookmarks = browserBookmarks.filter(b => {
-                const norm = normalizeUrl(b.url)
-                return norm && !existingUrls.has(norm)
-            })
+            const newBookmarks = deduplicateBookmarks(browserBookmarks, existingUrls)
 
             if (newBookmarks.length === 0) {
                 toast.info(t('notifications.allBookmarksAlreadyImported', 'All browser bookmarks are already in your library.'))
@@ -77,7 +71,7 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
 
             toast.success(t('notifications.browserImportedSuccess', {
                 count: newBookmarks.length,
-                defaultValue: `Imported ${newBookmarks.length} new bookmarks from browser`
+                defaultValue: `Imported ${newBookmarks.length} bookmarks from browser`
             }))
 
             return { success: true, count: newBookmarks.length }
@@ -141,7 +135,9 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
         setIsSyncing(true)
         try {
             const result = await syncBrowserBookmarks(rawBookmarks, options)
-            const imported = result.importedBookmarks || []
+            const rawImported = result.importedBookmarks || []
+            const existingUrls = new Set(rawBookmarks.map(b => normalizeUrl(b.url)).filter(Boolean))
+            const imported = deduplicateBookmarks(rawImported, existingUrls)
 
             if (imported.length > 0) {
                 await db.transaction('rw', db.bookmarks, async () => {
@@ -164,7 +160,7 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
                 defaultValue: `Synced: ${imported.length} imported, ${result.exportedCount || 0} exported to browser`
             }))
 
-            return { success: true, ...result }
+            return { success: true, ...result, importedBookmarks: imported }
         } catch (err) {
             console.error('Failed two-way sync with browser:', err)
             toast.error(err.message || 'Two-way sync failed')
@@ -173,6 +169,43 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
             setIsSyncing(false)
         }
     }, [rawBookmarks, addCommand, t])
+
+    // Listen for extension events (e.g. popup sync trigger, active tab capture)
+    useEffect(() => {
+        const handleExtensionEvent = (event) => {
+            if (event.source !== window || !event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
+                return
+            }
+
+            if (event.data.type === 'BOOKSMART_TRIGGER_SYNC') {
+                twoWaySync()
+            }
+
+            if (event.data.type === 'BOOKSMART_TAB_CAPTURED' && event.data.bookmark) {
+                const b = event.data.bookmark
+                const norm = normalizeUrl(b.url)
+                const exists = rawBookmarks.some(item => normalizeUrl(item.url) === norm)
+                if (!exists) {
+                    db.bookmarks.add(b).then(() => {
+                        addCommand?.({
+                            undo: () => db.bookmarks.delete(b.id),
+                            redo: () => db.bookmarks.add(b),
+                            description: `Save Tab: ${b.title || b.url}`
+                        })
+                        toast.success(t('notifications.tabCaptured', {
+                            title: (b.title || b.url).slice(0, 30),
+                            defaultValue: `Saved active tab: ${(b.title || b.url).slice(0, 30)}`
+                        }))
+                    }).catch(err => {
+                        console.error('Failed to add captured tab to database:', err)
+                    })
+                }
+            }
+        }
+
+        window.addEventListener('message', handleExtensionEvent)
+        return () => window.removeEventListener('message', handleExtensionEvent)
+    }, [twoWaySync, rawBookmarks, addCommand, t])
 
     return {
         isSyncing,

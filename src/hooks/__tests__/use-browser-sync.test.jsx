@@ -131,4 +131,48 @@ describe('useBrowserSync', () => {
         )
         expect(addCommand).toHaveBeenCalled()
     })
+
+    it('importFromBrowser deduplicates internally even when rawBookmarks is empty', async () => {
+        vi.spyOn(extensionClient, 'isExtensionConnected').mockReturnValue(true)
+        vi.spyOn(extensionClient, 'getBrowserBookmarks').mockResolvedValue([
+            { id: '1', title: 'React', url: 'https://react.dev' },
+            { id: '2', title: 'React Duplicate', url: 'https://react.dev/' }
+        ])
+
+        const { result } = renderHook(() => useBrowserSync({ rawBookmarks: [], addCommand }))
+
+        let res
+        await act(async () => {
+            res = await result.current.importFromBrowser()
+        })
+
+        expect(res.success).toBe(true)
+        // Even though browser returned 2, only 1 should be added!
+        expect(res.count).toBe(1)
+        expect(db.bookmarks.bulkAdd).toHaveBeenCalledWith([
+            expect.objectContaining({ id: '1', url: 'https://react.dev' })
+        ])
+    })
+
+    it('undo command invokes bulkDelete with imported IDs rather than clearing all DB', async () => {
+        vi.spyOn(extensionClient, 'isExtensionConnected').mockReturnValue(true)
+        vi.spyOn(extensionClient, 'getBrowserBookmarks').mockResolvedValue([
+            { id: 'imp_1', title: 'React', url: 'https://react.dev' }
+        ])
+
+        const { result } = renderHook(() => useBrowserSync({ rawBookmarks: [], addCommand }))
+
+        await act(async () => {
+            await result.current.importFromBrowser()
+        })
+
+        expect(addCommand).toHaveBeenCalled()
+        const commandArg = addCommand.mock.calls[0][0]
+        expect(typeof commandArg.undo).toBe('function')
+
+        // Calling undo should call bulkDelete with ['imp_1'], NEVER clear()
+        commandArg.undo()
+        expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['imp_1'])
+        expect(db.bookmarks.clear).not.toHaveBeenCalled()
+    })
 })

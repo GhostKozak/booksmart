@@ -2,7 +2,23 @@
 // Relays messages between BookSmart web app and extension background script
 
 (function () {
-    const EXTENSION_VERSION = '1.0.0';
+    const EXTENSION_VERSION = '1.1.0';
+
+    const TRUSTED_ORIGIN_PATTERNS = [
+        /^http:\/\/localhost(:\d+)?$/,
+        /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+        /^https:\/\/booksmart\.app$/,
+        /^https:\/\/ghostkozak\.github\.io$/
+    ];
+
+    function isOriginAllowed() {
+        try {
+            const origin = window.location.origin;
+            return TRUSTED_ORIGIN_PATTERNS.some(p => p.test(origin));
+        } catch {
+            return false;
+        }
+    }
 
     // Broadcast readiness to the page
     function announceReady() {
@@ -20,6 +36,31 @@
     }
 
     let activeCheckPort = null;
+
+    // Listen for messages from background/popup
+    try {
+        chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+            if (msg.action === 'TRIGGER_TWO_WAY_SYNC') {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_TRIGGER_SYNC'
+                }, '*');
+                sendResponse({ success: true });
+                return true;
+            }
+            if (msg.action === 'BOOKSMART_TAB_CAPTURED') {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_TAB_CAPTURED',
+                    bookmark: msg.bookmark
+                }, '*');
+                sendResponse({ success: true });
+                return true;
+            }
+        });
+    } catch {
+        // Ignored if runtime not available
+    }
 
     // Listen to messages from BookSmart web application
     window.addEventListener('message', (event) => {
@@ -127,6 +168,25 @@
                 }
                 activeCheckPort = null;
             }
+            return;
+        }
+
+        // Guard sensitive bookmark APIs against untrusted origins
+        const isBookmarkAction = [
+            'BOOKSMART_GET_BROWSER_BOOKMARKS',
+            'BOOKSMART_PUSH_BROWSER_BOOKMARKS',
+            'BOOKSMART_SYNC_BROWSER_BOOKMARKS',
+            'BOOKSMART_CAPTURE_TAB'
+        ].includes(type);
+
+        if (isBookmarkAction && !isOriginAllowed()) {
+            window.postMessage({
+                source: 'BOOKSMART_EXTENSION',
+                type: `${type}_RESULT`,
+                requestId,
+                success: false,
+                error: 'Access denied: Untrusted origin. Bookmarks access is restricted to BookSmart origins.'
+            }, '*');
             return;
         }
 

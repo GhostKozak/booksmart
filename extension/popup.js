@@ -13,6 +13,13 @@ function showStatus(text, duration = 3000) {
     }
 }
 
+const BOOKSMART_URL_PATTERNS = [
+    '*://localhost/*',
+    '*://127.0.0.1/*',
+    '*://booksmart.app/*',
+    '*://ghostkozak.github.io/booksmart/*'
+];
+
 // 1. Save Current Tab
 document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
     showStatus('Saving bookmark...');
@@ -20,8 +27,10 @@ document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
         chrome.runtime.sendMessage({ action: 'CAPTURE_CURRENT_TAB' }, (res) => {
             if (chrome.runtime.lastError || !res?.success) {
                 showStatus(res?.error || 'Could not save current page', 4000);
+            } else if (res.bookmark?.alreadyExisted) {
+                showStatus(`Already in BookSmart: "${(res.bookmark.title || '').slice(0, 20)}..."`, 4000);
             } else {
-                showStatus(`Saved: "${(res.bookmark.title || '').slice(0, 24)}..."`, 4000);
+                showStatus(`Saved & synced: "${(res.bookmark.title || '').slice(0, 20)}..."`, 4000);
             }
         });
     } catch (err) {
@@ -31,22 +40,20 @@ document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
 
 // 2. Trigger Two-Way Sync
 document.getElementById('sync-btn')?.addEventListener('click', () => {
-    showStatus('Syncing bookmarks...');
+    showStatus('Connecting to BookSmart...');
     try {
-        // Query for open BookSmart tabs to get current app bookmarks or trigger sync
-        chrome.tabs.query({ url: ['*://localhost/*', '*://127.0.0.1/*', '*://*/*booksmart*'] }, (tabs) => {
+        chrome.tabs.query({ url: BOOKSMART_URL_PATTERNS }, (tabs) => {
             if (tabs && tabs.length > 0) {
-                // Focus the BookSmart tab and initiate sync
                 chrome.tabs.update(tabs[0].id, { active: true });
-                showStatus('Syncing with BookSmart tab...', 3000);
-            } else {
-                chrome.runtime.sendMessage({ action: 'GET_BROWSER_BOOKMARKS' }, (res) => {
-                    if (res?.success) {
-                        showStatus(`${res.bookmarks?.length || 0} browser bookmarks ready`, 3500);
-                    } else {
-                        showStatus('Open BookSmart to complete sync', 3500);
+                showStatus('Dispatched sync to active BookSmart tab...', 3000);
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'TRIGGER_TWO_WAY_SYNC' }, (response) => {
+                    if (!chrome.runtime.lastError && response?.success) {
+                        showStatus('Sync started in BookSmart tab!', 3500);
                     }
                 });
+            } else {
+                chrome.tabs.create({ url: 'http://localhost:5173?sync=auto' });
+                showStatus('Opening BookSmart to sync...', 4000);
             }
         });
     } catch (err) {
@@ -56,7 +63,7 @@ document.getElementById('sync-btn')?.addEventListener('click', () => {
 
 // 3. Open BookSmart Web Application
 document.getElementById('open-app-btn')?.addEventListener('click', () => {
-    chrome.tabs.query({ url: ['*://localhost/*', '*://127.0.0.1/*', '*://*/*booksmart*'] }, (tabs) => {
+    chrome.tabs.query({ url: BOOKSMART_URL_PATTERNS }, (tabs) => {
         if (tabs && tabs.length > 0) {
             chrome.tabs.update(tabs[0].id, { active: true });
         } else {
