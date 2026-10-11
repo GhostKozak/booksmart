@@ -236,14 +236,14 @@ export function Header({
                         {isExtensionConnected ? (
                             <>
                                 {twoWaySync && (
-                                    <DropdownItem onClick={twoWaySync} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
+                                    <DropdownItem onClick={() => twoWaySync()} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
                                         <RefreshCw className={cn("h-4 w-4 mr-2.5 text-primary", isSyncing && "animate-spin")} />
                                         <span>{t('header.browserSync.twoWay', 'Two-Way Sync')}</span>
                                     </DropdownItem>
                                 )}
                                 <div className="grid grid-cols-2 gap-1.5 mb-1">
                                     {importFromBrowser && (
-                                        <DropdownItem onClick={importFromBrowser} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
+                                        <DropdownItem onClick={() => importFromBrowser()} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
                                             <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500" />
                                             <span className="truncate">{t('header.browserSync.pull', 'Pull')}</span>
                                         </DropdownItem>
@@ -494,7 +494,7 @@ export function Header({
                         <Button
                             variant="ghost"
                             className="gap-2 px-3 text-xs"
-                            onClick={twoWaySync}
+                            onClick={() => twoWaySync()}
                             disabled={isSyncing}
                             title={t('header.browserSync.twoWay', 'Two-Way Browser Sync')}
                         >

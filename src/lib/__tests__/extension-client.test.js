@@ -291,4 +291,38 @@ describe('extension-client', () => {
         expect(result.url).toBe('https://curr.com')
         postMessageSpy.mockRestore()
     })
+
+    it('syncBrowserBookmarks strips uncloneable DOM events and non-serializable properties', async () => {
+        let sentPayload = null
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_SYNC_BROWSER_BOOKMARKS') {
+                sentPayload = data.payload
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_BROWSER_SYNC_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            importedBookmarks: [],
+                            exportedCount: 0
+                        }
+                    })
+                )
+            }
+        })
+
+        const mockPointerEvent = {
+            nativeEvent: {},
+            preventDefault: vi.fn(),
+            type: 'click'
+        }
+
+        await syncBrowserBookmarks([{ id: 1, title: 'Safe', url: 'https://safe.com' }], mockPointerEvent, 500)
+
+        expect(sentPayload).not.toBeNull()
+        expect(sentPayload.options).toEqual({})
+        expect(sentPayload.bookmarks[0].url).toBe('https://safe.com')
+        postMessageSpy.mockRestore()
+    })
 })

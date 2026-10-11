@@ -227,13 +227,25 @@
             return;
         }
 
+        function sanitizeOptions(opts) {
+            if (!opts || typeof opts !== 'object') return {};
+            if ('nativeEvent' in opts || typeof opts.preventDefault === 'function') return {};
+            const safe = {};
+            for (const [k, v] of Object.entries(opts)) {
+                if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+                    safe[k] = v;
+                }
+            }
+            return safe;
+        }
+
         // 5. Push bookmarks to browser
         if (type === 'BOOKSMART_PUSH_BROWSER_BOOKMARKS') {
             try {
                 chrome.runtime.sendMessage({
                     action: 'PUSH_BROWSER_BOOKMARKS',
-                    bookmarks: payload?.bookmarks || [],
-                    options: payload?.options || {}
+                    bookmarks: Array.isArray(payload?.bookmarks) ? payload.bookmarks : [],
+                    options: sanitizeOptions(payload?.options)
                 }, (response) => {
                     const err = chrome.runtime.lastError;
                     window.postMessage({
@@ -263,8 +275,8 @@
             try {
                 chrome.runtime.sendMessage({
                     action: 'SYNC_BROWSER_BOOKMARKS',
-                    bookmarks: payload?.bookmarks || [],
-                    options: payload?.options || {}
+                    bookmarks: Array.isArray(payload?.bookmarks) ? payload.bookmarks : [],
+                    options: sanitizeOptions(payload?.options)
                 }, (response) => {
                     const err = chrome.runtime.lastError;
                     window.postMessage({
@@ -296,7 +308,7 @@
             try {
                 chrome.runtime.sendMessage({
                     action: 'CAPTURE_CURRENT_TAB',
-                    options: payload?.options || {}
+                    options: sanitizeOptions(payload?.options)
                 }, (response) => {
                     const err = chrome.runtime.lastError;
                     window.postMessage({

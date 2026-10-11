@@ -318,6 +318,47 @@ export function getBrowserBookmarks(timeoutMs = 12000) {
     });
 }
 
+function isDomEvent(obj) {
+    if (!obj || typeof obj !== 'object') return false;
+    return (
+        'nativeEvent' in obj ||
+        typeof obj.preventDefault === 'function' ||
+        typeof obj.stopPropagation === 'function' ||
+        (typeof Event !== 'undefined' && obj instanceof Event)
+    );
+}
+
+function sanitizeSerializableOptions(options) {
+    if (!options || typeof options !== 'object' || isDomEvent(options)) {
+        return {};
+    }
+    const safe = {};
+    for (const [key, value] of Object.entries(options)) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+            safe[key] = value;
+        }
+    }
+    return safe;
+}
+
+function sanitizeBookmarksList(bookmarks) {
+    if (!Array.isArray(bookmarks) || isDomEvent(bookmarks)) {
+        return [];
+    }
+    return bookmarks
+        .filter(b => b && typeof b === 'object' && !isDomEvent(b))
+        .map(b => ({
+            id: b.id != null ? String(b.id) : undefined,
+            title: b.title != null ? String(b.title) : '',
+            url: b.url != null ? String(b.url) : '',
+            originalFolder: b.originalFolder != null ? String(b.originalFolder) : '',
+            newFolder: b.newFolder != null ? String(b.newFolder) : '',
+            tags: Array.isArray(b.tags) ? b.tags.map(String) : [],
+            note: b.note != null ? String(b.note) : '',
+            dateAdded: typeof b.dateAdded === 'number' ? b.dateAdded : undefined
+        }));
+}
+
 /**
  * Pushes BookSmart bookmarks into the browser under a designated folder.
  * @param {Array<Object>} bookmarks
@@ -331,6 +372,9 @@ export function pushBookmarksToBrowser(bookmarks, options = {}, timeoutMs = 2500
     if (typeof window === 'undefined') {
         return Promise.reject(new Error('Window environment not available'));
     }
+
+    const safeBookmarks = sanitizeBookmarksList(bookmarks);
+    const safeOptions = sanitizeSerializableOptions(options);
 
     return new Promise((resolve, reject) => {
         const requestId = 'push_bm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
@@ -359,7 +403,7 @@ export function pushBookmarksToBrowser(bookmarks, options = {}, timeoutMs = 2500
                 if (event.data.success) {
                     resolve({
                         count: event.data.count || 0,
-                        folder: event.data.folder || options.targetFolderName || 'BookSmart'
+                        folder: event.data.folder || safeOptions.targetFolderName || 'BookSmart'
                     });
                 } else {
                     reject(new Error(event.data.error || 'Failed to push bookmarks to browser'));
@@ -374,8 +418,8 @@ export function pushBookmarksToBrowser(bookmarks, options = {}, timeoutMs = 2500
             type: 'BOOKSMART_PUSH_BROWSER_BOOKMARKS',
             requestId,
             payload: {
-                bookmarks,
-                options
+                bookmarks: safeBookmarks,
+                options: safeOptions
             }
         }, '*');
     });
@@ -392,6 +436,9 @@ export function syncBrowserBookmarks(bookmarks, options = {}, timeoutMs = 25000)
     if (typeof window === 'undefined') {
         return Promise.reject(new Error('Window environment not available'));
     }
+
+    const safeBookmarks = sanitizeBookmarksList(bookmarks);
+    const safeOptions = sanitizeSerializableOptions(options);
 
     return new Promise((resolve, reject) => {
         const requestId = 'sync_bm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
@@ -437,8 +484,8 @@ export function syncBrowserBookmarks(bookmarks, options = {}, timeoutMs = 25000)
             type: 'BOOKSMART_SYNC_BROWSER_BOOKMARKS',
             requestId,
             payload: {
-                bookmarks,
-                options
+                bookmarks: safeBookmarks,
+                options: safeOptions
             }
         }, '*');
     });
@@ -454,6 +501,8 @@ export function captureActiveTab(options = {}, timeoutMs = 6000) {
     if (typeof window === 'undefined') {
         return Promise.reject(new Error('Window environment not available'));
     }
+
+    const safeOptions = sanitizeSerializableOptions(options);
 
     return new Promise((resolve, reject) => {
         const requestId = 'cap_tab_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
@@ -493,7 +542,7 @@ export function captureActiveTab(options = {}, timeoutMs = 6000) {
             source: 'BOOKSMART_PAGE',
             type: 'BOOKSMART_CAPTURE_TAB',
             requestId,
-            payload: { options }
+            payload: { options: safeOptions }
         }, '*');
     });
 }

@@ -208,4 +208,37 @@ describe('useBrowserSync', () => {
             window.location = originalLocation
         }
     })
+
+    it('safely handles PointerEvent / DOM events passed as arguments without error', async () => {
+        vi.spyOn(extensionClient, 'isExtensionConnected').mockReturnValue(true)
+        const syncSpy = vi.spyOn(extensionClient, 'syncBrowserBookmarks').mockResolvedValue({
+            importedBookmarks: [],
+            exportedCount: 0
+        })
+        const pushSpy = vi.spyOn(extensionClient, 'pushBookmarksToBrowser').mockResolvedValue({
+            count: 1,
+            folder: 'BookSmart'
+        })
+
+        const rawBookmarks = [{ id: '1', title: 'Local', url: 'https://local.com' }]
+        const { result } = renderHook(() => useBrowserSync({ rawBookmarks, addCommand }))
+
+        const mockPointerEvent = {
+            nativeEvent: {},
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn()
+        }
+
+        // twoWaySync called directly as onClick handler
+        await act(async () => {
+            await result.current.twoWaySync(mockPointerEvent)
+        })
+        expect(syncSpy).toHaveBeenCalledWith(expect.any(Array), {})
+
+        // pushToBrowser called directly as onClick handler
+        await act(async () => {
+            await result.current.pushToBrowser(mockPointerEvent)
+        })
+        expect(pushSpy).toHaveBeenCalledWith(expect.any(Array), { targetFolderName: 'BookSmart', clean: false })
+    })
 })

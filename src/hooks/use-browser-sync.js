@@ -42,6 +42,16 @@ async function getEffectiveBookmarks(provided) {
     return provided || []
 }
 
+function isDomEvent(obj) {
+    if (!obj || typeof obj !== 'object') return false;
+    return (
+        'nativeEvent' in obj ||
+        typeof obj.preventDefault === 'function' ||
+        typeof obj.stopPropagation === 'function' ||
+        (typeof Event !== 'undefined' && obj instanceof Event)
+    );
+}
+
 export function useBrowserSync({ rawBookmarks = [], addCommand }) {
     const { t } = useTranslation()
     const [isSyncing, setIsSyncing] = useState(false)
@@ -113,7 +123,10 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
             return { success: false, count: 0 }
         }
 
-        const targetBookmarks = await getEffectiveBookmarks(bookmarksToPush || rawBookmarksRef.current)
+        const safeBookmarksInput = isDomEvent(bookmarksToPush) ? undefined : bookmarksToPush
+        const safeOptions = isDomEvent(options) ? {} : (isDomEvent(bookmarksToPush) ? {} : options)
+
+        const targetBookmarks = await getEffectiveBookmarks(safeBookmarksInput || rawBookmarksRef.current)
         if (!targetBookmarks || targetBookmarks.length === 0) {
             toast.info(t('notifications.noBookmarksToExport', 'No bookmarks to push.'))
             return { success: false, count: 0 }
@@ -121,10 +134,10 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
 
         setIsSyncing(true)
         try {
-            const folderName = options.targetFolderName || 'BookSmart'
+            const folderName = safeOptions.targetFolderName || 'BookSmart'
             const result = await pushBookmarksToBrowser(targetBookmarks, {
                 targetFolderName: folderName,
-                clean: options.clean ?? false
+                clean: safeOptions.clean ?? false
             })
 
             toast.success(t('notifications.browserPushedSuccess', {
@@ -152,10 +165,12 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
             return { success: false }
         }
 
+        const safeOptions = isDomEvent(options) ? {} : options
+
         setIsSyncing(true)
         try {
             const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
-            const result = await syncBrowserBookmarks(currentBookmarks, options)
+            const result = await syncBrowserBookmarks(currentBookmarks, safeOptions)
             const rawImported = result.importedBookmarks || []
             const existingUrls = new Set(currentBookmarks.map(b => normalizeUrl(b.url)).filter(Boolean))
             const imported = deduplicateBookmarks(rawImported, existingUrls)

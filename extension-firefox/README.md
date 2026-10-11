@@ -31,7 +31,8 @@ BookSmart Companion is a lightweight, serverless browser extension (Manifest V3)
 ### Mozilla Firefox:
 1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on...** (Geçici Eklenti Yükle).
-3. Select the `manifest.firefox.json` file inside the `extension/` directory (or run `pnpm build:extension` and load `dist/extension-firefox/manifest.json`).
+3. Select the `manifest.json` file inside the `extension-firefox/` directory (or `dist/extension-firefox/manifest.json`).
+   > **Note:** Do NOT select `extension/manifest.json` (Chrome). Firefox Manifest V3 requires `background.scripts` instead of Chrome's `service_worker`. The dedicated Firefox manifest is located in `extension-firefox/manifest.json`.
 
 ---
 
