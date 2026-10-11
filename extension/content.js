@@ -172,17 +172,17 @@
         }
 
         // Guard sensitive bookmark APIs against untrusted origins
-        const isBookmarkAction = [
-            'BOOKSMART_GET_BROWSER_BOOKMARKS',
-            'BOOKSMART_PUSH_BROWSER_BOOKMARKS',
-            'BOOKSMART_SYNC_BROWSER_BOOKMARKS',
-            'BOOKSMART_CAPTURE_TAB'
-        ].includes(type);
+        const RESULT_TYPE_BY_ACTION = {
+            BOOKSMART_GET_BROWSER_BOOKMARKS: 'BOOKSMART_BROWSER_BOOKMARKS_RESULT',
+            BOOKSMART_PUSH_BROWSER_BOOKMARKS: 'BOOKSMART_BROWSER_PUSH_RESULT',
+            BOOKSMART_SYNC_BROWSER_BOOKMARKS: 'BOOKSMART_BROWSER_SYNC_RESULT',
+            BOOKSMART_CAPTURE_TAB: 'BOOKSMART_CAPTURE_TAB_RESULT'
+        };
 
-        if (isBookmarkAction && !isOriginAllowed()) {
+        if (RESULT_TYPE_BY_ACTION[type] && !isOriginAllowed()) {
             window.postMessage({
                 source: 'BOOKSMART_EXTENSION',
-                type: `${type}_RESULT`,
+                type: RESULT_TYPE_BY_ACTION[type],
                 requestId,
                 success: false,
                 error: 'Access denied: Untrusted origin. Bookmarks access is restricted to BookSmart origins.'

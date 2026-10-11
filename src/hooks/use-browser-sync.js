@@ -4,7 +4,8 @@ import {
     getBrowserBookmarks,
     pushBookmarksToBrowser,
     syncBrowserBookmarks,
-    isExtensionConnected
+    isExtensionConnected,
+    pingExtension
 } from '../lib/extension-client'
 import { normalizeUrl } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
@@ -169,6 +170,32 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
             setIsSyncing(false)
         }
     }, [rawBookmarks, addCommand, t])
+
+    // Auto-sync on mount if opened with ?sync=auto (e.g. from extension popup)
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        try {
+            const params = new URLSearchParams(window.location.search)
+            if (params.get('sync') === 'auto') {
+                params.delete('sync')
+                const newSearch = params.toString() ? `?${params.toString()}` : ''
+                const newUrl = `${window.location.pathname}${newSearch}${window.location.hash}`
+                window.history.replaceState({}, '', newUrl)
+
+                const timer = setTimeout(async () => {
+                    if (!isExtensionConnected()) {
+                        await pingExtension(1500).catch(() => {})
+                    }
+                    if (isExtensionConnected()) {
+                        twoWaySync()
+                    }
+                }, 300)
+                return () => clearTimeout(timer)
+            }
+        } catch (err) {
+            console.error('Failed to parse URL for auto-sync:', err)
+        }
+    }, [twoWaySync])
 
     // Listen for extension events (e.g. popup sync trigger, active tab capture)
     useEffect(() => {

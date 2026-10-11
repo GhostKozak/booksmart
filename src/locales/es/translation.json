@@ -154,7 +154,7 @@
             "extensionRetryBtn": "Verificar Conexión",
             "extensionDetectedToast": "¡Extensión complementaria conectada con éxito!",
             "extensionNotFoundToast": "Extensión aún no detectada.",
-            "corsProxy": "CORS Proxy URL",
+            "corsProxy": "URL del proxy CORS",
             "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
         },
         "languages": {
@@ -701,10 +701,6 @@
     "accessibility": {
         "skipToMain": "Saltar al contenido principal"
     },
-    "network": {
-        "corsProxy": "URL del proxy CORS",
-        "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
-    },
     "notifications": {
         "duplicatesMerged": "{{count}} duplicados fusionados con éxito",
         "browserImportedSuccess": "{{count}} marcadores importados del navegador",
@@ -712,7 +708,8 @@
         "browserSyncedSuccess": "Sincronizado: {{imported}} importados, {{exported}} exportados al navegador",
         "noBookmarksInBrowser": "No se encontraron marcadores en el navegador",
         "allBookmarksAlreadyImported": "Todos los marcadores del navegador ya están en tu biblioteca",
-        "noBookmarksToExport": "No hay marcadores para exportar al navegador"
+        "noBookmarksToExport": "No hay marcadores para exportar al navegador",
+        "tabCaptured": "Pestaña activa guardada: {{title}}"
     },
     "commandPalette": {
         "title": "Paleta de comandos",

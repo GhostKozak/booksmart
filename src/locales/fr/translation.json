@@ -154,8 +154,8 @@
             "extensionRetryBtn": "Vérifier la Connexion",
             "extensionDetectedToast": "Extension compagnon connectée avec succès !",
             "extensionNotFoundToast": "Extension non encore détectée.",
-            "corsProxy": "CORS Proxy URL",
-            "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
+            "corsProxy": "URL du proxy CORS",
+            "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages."
         },
         "languages": {
             "en": "Anglais",
@@ -701,10 +701,6 @@
     "accessibility": {
         "skipToMain": "Passer au contenu principal"
     },
-    "network": {
-        "corsProxy": "URL du proxy CORS",
-        "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages."
-    },
     "notifications": {
         "duplicatesMerged": "{{count}} doublons fusionnés avec succès",
         "browserImportedSuccess": "{{count}} signets importés depuis le navigateur",
@@ -712,7 +708,8 @@
         "browserSyncedSuccess": "Synchronisé : {{imported}} importés, {{exported}} exportés vers le navigateur",
         "noBookmarksInBrowser": "Aucun signet trouvé dans le navigateur",
         "allBookmarksAlreadyImported": "Tous les signets du navigateur sont déjà dans votre bibliothèque",
-        "noBookmarksToExport": "Aucun signet à exporter vers le navigateur"
+        "noBookmarksToExport": "Aucun signet à exporter vers le navigateur",
+        "tabCaptured": "Onglet actif enregistré : {{title}}"
     },
     "commandPalette": {
         "title": "Palette de commandes",

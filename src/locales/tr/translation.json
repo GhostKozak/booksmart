@@ -708,7 +708,8 @@
         "browserSyncedSuccess": "Eşitlendi: {{imported}} içe aktarıldı, {{exported}} tarayıcıya gönderildi",
         "noBookmarksInBrowser": "Tarayıcıda yer imi bulunamadı",
         "allBookmarksAlreadyImported": "Tüm tarayıcı yer imleri zaten kütüphanenizde mevcut",
-        "noBookmarksToExport": "Tarayıcıya gönderilecek yer imi yok"
+        "noBookmarksToExport": "Tarayıcıya gönderilecek yer imi yok",
+        "tabCaptured": "Aktif sekme kaydedildi: {{title}}"
     },
     "commandPalette": {
         "title": "Komut Paleti",

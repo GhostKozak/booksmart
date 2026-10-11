@@ -708,7 +708,8 @@
         "browserSyncedSuccess": "Synced: {{imported}} imported, {{exported}} pushed to browser",
         "noBookmarksInBrowser": "No bookmarks found in browser",
         "allBookmarksAlreadyImported": "All browser bookmarks are already in your library",
-        "noBookmarksToExport": "No bookmarks to export to browser"
+        "noBookmarksToExport": "No bookmarks to export to browser",
+        "tabCaptured": "Saved active tab: {{title}}"
     },
     "commandPalette": {
         "title": "Command Palette",

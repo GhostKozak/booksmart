@@ -175,4 +175,34 @@ describe('useBrowserSync', () => {
         expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['imp_1'])
         expect(db.bookmarks.clear).not.toHaveBeenCalled()
     })
+
+    it('automatically triggers twoWaySync and cleans query param when ?sync=auto is present', async () => {
+        vi.spyOn(extensionClient, 'isExtensionConnected').mockReturnValue(true)
+        vi.spyOn(extensionClient, 'syncBrowserBookmarks').mockResolvedValue({
+            importedBookmarks: [],
+            exportedCount: 0
+        })
+
+        const originalLocation = window.location
+        const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {})
+
+        try {
+            delete window.location
+            window.location = new URL('http://localhost:5173/?sync=auto')
+
+            vi.useFakeTimers()
+            renderHook(() => useBrowserSync({ rawBookmarks: [], addCommand }))
+
+            expect(replaceStateSpy).toHaveBeenCalledWith({}, '', '/')
+
+            await act(async () => {
+                vi.advanceTimersByTime(500)
+            })
+
+            expect(extensionClient.syncBrowserBookmarks).toHaveBeenCalled()
+        } finally {
+            vi.useRealTimers()
+            window.location = originalLocation
+        }
+    })
 })

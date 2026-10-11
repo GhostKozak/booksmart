@@ -154,8 +154,8 @@
             "extensionRetryBtn": "Verbindung prüfen",
             "extensionDetectedToast": "Begleiter-Erweiterung erfolgreich verbunden!",
             "extensionNotFoundToast": "Erweiterung noch nicht erkannt.",
-            "corsProxy": "CORS Proxy URL",
-            "corsProxyDesc": "Optional proxy to bypass CORS restrictions for link checking and page summarization."
+            "corsProxy": "CORS-Proxy-URL",
+            "corsProxyDesc": "Optionaler Proxy zur Umgehung von CORS-Beschränkungen für Link-Prüfung und Zusammenfassungen."
         },
         "vault": {
             "title": "API-Schlüssel-Tresor",
@@ -701,10 +701,6 @@
     "accessibility": {
         "skipToMain": "Zum Hauptinhalt springen"
     },
-    "network": {
-        "corsProxy": "CORS-Proxy-URL",
-        "corsProxyDesc": "Optionaler Proxy zur Umgehung von CORS-Beschränkungen für Link-Prüfung und Zusammenfassungen."
-    },
     "notifications": {
         "duplicatesMerged": "{{count}} Duplikate erfolgreich zusammengeführt",
         "browserImportedSuccess": "{{count}} Lesezeichen aus dem Browser importiert",
@@ -712,7 +708,8 @@
         "browserSyncedSuccess": "Synchronisiert: {{imported}} importiert, {{exported}} in Browser exportiert",
         "noBookmarksInBrowser": "Keine Lesezeichen im Browser gefunden",
         "allBookmarksAlreadyImported": "Alle Browser-Lesezeichen befinden sich bereits in Ihrer Bibliothek",
-        "noBookmarksToExport": "Keine Lesezeichen zum Exportieren in den Browser vorhanden"
+        "noBookmarksToExport": "Keine Lesezeichen zum Exportieren in den Browser vorhanden",
+        "tabCaptured": "Aktiver Tab gespeichert: {{title}}"
     },
     "commandPalette": {
         "title": "Befehlspalette",
