@@ -278,6 +278,7 @@
         },
         "shortcuts": {
             "title": "Keyboard Shortcuts",
+            "commandPalette": "Command Palette",
             "focusSearch": "Focus Search",
             "selectAll": "Select All",
             "deleteSelected": "Delete Selected",
@@ -285,7 +286,13 @@
             "undo": "Undo",
             "redo": "Redo",
             "redoAlt": "Redo (Alt)",
-            "help": "Show Shortcuts"
+            "help": "Show Shortcuts",
+            "customizeHint": "Click any shortcut badge to record a new key combination",
+            "reset": "Reset",
+            "resetDefaults": "Reset to Defaults",
+            "clickToEdit": "Click to customize",
+            "pressKey": "Press new keys... (Esc to cancel)",
+            "conflict": "Shortcut \"{{key}}\" is already assigned to \"{{action}}\""
         },
         "sortConf": {
             "title": "Confirm Changes",
@@ -621,5 +628,20 @@
     },
     "notifications": {
         "duplicatesMerged": "Successfully merged {{count}} duplicate bookmarks"
+    },
+    "commandPalette": {
+        "title": "Command Palette",
+        "shortTitle": "Commands",
+        "placeholder": "Type a command or search...",
+        "noResults": "No commands found.",
+        "navigate": "to navigate",
+        "select": "to select",
+        "footer": "BookSmart Palette",
+        "categories": {
+            "views": "Views",
+            "actions": "Actions",
+            "ai": "AI Tools",
+            "system": "Preferences & System"
+        }
     }
 }

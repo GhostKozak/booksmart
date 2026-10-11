@@ -49,6 +49,11 @@ export const useAppStore = create((set, get) => ({
     isShortcutsOpen: false,
     setIsShortcutsOpen: (isOpen) => set({ isShortcutsOpen: isOpen }),
 
+    isCommandPaletteOpen: false,
+    setIsCommandPaletteOpen: (isOpen) => set((state) => ({
+        isCommandPaletteOpen: typeof isOpen === 'function' ? isOpen(state.isCommandPaletteOpen) : isOpen
+    })),
+
     showBackupModal: false,
     setShowBackupModal: (show) => set({ showBackupModal: show }),
 

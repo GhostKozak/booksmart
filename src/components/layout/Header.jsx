@@ -35,7 +35,8 @@ export function Header({
         sortBy, setSortBy,
         openSettings,
         isSidebarOpen, setIsSidebarOpen,
-        setIsShortcutsOpen
+        setIsShortcutsOpen,
+        setIsCommandPaletteOpen
     } = useAppStore()
 
     const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
@@ -178,6 +179,19 @@ export function Header({
                         <Search className="h-5 w-5" />
                     </Button>
                 )}
+
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsCommandPaletteOpen(true)}
+                    className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/60 rounded-lg border border-border/40"
+                    title={t('commandPalette.title', 'Command Palette (Ctrl+K)')}
+                    aria-label={t('commandPalette.title', 'Command Palette')}
+                >
+                    <Search className="w-3.5 h-3.5" />
+                    <span className="font-medium">{t('commandPalette.shortTitle', 'Commands')}</span>
+                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-background border rounded shadow-2xs text-muted-foreground ml-1">⌘K</kbd>
+                </Button>
 
                 <DropdownMenu
                     trigger={
@@ -356,6 +370,12 @@ export function Header({
                         </div>
 
                         <DropdownSeparator />
+
+                        <DropdownItem onClick={() => setIsCommandPaletteOpen(true)} className="py-2.5 mb-2 font-medium">
+                            <Search className="h-4 w-4 mr-2.5 text-muted-foreground" />
+                            <span>{t('commandPalette.title', 'Command Palette')}</span>
+                            <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-muted border rounded">⌘K</kbd>
+                        </DropdownItem>
 
                         <div className="grid grid-cols-2 gap-2 mb-2">
                             <DropdownItem onClick={() => setIsShortcutsOpen(true)} className="py-2.5">

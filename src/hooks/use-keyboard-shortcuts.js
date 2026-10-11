@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { getStoredShortcuts, matchesShortcut } from '../lib/shortcuts'
 
 export function useKeyboardShortcuts({
     selectedIds,
@@ -8,56 +9,85 @@ export function useKeyboardShortcuts({
     undo,
     redo,
     searchInputRef,
-    setIsShortcutsOpen
+    setIsShortcutsOpen,
+    setIsCommandPaletteOpen
 }) {
     useEffect(() => {
         const handleKeyDown = (e) => {
-            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+            const shortcuts = getStoredShortcuts()
 
-            // "/" to focus search
-            if (e.key === '/' && !isInput) {
+            // Command Palette (Ctrl+K / Cmd+K) - Works even inside input
+            if (matchesShortcut(e, shortcuts.commandPalette)) {
+                e.preventDefault()
+                setIsCommandPaletteOpen?.((prev) => !prev)
+                return
+            }
+
+            // If an input is focused, don't execute single-key shortcuts
+            if (isInput) return
+
+            // Focus search
+            if (matchesShortcut(e, shortcuts.focusSearch)) {
                 e.preventDefault()
                 searchInputRef.current?.focus()
+                return
             }
 
-            // "Delete" to delete selected
-            if (e.key === 'Delete' && selectedIds.size > 0 && !isInput) {
+            // Delete selected
+            if (matchesShortcut(e, shortcuts.deleteSelected) && selectedIds.size > 0) {
                 e.preventDefault()
-                handleBatchDelete()
+                handleBatchDelete?.()
+                return
             }
 
-            // "Ctrl+A" to select all
-            if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isInput) {
+            // Select all
+            if (matchesShortcut(e, shortcuts.selectAll)) {
                 e.preventDefault()
-                setSelectedIds(new Set(bookmarks.map(b => b.id)))
+                setSelectedIds?.(new Set(bookmarks.map(b => b.id)))
+                return
             }
 
-            // Ctrl+Z to undo
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey && !isInput) {
+            // Undo
+            if (matchesShortcut(e, shortcuts.undo)) {
                 e.preventDefault()
-                undo()
+                undo?.()
+                return
             }
 
-            // Ctrl+Y or Ctrl+Shift+Z to redo
-            if (!isInput && ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && (e.key === 'z' || e.key === 'Z'))))) {
+            // Redo
+            if (matchesShortcut(e, shortcuts.redo) || ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z'))) {
                 e.preventDefault()
-                redo()
+                redo?.()
+                return
             }
 
-            // Escape to clear selection
-            if (e.key === 'Escape' && selectedIds.size > 0 && !isInput) {
+            // Clear selection
+            if (matchesShortcut(e, shortcuts.clearSelection) && selectedIds.size > 0) {
                 e.preventDefault()
-                setSelectedIds(new Set())
+                setSelectedIds?.(new Set())
+                return
             }
 
-            // "?" to show shortcuts
-            if (e.key === '?' && !isInput) {
+            // Help / Shortcuts
+            if (matchesShortcut(e, shortcuts.help)) {
                 e.preventDefault()
-                setIsShortcutsOpen(true)
+                setIsShortcutsOpen?.(true)
+                return
             }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [selectedIds, bookmarks, handleBatchDelete, undo, redo, searchInputRef, setSelectedIds, setIsShortcutsOpen])
+    }, [
+        selectedIds,
+        bookmarks,
+        handleBatchDelete,
+        undo,
+        redo,
+        searchInputRef,
+        setSelectedIds,
+        setIsShortcutsOpen,
+        setIsCommandPaletteOpen
+    ])
 }

@@ -278,6 +278,7 @@
         },
         "shortcuts": {
             "title": "Klavye Kısayolları",
+            "commandPalette": "Komut Paleti",
             "focusSearch": "Aramaya Odaklan",
             "selectAll": "Tümünü Seç",
             "deleteSelected": "Seçilenleri Sil",
@@ -285,7 +286,13 @@
             "undo": "Geri Al",
             "redo": "Yinele",
             "redoAlt": "Yinele (Alt)",
-            "help": "Kısayolları Göster"
+            "help": "Kısayolları Göster",
+            "customizeHint": "Yeni bir tuş bileşimi kaydetmek için herhangi bir kısayola tıklayın",
+            "reset": "Sıfırla",
+            "resetDefaults": "Varsayılanlara Sıfırla",
+            "clickToEdit": "Düzenlemek için tıklayın",
+            "pressKey": "Yeni tuşlara basın... (İptal için Esc)",
+            "conflict": "\"{{key}}\" kısayolu zaten \"{{action}}\" işlemine atanmış"
         },
         "sortConf": {
             "title": "Değişiklikleri Onayla",
@@ -621,5 +628,20 @@
     },
     "notifications": {
         "duplicatesMerged": "{{count}} yinelenen yer imi başarıyla birleştirildi"
+    },
+    "commandPalette": {
+        "title": "Komut Paleti",
+        "shortTitle": "Komutlar",
+        "placeholder": "Bir komut yazın veya arayın...",
+        "noResults": "Hiçbir komut bulunamadı.",
+        "navigate": "gezinmek için",
+        "select": "seçmek için",
+        "footer": "BookSmart Paleti",
+        "categories": {
+            "views": "Görünümler",
+            "actions": "İşlemler",
+            "ai": "Yapay Zeka",
+            "system": "Tercihler ve Sistem"
+        }
     }
 }

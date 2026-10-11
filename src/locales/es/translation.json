@@ -278,6 +278,7 @@
         },
         "shortcuts": {
             "title": "Atajos de teclado",
+            "commandPalette": "Paleta de comandos",
             "focusSearch": "Enfocar Búsqueda",
             "selectAll": "Seleccionar Todo",
             "deleteSelected": "Eliminar Seleccionados",
@@ -285,7 +286,13 @@
             "undo": "Deshacer",
             "redo": "Rehacer",
             "redoAlt": "Rehacer (Alt)",
-            "help": "Mostrar Atajos"
+            "help": "Mostrar Atajos",
+            "customizeHint": "Haz clic en cualquier atajo para grabar una nueva combinación",
+            "reset": "Restablecer",
+            "resetDefaults": "Restablecer valores predeterminados",
+            "clickToEdit": "Haz clic para personalizar",
+            "pressKey": "Presiona las nuevas teclas... (Esc para cancelar)",
+            "conflict": "El atajo \"{{key}}\" ya está asignado a \"{{action}}\""
         },
         "sortConf": {
             "title": "Confirmar Cambios",
@@ -625,5 +632,20 @@
     },
     "notifications": {
         "duplicatesMerged": "{{count}} duplicados fusionados con éxito"
+    },
+    "commandPalette": {
+        "title": "Paleta de comandos",
+        "shortTitle": "Comandos",
+        "placeholder": "Escribe un comando o busca...",
+        "noResults": "No se encontraron comandos.",
+        "navigate": "para navegar",
+        "select": "para seleccionar",
+        "footer": "BookSmart Palette",
+        "categories": {
+            "views": "Vistas",
+            "actions": "Acciones",
+            "ai": "Herramientas IA",
+            "system": "Preferencias y Sistema"
+        }
     }
 }

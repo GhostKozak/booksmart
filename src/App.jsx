@@ -42,6 +42,7 @@ const RuleModal = lazy(() => import('./components/modals/RuleModal').then(m => (
 const RuleConflictModal = lazy(() => import('./components/modals/RuleConflictModal').then(m => ({ default: m.RuleConflictModal })))
 const ClearAllModal = lazy(() => import('./components/modals/ClearAllModal').then(m => ({ default: m.ClearAllModal })))
 const ShortcutsModal = lazy(() => import('./components/modals/ShortcutsModal').then(m => ({ default: m.ShortcutsModal })))
+const CommandPalette = lazy(() => import('./components/modals/CommandPalette').then(m => ({ default: m.CommandPalette })))
 const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirmationModal').then(m => ({ default: m.SortConfirmationModal })))
 const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
 const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').then(m => ({ default: m.EditBookmarkModal })))
@@ -63,10 +64,11 @@ function App() {
   const {
     searchQuery, searchMode, activeTag, activeFolder, smartFilter,
     dateFilter, sortBy, activeCollection, resolvedTheme, initTheme,
-    settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen,
+    settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen, openSettings,
     isConflictModalOpen, setIsConflictModalOpen,
     showBackupModal, setShowBackupModal,
     isShortcutsOpen, setIsShortcutsOpen,
+    isCommandPaletteOpen, setIsCommandPaletteOpen,
     isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection,
     editingBookmark, setEditingBookmark,
     previewBookmark, setPreviewBookmark,
@@ -188,7 +190,8 @@ function App() {
     handleBatchDelete: operations.handleBatchDelete,
     undo, redo,
     searchInputRef,
-    setIsShortcutsOpen
+    setIsShortcutsOpen,
+    setIsCommandPaletteOpen
   })
 
   const handlePreview = useCallback((bookmark) => {
@@ -444,6 +447,40 @@ function App() {
             <ShortcutsModal
               isOpen={isShortcutsOpen}
               onClose={() => setIsShortcutsOpen(false)}
+            />
+          )}
+
+          {isCommandPaletteOpen && (
+            <CommandPalette
+              isOpen={isCommandPaletteOpen}
+              onClose={() => setIsCommandPaletteOpen(false)}
+              setViewMode={useAppStore.getState().setViewMode}
+              toggleAll={useAppStore.getState().toggleAll}
+              bookmarks={worker.bookmarks}
+              selectedIds={selectedIds}
+              setSelectedIds={setSelectedIds}
+              handleBatchDelete={operations.handleBatchDelete}
+              undo={undo}
+              redo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              mergeDuplicates={operations.mergeDuplicates}
+              removeDuplicates={operations.removeDuplicates}
+              duplicateCount={worker.duplicateCount}
+              cleanAllUrls={operations.cleanAllUrls}
+              cleanableCount={operations.cleanableCount}
+              checkAllLinks={worker.checkAllLinks}
+              isCheckingLinks={worker.isCheckingLinks}
+              openExportModal={() => actions.guardedExport(exporter.openExportModal)}
+              handleAutoCategorize={autoCategorize.handleAutoCategorize}
+              handleMagicSort={handleMagicSort}
+              handleFixTitles={aiTools.handleFixTitles}
+              handleFindSmartDuplicates={aiTools.handleFindSmartDuplicates}
+              setTheme={useAppStore.getState().setTheme}
+              setIsShortcutsOpen={setIsShortcutsOpen}
+              openSettings={openSettings}
+              clearAll={actions.clearAll}
+              loadDemoData={loadDemoData}
             />
           )}
 
