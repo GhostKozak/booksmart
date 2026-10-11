@@ -585,7 +585,10 @@
             "desc": "Arrastra y suelta archivos HTML (Navegadores, Pocket), JSON (Raindrop, Pinboard), CSV o Markdown para comenzar.",
             "browse": "Examinar Archivos",
             "importFromBrowserDirect": "Importar marcadores del navegador (1-Clic)",
-            "extensionConnected": "Extensión complementaria conectada"
+            "extensionConnected": "Extensión complementaria conectada",
+            "pullWithoutFileTitle": "Importación directa desde el navegador",
+            "pullWithoutFileDesc": "Importa marcadores directamente desde tu navegador sin tener que exportar primero un archivo HTML.",
+            "setupExtensionBtn": "Instalar extensión e importar marcadores"
         },
         "empty": {
             "title": "No se encontraron marcadores",
@@ -706,7 +709,9 @@
             "title": "¡Listo para Empezar!",
             "desc": "Sube tu archivo de marcadores para comenzar a organizar, o prueba la demo para explorar las funciones.",
             "upload": "Subir Archivo",
-            "demo": "Probar Demo"
+            "demo": "Probar Demo",
+            "pullBrowser": "Importar del navegador (1-Clic)",
+            "setupAndPull": "Instalar extensión e importar"
         }
     },
     "accessibility": {

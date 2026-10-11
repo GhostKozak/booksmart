@@ -585,7 +585,10 @@
             "desc": "Glissez-déposez des fichiers HTML (Navigateurs, Pocket), JSON (Raindrop, Pinboard), CSV ou Markdown pour commencer.",
             "browse": "Parcourir",
             "importFromBrowserDirect": "Importer les signets du navigateur (1-Clic)",
-            "extensionConnected": "Extension compagnon connectée"
+            "extensionConnected": "Extension compagnon connectée",
+            "pullWithoutFileTitle": "Import direct depuis le navigateur",
+            "pullWithoutFileDesc": "Importez directement les signets depuis votre navigateur sans exporter de fichier HTML.",
+            "setupExtensionBtn": "Installer l'extension et importer les signets"
         },
         "empty": {
             "title": "Aucun signet trouvé",
@@ -706,7 +709,9 @@
             "title": "Prêt à Commencer !",
             "desc": "Téléchargez votre fichier de signets pour commencer à organiser, ou essayez la démo pour explorer les fonctionnalités.",
             "upload": "Télécharger un Fichier",
-            "demo": "Essayer la Démo"
+            "demo": "Essayer la Démo",
+            "pullBrowser": "Importer du navigateur (1-Clic)",
+            "setupAndPull": "Installer l'extension et importer"
         }
     },
     "accessibility": {

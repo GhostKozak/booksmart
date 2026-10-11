@@ -351,6 +351,7 @@ function App() {
           isExtensionConnected={worker.isExtensionConnected}
           importFromBrowser={browserSync.importFromBrowser}
           isSyncing={browserSync.isSyncing}
+          openExtensionGuide={openExtensionGuide}
           linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
           availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
           allCollections={collectionsHook.collections}

@@ -585,7 +585,10 @@
             "desc": "Drag and drop HTML (Browsers, Pocket), JSON (Raindrop, Pinboard), CSV, or Markdown files to get started.",
             "browse": "Browse Files",
             "importFromBrowserDirect": "Import Browser Bookmarks (1-Click)",
-            "extensionConnected": "Companion Extension Connected"
+            "extensionConnected": "Companion Extension Connected",
+            "pullWithoutFileTitle": "Direct Browser Import",
+            "pullWithoutFileDesc": "Import bookmarks straight from your browser without exporting an HTML file first.",
+            "setupExtensionBtn": "Install Extension & Pull Bookmarks"
         },
         "empty": {
             "title": "No bookmarks found",
@@ -706,7 +709,9 @@
             "title": "Ready to Go!",
             "desc": "Upload your bookmark file to start organizing, or try the demo to explore the features.",
             "upload": "Upload File",
-            "demo": "Try Demo"
+            "demo": "Try Demo",
+            "pullBrowser": "Import from Browser (1-Click)",
+            "setupAndPull": "Install Extension & Pull from Browser"
         }
     },
     "accessibility": {

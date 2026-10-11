@@ -585,7 +585,10 @@
             "desc": "Başlamak için HTML (Tarayıcılar, Pocket), JSON (Raindrop, Pinboard), CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
             "browse": "Dosyalara Göz At",
             "importFromBrowserDirect": "Tarayıcı Yer İmlerini İçe Aktar (Tek Tık)",
-            "extensionConnected": "Companion Eklentisi Bağlı"
+            "extensionConnected": "Companion Eklentisi Bağlı",
+            "pullWithoutFileTitle": "Tarayıcıdan Doğrudan İçe Aktar",
+            "pullWithoutFileDesc": "HTML dosyası dışa aktarmadan, Companion eklentisiyle yer imlerinizi tek tıkla tarayıcınızdan çekin.",
+            "setupExtensionBtn": "Eklentiyi Kur ve Yer İmlerini Çek"
         },
         "empty": {
             "title": "Yer imi bulunamadı",
@@ -706,7 +709,9 @@
             "title": "Hazırsınız!",
             "desc": "Düzenlemeye başlamak için yer imi dosyanızı yükleyin veya özellikleri keşfetmek için demoyu deneyin.",
             "upload": "Dosya Yükle",
-            "demo": "Demoyu Dene"
+            "demo": "Demoyu Dene",
+            "pullBrowser": "Tarayıcıdan Çek (Tek Tık)",
+            "setupAndPull": "Eklentiyle Tarayıcıdan Çek"
         }
     },
     "accessibility": {

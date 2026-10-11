@@ -585,7 +585,10 @@
             "desc": "Ziehen Sie HTML (Browser, Pocket), JSON (Raindrop, Pinboard), CSV oder Markdown hierher, um zu beginnen.",
             "browse": "Dateien Durchsuchen",
             "importFromBrowserDirect": "Browser-Lesezeichen importieren (1-Klick)",
-            "extensionConnected": "Begleiter-Erweiterung verbunden"
+            "extensionConnected": "Begleiter-Erweiterung verbunden",
+            "pullWithoutFileTitle": "Direkter Browser-Import",
+            "pullWithoutFileDesc": "Lesezeichen direkt aus Ihrem Browser importieren, ohne zuvor eine HTML-Datei exportieren zu müssen.",
+            "setupExtensionBtn": "Erweiterung installieren & Lesezeichen abrufen"
         },
         "empty": {
             "title": "Keine Lesezeichen gefunden",
@@ -706,7 +709,9 @@
             "title": "Bereit zum Start!",
             "desc": "Laden Sie Ihre Lesezeichen-Datei hoch, um mit dem Organisieren zu beginnen, oder probieren Sie die Demo aus.",
             "upload": "Datei Hochladen",
-            "demo": "Demo Testen"
+            "demo": "Demo Testen",
+            "pullBrowser": "Vom Browser importieren (1-Klick)",
+            "setupAndPull": "Erweiterung installieren & abrufen"
         }
     },
     "accessibility": {

@@ -47,7 +47,7 @@ describe('ExtensionPromptBanner', () => {
         expect(screen.queryByText(/Supercharge with Companion Extension/i)).not.toBeInTheDocument()
 
         act(() => {
-            vi.advanceTimersByTime(1600)
+            vi.advanceTimersByTime(700)
         })
 
         expect(screen.getByText(/Supercharge with Companion Extension/i)).toBeInTheDocument()
@@ -58,7 +58,7 @@ describe('ExtensionPromptBanner', () => {
     it('dismisses banner and sets localStorage when Later is clicked', () => {
         render(<ExtensionPromptBanner isExtensionConnected={false} onOpenGuide={vi.fn()} />)
         act(() => {
-            vi.advanceTimersByTime(1600)
+            vi.advanceTimersByTime(700)
         })
 
         const laterBtn = screen.getByText(/Later/i)
@@ -72,7 +72,7 @@ describe('ExtensionPromptBanner', () => {
         const onOpenGuide = vi.fn()
         render(<ExtensionPromptBanner isExtensionConnected={false} onOpenGuide={onOpenGuide} />)
         act(() => {
-            vi.advanceTimersByTime(1600)
+            vi.advanceTimersByTime(700)
         })
 
         const setupBtn = screen.getByText(/Setup Extension/i)

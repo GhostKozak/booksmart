@@ -4,14 +4,22 @@
  */
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Upload, Filter, Sparkles, BookOpen, ChevronRight, ChevronLeft, ArrowRight, FolderTree, Tag, Wand2, LayoutGrid } from 'lucide-react'
+import { Upload, Filter, Sparkles, BookOpen, ChevronRight, ChevronLeft, ArrowRight, FolderTree, Tag, Wand2, LayoutGrid, CloudDownload } from 'lucide-react'
 import { Button } from './ui/button'
 import { Logo } from './ui/Logo'
 import { cn } from '../lib/utils'
 
 const TOTAL_STEPS = 4
 
-export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
+export function OnboardingWizard({
+    onUploadClick,
+    onLoadDemo,
+    getInputProps,
+    isExtensionConnected = false,
+    importFromBrowser,
+    isSyncing = false,
+    openExtensionGuide
+}) {
     const { t } = useTranslation()
     const [currentStep, setCurrentStep] = useState(0)
     const [direction, setDirection] = useState(1) // 1=forward, -1=backward
@@ -38,7 +46,17 @@ export function OnboardingWizard({ onUploadClick, onLoadDemo, getInputProps }) {
         // Step 3: Organize
         <OrganizeStep key="organize" t={t} />,
         // Step 4: Get Started
-        <GetStartedStep key="start" t={t} onUploadClick={onUploadClick} onLoadDemo={onLoadDemo} getInputProps={getInputProps} />,
+        <GetStartedStep
+            key="start"
+            t={t}
+            onUploadClick={onUploadClick}
+            onLoadDemo={onLoadDemo}
+            getInputProps={getInputProps}
+            isExtensionConnected={isExtensionConnected}
+            importFromBrowser={importFromBrowser}
+            isSyncing={isSyncing}
+            openExtensionGuide={openExtensionGuide}
+        />,
     ]
 
     return (
@@ -201,7 +219,16 @@ function OrganizeStep({ t }) {
     )
 }
 
-function GetStartedStep({ t, onUploadClick, onLoadDemo, getInputProps }) {
+function GetStartedStep({
+    t,
+    onUploadClick,
+    onLoadDemo,
+    getInputProps,
+    isExtensionConnected,
+    importFromBrowser,
+    isSyncing,
+    openExtensionGuide
+}) {
     return (
         <>
             <div className="bg-linear-to-br from-green-500/10 to-emerald-500/5 mb-6 p-5 rounded-2xl ring-1 ring-green-500/10">
@@ -213,26 +240,51 @@ function GetStartedStep({ t, onUploadClick, onLoadDemo, getInputProps }) {
             <p className="mb-6 max-w-md text-muted-foreground text-sm">
                 {t('onboarding.getStarted.desc')}
             </p>
-            <div className="flex sm:flex-row flex-col gap-3 w-full max-w-sm">
-                <label className="flex-1 cursor-pointer">
-                    <input {...getInputProps()} />
+            <div className="flex flex-col gap-2.5 w-full max-w-sm">
+                {isExtensionConnected && importFromBrowser ? (
                     <Button
+                        type="button"
                         variant="default"
-                        className="gap-2 w-full h-11 font-semibold"
-                        onClick={onUploadClick}
+                        disabled={isSyncing}
+                        className="gap-2 w-full h-11 font-semibold cursor-pointer shadow-xs"
+                        onClick={importFromBrowser}
                     >
-                        <Upload className="w-4 h-4" />
-                        {t('onboarding.getStarted.upload')}
+                        <CloudDownload className={cn("w-4 h-4", isSyncing && "animate-spin")} />
+                        {t('onboarding.getStarted.pullBrowser', 'Import from Browser (1-Click)')}
                     </Button>
-                </label>
-                <Button
-                    variant="outline"
-                    className="flex-1 gap-2 border-dashed h-11 font-semibold"
-                    onClick={onLoadDemo}
-                >
-                    <Sparkles className="w-4 h-4" />
-                    {t('onboarding.getStarted.demo')}
-                </Button>
+                ) : (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="gap-2 w-full h-11 font-medium border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors cursor-pointer"
+                        onClick={openExtensionGuide}
+                    >
+                        <CloudDownload className="w-4 h-4 text-primary" />
+                        {t('onboarding.getStarted.setupAndPull', 'Install Extension & Pull from Browser')}
+                    </Button>
+                )}
+
+                <div className="flex sm:flex-row flex-col gap-2.5 w-full">
+                    <label className="flex-1 cursor-pointer">
+                        <input {...getInputProps()} />
+                        <Button
+                            variant={isExtensionConnected ? "outline" : "default"}
+                            className="gap-2 w-full h-10 font-medium cursor-pointer"
+                            onClick={onUploadClick}
+                        >
+                            <Upload className="w-4 h-4" />
+                            {t('onboarding.getStarted.upload')}
+                        </Button>
+                    </label>
+                    <Button
+                        variant="ghost"
+                        className="flex-1 gap-2 border border-dashed border-border/80 h-10 font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                        onClick={onLoadDemo}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        {t('onboarding.getStarted.demo')}
+                    </Button>
+                </div>
             </div>
         </>
     )

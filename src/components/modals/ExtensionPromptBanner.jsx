@@ -25,7 +25,7 @@ export function ExtensionPromptBanner({ isExtensionConnected, onOpenGuide }) {
         // Show prompt after a short delay so user first sees the interface
         const timer = setTimeout(() => {
             setIsVisible(true)
-        }, 1500)
+        }, 600)
 
         return () => clearTimeout(timer)
     }, [isExtensionConnected])

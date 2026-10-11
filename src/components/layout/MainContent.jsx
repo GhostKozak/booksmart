@@ -23,6 +23,7 @@ export function MainContent({
     isExtensionConnected = false,
     importFromBrowser,
     isSyncing = false,
+    openExtensionGuide,
     // Link health
     linkHealth,
     ignoredUrls, toggleIgnoreUrl,
@@ -63,6 +64,10 @@ export function MainContent({
                         loadDemoData()
                     }}
                     getInputProps={getInputProps}
+                    isExtensionConnected={isExtensionConnected}
+                    importFromBrowser={importFromBrowser}
+                    isSyncing={isSyncing}
+                    openExtensionGuide={openExtensionGuide}
                 />
             </main>
         )
@@ -87,10 +92,10 @@ export function MainContent({
                         <p className="max-w-md text-muted-foreground text-sm sm:text-base">
                             {t('main.dropzone.desc')}
                         </p>
-                        <Button variant="outline" className="mt-6 sm:mt-8">{t('main.dropzone.browse')}</Button>
+                        <Button variant="outline" className="mt-6 sm:mt-8 cursor-pointer">{t('main.dropzone.browse')}</Button>
                     </div>
 
-                    {isExtensionConnected && importFromBrowser && (
+                    {isExtensionConnected && importFromBrowser ? (
                         <div className="mt-6 flex flex-col items-center">
                             <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -104,10 +109,31 @@ export function MainContent({
                                     e.stopPropagation();
                                     importFromBrowser();
                                 }}
-                                className="gap-2 px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow transition-all"
+                                className="gap-2 px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow transition-all cursor-pointer"
                             >
                                 <CloudDownload className={cn("h-4 w-4", isSyncing && "animate-spin")} />
                                 <span>{t('main.dropzone.importFromBrowserDirect', 'Import Browser Bookmarks (1-Click)')}</span>
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="mt-6 flex flex-col items-center max-w-md text-center p-4 rounded-2xl bg-card/60 border border-border/60 shadow-xs">
+                            <h4 className="text-sm font-semibold text-foreground mb-1">
+                                {t('main.dropzone.pullWithoutFileTitle', 'Direct Browser Import')}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                                {t('main.dropzone.pullWithoutFileDesc', 'Import bookmarks straight from your browser without exporting an HTML file first.')}
+                            </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openExtensionGuide?.();
+                                }}
+                                className="gap-2 text-xs h-9 px-4 rounded-xl font-medium hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
+                            >
+                                <CloudDownload className="h-3.5 w-3.5 text-primary" />
+                                <span>{t('main.dropzone.setupExtensionBtn', 'Install Extension & Pull Bookmarks')}</span>
                             </Button>
                         </div>
                     )}
