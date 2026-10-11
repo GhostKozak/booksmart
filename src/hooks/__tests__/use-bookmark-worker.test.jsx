@@ -97,4 +97,27 @@ describe('useBookmarkWorker', () => {
 
         pingSpy.mockRestore()
     })
+
+    it('falls back to worker when extension check throws an error', async () => {
+        const pingSpy = vi.spyOn(extensionClient, 'pingExtension').mockResolvedValue({
+            available: true,
+            version: '1.0.0'
+        })
+        const checkSpy = vi.spyOn(extensionClient, 'checkLinksWithExtension').mockRejectedValue(
+            new Error('Extension disconnected')
+        )
+
+        const { result } = renderHook(() => useBookmarkWorker(defaultProps))
+
+        await act(async () => {
+            await result.current.checkAllLinks()
+        })
+
+        expect(pingSpy).toHaveBeenCalled()
+        expect(checkSpy).toHaveBeenCalled()
+        expect(result.current.isCheckingLinks).toBe(true)
+
+        pingSpy.mockRestore()
+        checkSpy.mockRestore()
+    })
 })

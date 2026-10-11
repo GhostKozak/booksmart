@@ -138,15 +138,6 @@ export function useBookmarkWorker({
                     },
                     onComplete: () => {
                         setIsCheckingLinks(false)
-                    },
-                    onError: (err) => {
-                        console.warn('Extension check failed, falling back to web worker:', err)
-                        const corsProxy = getStoredCorsProxy()
-                        if (workerRef.current) {
-                            workerRef.current.postMessage({ type: 'CHECK_LINKS', payload: { urls, corsProxy } })
-                        } else {
-                            setIsCheckingLinks(false)
-                        }
                     }
                 })
                 return

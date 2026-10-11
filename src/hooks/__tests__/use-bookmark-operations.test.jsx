@@ -34,10 +34,14 @@ vi.mock('../../db', () => ({
     }
 }));
 
-vi.mock('../../lib/utils', () => ({
-    generateUUID: vi.fn(() => 'mock-uuid'),
-    pickTagColor: vi.fn(() => '#f43f5e')
-}));
+vi.mock('../../lib/utils', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        generateUUID: vi.fn(() => 'mock-uuid'),
+        pickTagColor: vi.fn(() => '#f43f5e')
+    };
+});
 
 vi.mock('../../lib/url-cleaner', () => ({
     cleanUrl: vi.fn((url) => {
@@ -166,6 +170,19 @@ describe('useBookmarkOperations', () => {
                 tags: expect.arrayContaining(['a', 'b'])
             }));
             expect(db.bookmarks.bulkDelete).toHaveBeenCalledWith(['1']);
+        });
+
+        it('should preserve case-sensitive paths and not falsely merge distinct paths', async () => {
+            const caseSensitiveBookmarks = [
+                { id: '1', url: 'https://youtube.com/watch?v=AbCd', title: 'Video 1', addDate: 10 },
+                { id: '2', url: 'https://youtube.com/watch?v=abcd', title: 'Video 2', addDate: 20 }
+            ];
+            const props = { ...defaultProps, rawBookmarks: caseSensitiveBookmarks };
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            await act(async () => {
+                await result.current.mergeDuplicates();
+            });
+            expect(db.bookmarks.bulkDelete).not.toHaveBeenCalled();
         });
     });
 

@@ -67,6 +67,21 @@ describe('exporter', () => {
             expect(lines[1]).toContain('"Link 1","https://e1.com","Folder A","t1"');
             expect(lines[3]).toContain('"Root Link","https://root.com","Root","t2"');
         });
+
+        it('should sanitize formula characters (=, +, -, @) to prevent CSV injection', () => {
+            const unsafeBookmarks = [
+                {
+                    title: '=cmd|’ /C calc’!A0',
+                    url: 'https://safe.com',
+                    newFolder: '+Folder',
+                    note: '@payload'
+                }
+            ];
+            const csv = exportToCsv(unsafeBookmarks);
+            expect(csv).toContain("\"'=cmd|’ /C calc’!A0\"");
+            expect(csv).toContain("\"'+Folder\"");
+            expect(csv).toContain("\"'@payload\"");
+        });
     });
 
     describe('exportToMarkdown', () => {

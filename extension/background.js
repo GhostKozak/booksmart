@@ -5,6 +5,34 @@ const DEFAULT_TIMEOUT_MS = 8000;
 const BATCH_SIZE = 6;
 
 /**
+ * Validates whether a URL resolves to a private, loopback, or local IP/hostname
+ * to prevent SSRF and internal port scanning.
+ */
+function isPrivateOrLoopbackUrl(urlStr) {
+    try {
+        const parsed = new URL(urlStr);
+        const hostname = parsed.hostname.toLowerCase();
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+            return true;
+        }
+        const parts = hostname.split('.');
+        if (parts.length === 4 && parts.every(p => /^\d+$/.test(p))) {
+            const num0 = parseInt(parts[0], 10);
+            const num1 = parseInt(parts[1], 10);
+            if (num0 === 10) return true;
+            if (num0 === 127) return true;
+            if (num0 === 169 && num1 === 254) return true;
+            if (num0 === 172 && num1 >= 16 && num1 <= 31) return true;
+            if (num0 === 192 && num1 === 168) return true;
+            if (num0 === 0) return true;
+        }
+        return false;
+    } catch {
+        return true;
+    }
+}
+
+/**
  * Checks a single URL without CORS restrictions.
  * Tries HEAD first for performance; falls back to GET (with Range) if HEAD is rejected.
  */
@@ -14,6 +42,9 @@ async function checkUrlDirect(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
     }
 
     const cleanUrl = url.trim();
+    if (isPrivateOrLoopbackUrl(cleanUrl)) {
+        return { url: cleanUrl, status: 'dead', error: 'restricted_private_network' };
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -95,7 +126,7 @@ chrome.runtime.onConnect.addListener((port) => {
         port.onMessage.addListener(async (msg) => {
             if (msg.action === 'START_CHECK') {
                 const urls = Array.isArray(msg.urls) ? msg.urls : [];
-                const batchSize = msg.batchSize || BATCH_SIZE;
+                const batchSize = Math.min(Math.max(1, msg.batchSize || BATCH_SIZE), 12);
 
                 for (let i = 0; i < urls.length; i += batchSize) {
                     if (isCancelled) break;

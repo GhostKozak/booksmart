@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { db } from '../db'
-import { generateUUID, pickTagColor } from '../lib/utils'
+import { generateUUID, pickTagColor, normalizeUrl } from '../lib/utils'
 import { cleanUrl, countCleanableUrls } from '../lib/url-cleaner'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -25,7 +25,8 @@ export function useBookmarkOperations({
         const sortedBookmarks = [...rawBookmarks].sort((a, b) => b.addDate - a.addDate)
 
         sortedBookmarks.forEach(b => {
-            const normalized = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+            const normalized = normalizeUrl(b.url)
+            if (!normalized) return
             if (urls.has(normalized)) {
                 toDeleteIds.push(b.id)
             } else {
@@ -50,7 +51,7 @@ export function useBookmarkOperations({
         const sortedBookmarks = [...rawBookmarks].sort((a, b) => (parseInt(b.addDate) || 0) - (parseInt(a.addDate) || 0))
 
         sortedBookmarks.forEach(b => {
-            const normalized = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+            const normalized = normalizeUrl(b.url)
             if (!normalized) return
             if (!groups.has(normalized)) {
                 groups.set(normalized, [])
@@ -178,11 +179,11 @@ export function useBookmarkOperations({
     const mergeDuplicateGroup = async (targetBookmarkOrUrl) => {
         const targetUrl = typeof targetBookmarkOrUrl === 'string' ? targetBookmarkOrUrl : targetBookmarkOrUrl?.url
         if (!targetUrl) return
-        const normalizedTarget = targetUrl.toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
+        const normalizedTarget = normalizeUrl(targetUrl)
+        if (!normalizedTarget) return
 
         const matching = rawBookmarks.filter(b => {
-            const norm = (b.url || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/+$/, '')
-            return norm === normalizedTarget
+            return normalizeUrl(b.url) === normalizedTarget
         }).sort((a, b) => (parseInt(b.addDate) || 0) - (parseInt(a.addDate) || 0))
 
         if (matching.length <= 1) return

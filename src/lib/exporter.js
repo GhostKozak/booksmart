@@ -6,20 +6,6 @@
  * @returns {string} - The HTML string.
  */
 /**
- * Exports bookmarks to Netscape HTML format.
- * Reconstructs the folder structure based on 'newFolder' property.
- * 
- * @param {Array} bookmarks - Array of bookmark objects.
- * @returns {string} - The HTML string.
- */
-/**
- * Exports bookmarks to Netscape HTML format.
- * Reconstructs the folder structure based on 'newFolder' property.
- * 
- * @param {Array} bookmarks - Array of bookmark objects.
- * @returns {string} - The HTML string.
- */
-/**
  * Escapes HTML entities to prevent XSS in exported content.
  * @param {string} str - The string to escape.
  * @returns {string} - The escaped string.
@@ -90,7 +76,7 @@ export const exportBookmarks = (bookmarks) => {
 
         // B. Render Subfolders
         for (const [folderName, subNode] of Object.entries(node.__subfolders__)) {
-            output += `${indent}<DT><H3 ADD_DATE="${Date.now()}">${escapeHtml(folderName)}</H3>\n`;
+            output += `${indent}<DT><H3 ADD_DATE="${Math.floor(Date.now() / 1000)}">${escapeHtml(folderName)}</H3>\n`;
             output += `${indent}<DL><p>\n`;
 
             // Recurse
@@ -130,6 +116,20 @@ export const exportToJson = (bookmarks) => {
 };
 
 /**
+ * Sanitizes CSV cell against formula injection and quotes double-quotes.
+ * @param {*} value
+ * @returns {string}
+ */
+function sanitizeCsvCell(value) {
+    if (value == null) return '';
+    let str = String(value);
+    if (/^[=+\-@\t\r]/.test(str)) {
+        str = "'" + str;
+    }
+    return str.replace(/"/g, '""');
+}
+
+/**
  * Exports bookmarks to CSV format.
  * 
  * @param {Array} bookmarks - Array of bookmark objects.
@@ -138,12 +138,21 @@ export const exportToJson = (bookmarks) => {
 export const exportToCsv = (bookmarks) => {
     const headers = ['Title', 'URL', 'Folder', 'Tags', 'Date Added', 'Note'];
     const rows = bookmarks.map(b => {
-        const title = (b.title || '').replace(/"/g, '""');
-        const url = (b.url || '').replace(/"/g, '""');
-        const folder = (b.newFolder || 'Root').replace(/"/g, '""');
-        const tags = (b.tags || []).join(',').replace(/"/g, '""');
-        const date = b.addDate ? new Date(parseInt(b.addDate) * 1000).toISOString() : '';
-        const note = (b.note || '').replace(/"/g, '""');
+        const title = sanitizeCsvCell(b.title);
+        const url = sanitizeCsvCell(b.url);
+        const folder = sanitizeCsvCell(b.newFolder || 'Root');
+        const tags = sanitizeCsvCell((b.tags || []).join(','));
+        const rawDate = parseInt(b.addDate, 10);
+        let date = '';
+        if (!isNaN(rawDate) && rawDate > 0) {
+            const ms = rawDate < 1e11 ? rawDate * 1000 : rawDate;
+            try {
+                date = new Date(ms).toISOString();
+            } catch {
+                date = '';
+            }
+        }
+        const note = sanitizeCsvCell(b.note);
 
         return `"${title}","${url}","${folder}","${tags}","${date}","${note}"`;
     });
@@ -159,9 +168,6 @@ export const exportToCsv = (bookmarks) => {
  * @returns {string} - The Markdown string.
  */
 export const exportToMarkdown = (bookmarks) => {
-    // Reuse the tree building logic from HTML export basically, or simpler grouping
-    // Let's do a simple grouping map for markdown
-
     const folders = {};
 
     bookmarks.forEach(b => {
@@ -174,7 +180,6 @@ export const exportToMarkdown = (bookmarks) => {
 
     let md = '# Bookmarks Export\n\n';
 
-    // Sort folders alphabetically, but put Root first if exists
     const sortedFolders = Object.keys(folders).sort();
 
     sortedFolders.forEach(folder => {
@@ -182,7 +187,8 @@ export const exportToMarkdown = (bookmarks) => {
         folders[folder].forEach(b => {
             md += `- [${b.title}](${b.url})`;
             if (b.tags && b.tags.length > 0) {
-                md += ` \`#${b.tags.join(', #')}\``;
+                const tagStr = b.tags.map(t => '`#' + t + '`').join(' ');
+                md += ` ${tagStr}`;
             }
             md += '\n';
             if (b.note) {

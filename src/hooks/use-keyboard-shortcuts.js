@@ -14,18 +14,27 @@ export function useKeyboardShortcuts({
 }) {
     useEffect(() => {
         const handleKeyDown = (e) => {
-            const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+            const activeEl = document.activeElement
+            const isInput = activeEl && (
+                ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName) ||
+                activeEl.isContentEditable ||
+                activeEl.getAttribute('contenteditable') === 'true'
+            )
+            const isModalOpen = Boolean(
+                document.querySelector('[role="dialog"]') ||
+                document.querySelector('[aria-modal="true"]')
+            )
             const shortcuts = getStoredShortcuts()
 
-            // Command Palette (Ctrl+K / Cmd+K) - Works even inside input
+            // Command Palette (Ctrl+K / Cmd+K) - Works even inside inputs
             if (matchesShortcut(e, shortcuts.commandPalette)) {
                 e.preventDefault()
                 setIsCommandPaletteOpen?.((prev) => !prev)
                 return
             }
 
-            // If an input is focused, don't execute single-key shortcuts
-            if (isInput) return
+            // If an input is focused or a modal dialog is open, do not trigger background shortcuts
+            if (isInput || isModalOpen) return
 
             // Focus search
             if (matchesShortcut(e, shortcuts.focusSearch)) {

@@ -26,6 +26,31 @@ export function isHttpUrl(url) {
     return /^https?:\/\//i.test(url.trim());
 }
 
+/**
+ * Normalizes a URL for duplicate detection without corrupting case-sensitive paths/queries.
+ * Converts hostname and protocol to lowercase, removes default ports (80/443),
+ * removes 'www.' prefix, and strips trailing slashes.
+ * @param {string} url
+ * @returns {string}
+ */
+export function normalizeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    try {
+        const parsed = new URL(url);
+        parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        parsed.protocol = parsed.protocol.toLowerCase();
+        if ((parsed.protocol === 'http:' && parsed.port === '80') ||
+            (parsed.protocol === 'https:' && parsed.port === '443')) {
+            parsed.port = '';
+        }
+        let normalized = parsed.href;
+        if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
+        return normalized;
+    } catch {
+        return url.trim().replace(/\/+$/, '');
+    }
+}
+
 const TAG_COLORS = ['#f43f5e','#ec4899','#a855f7','#8b5cf6','#6366f1','#3b82f6','#0ea5e9','#06b6d4','#14b8a6','#10b981','#84cc16','#eab308','#f59e0b','#f97316','#ef4444'];
 
 export function pickTagColor(name) {

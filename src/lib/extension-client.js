@@ -183,8 +183,21 @@ export function checkLinksWithExtension(urls, {
     return new Promise((resolve, reject) => {
         const requestId = 'check_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         const accumulatedResults = [];
+        let activityTimer = null;
+        const INACTIVITY_TIMEOUT_MS = 25000;
+
+        const resetTimer = () => {
+            if (activityTimer) clearTimeout(activityTimer);
+            activityTimer = setTimeout(() => {
+                cleanup();
+                const err = new Error('Companion extension timed out during link check');
+                onError?.(err);
+                reject(err);
+            }, INACTIVITY_TIMEOUT_MS);
+        };
 
         const cleanup = () => {
+            if (activityTimer) clearTimeout(activityTimer);
             window.removeEventListener('message', handleMessage);
             if (signal) {
                 signal.removeEventListener('abort', handleAbort);
@@ -208,6 +221,8 @@ export function checkLinksWithExtension(urls, {
             signal.addEventListener('abort', handleAbort);
         }
 
+        resetTimer();
+
         const handleMessage = (event) => {
             if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
                 return;
@@ -221,6 +236,7 @@ export function checkLinksWithExtension(urls, {
             }
 
             if (event.data.type === 'BOOKSMART_LINK_STATUS_UPDATE') {
+                resetTimer();
                 const batch = event.data.results || [];
                 accumulatedResults.push(...batch);
                 onProgress?.(batch, event.data.processed, event.data.total);

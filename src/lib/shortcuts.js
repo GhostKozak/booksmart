@@ -124,11 +124,18 @@ export function matchesShortcut(e, shortcut) {
     if (!shortcut) return false
 
     const matchesCtrl = shortcut.ctrl ? (e.ctrlKey || e.metaKey) : (!e.ctrlKey && !e.metaKey)
-    const matchesShift = shortcut.shift ? e.shiftKey : !e.shiftKey
     const matchesAlt = shortcut.alt ? e.altKey : !e.altKey
 
     const targetKey = (shortcut.key || '').toLowerCase()
     const pressedKey = (e.key || '').toLowerCase()
+
+    // For non-letter single characters (like '?' or '/'), keyboards across different locales
+    // often require Shift (e.g. Shift+7 on TR-Q for '/', Shift+/ on US for '?').
+    // If the pressed key matches the target key directly, allow shiftKey even if shortcut.shift is false.
+    const isSymbolChar = shortcut.key && shortcut.key.length === 1 && !/[a-zA-Z]/.test(shortcut.key)
+    const matchesShift = shortcut.shift
+        ? e.shiftKey
+        : (isSymbolChar && pressedKey === targetKey ? true : !e.shiftKey)
 
     return matchesCtrl && matchesShift && matchesAlt && targetKey === pressedKey
 }

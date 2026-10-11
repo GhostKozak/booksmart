@@ -89,7 +89,15 @@
                 });
 
                 activeCheckPort.onDisconnect.addListener(() => {
-                    activeCheckPort = null;
+                    if (activeCheckPort) {
+                        window.postMessage({
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_LINKS_CHECKED_ERROR',
+                            requestId,
+                            error: chrome.runtime.lastError?.message || 'Companion extension background disconnected'
+                        }, '*');
+                        activeCheckPort = null;
+                    }
                 });
 
                 activeCheckPort.postMessage({
