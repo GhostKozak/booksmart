@@ -100,4 +100,21 @@ describe('ExtensionGuideModal', () => {
 
         expect(onClose).toHaveBeenCalledOnce()
     })
+
+    it('displays Firefox specific instructions when Firefox tab is selected', () => {
+        render(
+            <ExtensionGuideModal
+                isOpen={true}
+                onClose={vi.fn()}
+                isConnected={false}
+            />
+        )
+
+        const firefoxTab = screen.getByRole('button', { name: /Firefox/i })
+        fireEvent.click(firefoxTab)
+
+        expect(screen.getByText('about:debugging#/runtime/this-firefox')).toBeInTheDocument()
+        expect(screen.getByText('/extension-firefox/manifest.json')).toBeInTheDocument()
+        expect(screen.getByText(/Important: Do not select \/extension\/manifest\.json/i)).toBeInTheDocument()
+    })
 })

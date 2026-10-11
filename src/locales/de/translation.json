@@ -396,7 +396,8 @@
             "step4": "Erweiterungsordner im BookSmart-Projekt auswählen (/extension)",
             "firefoxStep1": "Debugging-Seite öffnen",
             "firefoxStep2": "Auf \"Temporäres Add-on laden...\" klicken",
-            "firefoxStep3": "Manifest-Datei auswählen (/extension/manifest.json)"
+            "firefoxStep3": "Manifest-Datei auswählen (/extension-firefox/manifest.json)",
+            "firefoxNote": "Wichtig: Nicht /extension/manifest.json (Chrome) auswählen. Firefox benötigt background.scripts aus /extension-firefox."
         }
     },
     "backup": {

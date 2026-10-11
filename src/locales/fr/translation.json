@@ -396,7 +396,8 @@
             "step4": "Sélectionnez le dossier de l'extension dans BookSmart (/extension)",
             "firefoxStep1": "Ouvrir la page de débogage",
             "firefoxStep2": "Cliquer sur \"Charger un module temporaire...\"",
-            "firefoxStep3": "Sélectionner le fichier manifest (/extension/manifest.json)"
+            "firefoxStep3": "Sélectionner le fichier manifest (/extension-firefox/manifest.json)",
+            "firefoxNote": "Important : Ne sélectionnez pas /extension/manifest.json (Chrome). Firefox requiert les scripts d'arrière-plan de /extension-firefox."
         }
     },
     "backup": {

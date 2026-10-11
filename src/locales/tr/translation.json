@@ -396,7 +396,8 @@
             "step4": "BookSmart proje dizinindeki eklenti klasörünü seçin (/extension)",
             "firefoxStep1": "Hata Ayıklama sayfasını açın",
             "firefoxStep2": "\"Geçici Eklenti Yükle...\" butonuna tıklayın",
-            "firefoxStep3": "Eklenti manifest dosyasını seçin (/extension/manifest.json)"
+            "firefoxStep3": "Eklenti manifest dosyasını seçin (/extension-firefox/manifest.json)",
+            "firefoxNote": "Önemli: /extension/manifest.json (Chrome) dosyasını seçmeyin. Firefox, arka plan betiği (background.scripts) için /extension-firefox klasörünü gerektirir."
         }
     },
     "backup": {

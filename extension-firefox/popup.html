@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BookSmart Companion</title>
+  <style>
+    body {
+      width: 300px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 500;
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin-bottom: 12px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #10b981;
+    }
+    .desc {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      box-sizing: border-box;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background-color: #3b82f6;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    .btn-secondary {
+      background-color: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+    .btn-secondary:hover {
+      background-color: #334155;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+    }
+    .btn-save:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    .status-msg {
+      margin-top: 10px;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+      color: #38bdf8;
+    }
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #1e293b;
+      text-align: center;
+      font-size: 10px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="icons/icon-48.png" alt="BookSmart" class="logo">
+    <div class="title">BookSmart Companion</div>
+  </div>
+
+  <div class="badge">
+    <span class="dot"></span>
+    <span>Sync & Health Ready</span>
+  </div>
+
+  <div class="desc">
+    Two-way bookmarks sync and CORS-free link health checking for BookSmart.
+  </div>
+
+  <div class="actions">
+    <button id="save-tab-btn" class="btn btn-save">
+      <span>⭐️ Save Current Tab</span>
+    </button>
+    <button id="sync-btn" class="btn btn-secondary">
+      <span>🔄 Two-Way Sync</span>
+    </button>
+    <button id="open-app-btn" class="btn btn-primary">
+      <span>Open BookSmart</span>
+    </button>
+  </div>
+
+  <div id="status-msg" class="status-msg"></div>
+
+  <div class="footer">v1.1.0 · 100% Private & Serverless</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

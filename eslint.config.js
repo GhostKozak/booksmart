@@ -52,7 +52,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['extension/**/*.js'],
+    files: ['extension/**/*.js', 'extension-firefox/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,

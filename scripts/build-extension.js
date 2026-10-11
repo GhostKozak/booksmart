@@ -42,3 +42,13 @@ fs.copyFileSync(
     path.join(firefoxDist, 'manifest.json')
 );
 console.log('✓ Built Firefox extension -> dist/extension-firefox');
+
+// 3. Root Firefox directory (ready for immediate unpacked testing in Firefox without running build)
+const extFirefoxDir = path.join(rootDir, 'extension-firefox');
+fs.rmSync(extFirefoxDir, { recursive: true, force: true });
+copyDirSync(extDir, extFirefoxDir, (p, entry) => entry.name !== 'manifest.firefox.json');
+fs.copyFileSync(
+    path.join(extDir, 'manifest.firefox.json'),
+    path.join(extFirefoxDir, 'manifest.json')
+);
+console.log('✓ Synced Firefox extension folder -> extension-firefox');

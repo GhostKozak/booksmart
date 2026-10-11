@@ -396,7 +396,8 @@
             "step4": "Selecciona la carpeta de la extensión en BookSmart (/extension)",
             "firefoxStep1": "Abrir la página de depuración",
             "firefoxStep2": "Hacer clic en \"Cargar complemento temporal...\"",
-            "firefoxStep3": "Seleccionar el archivo de manifiesto (/extension/manifest.json)"
+            "firefoxStep3": "Seleccionar el archivo de manifiesto (/extension-firefox/manifest.json)",
+            "firefoxNote": "Importante: No seleccione /extension/manifest.json (Chrome). Firefox requiere scripts en segundo plano desde /extension-firefox."
         }
     },
     "backup": {
