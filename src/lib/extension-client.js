@@ -265,3 +265,236 @@ export function checkLinksWithExtension(urls, {
         }, '*');
     });
 }
+
+/**
+ * Fetches all bookmarks directly from the browser via the companion extension.
+ * @param {number} timeoutMs
+ * @returns {Promise<Array<Object>>}
+ */
+export function getBrowserBookmarks(timeoutMs = 12000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'get_bm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out waiting for browser bookmarks from extension'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_BROWSER_BOOKMARKS_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success) {
+                    resolve(event.data.bookmarks || []);
+                } else {
+                    reject(new Error(event.data.error || 'Failed to fetch browser bookmarks'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_GET_BROWSER_BOOKMARKS',
+            requestId
+        }, '*');
+    });
+}
+
+/**
+ * Pushes BookSmart bookmarks into the browser under a designated folder.
+ * @param {Array<Object>} bookmarks
+ * @param {Object} [options]
+ * @param {string} [options.targetFolderName]
+ * @param {boolean} [options.clean]
+ * @param {number} [timeoutMs]
+ * @returns {Promise<{ count: number, folder: string }>}
+ */
+export function pushBookmarksToBrowser(bookmarks, options = {}, timeoutMs = 25000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'push_bm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out waiting for extension to push bookmarks'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_BROWSER_PUSH_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success) {
+                    resolve({
+                        count: event.data.count || 0,
+                        folder: event.data.folder || options.targetFolderName || 'BookSmart'
+                    });
+                } else {
+                    reject(new Error(event.data.error || 'Failed to push bookmarks to browser'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_PUSH_BROWSER_BOOKMARKS',
+            requestId,
+            payload: {
+                bookmarks,
+                options
+            }
+        }, '*');
+    });
+}
+
+/**
+ * Performs a two-way synchronization between BookSmart and Browser bookmarks.
+ * @param {Array<Object>} bookmarks - Current bookmarks in BookSmart
+ * @param {Object} [options]
+ * @param {number} [timeoutMs]
+ * @returns {Promise<{ importedBookmarks: Array, exportedCount: number, totalInBrowser: number, totalInApp: number }>}
+ */
+export function syncBrowserBookmarks(bookmarks, options = {}, timeoutMs = 25000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'sync_bm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out waiting for extension two-way sync'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_BROWSER_SYNC_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success) {
+                    resolve({
+                        importedBookmarks: event.data.importedBookmarks || [],
+                        exportedCount: event.data.exportedCount || 0,
+                        totalInBrowser: event.data.totalInBrowser || 0,
+                        totalInApp: event.data.totalInApp || 0
+                    });
+                } else {
+                    reject(new Error(event.data.error || 'Two-way browser sync failed'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_SYNC_BROWSER_BOOKMARKS',
+            requestId,
+            payload: {
+                bookmarks,
+                options
+            }
+        }, '*');
+    });
+}
+
+/**
+ * Captures active browser tab and creates bookmark.
+ * @param {Object} [options]
+ * @param {number} [timeoutMs]
+ * @returns {Promise<Object>}
+ */
+export function captureActiveTab(options = {}, timeoutMs = 6000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'cap_tab_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out capturing active tab'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_CAPTURE_TAB_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success) {
+                    resolve(event.data.bookmark);
+                } else {
+                    reject(new Error(event.data.error || 'Failed to capture tab'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_CAPTURE_TAB',
+            requestId,
+            payload: { options }
+        }, '*');
+    });
+}
+

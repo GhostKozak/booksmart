@@ -47,6 +47,13 @@
         "shortcuts": "Keyboard Shortcuts (?)",
         "settings": "Settings",
         "maintenance": "Maintenance",
+        "browserSync": {
+            "label": "Browser Sync",
+            "twoWay": "Two-Way Sync",
+            "pull": "Pull from Browser",
+            "push": "Push to Browser",
+            "syncBtn": "Browser Sync"
+        },
         "view": "View Options",
         "tools": "Tools",
         "system": "System",
@@ -562,7 +569,9 @@
         "dropzone": {
             "title": "Drop your bookmarks here",
             "desc": "Drag and drop HTML (Browsers, Pocket), JSON (Raindrop, Pinboard), CSV, or Markdown files to get started.",
-            "browse": "Browse Files"
+            "browse": "Browse Files",
+            "importFromBrowserDirect": "Import Browser Bookmarks (1-Click)",
+            "extensionConnected": "Companion Extension Connected"
         },
         "empty": {
             "title": "No bookmarks found",
@@ -690,7 +699,13 @@
         "skipToMain": "Skip to main content"
     },
     "notifications": {
-        "duplicatesMerged": "Successfully merged {{count}} duplicate bookmarks"
+        "duplicatesMerged": "Successfully merged {{count}} duplicate bookmarks",
+        "browserImportedSuccess": "Imported {{count}} bookmarks from browser",
+        "browserPushedSuccess": "Pushed {{count}} bookmarks to browser folder \"{{folder}}\"",
+        "browserSyncedSuccess": "Synced: {{imported}} imported, {{exported}} pushed to browser",
+        "noBookmarksInBrowser": "No bookmarks found in browser",
+        "allBookmarksAlreadyImported": "All browser bookmarks are already in your library",
+        "noBookmarksToExport": "No bookmarks to export to browser"
     },
     "commandPalette": {
         "title": "Command Palette",
@@ -700,6 +715,9 @@
         "navigate": "to navigate",
         "select": "to select",
         "footer": "BookSmart Palette",
+        "browserTwoWaySync": "Two-Way Browser Sync",
+        "browserImport": "Import Bookmarks from Browser",
+        "browserPush": "Push Bookmarks to Browser",
         "categories": {
             "views": "Views",
             "actions": "Actions",

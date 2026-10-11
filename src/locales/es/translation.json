@@ -47,6 +47,13 @@
         "shortcuts": "Atajos de teclado (?)",
         "settings": "Ajustes",
         "maintenance": "Mantenimiento",
+        "browserSync": {
+            "label": "Sincronización del navegador",
+            "twoWay": "Sincronización bidireccional",
+            "pull": "Importar del navegador",
+            "push": "Exportar al navegador",
+            "syncBtn": "Sincronizar Navegador"
+        },
         "view": "Opciones de vista",
         "tools": "Herramientas",
         "system": "Sistema",
@@ -562,7 +569,9 @@
         "dropzone": {
             "title": "Suelta tus marcadores aquí",
             "desc": "Arrastra y suelta archivos HTML (Navegadores, Pocket), JSON (Raindrop, Pinboard), CSV o Markdown para comenzar.",
-            "browse": "Examinar Archivos"
+            "browse": "Examinar Archivos",
+            "importFromBrowserDirect": "Importar marcadores del navegador (1-Clic)",
+            "extensionConnected": "Extensión complementaria conectada"
         },
         "empty": {
             "title": "No se encontraron marcadores",
@@ -694,7 +703,13 @@
         "corsProxyDesc": "Proxy opcional para omitir las restricciones de CORS para la comprobación de enlaces y el resumen de páginas."
     },
     "notifications": {
-        "duplicatesMerged": "{{count}} duplicados fusionados con éxito"
+        "duplicatesMerged": "{{count}} duplicados fusionados con éxito",
+        "browserImportedSuccess": "{{count}} marcadores importados del navegador",
+        "browserPushedSuccess": "{{count}} marcadores exportados a la carpeta \"{{folder}}\" del navegador",
+        "browserSyncedSuccess": "Sincronizado: {{imported}} importados, {{exported}} exportados al navegador",
+        "noBookmarksInBrowser": "No se encontraron marcadores en el navegador",
+        "allBookmarksAlreadyImported": "Todos los marcadores del navegador ya están en tu biblioteca",
+        "noBookmarksToExport": "No hay marcadores para exportar al navegador"
     },
     "commandPalette": {
         "title": "Paleta de comandos",
@@ -704,6 +719,9 @@
         "navigate": "para navegar",
         "select": "para seleccionar",
         "footer": "BookSmart Palette",
+        "browserTwoWaySync": "Sincronización bidireccional del navegador",
+        "browserImport": "Importar marcadores del navegador",
+        "browserPush": "Exportar marcadores al navegador",
         "categories": {
             "views": "Vistas",
             "actions": "Acciones",

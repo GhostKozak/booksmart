@@ -47,6 +47,13 @@
         "shortcuts": "Tastaturkürzel (?)",
         "settings": "Einstellungen",
         "maintenance": "Wartung",
+        "browserSync": {
+            "label": "Browser-Synchronisation",
+            "twoWay": "Zwei-Wege-Synchronisation",
+            "pull": "Aus Browser importieren",
+            "push": "In Browser exportieren",
+            "syncBtn": "Browser-Sync"
+        },
         "view": "Ansichtsoptionen",
         "tools": "Werkzeuge",
         "system": "System",
@@ -562,7 +569,9 @@
         "dropzone": {
             "title": "Legen Sie Ihre Lesezeichen hier ab",
             "desc": "Ziehen Sie HTML (Browser, Pocket), JSON (Raindrop, Pinboard), CSV oder Markdown hierher, um zu beginnen.",
-            "browse": "Dateien Durchsuchen"
+            "browse": "Dateien Durchsuchen",
+            "importFromBrowserDirect": "Browser-Lesezeichen importieren (1-Klick)",
+            "extensionConnected": "Begleiter-Erweiterung verbunden"
         },
         "empty": {
             "title": "Keine Lesezeichen gefunden",
@@ -694,7 +703,13 @@
         "corsProxyDesc": "Optionaler Proxy zur Umgehung von CORS-Beschränkungen für Link-Prüfung und Zusammenfassungen."
     },
     "notifications": {
-        "duplicatesMerged": "{{count}} Duplikate erfolgreich zusammengeführt"
+        "duplicatesMerged": "{{count}} Duplikate erfolgreich zusammengeführt",
+        "browserImportedSuccess": "{{count}} Lesezeichen aus dem Browser importiert",
+        "browserPushedSuccess": "{{count}} Lesezeichen in Browser-Ordner \"{{folder}}\" exportiert",
+        "browserSyncedSuccess": "Synchronisiert: {{imported}} importiert, {{exported}} in Browser exportiert",
+        "noBookmarksInBrowser": "Keine Lesezeichen im Browser gefunden",
+        "allBookmarksAlreadyImported": "Alle Browser-Lesezeichen befinden sich bereits in Ihrer Bibliothek",
+        "noBookmarksToExport": "Keine Lesezeichen zum Exportieren in den Browser vorhanden"
     },
     "commandPalette": {
         "title": "Befehlspalette",
@@ -704,6 +719,9 @@
         "navigate": "zum Navigieren",
         "select": "zum Auswählen",
         "footer": "BookSmart Palette",
+        "browserTwoWaySync": "Zwei-Wege-Browser-Synchronisation",
+        "browserImport": "Lesezeichen aus Browser importieren",
+        "browserPush": "Lesezeichen in Browser exportieren",
         "categories": {
             "views": "Ansichten",
             "actions": "Aktionen",

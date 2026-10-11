@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge } from 'lucide-react'
+import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge, RefreshCw, CloudDownload, CloudUpload } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -19,6 +19,8 @@ export function Header({
     checkAllLinks, isCheckingLinks,
     isExtensionConnected = false,
     openExportModal,
+    // Browser Sync
+    importFromBrowser, pushToBrowser, twoWaySync, isSyncing = false,
     // File
     hasFileLoaded, closeFile, bookmarkCount, clearAll,
     searchInputRef
@@ -207,6 +209,35 @@ export function Header({
                             {t('common.actions')}
                         </DropdownLabel>
                     </div>
+
+                    {isExtensionConnected && (
+                        <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-2 mx-2 mb-2 border border-primary/20">
+                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 text-primary font-bold flex items-center justify-between">
+                                <span>{t('header.browserSync.label', 'Browser Sync')}</span>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-normal">Active</span>
+                            </DropdownLabel>
+                            {twoWaySync && (
+                                <DropdownItem onClick={twoWaySync} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10">
+                                    <RefreshCw className={cn("h-4 w-4 mr-2.5 text-primary", isSyncing && "animate-spin")} />
+                                    <span>{t('header.browserSync.twoWay', 'Two-Way Sync')}</span>
+                                </DropdownItem>
+                            )}
+                            <div className="grid grid-cols-2 gap-1.5">
+                                {importFromBrowser && (
+                                    <DropdownItem onClick={importFromBrowser} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center">
+                                        <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500" />
+                                        <span className="truncate">{t('header.browserSync.pull', 'Pull')}</span>
+                                    </DropdownItem>
+                                )}
+                                {pushToBrowser && (
+                                    <DropdownItem onClick={() => pushToBrowser()} disabled={isSyncing || bookmarkCount === 0} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center">
+                                        <CloudUpload className="h-3.5 w-3.5 mr-1 text-emerald-500" />
+                                        <span className="truncate">{t('header.browserSync.push', 'Push')}</span>
+                                    </DropdownItem>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {hasMaintenanceActions && (
                         <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-2 mx-2 mb-2 border border-destructive/10">
@@ -420,7 +451,19 @@ export function Header({
                     </div>
                 </DropdownMenu>
 
-                <div className="hidden sm:flex items-center border-l pl-2 ml-2">
+                <div className="hidden sm:flex items-center border-l pl-2 ml-2 gap-1">
+                    {isExtensionConnected && (
+                        <Button
+                            variant="ghost"
+                            className="gap-2 px-3 text-xs"
+                            onClick={twoWaySync}
+                            disabled={isSyncing}
+                            title={t('header.browserSync.twoWay', 'Two-Way Browser Sync')}
+                        >
+                            <RefreshCw className={cn("h-4 w-4 text-primary", isSyncing && "animate-spin")} />
+                            <span className="hidden xl:inline">{t('header.browserSync.syncBtn', 'Browser Sync')}</span>
+                        </Button>
+                    )}
 
                     <Button
                         variant="ghost"

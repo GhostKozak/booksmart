@@ -127,6 +127,125 @@
                 }
                 activeCheckPort = null;
             }
+            return;
+        }
+
+        // 4. Get browser bookmarks
+        if (type === 'BOOKSMART_GET_BROWSER_BOOKMARKS') {
+            try {
+                chrome.runtime.sendMessage({ action: 'GET_BROWSER_BOOKMARKS' }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_BROWSER_BOOKMARKS_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        bookmarks: response?.bookmarks || [],
+                        error: err?.message || response?.error
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_BROWSER_BOOKMARKS_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+            return;
+        }
+
+        // 5. Push bookmarks to browser
+        if (type === 'BOOKSMART_PUSH_BROWSER_BOOKMARKS') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'PUSH_BROWSER_BOOKMARKS',
+                    bookmarks: payload?.bookmarks || [],
+                    options: payload?.options || {}
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_BROWSER_PUSH_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        count: response?.count || 0,
+                        folder: response?.folder,
+                        error: err?.message || response?.error
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_BROWSER_PUSH_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+            return;
+        }
+
+        // 6. Two-way sync with browser bookmarks
+        if (type === 'BOOKSMART_SYNC_BROWSER_BOOKMARKS') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'SYNC_BROWSER_BOOKMARKS',
+                    bookmarks: payload?.bookmarks || [],
+                    options: payload?.options || {}
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_BROWSER_SYNC_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        importedBookmarks: response?.importedBookmarks || [],
+                        exportedCount: response?.exportedCount || 0,
+                        totalInBrowser: response?.totalInBrowser || 0,
+                        totalInApp: response?.totalInApp || 0,
+                        error: err?.message || response?.error
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_BROWSER_SYNC_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+            return;
+        }
+
+        // 7. Capture active tab
+        if (type === 'BOOKSMART_CAPTURE_TAB') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'CAPTURE_CURRENT_TAB',
+                    options: payload?.options || {}
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_CAPTURE_TAB_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        bookmark: response?.bookmark,
+                        error: err?.message || response?.error
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_CAPTURE_TAB_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
         }
     });
 })();

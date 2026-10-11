@@ -47,6 +47,13 @@
         "shortcuts": "Klavye Kısayolları (?)",
         "settings": "Ayarlar",
         "maintenance": "Bakım",
+        "browserSync": {
+            "label": "Tarayıcı Eşitleme",
+            "twoWay": "İki Yönlü Eşitle",
+            "pull": "Tarayıcıdan Çek",
+            "push": "Tarayıcıya Gönder",
+            "syncBtn": "Tarayıcı Eşitle"
+        },
         "view": "Görünüm",
         "tools": "Araçlar",
         "system": "Sistem",
@@ -562,7 +569,9 @@
         "dropzone": {
             "title": "Yer imlerinizi buraya bırakın",
             "desc": "Başlamak için HTML (Tarayıcılar, Pocket), JSON (Raindrop, Pinboard), CSV veya Markdown dosyalarınızı sürükleyip bırakın.",
-            "browse": "Dosyalara Göz At"
+            "browse": "Dosyalara Göz At",
+            "importFromBrowserDirect": "Tarayıcı Yer İmlerini İçe Aktar (Tek Tık)",
+            "extensionConnected": "Companion Eklentisi Bağlı"
         },
         "empty": {
             "title": "Yer imi bulunamadı",
@@ -690,7 +699,13 @@
         "skipToMain": "Ana içeriğe atla"
     },
     "notifications": {
-        "duplicatesMerged": "{{count}} yinelenen yer imi başarıyla birleştirildi"
+        "duplicatesMerged": "{{count}} yinelenen yer imi başarıyla birleştirildi",
+        "browserImportedSuccess": "Tarayıcıdan {{count}} yer imi içe aktarıldı",
+        "browserPushedSuccess": "{{count}} yer imi tarayıcıdaki \"{{folder}}\" klasörüne gönderildi",
+        "browserSyncedSuccess": "Eşitlendi: {{imported}} içe aktarıldı, {{exported}} tarayıcıya gönderildi",
+        "noBookmarksInBrowser": "Tarayıcıda yer imi bulunamadı",
+        "allBookmarksAlreadyImported": "Tüm tarayıcı yer imleri zaten kütüphanenizde mevcut",
+        "noBookmarksToExport": "Tarayıcıya gönderilecek yer imi yok"
     },
     "commandPalette": {
         "title": "Komut Paleti",
@@ -700,6 +715,9 @@
         "navigate": "gezinmek için",
         "select": "seçmek için",
         "footer": "BookSmart Paleti",
+        "browserTwoWaySync": "İki Yönlü Tarayıcı Senkronizasyonu",
+        "browserImport": "Yer İmlerini Tarayıcıdan Çek",
+        "browserPush": "Yer İmlerini Tarayıcıya Gönder",
         "categories": {
             "views": "Görünümler",
             "actions": "İşlemler",

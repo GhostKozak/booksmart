@@ -1,4 +1,4 @@
-import { Upload, Folder, Search } from 'lucide-react'
+import { Upload, Folder, Search, CloudDownload } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { BookmarkList } from '../BookmarkList'
@@ -19,6 +19,10 @@ export function MainContent({
     rawBookmarks,
     // Dropzone
     getRootProps, getInputProps, isDragActive, openFileDialog,
+    // Browser Sync
+    isExtensionConnected = false,
+    importFromBrowser,
+    isSyncing = false,
     // Link health
     linkHealth,
     ignoredUrls, toggleIgnoreUrl,
@@ -85,6 +89,28 @@ export function MainContent({
                         </p>
                         <Button variant="outline" className="mt-6 sm:mt-8">{t('main.dropzone.browse')}</Button>
                     </div>
+
+                    {isExtensionConnected && importFromBrowser && (
+                        <div className="mt-6 flex flex-col items-center">
+                            <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>{t('main.dropzone.extensionConnected', 'Companion Extension Connected')}</span>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="default"
+                                disabled={isSyncing}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    importFromBrowser();
+                                }}
+                                className="gap-2 px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow transition-all"
+                            >
+                                <CloudDownload className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                                <span>{t('main.dropzone.importFromBrowserDirect', 'Import Browser Bookmarks (1-Click)')}</span>
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </main>
         )

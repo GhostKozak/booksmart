@@ -39,7 +39,7 @@ This project was developed entirely using Artificial Intelligence within the Ant
 - [x] **Undo/Redo**: Mistake-proof management.
 - [x] **Internationalization**: English, Turkish, Spanish, French, German support.
 - [x] **Drag & Drop**: Native drag and drop support.
-- [ ] **Browser Extension**: Capture bookmarks directly from the toolbar.
+- [x] **Browser Extension**: Capture bookmarks directly from toolbar & bidirectional sync with browser bookmarks API.
 - [ ] **Sync Server**: Optional self-hosted sync server.
 - [ ] **Archivebox Integration**: Auto-archive content for offline access.
 

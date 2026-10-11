@@ -79,7 +79,7 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                         {t('modals.extensionGuide.whyTitle', 'Why use the extension?')}
                     </div>
                     <p>
-                        {t('modals.extensionGuide.whyDesc', 'Web browsers block direct access to external status codes due to CORS policies (causing 404 dead links to falsely appear alive). The companion extension runs a serverless background script with full permissions, enabling 100% accurate, private health checks.')}
+                        {t('modals.extensionGuide.whyDesc', 'Enables bidirectional synchronization with browser bookmarks via the Chrome Bookmarks API (import, push, or two-way sync in 1-click), plus serverless CORS-free link health checks.')}
                     </p>
                 </div>
 

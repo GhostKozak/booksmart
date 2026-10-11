@@ -47,6 +47,13 @@
         "shortcuts": "Raccourcis clavier (?)",
         "settings": "Paramètres",
         "maintenance": "Maintenance",
+        "browserSync": {
+            "label": "Synchronisation du navigateur",
+            "twoWay": "Synchronisation bidirectionnelle",
+            "pull": "Importer du navigateur",
+            "push": "Exporter vers le navigateur",
+            "syncBtn": "Sync Navigateur"
+        },
         "view": "Options d'affichage",
         "tools": "Outils",
         "system": "Système",
@@ -562,7 +569,9 @@
         "dropzone": {
             "title": "Déposez vos signets ici",
             "desc": "Glissez-déposez des fichiers HTML (Navigateurs, Pocket), JSON (Raindrop, Pinboard), CSV ou Markdown pour commencer.",
-            "browse": "Parcourir"
+            "browse": "Parcourir",
+            "importFromBrowserDirect": "Importer les signets du navigateur (1-Clic)",
+            "extensionConnected": "Extension compagnon connectée"
         },
         "empty": {
             "title": "Aucun signet trouvé",
@@ -694,7 +703,13 @@
         "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages."
     },
     "notifications": {
-        "duplicatesMerged": "{{count}} doublons fusionnés avec succès"
+        "duplicatesMerged": "{{count}} doublons fusionnés avec succès",
+        "browserImportedSuccess": "{{count}} signets importés depuis le navigateur",
+        "browserPushedSuccess": "{{count}} signets exportés vers le dossier \"{{folder}}\" du navigateur",
+        "browserSyncedSuccess": "Synchronisé : {{imported}} importés, {{exported}} exportés vers le navigateur",
+        "noBookmarksInBrowser": "Aucun signet trouvé dans le navigateur",
+        "allBookmarksAlreadyImported": "Tous les signets du navigateur sont déjà dans votre bibliothèque",
+        "noBookmarksToExport": "Aucun signet à exporter vers le navigateur"
     },
     "commandPalette": {
         "title": "Palette de commandes",
@@ -704,6 +719,9 @@
         "navigate": "pour naviguer",
         "select": "pour sélectionner",
         "footer": "BookSmart Palette",
+        "browserTwoWaySync": "Synchronisation bidirectionnelle du navigateur",
+        "browserImport": "Importer les signets du navigateur",
+        "browserPush": "Exporter les signets vers le navigateur",
         "categories": {
             "views": "Vues",
             "actions": "Actions",

@@ -1,20 +1,21 @@
 # BookSmart Companion Extension 🚀
 
-BookSmart Companion is a lightweight, serverless browser extension (Manifest V3) designed to perform **100% CORS-free and serverless bookmark link health checks**.
+BookSmart Companion is a lightweight, serverless browser extension (Manifest V3) that provides **two-way bookmark synchronization via the `chrome.bookmarks` API** and **100% CORS-free link health checking**.
 
 ---
 
-## 💡 Why is this needed?
+## ✨ Features
 
-Standard web applications running directly in the browser are restricted by the browser's **CORS (Cross-Origin Resource Sharing)** policy. When a web app attempts to `fetch()` external links:
-- Responses are opaque (`mode: 'no-cors'`).
-- The browser hides status codes: a 404 Not Found or 500 Server Error cannot be distinguished from a healthy 200 OK.
-- This leads to unreliable "Alive" and "Dead" reports.
-
-The **BookSmart Companion extension** runs in the background of your browser with `host_permissions: ["<all_urls>"]`:
-- **No CORS Restrictions:** Performs real HTTP `HEAD` and `GET` requests directly.
-- **Accurate HTTP Status Codes:** Truly detects 200, 301, 404, 410, 500, timeouts, and network failures.
-- **100% Serverless & Private:** No data ever leaves your computer. No external proxy servers or backend needed.
+1. **🔄 Two-Way Browser Synchronization (`chrome.bookmarks` API):**
+   - **Pull / Import:** Fetch your full browser bookmark hierarchy into BookSmart with 1-click (no need to manually export and import HTML files).
+   - **Push / Export:** Sync BookSmart's organized bookmarks and folder structure directly into your browser under a dedicated `BookSmart` folder.
+   - **Intelligent Two-Way Sync:** Automatically detects missing bookmarks on both ends, imports new ones into BookSmart, and pushes new ones to your browser.
+2. **⭐️ Toolbar Quick Capture:**
+   - Click the extension icon in the toolbar and hit **"Save Current Tab"** to immediately bookmark the active page.
+3. **🛡️ 100% Serverless, CORS-Free Health Checks:**
+   - Detects real HTTP status codes (200, 301, 404, 500, timeouts) without CORS restrictions or external servers.
+4. **🔒 Privacy-First:**
+   - 100% local. No third-party servers, tracking, or cloud databases.
 
 ---
 
@@ -35,8 +36,10 @@ The **BookSmart Companion extension** runs in the background of your browser wit
 ---
 
 ## 🔄 How it works with BookSmart
-1. When you open BookSmart, the content script communicates with the background service worker.
-2. When you click **Health Check** (Sağlık Kontrolü):
-   - BookSmart detects the extension.
-   - The link check requests are routed through the background script.
-   - Results stream back with authentic status codes and alive/dead classifications in real time.
+1. When you open BookSmart, the content script bridges communication with the background service worker.
+2. **Browser Sync:**
+   - Click **"Tarayıcı Yer İmlerini İçe Aktar"** or **"Two-Way Sync"** in BookSmart.
+   - The extension uses `chrome.bookmarks.getTree()` and `chrome.bookmarks.create()` to synchronize your library seamlessly.
+3. **Health Check:**
+   - Requests are routed through the background script without CORS restrictions.
+   - Real HTTP status codes stream back in real time.

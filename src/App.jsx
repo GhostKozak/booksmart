@@ -16,6 +16,7 @@ import { useAITools } from './hooks/use-ai-tools'
 import { useFileUpload } from './hooks/use-file-upload'
 import { useExport } from './hooks/use-export'
 import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts'
+import { useBrowserSync } from './hooks/use-browser-sync'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 import { saveAutoBackup } from './lib/backup-manager'
@@ -143,6 +144,7 @@ function App() {
   const ruleManager = useRuleManager({ rules, addCommand })
   const fileUpload = useFileUpload()
   const collectionsHook = useCollections({ addCommand })
+  const browserSync = useBrowserSync({ rawBookmarks, addCommand })
 
   const loadDemoData = useCallback(async () => {
     await db.transaction('rw', db.bookmarks, async () => {
@@ -298,6 +300,10 @@ function App() {
           cleanableCount={operations.cleanableCount} cleanAllUrls={operations.cleanAllUrls}
           checkAllLinks={worker.checkAllLinks} isCheckingLinks={worker.isCheckingLinks}
           isExtensionConnected={worker.isExtensionConnected}
+          importFromBrowser={browserSync.importFromBrowser}
+          pushToBrowser={browserSync.pushToBrowser}
+          twoWaySync={browserSync.twoWaySync}
+          isSyncing={browserSync.isSyncing}
           openExportModal={() => actions.guardedExport(exporter.openExportModal)}
           hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
           bookmarkCount={worker.bookmarks.length}
@@ -339,6 +345,9 @@ function App() {
           rawBookmarks={rawBookmarks}
           getRootProps={fileUpload.getRootProps} getInputProps={fileUpload.getInputProps} openFileDialog={fileUpload.open}
           isDragActive={fileUpload.isDragActive}
+          isExtensionConnected={worker.isExtensionConnected}
+          importFromBrowser={browserSync.importFromBrowser}
+          isSyncing={browserSync.isSyncing}
           linkHealth={worker.linkHealth} ignoredUrls={taxonomy.ignoredUrls} toggleIgnoreUrl={taxonomy.toggleIgnoreUrl}
           availableFolders={taxonomy.availableFolders} availableTags={taxonomy.availableTags}
           allCollections={collectionsHook.collections}
@@ -504,6 +513,10 @@ function App() {
               checkAllLinks={worker.checkAllLinks}
               isCheckingLinks={worker.isCheckingLinks}
               openExportModal={() => actions.guardedExport(exporter.openExportModal)}
+              isExtensionConnected={worker.isExtensionConnected}
+              importFromBrowser={browserSync.importFromBrowser}
+              pushToBrowser={browserSync.pushToBrowser}
+              twoWaySync={browserSync.twoWaySync}
               handleAutoCategorize={autoCategorize.handleAutoCategorize}
               handleMagicSort={() => requestAIOperation('magicSort', handleMagicSort)}
               handleFixTitles={() => requestAIOperation('fixTitles', aiTools.handleFixTitles)}

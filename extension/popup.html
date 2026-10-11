@@ -5,7 +5,7 @@
   <title>BookSmart Companion</title>
   <style>
     body {
-      width: 280px;
+      width: 300px;
       margin: 0;
       padding: 16px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -50,29 +50,63 @@
       font-size: 12px;
       color: #94a3b8;
       line-height: 1.45;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .btn {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       width: 100%;
       padding: 8px 12px;
       border: none;
       border-radius: 8px;
-      background-color: #3b82f6;
-      color: #ffffff;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       text-align: center;
       box-sizing: border-box;
       text-decoration: none;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
     }
-    .btn:hover {
+    .btn-primary {
+      background-color: #3b82f6;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
       background-color: #2563eb;
     }
+    .btn-secondary {
+      background-color: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+    .btn-secondary:hover {
+      background-color: #334155;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+    }
+    .btn-save:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+    .status-msg {
+      margin-top: 10px;
+      font-size: 11px;
+      text-align: center;
+      min-height: 16px;
+      color: #38bdf8;
+    }
     .footer {
-      margin-top: 12px;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #1e293b;
       text-align: center;
       font-size: 10px;
       color: #64748b;
@@ -87,16 +121,28 @@
 
   <div class="badge">
     <span class="dot"></span>
-    <span>Active & CORS-Free</span>
+    <span>Sync & Health Ready</span>
   </div>
 
   <div class="desc">
-    This extension runs in your browser to check bookmark link health directly without CORS blocks or servers.
+    Two-way bookmarks sync and CORS-free link health checking for BookSmart.
   </div>
 
-  <button id="open-app-btn" class="btn">Open BookSmart</button>
+  <div class="actions">
+    <button id="save-tab-btn" class="btn btn-save">
+      <span>⭐️ Save Current Tab</span>
+    </button>
+    <button id="sync-btn" class="btn btn-secondary">
+      <span>🔄 Two-Way Sync</span>
+    </button>
+    <button id="open-app-btn" class="btn btn-primary">
+      <span>Open BookSmart</span>
+    </button>
+  </div>
 
-  <div class="footer">v1.0.0 · 100% Private & Serverless</div>
+  <div id="status-msg" class="status-msg"></div>
+
+  <div class="footer">v1.1.0 · 100% Private & Serverless</div>
 
   <script src="popup.js"></script>
 </body>

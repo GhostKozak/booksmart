@@ -25,7 +25,10 @@ import {
     Keyboard,
     Settings,
     FileText,
-    Pencil
+    Pencil,
+    RefreshCw,
+    CloudDownload,
+    CloudUpload
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { getStoredShortcuts } from '../../lib/shortcuts'
@@ -52,6 +55,11 @@ export function CommandPalette({
     checkAllLinks,
     isCheckingLinks,
     openExportModal,
+    // Browser Sync
+    isExtensionConnected = false,
+    importFromBrowser,
+    pushToBrowser,
+    twoWaySync,
     handleAutoCategorize,
     handleMagicSort,
     handleFixTitles,
@@ -200,6 +208,30 @@ export function CommandPalette({
                 icon: Download,
                 action: () => openExportModal?.()
             },
+            ...(isExtensionConnected ? [
+                {
+                    id: 'action-browser-sync',
+                    category: t('commandPalette.categories.actions', 'Actions'),
+                    title: t('commandPalette.browserTwoWaySync', 'Two-Way Browser Sync'),
+                    icon: RefreshCw,
+                    action: () => twoWaySync?.()
+                },
+                {
+                    id: 'action-browser-import',
+                    category: t('commandPalette.categories.actions', 'Actions'),
+                    title: t('commandPalette.browserImport', 'Import Bookmarks from Browser'),
+                    icon: CloudDownload,
+                    action: () => importFromBrowser?.()
+                },
+                {
+                    id: 'action-browser-push',
+                    category: t('commandPalette.categories.actions', 'Actions'),
+                    title: t('commandPalette.browserPush', 'Push Bookmarks to Browser'),
+                    icon: CloudUpload,
+                    disabled: bookmarks.length === 0,
+                    action: () => pushToBrowser?.()
+                }
+            ] : []),
 
             // AI Tools
             {
@@ -312,7 +344,11 @@ export function CommandPalette({
         setIsShortcutsOpen,
         openSettings,
         clearAll,
-        loadDemoData
+        loadDemoData,
+        isExtensionConnected,
+        twoWaySync,
+        importFromBrowser,
+        pushToBrowser
     ])
 
     const filteredCommands = useMemo(() => {

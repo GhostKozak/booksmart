@@ -99,10 +99,267 @@ async function checkUrlDirect(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
     }
 }
 
-// 1. One-off Message Listener (Ping, Single Check)
+// --- Browser Bookmarks API & Two-Way Sync Helpers ---
+
+function normalizeBookmarkUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    try {
+        const parsed = new URL(url);
+        parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        parsed.protocol = parsed.protocol.toLowerCase();
+        if ((parsed.protocol === 'http:' && parsed.port === '80') ||
+            (parsed.protocol === 'https:' && parsed.port === '443')) {
+            parsed.port = '';
+        }
+        let normalized = parsed.href;
+        if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
+        return normalized;
+    } catch {
+        return url.trim().replace(/\/+$/, '');
+    }
+}
+
+function generateBookmarkId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+/**
+ * Recursively flattens a chrome.bookmarks tree into BookSmart bookmark format.
+ */
+function flattenBookmarkTree(nodes, currentPath = '') {
+    const results = [];
+    if (!Array.isArray(nodes)) return results;
+
+    for (const node of nodes) {
+        if (node.url) {
+            const addDate = node.dateAdded
+                ? Math.floor(node.dateAdded / 1000)
+                : Math.floor(Date.now() / 1000);
+            const folder = currentPath || 'Root';
+            results.push({
+                id: generateBookmarkId(),
+                browserId: node.id,
+                title: node.title || node.url,
+                url: node.url,
+                addDate,
+                tags: [],
+                originalFolder: folder,
+                newFolder: folder,
+                note: '',
+                status: 'unchanged'
+            });
+        } else if (node.children) {
+            let folderName = (node.title || '').trim();
+            let nextPath = currentPath;
+            if (node.id !== '0' && folderName) {
+                nextPath = currentPath ? `${currentPath} > ${folderName}` : folderName;
+            }
+            results.push(...flattenBookmarkTree(node.children, nextPath));
+        }
+    }
+    return results;
+}
+
+/**
+ * Retrieves all browser bookmarks.
+ */
+async function getBrowserBookmarks() {
+    if (!chrome.bookmarks) {
+        throw new Error('Bookmarks API not available');
+    }
+    const tree = await chrome.bookmarks.getTree();
+    return flattenBookmarkTree(tree);
+}
+
+/**
+ * Finds or creates a designated target folder in Bookmarks Bar or Root.
+ */
+async function getOrCreateTargetFolder(folderName = 'BookSmart') {
+    const tree = await chrome.bookmarks.getTree();
+    const root = tree[0];
+    const bar = root.children?.find(c => c.id === '1') || root.children?.[0] || root;
+    const parentId = bar.id;
+
+    const existing = bar.children?.find(c => c.title === folderName && !c.url);
+    if (existing) {
+        return { parentId, folderId: existing.id, isNew: false };
+    }
+    const created = await chrome.bookmarks.create({ parentId, title: folderName });
+    return { parentId, folderId: created.id, isNew: true };
+}
+
+/**
+ * Pushes BookSmart bookmarks into the browser under a designated folder.
+ */
+async function pushBookmarksToBrowser(bookmarks, { targetFolderName = 'BookSmart', clean = false } = {}) {
+    if (!chrome.bookmarks) {
+        throw new Error('Bookmarks API not available');
+    }
+    const { folderId } = await getOrCreateTargetFolder(targetFolderName);
+
+    if (clean) {
+        const subTree = await chrome.bookmarks.getSubTree(folderId);
+        if (subTree[0]?.children) {
+            for (const child of subTree[0].children) {
+                await chrome.bookmarks.removeTree(child.id);
+            }
+        }
+    }
+
+    const folderCache = new Map();
+    folderCache.set('', folderId);
+    folderCache.set('Root', folderId);
+
+    async function ensureFolderPath(path) {
+        if (!path || path === 'Root') return folderId;
+        if (folderCache.has(path)) return folderCache.get(path);
+
+        const segments = path.split(' > ').map(s => s.trim()).filter(Boolean);
+        let currentParent = folderId;
+        let cumulative = '';
+
+        for (const segment of segments) {
+            cumulative = cumulative ? `${cumulative} > ${segment}` : segment;
+            if (folderCache.has(cumulative)) {
+                currentParent = folderCache.get(cumulative);
+                continue;
+            }
+
+            const children = await chrome.bookmarks.getChildren(currentParent);
+            const found = children.find(c => c.title === segment && !c.url);
+            if (found) {
+                currentParent = found.id;
+            } else {
+                const created = await chrome.bookmarks.create({ parentId: currentParent, title: segment });
+                currentParent = created.id;
+            }
+            folderCache.set(cumulative, currentParent);
+        }
+        return currentParent;
+    }
+
+    let createdCount = 0;
+    for (const b of (bookmarks || [])) {
+        if (!b.url) continue;
+        const targetParentId = await ensureFolderPath(b.newFolder || b.originalFolder);
+        await chrome.bookmarks.create({
+            parentId: targetParentId,
+            title: b.title || b.url,
+            url: b.url
+        });
+        createdCount++;
+    }
+
+    return {
+        success: true,
+        count: createdCount,
+        folder: targetFolderName
+    };
+}
+
+/**
+ * Performs bidirectional synchronization between BookSmart and Browser.
+ */
+async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
+    if (!chrome.bookmarks) {
+        throw new Error('Bookmarks API not available');
+    }
+
+    const browserBookmarks = await getBrowserBookmarks();
+    const appUrlMap = new Map();
+    for (const b of appBookmarks) {
+        const norm = normalizeBookmarkUrl(b.url);
+        if (norm) appUrlMap.set(norm, b);
+    }
+
+    const browserUrlMap = new Map();
+    for (const b of browserBookmarks) {
+        const norm = normalizeBookmarkUrl(b.url);
+        if (norm) browserUrlMap.set(norm, b);
+    }
+
+    // 1. Missing in App (present in Browser, missing in App)
+    const importedBookmarks = [];
+    for (const b of browserBookmarks) {
+        const norm = normalizeBookmarkUrl(b.url);
+        if (norm && !appUrlMap.has(norm)) {
+            importedBookmarks.push(b);
+        }
+    }
+
+    // 2. Missing in Browser (present in App, missing in Browser)
+    const toPushToBrowser = [];
+    for (const b of appBookmarks) {
+        const norm = normalizeBookmarkUrl(b.url);
+        if (norm && !browserUrlMap.has(norm)) {
+            toPushToBrowser.push(b);
+        }
+    }
+
+    let exportedCount = 0;
+    if (toPushToBrowser.length > 0) {
+        const pushResult = await pushBookmarksToBrowser(toPushToBrowser, {
+            targetFolderName: options.targetFolderName || 'BookSmart',
+            clean: false
+        });
+        exportedCount = pushResult.count;
+    }
+
+    return {
+        success: true,
+        importedBookmarks,
+        exportedCount,
+        totalInBrowser: browserBookmarks.length + exportedCount,
+        totalInApp: appBookmarks.length + importedBookmarks.length
+    };
+}
+
+/**
+ * Captures currently active tab to browser bookmarks.
+ */
+async function captureCurrentTab(options = {}) {
+    if (!chrome.tabs || !chrome.bookmarks) {
+        throw new Error('Tabs or Bookmarks API not available');
+    }
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tabs || tabs.length === 0) {
+        throw new Error('No active tab found');
+    }
+    const currentTab = tabs[0];
+    if (!currentTab.url || !/^https?:\/\//i.test(currentTab.url)) {
+        throw new Error('Cannot bookmark non-web page (e.g. browser internal page)');
+    }
+
+    const folderName = options.folderName || 'BookSmart';
+    const { folderId } = await getOrCreateTargetFolder(folderName);
+
+    const created = await chrome.bookmarks.create({
+        parentId: folderId,
+        title: currentTab.title || currentTab.url,
+        url: currentTab.url
+    });
+
+    return {
+        id: generateBookmarkId(),
+        browserId: created.id,
+        title: created.title,
+        url: created.url,
+        addDate: Math.floor(Date.now() / 1000),
+        originalFolder: folderName,
+        newFolder: folderName,
+        tags: [],
+        note: '',
+        status: 'unchanged'
+    };
+}
+
+// 1. One-off Message Listener (Ping, Single Check, Bookmarks API)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'PING') {
-        sendResponse({ success: true, version: '1.0.0', type: 'PONG' });
+        sendResponse({ success: true, version: '1.1.0', type: 'PONG' });
         return true;
     }
 
@@ -110,7 +367,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         checkUrlDirect(request.url, request.timeoutMs)
             .then(result => sendResponse(result))
             .catch(err => sendResponse({ url: request.url, status: 'dead', error: err.message }));
-        return true; // Keep message channel open for async response
+        return true;
+    }
+
+    if (request.action === 'GET_BROWSER_BOOKMARKS') {
+        getBrowserBookmarks()
+            .then(bookmarks => sendResponse({ success: true, bookmarks }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true;
+    }
+
+    if (request.action === 'PUSH_BROWSER_BOOKMARKS') {
+        pushBookmarksToBrowser(request.bookmarks, request.options)
+            .then(result => sendResponse({ success: true, ...result }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true;
+    }
+
+    if (request.action === 'SYNC_BROWSER_BOOKMARKS') {
+        syncBrowserBookmarks(request.bookmarks, request.options)
+            .then(result => sendResponse(result))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true;
+    }
+
+    if (request.action === 'CAPTURE_CURRENT_TAB') {
+        captureCurrentTab(request.options)
+            .then(bookmark => sendResponse({ success: true, bookmark }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true;
     }
 });
 

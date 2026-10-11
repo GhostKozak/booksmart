@@ -6,6 +6,10 @@ import {
     getExtensionState,
     subscribeExtensionStatus,
     checkLinksWithExtension,
+    getBrowserBookmarks,
+    pushBookmarksToBrowser,
+    syncBrowserBookmarks,
+    captureActiveTab,
     _resetExtensionStateForTesting
 } from '../extension-client'
 
@@ -188,5 +192,103 @@ describe('extension-client', () => {
         controller.abort()
 
         await expect(checkPromise).rejects.toThrow('Link check cancelled by user')
+    })
+
+    it('getBrowserBookmarks resolves with bookmarks list', async () => {
+        const mockBookmarks = [
+            { id: '1', title: 'Test 1', url: 'https://test1.com', originalFolder: 'Bar' }
+        ]
+
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_GET_BROWSER_BOOKMARKS') {
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_BROWSER_BOOKMARKS_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            bookmarks: mockBookmarks
+                        }
+                    })
+                )
+            }
+        })
+
+        const result = await getBrowserBookmarks(500)
+        expect(result).toEqual(mockBookmarks)
+        postMessageSpy.mockRestore()
+    })
+
+    it('pushBookmarksToBrowser resolves with created count and folder', async () => {
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_PUSH_BROWSER_BOOKMARKS') {
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_BROWSER_PUSH_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            count: 5,
+                            folder: 'BookSmart'
+                        }
+                    })
+                )
+            }
+        })
+
+        const result = await pushBookmarksToBrowser([{ url: 'https://a.com' }], { targetFolderName: 'BookSmart' }, 500)
+        expect(result).toEqual({ count: 5, folder: 'BookSmart' })
+        postMessageSpy.mockRestore()
+    })
+
+    it('syncBrowserBookmarks resolves with sync statistics', async () => {
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_SYNC_BROWSER_BOOKMARKS') {
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_BROWSER_SYNC_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            importedBookmarks: [{ title: 'New', url: 'https://new.com' }],
+                            exportedCount: 2,
+                            totalInBrowser: 10,
+                            totalInApp: 12
+                        }
+                    })
+                )
+            }
+        })
+
+        const result = await syncBrowserBookmarks([], {}, 500)
+        expect(result.importedBookmarks).toHaveLength(1)
+        expect(result.exportedCount).toBe(2)
+        expect(result.totalInApp).toBe(12)
+        postMessageSpy.mockRestore()
+    })
+
+    it('captureActiveTab resolves with captured bookmark', async () => {
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_CAPTURE_TAB') {
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_CAPTURE_TAB_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            bookmark: { title: 'Current Page', url: 'https://curr.com' }
+                        }
+                    })
+                )
+            }
+        })
+
+        const result = await captureActiveTab({}, 500)
+        expect(result.url).toBe('https://curr.com')
+        postMessageSpy.mockRestore()
     })
 })
