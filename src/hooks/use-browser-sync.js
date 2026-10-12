@@ -232,7 +232,25 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
         }
     }, [twoWaySync])
 
-    // Listen for extension events (e.g. popup sync trigger, active tab capture)
+    // Cache library bookmarks in extension storage for instant duplicate detection
+    useEffect(() => {
+        if (typeof window === 'undefined' || !rawBookmarks || rawBookmarks.length === 0) return
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_CACHE_BOOKMARKS',
+            payload: {
+                bookmarks: rawBookmarks.map(b => ({
+                    id: b.id,
+                    title: b.title,
+                    url: b.url,
+                    newFolder: b.newFolder,
+                    originalFolder: b.originalFolder
+                }))
+            }
+        }, '*')
+    }, [rawBookmarks])
+
+    // Listen for extension events (e.g. popup sync trigger, active tab capture, session save)
     useEffect(() => {
         const handleExtensionEvent = async (event) => {
             if (event.source !== window || !event.data || event.data.source !== 'BOOKSMART_EXTENSION') {
@@ -249,6 +267,21 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
                 const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
                 const exists = currentBookmarks.some(item => normalizeUrl(item.url) === norm)
                 if (!exists) {
+                    if (b.newFolder && b.newFolder !== 'BookSmart' && b.newFolder !== 'Root') {
+                        try {
+                            const folderExists = await db.folders?.where('name').equalsIgnoreCase(b.newFolder).first()
+                            if (!folderExists && db.folders) {
+                                await db.folders.add({
+                                    id: 'f_' + Date.now(),
+                                    name: b.newFolder,
+                                    order: Date.now()
+                                })
+                            }
+                        } catch {
+                            // Ignored
+                        }
+                    }
+
                     db.bookmarks.add(b).then(() => {
                         addCommand?.({
                             undo: () => db.bookmarks.delete(b.id),
@@ -262,6 +295,75 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
                     }).catch(err => {
                         console.error('Failed to add captured tab to database:', err)
                     })
+                }
+            }
+
+            if (event.data.type === 'BOOKSMART_SESSION_SAVED') {
+                const sessionName = event.data.sessionName || 'Araştırma Oturumu'
+                const sessionBookmarks = event.data.bookmarks || []
+                if (sessionBookmarks.length > 0) {
+                    try {
+                        // 1. Ensure folder in db.folders
+                        if (db.folders) {
+                            const existingFolder = await db.folders.where('name').equalsIgnoreCase(sessionName).first()
+                            if (!existingFolder) {
+                                await db.folders.add({
+                                    id: 'f_' + Date.now(),
+                                    name: sessionName,
+                                    order: Date.now()
+                                })
+                            }
+                        }
+
+                        // 2. Ensure collection in db.collections
+                        if (db.collections) {
+                            const existingCollection = await db.collections.where('name').equalsIgnoreCase(sessionName).first()
+                            if (!existingCollection) {
+                                await db.collections.add({
+                                    id: 'c_' + Date.now(),
+                                    name: sessionName,
+                                    order: Date.now()
+                                })
+                            }
+                        }
+
+                        // 3. Add bookmarks with deduplication
+                        const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
+                        const existingUrls = new Set(currentBookmarks.map(item => normalizeUrl(item.url)).filter(Boolean))
+                        const toInsert = []
+
+                        for (const b of sessionBookmarks) {
+                            const norm = normalizeUrl(b.url)
+                            if (norm && !existingUrls.has(norm)) {
+                                existingUrls.add(norm)
+                                toInsert.push({
+                                    ...b,
+                                    newFolder: sessionName,
+                                    originalFolder: sessionName,
+                                    collections: [sessionName],
+                                    tags: Array.isArray(b.tags) ? b.tags : ['session']
+                                })
+                            }
+                        }
+
+                        if (toInsert.length > 0 && db.bookmarks) {
+                            await db.bookmarks.bulkAdd(toInsert)
+                            const insertedIds = toInsert.map(b => b.id)
+                            addCommand?.({
+                                undo: () => db.bookmarks.bulkDelete(insertedIds),
+                                redo: () => db.bookmarks.bulkAdd(toInsert),
+                                description: `Save Session: ${sessionName} (${toInsert.length})`
+                            })
+                        }
+
+                        toast.success(t('notifications.sessionSavedSuccess', {
+                            name: sessionName,
+                            count: toInsert.length || sessionBookmarks.length,
+                            defaultValue: `"${sessionName}" koleksiyonu kaydedildi (${toInsert.length || sessionBookmarks.length} sekme)`
+                        }))
+                    } catch (err) {
+                        console.error('Failed to save session bookmarks:', err)
+                    }
                 }
             }
         }

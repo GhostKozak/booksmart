@@ -756,7 +756,8 @@
         "noBookmarksInBrowser": "Tarayıcıda yer imi bulunamadı",
         "allBookmarksAlreadyImported": "Tüm tarayıcı yer imleri zaten kütüphanenizde mevcut",
         "noBookmarksToExport": "Tarayıcıya gönderilecek yer imi yok",
-        "tabCaptured": "Aktif sekme kaydedildi: {{title}}"
+        "tabCaptured": "Aktif sekme kaydedildi: {{title}}",
+        "sessionSavedSuccess": "\"{{name}}\" koleksiyonu kaydedildi ({{count}} sekme)"
     },
     "commandPalette": {
         "title": "Komut Paleti",

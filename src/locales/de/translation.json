@@ -756,7 +756,8 @@
         "noBookmarksInBrowser": "Keine Lesezeichen im Browser gefunden",
         "allBookmarksAlreadyImported": "Alle Browser-Lesezeichen befinden sich bereits in Ihrer Bibliothek",
         "noBookmarksToExport": "Keine Lesezeichen zum Exportieren in den Browser vorhanden",
-        "tabCaptured": "Aktiver Tab gespeichert: {{title}}"
+        "tabCaptured": "Aktiver Tab gespeichert: {{title}}",
+        "sessionSavedSuccess": "Sammlung \"{{name}}\" gespeichert ({{count}} Tabs)"
     },
     "commandPalette": {
         "title": "Befehlspalette",

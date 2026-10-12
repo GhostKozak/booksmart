@@ -73,6 +73,16 @@
                 sendResponse({ success: true });
                 return true;
             }
+            if (msg.action === 'BOOKSMART_SESSION_SAVED') {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_SESSION_SAVED',
+                    sessionName: msg.sessionName,
+                    bookmarks: msg.bookmarks
+                }, '*');
+                sendResponse({ success: true });
+                return true;
+            }
         });
     } catch {
         // Ignored if runtime not available
@@ -366,6 +376,73 @@
                     success: false,
                     error: err.message,
                     url: payload?.url
+                }, '*');
+            }
+            return;
+        }
+
+        // 9. Cache BookSmart bookmarks in extension local storage for fast duplicate checking
+        if (type === 'BOOKSMART_CACHE_BOOKMARKS') {
+            try {
+                const bookmarks = Array.isArray(payload?.bookmarks) ? payload.bookmarks : [];
+                const cache = {};
+                for (const b of bookmarks) {
+                    if (!b || !b.url) continue;
+                    let norm = (b.url || '').trim().replace(/\/+$/, '');
+                    try {
+                        const parsed = new URL(b.url);
+                        parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
+                        parsed.protocol = parsed.protocol.toLowerCase();
+                        if ((parsed.protocol === 'http:' && parsed.port === '80') ||
+                            (parsed.protocol === 'https:' && parsed.port === '443')) {
+                            parsed.port = '';
+                        }
+                        let normalized = parsed.href;
+                        if (normalized.endsWith('/')) normalized = normalized.slice(0, -1);
+                        norm = normalized;
+                    } catch {
+                        // ignore parsing error
+                    }
+                    cache[norm] = {
+                        title: b.title,
+                        folder: b.newFolder || b.originalFolder || 'BookSmart',
+                        id: b.id
+                    };
+                }
+                if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                    chrome.storage.local.set({ appBookmarksCache: cache });
+                }
+            } catch {
+                // Ignored
+            }
+            return;
+        }
+
+        // 10. Save active tabs session
+        if (type === 'BOOKSMART_SAVE_SESSION') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'SAVE_SESSION_TABS',
+                    options: sanitizeOptions(payload?.options)
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_SAVE_SESSION_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        count: response?.count,
+                        sessionName: response?.sessionName,
+                        error: err?.message || response?.error
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_SAVE_SESSION_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
                 }, '*');
             }
         }

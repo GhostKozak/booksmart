@@ -518,19 +518,29 @@ async function captureCurrentTab(options = {}) {
     if (!chrome.tabs || !chrome.bookmarks) {
         throw new Error('Tabs or Bookmarks API not available');
     }
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tabs || tabs.length === 0) {
-        throw new Error('No active tab found');
+
+    let targetUrl = options.url;
+    let targetTitle = options.title;
+
+    if (!targetUrl) {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tabs || tabs.length === 0) {
+            throw new Error('No active tab found');
+        }
+        const currentTab = tabs[0];
+        targetUrl = currentTab.url;
+        targetTitle = currentTab.title;
     }
-    const currentTab = tabs[0];
-    if (!currentTab.url || !/^https?:\/\//i.test(currentTab.url)) {
+
+    if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
         throw new Error('Cannot bookmark non-web page (e.g. browser internal page)');
     }
 
     const folderName = options.folderName || 'BookSmart';
+    const note = (options.note || '').trim();
     const { folderId } = await getOrCreateTargetFolder(folderName);
 
-    const norm = normalizeBookmarkUrl(currentTab.url);
+    const norm = normalizeBookmarkUrl(targetUrl);
     const existingChildren = await chrome.bookmarks.getChildren(folderId);
     const existing = existingChildren.find(c => c.url && normalizeBookmarkUrl(c.url) === norm);
 
@@ -539,21 +549,21 @@ async function captureCurrentTab(options = {}) {
         bookmarkResult = {
             id: generateBookmarkId(),
             browserId: existing.id,
-            title: existing.title || currentTab.title,
+            title: existing.title || targetTitle || targetUrl,
             url: existing.url,
             addDate: Math.floor(Date.now() / 1000),
             originalFolder: folderName,
             newFolder: folderName,
             tags: [],
-            note: '',
+            note: note,
             status: 'unchanged',
             alreadyExisted: true
         };
     } else {
         const created = await chrome.bookmarks.create({
             parentId: folderId,
-            title: currentTab.title || currentTab.url,
-            url: currentTab.url
+            title: targetTitle || targetUrl,
+            url: targetUrl
         });
 
         bookmarkResult = {
@@ -565,7 +575,7 @@ async function captureCurrentTab(options = {}) {
             originalFolder: folderName,
             newFolder: folderName,
             tags: [],
-            note: '',
+            note: note,
             status: 'unchanged'
         };
     }
@@ -603,6 +613,94 @@ async function captureCurrentTab(options = {}) {
     return bookmarkResult;
 }
 
+/**
+ * Recursively searches bookmark tree nodes to find matching URL.
+ */
+function findBookmarkInTree(nodes, normUrl, parentTitle = 'Root') {
+    if (!Array.isArray(nodes)) return null;
+    for (const node of nodes) {
+        if (node.url && normalizeBookmarkUrl(node.url) === normUrl) {
+            return {
+                found: true,
+                title: node.title || '',
+                url: node.url,
+                folder: parentTitle || 'Root',
+                id: node.id
+            };
+        }
+        if (node.children) {
+            let nextParent = node.title || parentTitle;
+            if (SYSTEM_ROOT_FOLDER_IDS.has(String(node.id))) {
+                nextParent = 'Bookmarks Bar';
+            }
+            const found = findBookmarkInTree(node.children, normUrl, nextParent);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+/**
+ * Checks if a URL already exists in either browser bookmarks or BookSmart app cache.
+ */
+async function checkUrlDuplicate(url) {
+    if (!url || typeof url !== 'string') {
+        return { isDuplicate: false };
+    }
+    const norm = normalizeBookmarkUrl(url);
+    if (!norm) return { isDuplicate: false };
+
+    // 1. Check in Browser bookmarks
+    if (typeof chrome !== 'undefined' && chrome.bookmarks?.getTree) {
+        try {
+            const tree = await chrome.bookmarks.getTree();
+            const match = findBookmarkInTree(tree, norm);
+            if (match) {
+                return {
+                    isDuplicate: true,
+                    folder: match.folder || 'Bookmarks Bar',
+                    title: match.title,
+                    source: 'browser'
+                };
+            }
+        } catch {
+            // Ignored
+        }
+    }
+
+    // 2. Check in appBookmarksCache (synced from BookSmart app)
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        try {
+            const data = await chrome.storage.local.get(['appBookmarksCache']);
+            const cache = data?.appBookmarksCache;
+            if (cache && typeof cache === 'object' && cache[norm]) {
+                const item = cache[norm];
+                return {
+                    isDuplicate: true,
+                    folder: item.folder || item.newFolder || item.originalFolder || 'BookSmart',
+                    title: item.title,
+                    source: 'booksmart'
+                };
+            }
+        } catch {
+            // Ignored
+        }
+    }
+
+    return { isDuplicate: false };
+}
+
+/**
+ * Formats default session folder/collection name like "Araştırma - 12 Ekim".
+ */
+function getDefaultSessionName() {
+    const now = new Date();
+    const day = now.getDate();
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const month = monthNames[now.getMonth()] || (now.getMonth() + 1);
+    return `Araştırma - ${day} ${month}`;
+}
+
 const TRUSTED_ORIGIN_PATTERNS = [
     /^https?:\/\/localhost(:\d+)?$/,
     /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
@@ -610,6 +708,281 @@ const TRUSTED_ORIGIN_PATTERNS = [
     /^https:\/\/.*booksmart\.app$/,
     /^https:\/\/ghostkozak\.github\.io$/
 ];
+
+/**
+ * Saves all open tabs in current window into a dated session collection/folder (OneTab style).
+ */
+async function saveActiveTabsSession(options = {}) {
+    if (!chrome.tabs) {
+        throw new Error('Tabs API not available');
+    }
+
+    const sessionName = (options.sessionName || getDefaultSessionName()).trim();
+    const closeTabs = Boolean(options.closeTabs);
+
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    if (!tabs || tabs.length === 0) {
+        return { success: false, error: 'no_tabs_found', count: 0, sessionName };
+    }
+
+    // Filter valid web tabs (ignore internal schemes like chrome://, moz-extension://, etc.)
+    const validTabs = tabs.filter(t => {
+        if (!t.url) return false;
+        const u = t.url.toLowerCase();
+        if (!u.startsWith('http://') && !u.startsWith('https://')) return false;
+        try {
+            const origin = new URL(t.url).origin;
+            if (TRUSTED_ORIGIN_PATTERNS.some(p => p.test(origin))) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+        return true;
+    });
+
+    if (validTabs.length === 0) {
+        return { success: false, error: 'no_valid_web_tabs', count: 0, sessionName };
+    }
+
+    // Save bookmarks to browser under BookSmart / sessionName
+    if (chrome.bookmarks) {
+        const rootFolder = await getOrCreateTargetFolder('BookSmart');
+        const sessionFolder = await chrome.bookmarks.create({
+            parentId: rootFolder.folderId,
+            title: sessionName
+        });
+
+        for (const t of validTabs) {
+            try {
+                await chrome.bookmarks.create({
+                    parentId: sessionFolder.id,
+                    title: t.title || t.url,
+                    url: t.url
+                });
+            } catch {
+                // Ignore single bookmark failure
+            }
+        }
+    }
+
+    const sessionBookmarks = validTabs.map(t => ({
+        id: generateBookmarkId(),
+        title: t.title || t.url,
+        url: t.url,
+        addDate: Math.floor(Date.now() / 1000),
+        originalFolder: sessionName,
+        newFolder: sessionName,
+        collections: [sessionName],
+        tags: ['session'],
+        note: '',
+        status: 'unchanged'
+    }));
+
+    // Broadcast BOOKSMART_SESSION_SAVED to open BookSmart tabs
+    const booksmartTabs = tabs.filter(t => {
+        if (!t.url) return false;
+        try {
+            const origin = new URL(t.url).origin;
+            return TRUSTED_ORIGIN_PATTERNS.some(p => p.test(origin));
+        } catch {
+            return false;
+        }
+    });
+
+    for (const bTab of booksmartTabs) {
+        try {
+            const sendPromise = chrome.tabs.sendMessage(bTab.id, {
+                action: 'BOOKSMART_SESSION_SAVED',
+                sessionName,
+                bookmarks: sessionBookmarks
+            });
+            if (sendPromise && typeof sendPromise.catch === 'function') {
+                sendPromise.catch(() => {});
+            }
+        } catch {
+            // Ignored
+        }
+    }
+
+    // If closeTabs is true, close the saved tabs
+    if (closeTabs) {
+        if (booksmartTabs.length === 0 && chrome.storage?.local) {
+            try {
+                const stored = await chrome.storage.local.get(['lastBooksmartUrl']);
+                const appUrl = stored?.lastBooksmartUrl || 'http://localhost:5173';
+                await chrome.tabs.create({ url: appUrl });
+            } catch {
+                // Ignored
+            }
+        }
+
+        const tabIdsToClose = validTabs.map(t => t.id).filter(id => id !== undefined && id !== null);
+        if (tabIdsToClose.length > 0) {
+            try {
+                await chrome.tabs.remove(tabIdsToClose);
+            } catch {
+                // Ignored
+            }
+        }
+    }
+
+    return {
+        success: true,
+        count: sessionBookmarks.length,
+        sessionName,
+        bookmarks: sessionBookmarks
+    };
+}
+
+/**
+ * Displays a temporary badge feedback on the extension action icon.
+ */
+function showBadge(text, color = '#10b981', durationMs = 3000) {
+    if (typeof chrome === 'undefined' || !chrome.action?.setBadgeText) return;
+    try {
+        chrome.action.setBadgeText({ text });
+        if (chrome.action.setBadgeBackgroundColor) {
+            chrome.action.setBadgeBackgroundColor({ color });
+        }
+        if (durationMs > 0) {
+            setTimeout(() => {
+                try {
+                    chrome.action.setBadgeText({ text: '' });
+                } catch {
+                    // Ignored
+                }
+            }, durationMs);
+        }
+    } catch {
+        // Ignored
+    }
+}
+
+const CONTEXT_MENU_FOLDERS = [
+    { id: 'booksmart_folder_reading', title: 'Okuma Listesi' },
+    { id: 'booksmart_folder_dev', title: 'Yazılım' },
+    { id: 'booksmart_folder_research', title: 'Araştırma' },
+    { id: 'booksmart_folder_inspiration', title: 'İlham' },
+    { id: 'booksmart_folder_tools', title: 'Araçlar' }
+];
+
+function setupContextMenus() {
+    if (typeof chrome === 'undefined' || !chrome.contextMenus) return;
+
+    try {
+        chrome.contextMenus.removeAll(() => {
+            if (chrome.runtime?.lastError) {
+                // Ignore remove error
+            }
+
+            // 1. Direct Save: "BookSmart'a Kaydet"
+            chrome.contextMenus.create({
+                id: 'booksmart_save_direct',
+                title: "BookSmart'a Kaydet",
+                contexts: ['page', 'link', 'selection']
+            }, () => void chrome.runtime?.lastError);
+
+            // 2. Folder Submenu Parent: "Klasör Seçerek Kaydet"
+            chrome.contextMenus.create({
+                id: 'booksmart_save_to_folder_root',
+                title: "Klasör Seçerek Kaydet",
+                contexts: ['page', 'link', 'selection']
+            }, () => void chrome.runtime?.lastError);
+
+            // Submenu folders
+            for (const item of CONTEXT_MENU_FOLDERS) {
+                chrome.contextMenus.create({
+                    id: item.id,
+                    parentId: 'booksmart_save_to_folder_root',
+                    title: item.title,
+                    contexts: ['page', 'link', 'selection']
+                }, () => void chrome.runtime?.lastError);
+            }
+
+            // 3. Save all tabs session
+            chrome.contextMenus.create({
+                id: 'booksmart_save_all_tabs_session',
+                title: "Açık Sekmeleri Koleksiyon Yap (OneTab)",
+                contexts: ['page']
+            }, () => void chrome.runtime?.lastError);
+        });
+    } catch {
+        // Ignored
+    }
+}
+
+async function handleContextMenuClick(info, tab) {
+    if (!info) return;
+
+    if (info.menuItemId === 'booksmart_save_all_tabs_session') {
+        try {
+            const res = await saveActiveTabsSession({ closeTabs: false });
+            if (res && res.success) {
+                showBadge('✓', '#10b981');
+            } else {
+                showBadge('!', '#ef4444');
+            }
+        } catch {
+            showBadge('!', '#ef4444');
+        }
+        return;
+    }
+
+    const targetUrl = info.linkUrl || info.pageUrl || tab?.url;
+    if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
+        showBadge('!', '#ef4444');
+        return;
+    }
+
+    let targetTitle = tab?.title || targetUrl;
+    if (info.linkUrl && !info.pageUrl) {
+        targetTitle = info.selectionText || info.linkUrl;
+    }
+
+    let targetFolder = 'BookSmart';
+    const folderMatch = CONTEXT_MENU_FOLDERS.find(f => f.id === info.menuItemId);
+    if (folderMatch) {
+        targetFolder = folderMatch.title;
+    }
+
+    const note = (info.selectionText || '').trim();
+
+    try {
+        const dup = await checkUrlDuplicate(targetUrl);
+        if (dup.isDuplicate) {
+            showBadge('VAR', '#f59e0b', 3500);
+        }
+
+        await captureCurrentTab({
+            folderName: targetFolder,
+            url: targetUrl,
+            title: targetTitle,
+            note
+        });
+
+        if (!dup.isDuplicate) {
+            showBadge('✓', '#10b981', 3000);
+        }
+    } catch (err) {
+        console.error('Error saving via context menu:', err);
+        showBadge('!', '#ef4444', 3000);
+    }
+}
+
+if (typeof chrome !== 'undefined') {
+    if (chrome.contextMenus?.onClicked) {
+        chrome.contextMenus.onClicked.addListener(handleContextMenuClick);
+    }
+    if (chrome.runtime?.onInstalled) {
+        chrome.runtime.onInstalled.addListener(() => {
+            setupContextMenus();
+        });
+    }
+    if (chrome.contextMenus) {
+        setupContextMenus();
+    }
+}
 
 function isSenderAuthorized(sender) {
     if (!sender || !sender.url) return true; // Extension popup or internal service worker
@@ -639,6 +1012,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             return true;
         }
 
+        if (request.action === 'CHECK_URL_DUPLICATE') {
+            checkUrlDuplicate(request.url)
+                .then(result => sendResponse(result))
+                .catch(err => sendResponse({ isDuplicate: false, error: err.message }));
+            return true;
+        }
+
         if (request.action === 'FETCH_OG_METADATA') {
             fetchOgMetadata(request.url, request.timeoutMs)
                 .then(result => sendResponse(result))
@@ -650,7 +1030,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             'GET_BROWSER_BOOKMARKS',
             'PUSH_BROWSER_BOOKMARKS',
             'SYNC_BROWSER_BOOKMARKS',
-            'CAPTURE_CURRENT_TAB'
+            'CAPTURE_CURRENT_TAB',
+            'SAVE_SESSION_TABS'
         ];
 
         if (SENSITIVE_ACTIONS.includes(request.action) && !isSenderAuthorized(sender)) {
@@ -682,6 +1063,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
         if (request.action === 'CAPTURE_CURRENT_TAB') {
             captureCurrentTab(request.options)
                 .then(bookmark => sendResponse({ success: true, bookmark }))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+
+        if (request.action === 'SAVE_SESSION_TABS') {
+            saveActiveTabsSession(request.options)
+                .then(result => sendResponse(result))
                 .catch(err => sendResponse({ success: false, error: err.message }));
             return true;
         }
@@ -754,6 +1142,14 @@ if (typeof module !== 'undefined' && module.exports) {
         decodeHtmlEntities,
         toAbsoluteUrl,
         isSenderAuthorized,
-        SYSTEM_ROOT_FOLDER_IDS
+        SYSTEM_ROOT_FOLDER_IDS,
+        findBookmarkInTree,
+        checkUrlDuplicate,
+        getDefaultSessionName,
+        saveActiveTabsSession,
+        showBadge,
+        CONTEXT_MENU_FOLDERS,
+        setupContextMenus,
+        handleContextMenuClick
     };
 }

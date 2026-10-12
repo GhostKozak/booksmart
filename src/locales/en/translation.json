@@ -756,7 +756,8 @@
         "noBookmarksInBrowser": "No bookmarks found in browser",
         "allBookmarksAlreadyImported": "All browser bookmarks are already in your library",
         "noBookmarksToExport": "No bookmarks to export to browser",
-        "tabCaptured": "Saved active tab: {{title}}"
+        "tabCaptured": "Saved active tab: {{title}}",
+        "sessionSavedSuccess": "Saved \"{{name}}\" collection ({{count}} tabs)"
     },
     "commandPalette": {
         "title": "Command Palette",

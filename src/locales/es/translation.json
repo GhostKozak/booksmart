@@ -756,7 +756,8 @@
         "noBookmarksInBrowser": "No se encontraron marcadores en el navegador",
         "allBookmarksAlreadyImported": "Todos los marcadores del navegador ya están en tu biblioteca",
         "noBookmarksToExport": "No hay marcadores para exportar al navegador",
-        "tabCaptured": "Pestaña activa guardada: {{title}}"
+        "tabCaptured": "Pestaña activa guardada: {{title}}",
+        "sessionSavedSuccess": "Colección \"{{name}}\" guardada ({{count}} pestañas)"
     },
     "commandPalette": {
         "title": "Paleta de comandos",

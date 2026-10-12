@@ -756,7 +756,8 @@
         "noBookmarksInBrowser": "Aucun signet trouvé dans le navigateur",
         "allBookmarksAlreadyImported": "Tous les signets du navigateur sont déjà dans votre bibliothèque",
         "noBookmarksToExport": "Aucun signet à exporter vers le navigateur",
-        "tabCaptured": "Onglet actif enregistré : {{title}}"
+        "tabCaptured": "Onglet actif enregistré : {{title}}",
+        "sessionSavedSuccess": "Collection \"{{name}}\" enregistrée ({{count}} onglets)"
     },
     "commandPalette": {
         "title": "Palette de commandes",

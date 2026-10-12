@@ -11,7 +11,15 @@ const {
     isSenderAuthorized,
     fetchOgMetadata,
     decodeHtmlEntities,
-    toAbsoluteUrl
+    toAbsoluteUrl,
+    findBookmarkInTree,
+    checkUrlDuplicate,
+    getDefaultSessionName,
+    saveActiveTabsSession,
+    showBadge,
+    CONTEXT_MENU_FOLDERS,
+    setupContextMenus,
+    handleContextMenuClick
 } = await import('../../../extension/background.js')
 
 describe('Extension background script helpers', () => {
@@ -28,7 +36,27 @@ describe('Extension background script helpers', () => {
             },
             tabs: {
                 query: vi.fn(),
-                sendMessage: vi.fn().mockResolvedValue({})
+                sendMessage: vi.fn().mockResolvedValue({}),
+                create: vi.fn().mockResolvedValue({ id: 101 }),
+                remove: vi.fn().mockResolvedValue()
+            },
+            storage: {
+                local: {
+                    get: vi.fn().mockResolvedValue({}),
+                    set: vi.fn().mockResolvedValue()
+                }
+            },
+            contextMenus: {
+                removeAll: vi.fn().mockImplementation((cb) => cb && cb()),
+                create: vi.fn(),
+                onClicked: { addListener: vi.fn() }
+            },
+            action: {
+                setBadgeText: vi.fn(),
+                setBadgeBackgroundColor: vi.fn()
+            },
+            runtime: {
+                onInstalled: { addListener: vi.fn() }
             }
         }
     })
@@ -268,6 +296,192 @@ describe('Extension background script helpers', () => {
             const result = await fetchOgMetadata('http://127.0.0.1:8080')
             expect(result.success).toBe(false)
             expect(result.error).toBe('restricted_private_network')
+        })
+    })
+
+    describe('Duplicate detection: checkUrlDuplicate and findBookmarkInTree', () => {
+        it('finds bookmark in tree and extracts correct parent folder with findBookmarkInTree', () => {
+            const mockTree = [
+                {
+                    id: '0',
+                    children: [
+                        {
+                            id: 'folder_dev',
+                            title: 'Yazılım',
+                            children: [
+                                { id: 'b_1', title: 'React', url: 'https://react.dev' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+            const match = findBookmarkInTree(mockTree, 'https://react.dev')
+            expect(match).not.toBeNull()
+            expect(match.found).toBe(true)
+            expect(match.folder).toBe('Yazılım')
+            expect(match.title).toBe('React')
+        })
+
+        it('identifies duplicates in browser bookmarks tree with correct folder name', async () => {
+            const mockTree = [
+                {
+                    id: '0',
+                    children: [
+                        {
+                            id: 'toolbar_____',
+                            title: 'Bookmarks Bar',
+                            children: [
+                                {
+                                    id: 'folder_dev',
+                                    title: 'Yazılım',
+                                    children: [
+                                        { id: 'b_1', title: 'React', url: 'https://react.dev' }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+            chrome.bookmarks.getTree.mockResolvedValue(mockTree)
+
+            const result = await checkUrlDuplicate('https://react.dev/')
+            expect(result.isDuplicate).toBe(true)
+            expect(result.folder).toBe('Yazılım')
+            expect(result.source).toBe('browser')
+        })
+
+        it('identifies duplicates in appBookmarksCache when not in browser bookmarks', async () => {
+            chrome.bookmarks.getTree.mockResolvedValue([])
+            chrome.storage.local.get.mockResolvedValue({
+                appBookmarksCache: {
+                    'https://github.com': {
+                        title: 'GitHub',
+                        folder: 'Araçlar'
+                    }
+                }
+            })
+
+            const result = await checkUrlDuplicate('https://github.com')
+            expect(result.isDuplicate).toBe(true)
+            expect(result.folder).toBe('Araçlar')
+            expect(result.source).toBe('booksmart')
+        })
+
+        it('returns isDuplicate: false for unique URLs', async () => {
+            chrome.bookmarks.getTree.mockResolvedValue([])
+            chrome.storage.local.get.mockResolvedValue({ appBookmarksCache: {} })
+
+            const result = await checkUrlDuplicate('https://brand-new-site.org')
+            expect(result.isDuplicate).toBe(false)
+        })
+    })
+
+    describe('Session Saver (OneTab style): saveActiveTabsSession', () => {
+        it('saves active window web tabs into a dated collection and folder', async () => {
+            chrome.tabs.query.mockResolvedValue([
+                { id: 1, title: 'Docs', url: 'https://docs.example.com' },
+                { id: 2, title: 'Article', url: 'https://blog.example.com' },
+                { id: 3, title: 'Settings', url: 'chrome://settings' }, // Should be ignored
+                { id: 4, title: 'BookSmart App', url: 'https://booksmart.app/' } // Should be ignored
+            ])
+
+            const mockRoot = [{ id: '0', children: [{ id: '1', title: 'Bookmarks bar', children: [] }] }]
+            chrome.bookmarks.getTree.mockResolvedValue(mockRoot)
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            const res = await saveActiveTabsSession({ sessionName: 'Araştırma - Test' })
+
+            expect(res.success).toBe(true)
+            expect(res.count).toBe(2)
+            expect(res.sessionName).toBe('Araştırma - Test')
+            expect(chrome.bookmarks.create).toHaveBeenCalledWith(
+                expect.objectContaining({ title: 'Araştırma - Test' })
+            )
+        })
+
+        it('closes saved tabs when closeTabs is true', async () => {
+            chrome.tabs.query.mockResolvedValue([
+                { id: 10, title: 'Tab 1', url: 'https://tab1.com' },
+                { id: 20, title: 'Tab 2', url: 'https://tab2.com' }
+            ])
+            chrome.bookmarks.getTree.mockResolvedValue([{ id: '0', children: [{ id: '1', title: 'Bookmarks bar', children: [] }] }])
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            const res = await saveActiveTabsSession({ closeTabs: true })
+
+            expect(res.success).toBe(true)
+            expect(chrome.tabs.remove).toHaveBeenCalledWith([10, 20])
+        })
+
+        it('generates a dated default session name like "Araştırma - DD Ay"', () => {
+            const name = getDefaultSessionName()
+            expect(name).toMatch(/^Araştırma - \d+ \S+/)
+        })
+    })
+
+    describe('Context Menus: setupContextMenus and handleContextMenuClick', () => {
+        it('configures context menus with direct save and folder submenu', () => {
+            setupContextMenus()
+            expect(chrome.contextMenus.removeAll).toHaveBeenCalled()
+            expect(chrome.contextMenus.create).toHaveBeenCalledWith(
+                expect.objectContaining({ id: 'booksmart_save_direct' }),
+                expect.any(Function)
+            )
+            expect(chrome.contextMenus.create).toHaveBeenCalledWith(
+                expect.objectContaining({ id: 'booksmart_save_to_folder_root' }),
+                expect.any(Function)
+            )
+            for (const folder of CONTEXT_MENU_FOLDERS) {
+                expect(chrome.contextMenus.create).toHaveBeenCalledWith(
+                    expect.objectContaining({ id: folder.id, parentId: 'booksmart_save_to_folder_root' }),
+                    expect.any(Function)
+                )
+            }
+        })
+
+        it('saves link or page from context menu click and sets badge', async () => {
+            chrome.bookmarks.getTree.mockResolvedValue([{ id: '0', children: [{ id: '1', title: 'Bookmarks bar', children: [] }] }])
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            await handleContextMenuClick({
+                menuItemId: 'booksmart_folder_reading',
+                pageUrl: 'https://news.ycombinator.com',
+                selectionText: 'Interesting discussion about algorithms'
+            }, { title: 'Hacker News' })
+
+            expect(chrome.bookmarks.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    url: 'https://news.ycombinator.com',
+                    title: 'Hacker News'
+                })
+            )
+            expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' })
+        })
+
+        it('captures custom url, title, and note in captureCurrentTab', async () => {
+            chrome.bookmarks.getTree.mockResolvedValue([{ id: '0', children: [{ id: '1', title: 'Bookmarks bar', children: [] }] }])
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            const bookmark = await captureCurrentTab({
+                url: 'https://vite.dev',
+                title: 'Vite Next Gen',
+                note: 'Build tool note',
+                folderName: 'Yazılım'
+            })
+
+            expect(bookmark.url).toBe('https://vite.dev')
+            expect(bookmark.title).toBe('Vite Next Gen')
+            expect(bookmark.note).toBe('Build tool note')
+            expect(bookmark.newFolder).toBe('Yazılım')
+        })
+    })
+
+    describe('showBadge helper', () => {
+        it('sets badge text and color safely', () => {
+            showBadge('✓', '#10b981', 0)
+            expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' })
+            expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#10b981' })
         })
     })
 })
