@@ -1,11 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+    normalizeFeedInputUrl,
     cleanHtmlText,
     parsePubDate,
     parseFeedXml,
     discoverFeedUrlFromHtml,
     getCandidateFeedUrls,
-    addFeedItemToBookmarks
+    addFeedItemToBookmarks,
+    subscribeToFeed
 } from '../rss-service';
 import { db } from '../../db/schema';
 
@@ -13,15 +15,17 @@ import { db } from '../../db/schema';
 vi.mock('../../db/schema', () => ({
     db: {
         bookmarks: { add: vi.fn().mockResolvedValue(42), update: vi.fn(), where: vi.fn() },
-        feeds: { put: vi.fn(), get: vi.fn(), toArray: vi.fn().mockResolvedValue([]), update: vi.fn() },
+        feeds: { put: vi.fn().mockResolvedValue('ok'), get: vi.fn(), toArray: vi.fn().mockResolvedValue([]), update: vi.fn() },
         feedItems: {
-            bulkPut: vi.fn(),
-            bulkAdd: vi.fn(),
+            bulkPut: vi.fn().mockResolvedValue([]),
+            bulkAdd: vi.fn().mockResolvedValue([]),
             toArray: vi.fn().mockResolvedValue([]),
             update: vi.fn(),
             get: vi.fn().mockResolvedValue({ id: 99, feedUrl: 'https://test.com/feed' }),
             where: vi.fn().mockReturnValue({
                 equals: vi.fn().mockReturnValue({
+                    toArray: vi.fn().mockResolvedValue([]),
+                    delete: vi.fn().mockResolvedValue(0),
                     and: vi.fn().mockReturnValue({ count: vi.fn().mockResolvedValue(0) }),
                     count: vi.fn().mockResolvedValue(0)
                 })
@@ -120,6 +124,14 @@ describe('RSS Service - XML Parsing & Helpers', () => {
         expect(ghUrls).toContain('https://github.com/facebook/react/releases.atom');
     });
 
+    it('normalizeFeedInputUrl should prepend https:// if missing and trim whitespace', () => {
+        expect(normalizeFeedInputUrl('techcrunch.com')).toBe('https://techcrunch.com');
+        expect(normalizeFeedInputUrl('  overreacted.io/rss.xml  ')).toBe('https://overreacted.io/rss.xml');
+        expect(normalizeFeedInputUrl('http://insecure.example.com')).toBe('http://insecure.example.com');
+        expect(normalizeFeedInputUrl('https://secure.example.com')).toBe('https://secure.example.com');
+        expect(normalizeFeedInputUrl('')).toBe('');
+    });
+
     it('addFeedItemToBookmarks should format and add item to DB', async () => {
         const item = {
             title: 'Sample Article',
@@ -136,5 +148,44 @@ describe('RSS Service - XML Parsing & Helpers', () => {
             tags: ['rss', 'newsletter']
         }));
         expect(bookmark.id).toBe(42);
+    });
+
+    it('subscribeToFeed should discover feed and insert items using bulkAdd', async () => {
+        const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+            <channel>
+                <title>Mock Tech Blog</title>
+                <link>https://mocktech.example.com</link>
+                <item>
+                    <title>Post 1</title>
+                    <link>https://mocktech.example.com/post-1</link>
+                    <pubDate>Mon, 12 Oct 2026 08:00:00 GMT</pubDate>
+                </item>
+            </channel>
+        </rss>`;
+
+        // Mock global fetch
+        const originalFetch = global.fetch;
+        global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            text: async () => rssXml
+        });
+
+        try {
+            const res = await subscribeToFeed(null, 'mocktech.example.com/rss');
+            expect(res.feed.title).toBe('Mock Tech Blog');
+            expect(db.feeds.put).toHaveBeenCalledWith(expect.objectContaining({
+                feedUrl: 'https://mocktech.example.com/rss',
+                title: 'Mock Tech Blog'
+            }));
+            expect(db.feedItems.bulkAdd).toHaveBeenCalledWith(expect.arrayContaining([
+                expect.objectContaining({
+                    title: 'Post 1',
+                    link: 'https://mocktech.example.com/post-1'
+                })
+            ]));
+        } finally {
+            global.fetch = originalFetch;
+        }
     });
 });

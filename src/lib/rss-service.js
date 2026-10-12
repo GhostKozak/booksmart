@@ -4,6 +4,18 @@ import { getStoredCorsProxy } from './key-vault';
 import { toast } from 'sonner';
 
 /**
+ * Normalizes user-input URL for feeds (e.g. prepending https:// if missing).
+ */
+export function normalizeFeedInputUrl(input) {
+    if (!input || typeof input !== 'string') return '';
+    let trimmed = input.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+        trimmed = 'https://' + trimmed;
+    }
+    return trimmed;
+}
+
+/**
  * Strips HTML tags and normalizes whitespace for summaries.
  */
 export function cleanHtmlText(htmlStr) {
@@ -45,13 +57,15 @@ export function parseFeedXml(xmlStr, feedUrl = '') {
     }
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlStr, 'application/xml');
+    let doc = parser.parseFromString(xmlStr, 'application/xml');
 
     const parserError = doc.querySelector('parsererror');
     if (parserError) {
         // Fallback: try parsing as text/html for lenient XML
         const htmlDoc = parser.parseFromString(xmlStr, 'text/html');
-        if (!htmlDoc.querySelector('rss, feed, channel')) {
+        if (htmlDoc.querySelector('rss, feed, channel')) {
+            doc = htmlDoc;
+        } else {
             throw new Error('Failed to parse feed XML: ' + parserError.textContent.slice(0, 100));
         }
     }
@@ -281,11 +295,12 @@ export function getCandidateFeedUrls(siteUrl) {
  */
 export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
     if (!url) throw new Error('No URL specified');
+    const normalizedUrl = normalizeFeedInputUrl(url);
 
     // 1. Try Extension (100% CORS-free and fastest)
     if (isExtensionConnected()) {
         try {
-            const xml = await fetchFeedXmlWithExtension(url, timeoutMs);
+            const xml = await fetchFeedXmlWithExtension(normalizedUrl, timeoutMs);
             if (xml) return xml;
         } catch (extErr) {
             console.warn('[RSS] Extension fetch failed, trying direct/proxy fallback:', extErr.message);
@@ -296,10 +311,10 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
     try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
-        const res = await fetch(url, {
+        const res = await fetch(normalizedUrl, {
             method: 'GET',
             headers: {
-                'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*'
+                'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html, */*'
             },
             signal: controller.signal
         });
@@ -311,25 +326,35 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
         // Direct fetch blocked by CORS or network error
     }
 
-    // 3. Configured CORS Proxy
+    // 3. Configured CORS Proxy or fallback proxy pool
     const userProxy = getStoredCorsProxy();
-    const proxyUrl = userProxy
-        ? `${userProxy.replace(/\/+$/, '')}/${url}`
-        : `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    const proxyEndpoints = [];
+    if (userProxy) {
+        proxyEndpoints.push(`${userProxy.replace(/\/+$/, '')}/${normalizedUrl}`);
+    }
+    proxyEndpoints.push(`https://corsproxy.io/?url=${encodeURIComponent(normalizedUrl)}`);
+    proxyEndpoints.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`);
+    proxyEndpoints.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(normalizedUrl)}`);
 
-    try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
-        const res = await fetch(proxyUrl, { signal: controller.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-            return await res.text();
+    let lastError = null;
+    for (const endpoint of proxyEndpoints) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            const res = await fetch(endpoint, { signal: controller.signal });
+            clearTimeout(timer);
+            if (res.ok) {
+                const text = await res.text();
+                if (text && text.trim().length > 0) {
+                    return text;
+                }
+            }
+        } catch (err) {
+            lastError = err;
         }
-    } catch (proxyErr) {
-        throw new Error(`Failed to fetch feed from ${url}: ${proxyErr.message}`);
     }
 
-    throw new Error(`Feed request returned non-OK status from ${url}`);
+    throw new Error(lastError ? `Failed to fetch feed from ${normalizedUrl}: ${lastError.message}` : `Feed request returned non-OK status from ${normalizedUrl}`);
 }
 
 /**
@@ -337,47 +362,53 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
  */
 export async function discoverFeed(siteUrl) {
     if (!siteUrl) return null;
+    const normalizedUrl = normalizeFeedInputUrl(siteUrl);
 
-    // Check if siteUrl itself is an active feed
+    let raw = null;
+    // Check if normalizedUrl itself is an active feed
     try {
-        const raw = await fetchFeedXmlRaw(siteUrl, 5000);
-        const parsed = parseFeedXml(raw, siteUrl);
+        raw = await fetchFeedXmlRaw(normalizedUrl, 6000);
+        const parsed = parseFeedXml(raw, normalizedUrl);
         if (parsed.items) {
-            return { feedUrl: siteUrl, parsed };
+            return { feedUrl: normalizedUrl, parsed };
         }
     } catch {
-        // Not a direct feed, continue autodiscovery
+        // Not a direct feed, continue autodiscovery with candidate URLs or HTML
     }
 
-    // Try fetching page HTML to find <link rel="alternate">
-    try {
-        const html = await fetchFeedXmlRaw(siteUrl, 5000);
-        const discovered = discoverFeedUrlFromHtml(html, siteUrl);
+    // Try parsing already fetched raw text as HTML to find <link rel="alternate">
+    if (raw) {
+        const discovered = discoverFeedUrlFromHtml(raw, normalizedUrl);
         if (discovered) {
             try {
                 const feedXml = await fetchFeedXmlRaw(discovered, 6000);
                 const parsed = parseFeedXml(feedXml, discovered);
-                return { feedUrl: discovered, parsed };
+                if (parsed.items) {
+                    return { feedUrl: discovered, parsed };
+                }
             } catch {
-                // Ignore failure on candidate
+                // Discovered link failed, continue to candidate probing
             }
         }
-    } catch {
-        // Page fetch failed
     }
 
-    // Probe candidate URLs
-    const candidates = getCandidateFeedUrls(siteUrl);
-    for (const candidate of candidates) {
-        if (candidate === siteUrl) continue;
+    // Probe candidate URLs concurrently
+    const candidates = getCandidateFeedUrls(normalizedUrl).filter(c => c !== normalizedUrl);
+    if (candidates.length > 0) {
         try {
-            const raw = await fetchFeedXmlRaw(candidate, 4000);
-            const parsed = parseFeedXml(raw, candidate);
-            if (parsed.items && parsed.items.length >= 0) {
-                return { feedUrl: candidate, parsed };
-            }
+            const result = await Promise.any(
+                candidates.map(async (candidate) => {
+                    const candidateXml = await fetchFeedXmlRaw(candidate, 4000);
+                    const parsed = parseFeedXml(candidateXml, candidate);
+                    if (parsed && parsed.items) {
+                        return { feedUrl: candidate, parsed };
+                    }
+                    throw new Error('Not a feed');
+                })
+            );
+            if (result) return result;
         } catch {
-            // candidate failed, try next
+            // All candidates failed
         }
     }
 
@@ -388,16 +419,11 @@ export async function discoverFeed(siteUrl) {
  * Subscribes to a feed and stores initial posts into IndexedDB.
  */
 export async function subscribeToFeed(bookmark = null, customFeedUrl = null) {
-    const targetUrl = customFeedUrl || bookmark?.url;
-    if (!targetUrl) throw new Error('No bookmark or feed URL provided');
+    const rawTarget = customFeedUrl || bookmark?.url;
+    if (!rawTarget) throw new Error('No bookmark or feed URL provided');
+    const targetUrl = normalizeFeedInputUrl(rawTarget);
 
-    let feedInfo = null;
-    if (customFeedUrl) {
-        const raw = await fetchFeedXmlRaw(customFeedUrl);
-        feedInfo = { feedUrl: customFeedUrl, parsed: parseFeedXml(raw, customFeedUrl) };
-    } else {
-        feedInfo = await discoverFeed(targetUrl);
-    }
+    const feedInfo = await discoverFeed(targetUrl);
 
     if (!feedInfo || !feedInfo.parsed) {
         throw new Error('No valid RSS/Atom feed could be found for this site.');
@@ -434,7 +460,12 @@ export async function subscribeToFeed(bookmark = null, customFeedUrl = null) {
     }));
 
     if (itemsToInsert.length > 0) {
-        await db.feedItems.bulkPut(itemsToInsert);
+        const existingItems = await db.feedItems.where('feedUrl').equals(feedUrl).toArray();
+        const existingLinks = new Set(existingItems.map(i => i.link));
+        const newItems = itemsToInsert.filter(it => !existingLinks.has(it.link));
+        if (newItems.length > 0) {
+            await db.feedItems.bulkAdd(newItems);
+        }
     }
 
     // Link feedUrl to bookmark
