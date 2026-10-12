@@ -175,8 +175,36 @@
     .status-msg {
       margin-top: 10px;
       font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      line-height: 1.4;
       text-align: center;
-      min-height: 16px;
+      display: none;
+      word-break: break-word;
+      transition: all 0.2s;
+    }
+    .status-msg.status-success {
+      display: block;
+      background-color: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .status-msg.status-warning {
+      display: block;
+      background-color: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fbbf24;
+    }
+    .status-msg.status-error {
+      display: block;
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .status-msg.status-info {
+      display: block;
+      background-color: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
       color: #38bdf8;
     }
     .footer {

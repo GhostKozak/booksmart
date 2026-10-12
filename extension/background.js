@@ -543,17 +543,20 @@ async function captureCurrentTab(options = {}) {
     const norm = normalizeBookmarkUrl(targetUrl);
     const existingChildren = await chrome.bookmarks.getChildren(folderId);
     const existing = existingChildren.find(c => c.url && normalizeBookmarkUrl(c.url) === norm);
+    const dupCheck = await checkUrlDuplicate(targetUrl);
 
     let bookmarkResult;
-    if (existing) {
+    if (existing || dupCheck.isDuplicate) {
+        const resolvedFolder = (dupCheck.isDuplicate ? dupCheck.folder : null) || folderName;
         bookmarkResult = {
             id: generateBookmarkId(),
-            browserId: existing.id,
-            title: existing.title || targetTitle || targetUrl,
-            url: existing.url,
+            browserId: existing?.id,
+            title: existing?.title || dupCheck.title || targetTitle || targetUrl,
+            url: targetUrl,
             addDate: Math.floor(Date.now() / 1000),
-            originalFolder: folderName,
-            newFolder: folderName,
+            originalFolder: resolvedFolder,
+            newFolder: resolvedFolder,
+            folder: resolvedFolder,
             tags: [],
             note: note,
             status: 'unchanged',
@@ -574,9 +577,11 @@ async function captureCurrentTab(options = {}) {
             addDate: Math.floor(Date.now() / 1000),
             originalFolder: folderName,
             newFolder: folderName,
+            folder: folderName,
             tags: [],
             note: note,
-            status: 'unchanged'
+            status: 'unchanged',
+            alreadyExisted: false
         };
     }
 
@@ -836,6 +841,93 @@ async function saveActiveTabsSession(options = {}) {
 }
 
 /**
+ * Displays a native browser/OS desktop notification.
+ */
+function showNotification(title, message, isWarning = false) {
+    if (typeof chrome === 'undefined' || !chrome.notifications?.create) return;
+    try {
+        const notifId = 'booksmart_' + Date.now();
+        chrome.notifications.create(notifId, {
+            type: 'basic',
+            iconUrl: 'icons/icon-48.png',
+            title: title || 'BookSmart',
+            message: message || '',
+            priority: isWarning ? 2 : 1
+        }, () => {
+            if (chrome.runtime?.lastError) {
+                // Ignore notification error
+            }
+        });
+    } catch {
+        // Ignored
+    }
+}
+
+/**
+ * Injects a floating in-page feedback pill on the active tab for immediate visual feedback.
+ */
+function showInPageToast(tabId, { title = 'BookSmart', message = '', isWarning = false } = {}) {
+    if (!tabId || typeof chrome === 'undefined') return;
+
+    if (chrome.scripting?.executeScript) {
+        chrome.scripting.executeScript({
+            target: { tabId },
+            func: (t, m, isWarn) => {
+                try {
+                    const existing = document.getElementById('booksmart-inpage-toast');
+                    if (existing) existing.remove();
+
+                    const toast = document.createElement('div');
+                    toast.id = 'booksmart-inpage-toast';
+                    const bg = isWarn ? '#1e293b' : '#0f172a';
+                    const border = isWarn ? '#f59e0b' : '#10b981';
+                    const titleColor = isWarn ? '#fbbf24' : '#34d399';
+                    const icon = isWarn ? '⚠️' : '✓';
+
+                    toast.style.cssText = [
+                        'position: fixed !important',
+                        'top: 20px !important',
+                        'right: 20px !important',
+                        'z-index: 2147483647 !important',
+                        'display: flex !important',
+                        'align-items: flex-start !important',
+                        'gap: 10px !important',
+                        'padding: 12px 16px !important',
+                        'border-radius: 10px !important',
+                        'background: ' + bg + ' !important',
+                        'border: 1.5px solid ' + border + ' !important',
+                        'color: #f8fafc !important',
+                        'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important',
+                        'font-size: 13px !important',
+                        'line-height: 1.4 !important',
+                        'box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important',
+                        'transition: all 0.25s ease !important',
+                        'max-width: 360px !important',
+                        'cursor: pointer !important'
+                    ].join(';');
+
+                    toast.innerHTML = '<span style="font-size: 16px; line-height: 1;">' + icon + '</span>' +
+                        '<div><strong style="display:block; font-weight:600; color:' + titleColor + ';">' + t + '</strong>' +
+                        '<span style="font-size:12px; color:#cbd5e1;">' + m + '</span></div>';
+
+                    toast.onclick = () => toast.remove();
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(-8px)';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                } catch {
+                    // Ignored on restricted internal pages
+                }
+            },
+            args: [title, message, isWarning]
+        }).catch(() => {});
+    }
+}
+
+/**
  * Displays a temporary badge feedback on the extension action icon.
  */
 function showBadge(text, color = '#10b981', durationMs = 3000) {
@@ -920,11 +1012,23 @@ async function handleContextMenuClick(info, tab) {
             const res = await saveActiveTabsSession({ closeTabs: false });
             if (res && res.success) {
                 showBadge('✓', '#10b981');
+                showNotification(
+                    'BookSmart - Sekmeler Kaydedildi',
+                    `"${res.sessionName}" koleksiyonu oluşturuldu (${res.count} sekme).`,
+                    false
+                );
+                showInPageToast(tab?.id, {
+                    title: 'Sekmeler Kaydedildi',
+                    message: `"${res.sessionName}" koleksiyonu (${res.count} sekme)`,
+                    isWarning: false
+                });
             } else {
                 showBadge('!', '#ef4444');
+                showNotification('BookSmart - Hata', res?.error || 'Sekmeler kaydedilemedi.', true);
             }
-        } catch {
+        } catch (err) {
             showBadge('!', '#ef4444');
+            showNotification('BookSmart - Hata', err.message || 'Sekmeler kaydedilemedi.', true);
         }
         return;
     }
@@ -932,6 +1036,12 @@ async function handleContextMenuClick(info, tab) {
     const targetUrl = info.linkUrl || info.pageUrl || tab?.url;
     if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
         showBadge('!', '#ef4444');
+        showNotification('BookSmart - Uyarı', 'Yalnızca web bağlantıları (http/https) kaydedilebilir.', true);
+        showInPageToast(tab?.id, {
+            title: 'Kaydedilemedi',
+            message: 'Geçersiz web adresi.',
+            isWarning: true
+        });
         return;
     }
 
@@ -949,24 +1059,51 @@ async function handleContextMenuClick(info, tab) {
     const note = (info.selectionText || '').trim();
 
     try {
-        const dup = await checkUrlDuplicate(targetUrl);
-        if (dup.isDuplicate) {
-            showBadge('VAR', '#f59e0b', 3500);
-        }
-
-        await captureCurrentTab({
+        const result = await captureCurrentTab({
             folderName: targetFolder,
             url: targetUrl,
             title: targetTitle,
             note
         });
 
-        if (!dup.isDuplicate) {
+        const activeTabId = tab?.id;
+        const displayTitle = (result.title || targetTitle || 'Bağlantı').slice(0, 45);
+
+        if (result.alreadyExisted) {
+            const existingFolder = result.folder || targetFolder;
+            showBadge('VAR', '#f59e0b', 3500);
+            showNotification(
+                'BookSmart - Zaten Kayıtlı!',
+                `"${displayTitle}" zaten "${existingFolder}" klasöründe kayıtlı.`,
+                true
+            );
+            showInPageToast(activeTabId, {
+                title: 'Zaten Kayıtlı!',
+                message: `Bu link zaten "${existingFolder}" klasöründe mevcut.`,
+                isWarning: true
+            });
+        } else {
             showBadge('✓', '#10b981', 3000);
+            showNotification(
+                'BookSmart - Kaydedildi',
+                `"${displayTitle}" "${targetFolder}" klasörüne başarıyla kaydedildi.`,
+                false
+            );
+            showInPageToast(activeTabId, {
+                title: 'BookSmart\'a Kaydedildi',
+                message: `"${displayTitle}" → ${targetFolder}`,
+                isWarning: false
+            });
         }
     } catch (err) {
         console.error('Error saving via context menu:', err);
         showBadge('!', '#ef4444', 3000);
+        showNotification('BookSmart - Hata', err.message || 'Yer imi kaydedilemedi', true);
+        showInPageToast(tab?.id, {
+            title: 'Kaydedilemedi',
+            message: err.message || 'Bir hata oluştu',
+            isWarning: true
+        });
     }
 }
 
@@ -1073,6 +1210,19 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
                 .catch(err => sendResponse({ success: false, error: err.message }));
             return true;
         }
+
+        if (request.action === 'SHOW_NOTIFICATION') {
+            showNotification(request.title, request.message, request.isWarning);
+            if (sender?.tab?.id) {
+                showInPageToast(sender.tab.id, {
+                    title: request.title,
+                    message: request.message,
+                    isWarning: request.isWarning
+                });
+            }
+            sendResponse({ success: true });
+            return true;
+        }
     });
 }
 
@@ -1148,6 +1298,8 @@ if (typeof module !== 'undefined' && module.exports) {
         getDefaultSessionName,
         saveActiveTabsSession,
         showBadge,
+        showNotification,
+        showInPageToast,
         CONTEXT_MENU_FOLDERS,
         setupContextMenus,
         handleContextMenuClick

@@ -17,6 +17,8 @@ const {
     getDefaultSessionName,
     saveActiveTabsSession,
     showBadge,
+    showNotification,
+    showInPageToast,
     CONTEXT_MENU_FOLDERS,
     setupContextMenus,
     handleContextMenuClick
@@ -54,6 +56,12 @@ describe('Extension background script helpers', () => {
             action: {
                 setBadgeText: vi.fn(),
                 setBadgeBackgroundColor: vi.fn()
+            },
+            notifications: {
+                create: vi.fn()
+            },
+            scripting: {
+                executeScript: vi.fn().mockResolvedValue([])
             },
             runtime: {
                 onInstalled: { addListener: vi.fn() }
@@ -440,7 +448,7 @@ describe('Extension background script helpers', () => {
             }
         })
 
-        it('saves link or page from context menu click and sets badge', async () => {
+        it('saves link or page from context menu click, sets badge, and fires notification', async () => {
             chrome.bookmarks.getTree.mockResolvedValue([{ id: '0', children: [{ id: '1', title: 'Bookmarks bar', children: [] }] }])
             chrome.bookmarks.getChildren.mockResolvedValue([])
 
@@ -448,7 +456,7 @@ describe('Extension background script helpers', () => {
                 menuItemId: 'booksmart_folder_reading',
                 pageUrl: 'https://news.ycombinator.com',
                 selectionText: 'Interesting discussion about algorithms'
-            }, { title: 'Hacker News' })
+            }, { id: 42, title: 'Hacker News' })
 
             expect(chrome.bookmarks.create).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -457,6 +465,54 @@ describe('Extension background script helpers', () => {
                 })
             )
             expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' })
+            expect(chrome.notifications.create).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    title: 'BookSmart - Kaydedildi',
+                    message: expect.stringContaining('Okuma Listesi')
+                }),
+                expect.any(Function)
+            )
+            expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    target: { tabId: 42 }
+                })
+            )
+        })
+
+        it('warns user via notification and in-page toast when duplicate bookmark is saved via context menu', async () => {
+            // Already in Yazılım folder
+            const mockTree = [{
+                id: '0',
+                children: [{
+                    id: 'f_dev',
+                    title: 'Yazılım',
+                    children: [{ id: 'b_dup', title: 'React', url: 'https://react.dev' }]
+                }]
+            }]
+            chrome.bookmarks.getTree.mockResolvedValue(mockTree)
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            await handleContextMenuClick({
+                menuItemId: 'booksmart_save_direct',
+                pageUrl: 'https://react.dev'
+            }, { id: 77, title: 'React' })
+
+            expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: 'VAR' })
+            expect(chrome.notifications.create).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    title: 'BookSmart - Zaten Kayıtlı!',
+                    priority: 2,
+                    message: expect.stringContaining('Yazılım')
+                }),
+                expect.any(Function)
+            )
+            expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    target: { tabId: 77 }
+                })
+            )
         })
 
         it('captures custom url, title, and note in captureCurrentTab', async () => {
@@ -474,6 +530,32 @@ describe('Extension background script helpers', () => {
             expect(bookmark.title).toBe('Vite Next Gen')
             expect(bookmark.note).toBe('Build tool note')
             expect(bookmark.newFolder).toBe('Yazılım')
+        })
+    })
+
+    describe('showNotification and showInPageToast helpers', () => {
+        it('triggers chrome.notifications.create with correct payload', () => {
+            showNotification('Test Başlık', 'Test Mesajı', true)
+            expect(chrome.notifications.create).toHaveBeenCalledWith(
+                expect.stringMatching(/^booksmart_\d+/),
+                expect.objectContaining({
+                    type: 'basic',
+                    title: 'Test Başlık',
+                    message: 'Test Mesajı',
+                    priority: 2
+                }),
+                expect.any(Function)
+            )
+        })
+
+        it('invokes chrome.scripting.executeScript for in-page toast', () => {
+            showInPageToast(99, { title: 'Kaydedildi', message: 'Detay', isWarning: false })
+            expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    target: { tabId: 99 },
+                    args: ['Kaydedildi', 'Detay', false]
+                })
+            )
         })
     })
 
