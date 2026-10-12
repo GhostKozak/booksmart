@@ -144,7 +144,9 @@
             "reqGemini": "Google Gemini API Anahtarı Gerekir",
             "reqOpenRouter": "OpenRouter API Anahtarı Gerekir",
             "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın",
-            "reqAnthropic": "Anthropic API Anahtarı Gerekir"
+            "reqAnthropic": "Anthropic API Anahtarı Gerekir",
+            "autoSummarize": "Yer İmi Detayında Otomatik Özetleme",
+            "autoSummarizeDesc": "Yer imi önizlemesini veya detayını açtığınızda tek cümlelik \"Bu sayfa ne anlatıyor?\" özeti otomatik oluşturulur."
         },
         "network": {
             "extensionTitle": "Sunucusuz Sağlık Kontrolü (Companion Eklentisi)",
@@ -551,7 +553,19 @@
         "cardView": "Genel Bakış Kartı",
         "liveView": "Canlı Web Sayfası",
         "refreshMetadata": "Önizlemeyi Yenile",
-        "tryIframe": "Canlı Sayfayı Yükle"
+        "tryIframe": "Canlı Sayfayı Yükle",
+        "oneSentenceSummaryTitle": "Bu Sayfa Ne Anlatıyor?",
+        "generateOneSentence": "Tek Cümlelik Özet Çıkar",
+        "regenerateSummary": "Özeti Yenile",
+        "generatingSummary": "YZ tek cümlelik özeti hazırlıyor...",
+        "oneSentenceSuccess": "Tek cümlelik YZ özeti oluşturuldu",
+        "oneSentenceError": "Tek cümlelik özet oluşturulamadı",
+        "noSummaryDesc": "Yapay zeka başlık ve sayfa içeriğini analiz ederek tek cümlelik net bir özet çıkarsın.",
+        "autoSummarizeToggle": "Detayda otomatik özetle",
+        "copySummary": "Özeti Kopyala",
+        "copied": "Özet panoya kopyalandı",
+        "appendToNotes": "Notlara Ekle",
+        "appendedToNotes": "Özet notlara eklendi"
     },
     "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
     "bookmarks": {

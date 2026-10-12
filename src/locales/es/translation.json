@@ -144,7 +144,9 @@
             "reqGemini": "Requiere clave API de Google Gemini",
             "reqOpenRouter": "Requiere clave API de OpenRouter",
             "reqOllama": "Dejar vacío para el predeterminado http://localhost:11434",
-            "reqAnthropic": "Requiere clave API de Anthropic"
+            "reqAnthropic": "Requiere clave API de Anthropic",
+            "autoSummarize": "Resumen Automático en Detalles del Marcador",
+            "autoSummarizeDesc": "Genera automáticamente un resumen de una sola frase (\"¿De qué trata esta página?\") al abrir los detalles del marcador."
         },
         "network": {
             "extensionTitle": "Comprobación de Estado sin Servidor (Extensión)",
@@ -551,7 +553,19 @@
         "cardView": "Tarjeta de Resumen",
         "liveView": "Página Web en Vivo",
         "refreshMetadata": "Actualizar Vista Previa",
-        "tryIframe": "Cargar Sitio en Vivo"
+        "tryIframe": "Cargar Sitio en Vivo",
+        "oneSentenceSummaryTitle": "¿De qué trata esta página?",
+        "generateOneSentence": "Generar resumen de una frase",
+        "regenerateSummary": "Actualizar resumen",
+        "generatingSummary": "La IA está generando el resumen de una frase...",
+        "oneSentenceSuccess": "Resumen de una frase generado con éxito",
+        "oneSentenceError": "Error al generar el resumen",
+        "noSummaryDesc": "Deja que la IA analice el título y el contenido para generar un resumen claro de una sola frase.",
+        "autoSummarizeToggle": "Resumir automáticamente en detalles",
+        "copySummary": "Copiar resumen",
+        "copied": "Resumen copiado al portapapeles",
+        "appendToNotes": "Añadir a notas",
+        "appendedToNotes": "Resumen añadido a las notas"
     },
     "offline": "Estás sin conexión — Los datos se guardan localmente",
     "bookmarks": {

@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye, Pencil } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
@@ -182,11 +182,18 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                         )}
                     </div>
 
-                    {/* Notes / Descriptions */}
-                    {detailed && (bookmark.note || preview?.description) && (
-                        <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap break-words leading-relaxed max-h-24 overflow-y-auto pr-1">
-                            {bookmark.note || preview?.description}
-                        </p>
+                    {/* Notes / AI Summary / Descriptions */}
+                    {detailed && (bookmark.aiSummary || bookmark.note || preview?.description) && (
+                        <div className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap break-words leading-relaxed max-h-24 overflow-y-auto pr-1">
+                            {bookmark.aiSummary ? (
+                                <p className="flex items-start gap-1 text-foreground/90 font-medium italic">
+                                    <Sparkles className="w-3.5 h-3.5 text-purple-500 shrink-0 mt-0.5" />
+                                    <span>{bookmark.aiSummary}</span>
+                                </p>
+                            ) : (
+                                <p>{bookmark.note || preview?.description}</p>
+                            )}
+                        </div>
                     )}
 
                     {/* Tags */}

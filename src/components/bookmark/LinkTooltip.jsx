@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Favicon } from '../Favicon';
-import { ExternalLink, Globe, Folder, Calendar, StickyNote } from 'lucide-react';
+import { ExternalLink, Globe, Folder, Calendar, StickyNote, Sparkles } from 'lucide-react';
 import { cn, getRelativeTime } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useBookmarkPreview } from '../../lib/metadata-fetcher';
@@ -147,8 +147,15 @@ export function LinkTooltip({ bookmark, children, className }) {
                         {bookmark.url}
                     </p>
 
-                    {/* Note or OpenGraph Description preview */}
-                    {bookmark.note ? (
+                    {/* Note or OpenGraph Description or AI Summary preview */}
+                    {bookmark.aiSummary ? (
+                        <div className="flex items-start gap-1.5 pl-6 text-[11px] text-foreground/90">
+                            <Sparkles className="mt-0.5 w-3 h-3 text-purple-500 shrink-0" />
+                            <span className="italic line-clamp-2 font-medium">
+                                {bookmark.aiSummary}
+                            </span>
+                        </div>
+                    ) : bookmark.note ? (
                         <div className="flex items-start gap-1.5 pl-6 text-[11px] text-muted-foreground/80">
                             <StickyNote className="mt-0.5 w-3 h-3 text-amber-500 shrink-0" />
                             <span className="italic line-clamp-2">

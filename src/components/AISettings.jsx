@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ShieldCheck, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react'
+import { ShieldCheck, CheckCircle2, AlertCircle, HelpCircle, Sparkles } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { AI_MODELS, DEFAULT_MODEL } from '../services/ai-service'
@@ -10,7 +10,8 @@ import { subscribeExtensionStatus } from '../lib/extension-client'
 import {
     unlockVault, lockVault, saveSecret, loadSecret,
     isVaultUnlocked, hasVault, clearVault, migrateFromLocalStorage,
-    getStoredCorsProxy, saveStoredCorsProxy
+    getStoredCorsProxy, saveStoredCorsProxy,
+    getAutoSummarizeEnabled, setAutoSummarizeEnabled
 } from '../lib/key-vault'
 
 export function AISettings() {
@@ -18,6 +19,7 @@ export function AISettings() {
     const [apiKey, setApiKey] = useState('')
     const [ollamaUrl, setOllamaUrl] = useState(() => sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url') || '')
     const [selectedModel, setSelectedModel] = useState(() => sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || DEFAULT_MODEL)
+    const [autoSummarize, setAutoSummarize] = useState(() => getAutoSummarizeEnabled())
     const [saved, setSaved] = useState(false)
     const [vaultPassword, setVaultPassword] = useState('')
     const [vaultNewPassword, setVaultNewPassword] = useState('')
@@ -102,6 +104,7 @@ export function AISettings() {
             sessionStorage.setItem('bs_api_key', apiKey)
         }
         saveStoredCorsProxy(corsProxy)
+        setAutoSummarizeEnabled(autoSummarize)
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
         toast.success(t('toast.settingsSaved'))
@@ -221,6 +224,25 @@ export function AISettings() {
                     {selectedProvider === 'anthropic' && t('settings.ai.reqAnthropic')}
                     {selectedProvider === 'ollama' && (t('settings.ai.reqOllama') || 'Leave empty for default localhost:11434')}
                 </p>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 rounded-xl border border-purple-500/20 bg-purple-500/5">
+                <input
+                    type="checkbox"
+                    id="autoSummarize"
+                    checked={autoSummarize}
+                    onChange={(e) => setAutoSummarize(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                />
+                <label htmlFor="autoSummarize" className="space-y-0.5 cursor-pointer select-none">
+                    <div className="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                        {t('settings.ai.autoSummarize', 'Yer İmi Detayında Otomatik Özetleme')}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-normal">
+                        {t('settings.ai.autoSummarizeDesc', 'Yer imi önizlemesini veya detayını açtığınızda tek cümlelik "Bu sayfa ne anlatıyor?" özeti otomatik oluşturulur.')}
+                    </p>
+                </label>
             </div>
 
             <div className="space-y-3 border-t pt-3">

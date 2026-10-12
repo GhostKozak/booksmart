@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { categorizeBookmarks, summarizeContent, AI_MODELS } from '../ai-service';
+import { categorizeBookmarks, summarizeContent, generateOneSentenceSummary, cleanOneSentenceSummary, AI_MODELS } from '../ai-service';
 
 // Mock Fetch
 global.fetch = vi.fn();
@@ -90,5 +90,61 @@ describe('AI Service', () => {
 
         await expect(categorizeBookmarks([{ id: '1' }], 'key', 'gpt-4o-mini'))
             .rejects.toThrow('Invalid API Key');
+    });
+
+    describe('cleanOneSentenceSummary', () => {
+        it('cleans enclosing quotes, markdown, and summary prefixes', () => {
+            expect(cleanOneSentenceSummary('"A modern JavaScript framework for frontend developers."'))
+                .toBe('A modern JavaScript framework for frontend developers.');
+            expect(cleanOneSentenceSummary('Summary: An online bookstore with millions of titles.'))
+                .toBe('An online bookstore with millions of titles.');
+            expect(cleanOneSentenceSummary('Özet: Hızlı ve güvenli modern web tarayıcısı.'))
+                .toBe('Hızlı ve güvenli modern web tarayıcısı.');
+            expect(cleanOneSentenceSummary('```text\nOpen-source vector graphics editor.\n```'))
+                .toBe('Open-source vector graphics editor.');
+        });
+
+        it('handles empty or non-string inputs safely', () => {
+            expect(cleanOneSentenceSummary('')).toBe('');
+            expect(cleanOneSentenceSummary(null)).toBe('');
+        });
+    });
+
+    describe('generateOneSentenceSummary', () => {
+        it('generates a clean one-sentence summary using bookmark context and AI response', async () => {
+            const bookmark = {
+                id: 1,
+                title: 'Tailwind CSS',
+                url: 'https://tailwindcss.com'
+            };
+
+            // Mock page content fetch
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                text: async () => '<html><body>A utility-first CSS framework for rapid UI development</body></html>'
+            });
+
+            // Mock AI response
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    choices: [{
+                        message: { content: '"A utility-first CSS framework for rapidly building modern websites."' }
+                    }]
+                })
+            });
+
+            const summary = await generateOneSentenceSummary(bookmark, 'api-key', 'gpt-4o-mini', {
+                previewMetadata: { description: 'Rapidly build modern websites without ever leaving your HTML.' }
+            });
+
+            expect(summary).toBe('A utility-first CSS framework for rapidly building modern websites.');
+            expect(fetch).toHaveBeenCalledTimes(2);
+        });
+
+        it('throws error when bookmark URL is missing', async () => {
+            await expect(generateOneSentenceSummary({}, 'key', 'gpt-4o-mini'))
+                .rejects.toThrow('Bookmark URL is required');
+        });
     });
 });

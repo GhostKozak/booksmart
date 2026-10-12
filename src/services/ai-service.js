@@ -490,6 +490,119 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal, cors
     throw new Error("Invalid provider");
 }
 
+/**
+ * Cleans a one-sentence summary to ensure it is crisp, without markdown, quotes or conversational filler.
+ * @param {string} text
+ * @returns {string}
+ */
+export function cleanOneSentenceSummary(text) {
+    if (!text || typeof text !== 'string') return '';
+    let cleaned = text.trim();
+    // Remove enclosing markdown code fences
+    cleaned = cleaned.replace(/^```[a-z]*\s*/i, '').replace(/\s*```$/i, '').trim();
+    // Remove enclosing quotes
+    cleaned = cleaned.replace(/^["'“‘«»]+|["'”’«»]+$/g, '').trim();
+    // Remove leading prefixes like "Summary:", "Özet:", etc.
+    cleaned = cleaned.replace(/^(summary|özet|résumé|zusammenfassung|resumen)\s*:\s*/i, '').trim();
+    // If the model produced multiple lines, take the first non-empty line
+    const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length > 0) {
+        cleaned = lines[0];
+    }
+    // Remove enclosing quotes again if line was individually quoted
+    cleaned = cleaned.replace(/^["'“‘«»]+|["'”’«»]+$/g, '').trim();
+    return cleaned;
+}
+
+/**
+ * Generates an automatic one-sentence summary ("Bu sayfa ne anlatıyor?") for a bookmark.
+ * Utilizes title, URL, OpenGraph preview description, and extracted page content.
+ *
+ * @param {{ url: string, title?: string }} bookmark
+ * @param {string} apiKey
+ * @param {string} modelId
+ * @param {Object} [options]
+ * @param {AbortSignal} [options.abortSignal]
+ * @param {string} [options.corsProxy]
+ * @param {Object} [options.previewMetadata]
+ * @returns {Promise<string>}
+ */
+export async function generateOneSentenceSummary(bookmark, apiKey, modelId, { abortSignal, corsProxy, previewMetadata } = {}) {
+    if (!bookmark || !bookmark.url) {
+        throw new Error("Bookmark URL is required");
+    }
+
+    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const provider = modelInfo.provider;
+    const url = bookmark.url;
+    const title = bookmark.title || previewMetadata?.title || '';
+
+    // Collect context
+    const contextParts = [];
+    contextParts.push(`URL: ${url}`);
+    if (title) {
+        contextParts.push(`Title: ${title}`);
+    }
+    if (previewMetadata?.siteName) {
+        contextParts.push(`Website / Brand: ${previewMetadata.siteName}`);
+    }
+    if (previewMetadata?.description) {
+        contextParts.push(`Page Description (OpenGraph): ${previewMetadata.description}`);
+    }
+
+    // Try fetching content if possible
+    try {
+        const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
+        const res = await fetch(fetchUrl, { signal: abortSignal });
+        if (res.ok) {
+            const html = await res.text();
+            if (typeof DOMParser !== 'undefined') {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 8000) : '';
+                if (textOnly) {
+                    contextParts.push(`Page Text Excerpt: ${textOnly}`);
+                }
+            }
+        }
+    } catch {
+        // Fall back gracefully to URL, title, and OpenGraph metadata
+    }
+
+    const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
+    const systemPrompt = `You are an expert web content summarizer.
+Your goal is to answer the question: "What is this page about?" in EXACTLY ONE clear, concise, and informative sentence.
+Rules:
+1. Return EXACTLY ONE sentence.
+2. The sentence MUST directly explain what this website, tool, article, or product is and what it does.
+3. Do NOT use introductory filler like "This page is...", "This website offers...", "Here is a summary:".
+4. Do NOT use quotation marks, bullet points, or markdown formatting.
+5. Write the summary natively in the language corresponding to language code '${lang}'.`;
+
+    const userContent = `Analyze the following webpage information and write a single-sentence "What is this page about?" summary in '${lang}':\n\n${contextParts.join('\n')}`;
+
+    const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent }
+    ];
+
+    let rawSummary = '';
+    if (provider === 'openai') {
+        rawSummary = await callOpenAI(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'gemini') {
+        rawSummary = await callGemini(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'openrouter') {
+        rawSummary = await callOpenRouter(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'ollama') {
+        rawSummary = await callOllama(messages, apiKey, modelId, false, abortSignal);
+    } else if (provider === 'anthropic') {
+        rawSummary = await callAnthropic(messages, apiKey, modelId, false, abortSignal);
+    } else {
+        throw new Error("Invalid provider");
+    }
+
+    return cleanOneSentenceSummary(rawSummary);
+}
+
 export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
     const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;

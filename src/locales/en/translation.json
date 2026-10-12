@@ -144,7 +144,9 @@
             "reqGemini": "Requires Google Gemini API Key",
             "reqOpenRouter": "Requires OpenRouter API Key",
             "reqAnthropic": "Requires Anthropic API Key",
-            "reqOllama": "Leave empty to use http://localhost:11434"
+            "reqOllama": "Leave empty to use http://localhost:11434",
+            "autoSummarize": "Auto-Summarize in Bookmark Details",
+            "autoSummarizeDesc": "Automatically generates a one-sentence \"What is this page about?\" summary when you open bookmark details."
         },
         "network": {
             "extensionTitle": "Serverless Health Check (Companion Extension)",
@@ -551,7 +553,19 @@
         "cardView": "Overview Card",
         "liveView": "Live Webpage",
         "refreshMetadata": "Refresh Preview",
-        "tryIframe": "Load Live Site"
+        "tryIframe": "Load Live Site",
+        "oneSentenceSummaryTitle": "What is this page about?",
+        "generateOneSentence": "Generate One-Sentence Summary",
+        "regenerateSummary": "Regenerate Summary",
+        "generatingSummary": "AI is generating one-sentence summary...",
+        "oneSentenceSuccess": "One-sentence AI summary generated",
+        "oneSentenceError": "Failed to generate summary",
+        "noSummaryDesc": "Let AI analyze the page title and content to generate a crisp one-sentence summary.",
+        "autoSummarizeToggle": "Auto-summarize in details",
+        "copySummary": "Copy Summary",
+        "copied": "Summary copied to clipboard",
+        "appendToNotes": "Append to Notes",
+        "appendedToNotes": "Summary appended to notes"
     },
     "offline": "You are offline — Data is saved locally",
     "bookmarks": {

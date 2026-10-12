@@ -1,13 +1,22 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image } from 'lucide-react';
+import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image, Sparkles, Copy, Check } from 'lucide-react';
 import { cn, isHttpUrl } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
-import { summarizeContent } from '../services/ai-service';
+import { summarizeContent, generateOneSentenceSummary } from '../services/ai-service';
 import { toast } from 'sonner';
-import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault, getStoredCorsProxy } from '../lib/key-vault';
+import {
+    getEffectiveApiKey,
+    getStoredProvider,
+    getStoredModel,
+    isVaultUnlocked,
+    hasVault,
+    getStoredCorsProxy,
+    getAutoSummarizeEnabled,
+    setAutoSummarizeEnabled
+} from '../lib/key-vault';
 import { useBookmarkPreview } from '../lib/metadata-fetcher';
 import { Favicon } from './Favicon';
 
@@ -18,15 +27,21 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const [refreshKey, setRefreshKey] = useState(0);
     const [noteValue, setNoteValue] = useState(bookmark?.note || '');
     const [isNoteOpen, setIsNoteOpen] = useState(!!(bookmark?.note));
+    const [aiSummary, setAiSummary] = useState(bookmark?.aiSummary || '');
+    const [isSummarizingOneSentence, setIsSummarizingOneSentence] = useState(false);
+    const [autoSummarizeEnabled, setAutoSummarizeEnabledState] = useState(() => getAutoSummarizeEnabled());
+    const [hasCopied, setHasCopied] = useState(false);
+    const autoSummarizedRef = useRef(new Set());
 
     const { preview, isLoading: isPreviewLoading, refresh: refreshPreview } = useBookmarkPreview(bookmark?.url);
 
-    const [prevSync, setPrevSync] = useState({ id: bookmark?.id, note: bookmark?.note });
+    const [prevSync, setPrevSync] = useState({ id: bookmark?.id, note: bookmark?.note, aiSummary: bookmark?.aiSummary });
 
-    if (prevSync.id !== bookmark?.id || prevSync.note !== bookmark?.note) {
-        setPrevSync({ id: bookmark?.id, note: bookmark?.note });
+    if (prevSync.id !== bookmark?.id || prevSync.note !== bookmark?.note || prevSync.aiSummary !== bookmark?.aiSummary) {
+        setPrevSync({ id: bookmark?.id, note: bookmark?.note, aiSummary: bookmark?.aiSummary });
         setNoteValue(bookmark?.note || '');
         setIsNoteOpen(!!(bookmark?.note));
+        setAiSummary(bookmark?.aiSummary || '');
     }
 
     const handleReload = () => {
@@ -39,6 +54,91 @@ export function PreviewPane({ bookmark, onClose, className }) {
     };
 
     const [isSummarizing, setIsSummarizing] = useState(false);
+
+    const saveNote = useCallback(async (value) => {
+        if (!bookmark?.id) return;
+        setNoteValue(value);
+        await db.bookmarks.update(bookmark.id, { note: value });
+    }, [bookmark]);
+
+    const handleGenerateOneSentenceSummary = useCallback(async ({ silent = false } = {}) => {
+        if (!bookmark?.id || !bookmark?.url) return;
+
+        const provider = getStoredProvider();
+        const apiKey = await getEffectiveApiKey(provider);
+        const modelId = getStoredModel();
+
+        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+            if (!silent) {
+                toast.error(t('settings.ai.reqOpenAI') || 'API key required');
+            }
+            return;
+        }
+
+        setIsSummarizingOneSentence(true);
+
+        try {
+            const corsProxy = getStoredCorsProxy();
+            const summary = await generateOneSentenceSummary(bookmark, apiKey, modelId, {
+                corsProxy,
+                previewMetadata: preview
+            });
+
+            if (summary) {
+                setAiSummary(summary);
+                await db.bookmarks.update(bookmark.id, { aiSummary: summary });
+                if (!silent) {
+                    toast.success(t('preview.oneSentenceSuccess', 'Tek cümlelik YZ özeti oluşturuldu'));
+                }
+            }
+        } catch (e) {
+            console.error('Failed to generate one-sentence summary:', e);
+            if (!silent) {
+                toast.error(t('preview.oneSentenceError', 'Tek cümlelik özet oluşturulamadı'));
+            }
+        } finally {
+            setIsSummarizingOneSentence(false);
+        }
+    }, [bookmark, preview, t]);
+
+    // Automatic summarization trigger when entering bookmark details
+    useEffect(() => {
+        if (!bookmark?.id || !bookmark?.url || bookmark?.aiSummary || aiSummary) return;
+        if (!autoSummarizeEnabled) return;
+        if (autoSummarizedRef.current.has(bookmark.id)) return;
+
+        const provider = getStoredProvider();
+        getEffectiveApiKey(provider).then((apiKey) => {
+            if ((apiKey || provider === 'ollama') && (!hasVault() || isVaultUnlocked())) {
+                autoSummarizedRef.current.add(bookmark.id);
+                handleGenerateOneSentenceSummary({ silent: true });
+            }
+        });
+    }, [bookmark?.id, bookmark?.url, bookmark?.aiSummary, aiSummary, autoSummarizeEnabled, handleGenerateOneSentenceSummary]);
+
+    const handleCopySummary = () => {
+        if (!aiSummary) return;
+        navigator.clipboard.writeText(aiSummary);
+        setHasCopied(true);
+        setTimeout(() => setHasCopied(false), 2000);
+        toast.success(t('preview.copied', 'Özet panoya kopyalandı'));
+    };
+
+    const handleAppendSummaryToNotes = async () => {
+        if (!aiSummary) return;
+        const newNote = noteValue ? `${noteValue}\n\n---\n**AI Summary:**\n${aiSummary}` : `**AI Summary:**\n${aiSummary}`;
+        await saveNote(newNote);
+        setIsNoteOpen(true);
+        toast.success(t('preview.appendedToNotes', 'Özet notlara eklendi'));
+    };
+
+    const toggleAutoSummarize = (checked) => {
+        setAutoSummarizeEnabledState(checked);
+        setAutoSummarizeEnabled(checked);
+        if (checked && !aiSummary && !isSummarizingOneSentence) {
+            handleGenerateOneSentenceSummary({ silent: false });
+        }
+    };
 
     const handleSummarize = async () => {
         const provider = getStoredProvider();
@@ -66,12 +166,6 @@ export function PreviewPane({ bookmark, onClose, className }) {
             setIsSummarizing(false);
         }
     };
-
-    const saveNote = useCallback(async (value) => {
-        if (!bookmark?.id) return;
-        setNoteValue(value);
-        await db.bookmarks.update(bookmark.id, { note: value });
-    }, [bookmark]);
 
     if (!bookmark) return null;
 
@@ -245,6 +339,88 @@ export function PreviewPane({ bookmark, onClose, className }) {
                         )}
                     </div>
 
+                    {/* AI One-Sentence Summary Card: "Bu Sayfa Ne Anlatıyor?" */}
+                    <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-linear-to-br from-purple-500/5 via-background to-indigo-500/5 p-4 shadow-xs transition-all">
+                        <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-border/40">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 dark:text-purple-400">
+                                <Sparkles className="w-4 h-4 text-purple-500 animate-pulse" />
+                                <span>{t('preview.oneSentenceSummaryTitle', 'Bu Sayfa Ne Anlatıyor?')}</span>
+                            </div>
+                            {aiSummary && (
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                                        onClick={handleCopySummary}
+                                        title={t('preview.copySummary', 'Özeti Kopyala')}
+                                    >
+                                        {hasCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-purple-500 cursor-pointer"
+                                        onClick={handleAppendSummaryToNotes}
+                                        title={t('preview.appendToNotes', 'Notlara Ekle')}
+                                    >
+                                        <StickyNote className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-muted-foreground hover:text-purple-500 cursor-pointer"
+                                        onClick={() => handleGenerateOneSentenceSummary()}
+                                        disabled={isSummarizingOneSentence}
+                                        title={t('preview.regenerateSummary', 'Özeti Yenile')}
+                                    >
+                                        <RefreshCw className={cn("h-3.5 w-3.5", isSummarizingOneSentence && "animate-spin text-purple-500")} />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {isSummarizingOneSentence ? (
+                            <div className="py-4 flex flex-col items-center justify-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+                                <span>{t('preview.generatingSummary', 'YZ tek cümlelik özeti hazırlıyor...')}</span>
+                            </div>
+                        ) : aiSummary ? (
+                            <div className="pt-3">
+                                <p className="text-xs sm:text-sm font-medium text-foreground/90 leading-relaxed italic">
+                                    “{aiSummary}”
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="pt-3 space-y-3">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    {t('preview.noSummaryDesc', 'Yapay zeka başlık ve sayfa içeriğini analiz ederek tek cümlelik net bir özet çıkarsın.')}
+                                </p>
+                                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleGenerateOneSentenceSummary()}
+                                        disabled={isSummarizingOneSentence}
+                                        className="h-7 text-xs gap-1.5 border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 cursor-pointer"
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                                        <span>{t('preview.generateOneSentence', 'Tek Cümlelik Özet Çıkar')}</span>
+                                    </Button>
+                                    <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={autoSummarizeEnabled}
+                                            onChange={(e) => toggleAutoSummarize(e.target.checked)}
+                                            className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                                        />
+                                        <span>{t('preview.autoSummarizeToggle', 'Detayda otomatik özetle')}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Quick Action Pills */}
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                         <Button
@@ -279,42 +455,61 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 relative bg-muted/20 overflow-hidden">
-                    {isLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
-                            <div className="flex flex-col items-center gap-2">
-                                <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-                                <span className="text-sm text-muted-foreground">{t('preview.loading')}</span>
+                <div className="flex-1 relative bg-muted/20 overflow-hidden flex flex-col">
+                    {aiSummary && (
+                        <div className="px-3 py-1.5 bg-card/90 backdrop-blur border-b text-xs flex items-center justify-between gap-2 shadow-xs shrink-0 z-10">
+                            <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 font-medium truncate">
+                                <Sparkles className="w-3.5 h-3.5 shrink-0 text-purple-500" />
+                                <span className="truncate italic">“{aiSummary}”</span>
                             </div>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleCopySummary}
+                                className="h-6 px-1.5 text-[11px] shrink-0 text-muted-foreground hover:text-foreground cursor-pointer"
+                                title={t('preview.copySummary', 'Özeti Kopyala')}
+                            >
+                                {hasCopied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                            </Button>
                         </div>
                     )}
+                    <div className="flex-1 relative overflow-hidden">
+                        {isLoading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                                <div className="flex flex-col items-center gap-2">
+                                    <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+                                    <span className="text-sm text-muted-foreground">{t('preview.loading')}</span>
+                                </div>
+                            </div>
+                        )}
 
-                    <iframe
-                        key={`${bookmark.id}-${refreshKey}`}
-                        src={isHttpUrl(bookmark.url) ? bookmark.url : 'about:blank'}
-                        className="w-full h-full border-0 bg-white"
-                        title={`Preview of ${bookmark.title}`}
-                        onLoad={() => setIsLoading(false)}
-                        onError={() => {
-                            setIsLoading(false);
-                        }}
-                        sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                        referrerPolicy="no-referrer"
-                    />
+                        <iframe
+                            key={`${bookmark.id}-${refreshKey}`}
+                            src={isHttpUrl(bookmark.url) ? bookmark.url : 'about:blank'}
+                            className="w-full h-full border-0 bg-white"
+                            title={`Preview of ${bookmark.title}`}
+                            onLoad={() => setIsLoading(false)}
+                            onError={() => {
+                                setIsLoading(false);
+                            }}
+                            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                            referrerPolicy="no-referrer"
+                        />
 
-                    {/* Overlay for potential errors */}
-                    <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
-                        <div className="bg-background/90 backdrop-blur border rounded-lg shadow-lg p-3 pointer-events-auto max-w-[200px] text-xs">
-                            <p className="mb-2 text-muted-foreground">
-                                {t('preview.error')}
-                            </p>
-                            <Button size="sm" variant="outline" className="w-full gap-2 cursor-pointer" onClick={() => {
-                                if (isHttpUrl(bookmark.url)) {
-                                    window.open(bookmark.url, '_blank', 'noopener,noreferrer');
-                                }
-                            }}>
-                                <ExternalLink className="h-3 w-3" /> {t('preview.openExternal')}
-                            </Button>
+                        {/* Overlay for potential errors */}
+                        <div className="absolute bottom-4 right-4 z-20 pointer-events-none">
+                            <div className="bg-background/90 backdrop-blur border rounded-lg shadow-lg p-3 pointer-events-auto max-w-[200px] text-xs">
+                                <p className="mb-2 text-muted-foreground">
+                                    {t('preview.error')}
+                                </p>
+                                <Button size="sm" variant="outline" className="w-full gap-2 cursor-pointer" onClick={() => {
+                                    if (isHttpUrl(bookmark.url)) {
+                                        window.open(bookmark.url, '_blank', 'noopener,noreferrer');
+                                    }
+                                }}>
+                                    <ExternalLink className="h-3 w-3" /> {t('preview.openExternal')}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>

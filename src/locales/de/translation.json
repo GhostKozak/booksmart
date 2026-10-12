@@ -144,7 +144,9 @@
             "reqGemini": "Benötigt Google Gemini API-Schlüssel",
             "reqOpenRouter": "Benötigt OpenRouter API-Schlüssel",
             "reqOllama": "Lassen Sie dieses Feld leer, um standardmäßig http://localhost:11434 zu verwenden",
-            "reqAnthropic": "Erfordert Anthropic API-Schlüssel"
+            "reqAnthropic": "Erfordert Anthropic API-Schlüssel",
+            "autoSummarize": "Automatische Zusammenfassung in Lesezeichen-Details",
+            "autoSummarizeDesc": "Erstellt beim Öffnen der Lesezeichen-Details automatisch eine prägnante Ein-Satz-Zusammenfassung (\"Worum geht es auf dieser Seite?\")."
         },
         "network": {
             "extensionTitle": "Serverlose Integritätsprüfung (Begleiter-Erweiterung)",
@@ -551,7 +553,19 @@
         "cardView": "Übersichtskarte",
         "liveView": "Live-Webseite",
         "refreshMetadata": "Vorschau Aktualisieren",
-        "tryIframe": "Live-Seite Laden"
+        "tryIframe": "Live-Seite Laden",
+        "oneSentenceSummaryTitle": "Worum geht es auf dieser Seite?",
+        "generateOneSentence": "Ein-Satz-Zusammenfassung erstellen",
+        "regenerateSummary": "Zusammenfassung aktualisieren",
+        "generatingSummary": "KI erstellt Ein-Satz-Zusammenfassung...",
+        "oneSentenceSuccess": "Ein-Satz-Zusammenfassung erfolgreich erstellt",
+        "oneSentenceError": "Fehler beim Erstellen der Zusammenfassung",
+        "noSummaryDesc": "Lassen Sie die KI Titel und Inhalt analysieren, um eine prägnante Ein-Satz-Zusammenfassung zu generieren.",
+        "autoSummarizeToggle": "In Details automatisch zusammenfassen",
+        "copySummary": "Zusammenfassung kopieren",
+        "copied": "Zusammenfassung in Zwischenablage kopiert",
+        "appendToNotes": "Zu Notizen hinzufügen",
+        "appendedToNotes": "Zusammenfassung zu Notizen hinzugefügt"
     },
     "offline": "Sie sind offline — Daten werden lokal gespeichert",
     "bookmarks": {

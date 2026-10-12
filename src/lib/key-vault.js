@@ -168,3 +168,11 @@ export function saveStoredCorsProxy(url) {
     sessionStorage.setItem('bs_cors_proxy', cleanUrl);
     localStorage.setItem('bs_cors_proxy', cleanUrl);
 }
+
+export function getAutoSummarizeEnabled() {
+    return localStorage.getItem('bs_auto_summarize') === 'true';
+}
+
+export function setAutoSummarizeEnabled(enabled) {
+    localStorage.setItem('bs_auto_summarize', enabled ? 'true' : 'false');
+}

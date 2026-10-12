@@ -144,7 +144,9 @@
             "reqGemini": "Nécessite une clé API Google Gemini",
             "reqOpenRouter": "Nécessite une clé API OpenRouter",
             "reqOllama": "Laissez vide pour utiliser http://localhost:11434 par défaut",
-            "reqAnthropic": "Nécessite une clé API Anthropic"
+            "reqAnthropic": "Nécessite une clé API Anthropic",
+            "autoSummarize": "Résumé Automatique dans les Détails",
+            "autoSummarizeDesc": "Génère automatiquement un résumé d'une phrase (\"De quoi parle cette page ?\") lors de l'ouverture des détails du signet."
         },
         "network": {
             "extensionTitle": "Vérification Sans Serveur (Extension Compagnon)",
@@ -551,7 +553,19 @@
         "cardView": "Carte Aperçu",
         "liveView": "Page Web en Direct",
         "refreshMetadata": "Actualiser l'Aperçu",
-        "tryIframe": "Charger le Site en Direct"
+        "tryIframe": "Charger le Site en Direct",
+        "oneSentenceSummaryTitle": "De quoi parle cette page ?",
+        "generateOneSentence": "Générer un résumé en une phrase",
+        "regenerateSummary": "Actualiser le résumé",
+        "generatingSummary": "L'IA génère le résumé en une phrase...",
+        "oneSentenceSuccess": "Résumé d'une phrase généré avec succès",
+        "oneSentenceError": "Échec de génération du résumé",
+        "noSummaryDesc": "Laissez l'IA analyser le titre et le contenu pour générer un résumé net en une phrase.",
+        "autoSummarizeToggle": "Résumer automatiquement dans les détails",
+        "copySummary": "Copier le résumé",
+        "copied": "Résumé copié dans le presse-papiers",
+        "appendToNotes": "Ajouter aux notes",
+        "appendedToNotes": "Résumé ajouté aux notes"
     },
     "offline": "Vous êtes hors ligne — Les données sont sauvegardées localement",
     "bookmarks": {

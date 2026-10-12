@@ -9,7 +9,9 @@ import {
     clearVault,
     getEffectiveApiKey,
     saveStoredCorsProxy,
-    getStoredCorsProxy
+    getStoredCorsProxy,
+    getAutoSummarizeEnabled,
+    setAutoSummarizeEnabled
 } from '../key-vault';
 
 describe('key-vault', () => {
@@ -109,5 +111,13 @@ describe('key-vault', () => {
     it('should save and retrieve CORS proxy properly', () => {
         saveStoredCorsProxy('  https://my-proxy.com/  ');
         expect(getStoredCorsProxy()).toBe('https://my-proxy.com/');
+    });
+
+    it('should get and set auto-summarize preference properly', () => {
+        expect(getAutoSummarizeEnabled()).toBe(false);
+        setAutoSummarizeEnabled(true);
+        expect(getAutoSummarizeEnabled()).toBe(true);
+        setAutoSummarizeEnabled(false);
+        expect(getAutoSummarizeEnabled()).toBe(false);
     });
 });
