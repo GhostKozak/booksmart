@@ -10,6 +10,7 @@ const {
     captureCurrentTab,
     isSenderAuthorized,
     fetchOgMetadata,
+    fetchFeedXml,
     decodeHtmlEntities,
     toAbsoluteUrl,
     findBookmarkInTree,
@@ -564,6 +565,31 @@ describe('Extension background script helpers', () => {
             showBadge('✓', '#10b981', 0)
             expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' })
             expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#10b981' })
+        })
+    })
+
+    describe('fetchFeedXml helper', () => {
+        it('rejects invalid or loopback URLs', async () => {
+            const res1 = await fetchFeedXml('not-a-url')
+            expect(res1.success).toBe(false)
+            expect(res1.error).toBe('invalid_url')
+
+            const res2 = await fetchFeedXml('http://127.0.0.1:8080/feed.xml')
+            expect(res2.success).toBe(false)
+            expect(res2.error).toBe('restricted_private_network')
+        })
+
+        it('fetches feed xml successfully when response is ok', async () => {
+            const mockXml = '<rss><channel><title>Feed</title></channel></rss>'
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                text: async () => mockXml
+            })
+
+            const res = await fetchFeedXml('https://example.com/rss.xml')
+            expect(res.success).toBe(true)
+            expect(res.xml).toBe(mockXml)
         })
     })
 })

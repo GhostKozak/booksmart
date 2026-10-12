@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye, Pencil, Sparkles } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
@@ -136,9 +136,17 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                         </div>
                         <div className="flex-1 min-w-0">
                             <LinkTooltip bookmark={bookmark}>
-                                <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
-                                    {bookmark.title || t('common.untitled')}
-                                </h3>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
+                                        {bookmark.title || t('common.untitled')}
+                                    </h3>
+                                    {bookmark.feedUrl && (
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                                            <Rss className="w-2.5 h-2.5" />
+                                            <span>RSS</span>
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">
                                     {preview?.siteName ? `${preview.siteName} • ${bookmark.url}` : bookmark.url}
                                 </p>

@@ -381,6 +381,39 @@
             return;
         }
 
+        // 8b. Fetch RSS/Atom Feed XML directly bypassing CORS
+        if (type === 'BOOKSMART_FETCH_FEED_XML') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'FETCH_FEED_XML',
+                    url: payload?.url,
+                    timeoutMs: payload?.timeoutMs
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_FETCH_FEED_XML_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        xml: response?.xml,
+                        statusCode: response?.statusCode,
+                        error: err?.message || response?.error,
+                        url: payload?.url
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_FETCH_FEED_XML_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message,
+                    url: payload?.url
+                }, '*');
+            }
+            return;
+        }
+
         // 9. Cache BookSmart bookmarks in extension local storage for fast duplicate checking
         if (type === 'BOOKSMART_CACHE_BOOKMARKS') {
             try {

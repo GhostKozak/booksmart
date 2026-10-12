@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function BookmarkRowMobile({
@@ -47,6 +47,12 @@ export function BookmarkRowMobile({
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )}>{bookmark.title || t('common.untitled')}</span>
+                        {bookmark.feedUrl && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                                <Rss className="w-2.5 h-2.5" />
+                                <span>RSS</span>
+                            </span>
+                        )}
 
                         <div className="flex items-center gap-1 shrink-0">
                             <Button

@@ -252,6 +252,60 @@ async function fetchOgMetadata(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
     }
 }
 
+/**
+ * Fetches RSS/Atom XML text content directly bypassing CORS.
+ */
+async function fetchFeedXml(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+    if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url.trim())) {
+        return { success: false, error: 'invalid_url', url };
+    }
+
+    const cleanUrl = url.trim();
+    if (isPrivateOrLoopbackUrl(cleanUrl)) {
+        return { success: false, error: 'restricted_private_network', url: cleanUrl };
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const res = await fetch(cleanUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*'
+            },
+            redirect: 'follow',
+            signal: controller.signal
+        });
+
+        clearTimeout(timer);
+
+        if (!res.ok) {
+            return {
+                success: false,
+                statusCode: res.status,
+                error: `HTTP ${res.status}: ${res.statusText}`,
+                url: cleanUrl
+            };
+        }
+
+        const xml = await res.text();
+        return {
+            success: true,
+            statusCode: res.status,
+            xml,
+            url: cleanUrl
+        };
+    } catch (err) {
+        clearTimeout(timer);
+        return {
+            success: false,
+            error: err.name === 'AbortError' ? 'timeout' : (err.message || 'fetch_failed'),
+            url: cleanUrl
+        };
+    }
+}
+
 // --- Browser Bookmarks API & Two-Way Sync Helpers ---
 
 function normalizeBookmarkUrl(url) {
@@ -1163,6 +1217,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             return true;
         }
 
+        if (request.action === 'FETCH_FEED_XML') {
+            fetchFeedXml(request.url, request.timeoutMs)
+                .then(result => sendResponse(result))
+                .catch(err => sendResponse({ success: false, error: err.message, url: request.url }));
+            return true;
+        }
+
         const SENSITIVE_ACTIONS = [
             'GET_BROWSER_BOOKMARKS',
             'PUSH_BROWSER_BOOKMARKS',
@@ -1289,6 +1350,7 @@ if (typeof module !== 'undefined' && module.exports) {
         syncBrowserBookmarks,
         captureCurrentTab,
         fetchOgMetadata,
+        fetchFeedXml,
         decodeHtmlEntities,
         toAbsoluteUrl,
         isSenderAuthorized,

@@ -614,4 +614,64 @@ export function fetchOgMetadataWithExtension(url, timeoutMs = 8000) {
     });
 }
 
+/**
+ * Fetches RSS/Atom XML text content using the companion extension.
+ * Serverless and bypasses CORS restrictions.
+ *
+ * @param {string} url
+ * @param {number} [timeoutMs=10000]
+ * @returns {Promise<string>}
+ */
+export function fetchFeedXmlWithExtension(url, timeoutMs = 10000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    if (!url || !/^https?:\/\//i.test(url.trim())) {
+        return Promise.reject(new Error('Invalid URL'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'feed_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out fetching RSS/Atom feed from extension'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_FETCH_FEED_XML_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success && event.data.xml) {
+                    resolve(event.data.xml);
+                } else {
+                    reject(new Error(event.data.error || 'Failed to fetch RSS/Atom feed'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_FETCH_FEED_XML',
+            requestId,
+            payload: { url: url.trim(), timeoutMs }
+        }, '*');
+    });
+}
+
 

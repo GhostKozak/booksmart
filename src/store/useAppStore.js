@@ -84,6 +84,12 @@ export const useAppStore = create((set, get) => ({
     editingCollection: null,
     setEditingCollection: (collection) => set({ editingCollection: collection }),
 
+    // --- RSS & Newsletter Slice ---
+    isRssReaderOpen: false,
+    setIsRssReaderOpen: (isOpen) => set({ isRssReaderOpen: isOpen }),
+    selectedFeedUrl: null,
+    setSelectedFeedUrl: (url) => set({ selectedFeedUrl: url }),
+
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",
     resolvedTheme: "light",

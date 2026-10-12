@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge, RefreshCw, CloudDownload, CloudUpload } from 'lucide-react'
+import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge, RefreshCw, CloudDownload, CloudUpload, Rss } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -9,6 +9,8 @@ import { HistoryPanel } from '../HistoryPanel'
 import { AdvancedSearch } from '../AdvancedSearch'
 import { cn } from '../../lib/utils'
 import { useAppStore } from '../../store/useAppStore'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../db/schema'
 
 export function Header({
     // Undo/Redo
@@ -40,8 +42,14 @@ export function Header({
         openExtensionGuide,
         isSidebarOpen, setIsSidebarOpen,
         setIsShortcutsOpen,
-        setIsCommandPaletteOpen
+        setIsCommandPaletteOpen,
+        setIsRssReaderOpen
     } = useAppStore()
+
+    const totalUnreadRss = useLiveQuery(async () => {
+        const feeds = await db.feeds.toArray();
+        return feeds.reduce((sum, f) => sum + (f.unreadCount || 0), 0);
+    }) || 0;
 
     const hasMaintenanceActions = duplicateCount > 0 || cleanableCount > 0
 
@@ -195,6 +203,23 @@ export function Header({
                     <Search className="w-3.5 h-3.5" />
                     <span className="font-medium">{t('commandPalette.shortTitle', 'Commands')}</span>
                     <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-background border rounded shadow-2xs text-muted-foreground ml-1">⌘K</kbd>
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsRssReaderOpen(true)}
+                    className="relative inline-flex items-center gap-1.5 h-9 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-amber-500/10 cursor-pointer rounded-lg border border-border/40"
+                    title={t('rss.readerTitle', 'RSS & Bülten Akışları')}
+                    aria-label={t('rss.readerTitle', 'RSS Reader')}
+                >
+                    <Rss className="w-3.5 h-3.5 text-amber-500" />
+                    <span className="hidden md:inline font-medium">{t('rss.feedShort', 'Akışlar')}</span>
+                    {totalUnreadRss > 0 && (
+                        <span className="px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500 text-white shrink-0">
+                            {totalUnreadRss}
+                        </span>
+                    )}
                 </Button>
 
                 <DropdownMenu
@@ -445,6 +470,16 @@ export function Header({
                         </div>
 
                         <DropdownSeparator />
+
+                        <DropdownItem onClick={() => setIsRssReaderOpen(true)} className="py-2.5 mb-1 font-medium cursor-pointer">
+                            <Rss className="h-4 w-4 mr-2.5 text-amber-500" />
+                            <span>{t('rss.readerTitle', 'RSS & Bülten Akışları')}</span>
+                            {totalUnreadRss > 0 && (
+                                <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">
+                                    {totalUnreadRss}
+                                </span>
+                            )}
+                        </DropdownItem>
 
                         <DropdownItem onClick={() => setIsCommandPaletteOpen(true)} className="py-2.5 mb-2 font-medium">
                             <Search className="h-4 w-4 mr-2.5 text-muted-foreground" />

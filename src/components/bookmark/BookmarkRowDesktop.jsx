@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 
@@ -50,6 +50,12 @@ export function BookmarkRowDesktop({
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/30 line-through decoration-2"
                         )} title={bookmark.title}>{bookmark.title || t('common.untitled')}</span>
+                        {bookmark.feedUrl && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                                <Rss className="w-2.5 h-2.5" />
+                                <span>RSS</span>
+                            </span>
+                        )}
                     </div>
                     {!compact && (
                         <span className="text-muted-foreground text-xs break-words truncate" title={bookmark.url}>{bookmark.url}</span>
