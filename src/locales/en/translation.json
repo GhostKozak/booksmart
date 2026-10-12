@@ -235,7 +235,10 @@
         },
         "bookmarks_one": "bookmark",
         "bookmarks_other": "bookmarks",
-        "cachedItems": "cached items"
+        "cachedItems": "cached items",
+        "retry": "Retry",
+        "search": "Search...",
+        "openInNewTab": "Open in New Tab"
     },
     "modals": {
         "rules": {
@@ -565,7 +568,8 @@
         "copySummary": "Copy Summary",
         "copied": "Summary copied to clipboard",
         "appendToNotes": "Append to Notes",
-        "appendedToNotes": "Summary appended to notes"
+        "appendedToNotes": "Summary appended to notes",
+        "addToNote": "Add to Note"
     },
     "offline": "You are offline — Data is saved locally",
     "bookmarks": {

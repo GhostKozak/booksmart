@@ -235,7 +235,10 @@
         },
         "bookmarks_one": "Lesezeichen",
         "bookmarks_other": "Lesezeichen",
-        "cachedItems": "im Cache"
+        "cachedItems": "im Cache",
+        "retry": "Wiederholen",
+        "search": "Suchen...",
+        "openInNewTab": "In neuem Tab öffnen"
     },
     "modals": {
         "rules": {
@@ -565,7 +568,8 @@
         "copySummary": "Zusammenfassung kopieren",
         "copied": "Zusammenfassung in Zwischenablage kopiert",
         "appendToNotes": "Zu Notizen hinzufügen",
-        "appendedToNotes": "Zusammenfassung zu Notizen hinzugefügt"
+        "appendedToNotes": "Zusammenfassung zu Notizen hinzugefügt",
+        "addToNote": "Zu Notizen hinzufügen"
     },
     "offline": "Sie sind offline — Daten werden lokal gespeichert",
     "bookmarks": {

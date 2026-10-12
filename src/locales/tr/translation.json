@@ -235,7 +235,10 @@
         },
         "bookmarks_one": "yer imi",
         "bookmarks_other": "yer imi",
-        "cachedItems": "adet önbellekte"
+        "cachedItems": "adet önbellekte",
+        "retry": "Tekrar Dene",
+        "search": "Ara...",
+        "openInNewTab": "Yeni Sekmede Aç"
     },
     "modals": {
         "rules": {
@@ -565,7 +568,8 @@
         "copySummary": "Özeti Kopyala",
         "copied": "Özet panoya kopyalandı",
         "appendToNotes": "Notlara Ekle",
-        "appendedToNotes": "Özet notlara eklendi"
+        "appendedToNotes": "Özet notlara eklendi",
+        "addToNote": "Notlara Ekle"
     },
     "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
     "bookmarks": {

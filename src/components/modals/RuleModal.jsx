@@ -78,9 +78,9 @@ export function RuleModal({
                         onChange={(e) => setNewRule({ ...newRule, tags: e.target.value })}
                     />
                     <div className="flex flex-wrap gap-1 mt-1 max-h-24 overflow-y-auto">
-                        {availableTags.map(tag => (
+                        {availableTags.map((tag, idx) => (
                             <button
-                                key={tag.id}
+                                key={tag.id ? `rule-tag-${tag.id}` : `rule-tag-${tag.name || idx}-${idx}`}
                                 onClick={() => {
                                     const current = newRule.tags ? newRule.tags.split(',').map(t => t.trim()).filter(Boolean) : []
                                     if (!current.includes(tag.name)) {

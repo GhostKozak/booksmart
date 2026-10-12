@@ -21,6 +21,11 @@
         }
     }
 
+    // Only run on BookSmart origins (including localhost on any port)
+    if (!isOriginAllowed()) {
+        return;
+    }
+
     // Broadcast readiness to the page
     function announceReady() {
         window.postMessage({

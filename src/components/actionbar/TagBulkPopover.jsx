@@ -50,9 +50,9 @@ export function TagBulkPopover({ allTags, onApply, isOpen, onToggle, isVertical 
 
                     {allTags && allTags.length > 0 && (
                         <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto pt-1">
-                            {allTags.map(tag => (
+                            {allTags.map((tag, idx) => (
                                 <button
-                                    key={tag.id}
+                                    key={tag.id ? `tag-${tag.id}` : `tag-${tag.name || idx}-${idx}`}
                                     className="text-xs bg-secondary hover:bg-secondary/80 px-2 py-1 rounded-full transition-colors truncate max-w-full"
                                     onClick={() => {
                                         const current = tagsInput.split(',').map(t => t.trim()).filter(Boolean);

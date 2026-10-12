@@ -248,7 +248,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                     ) : (
                         bookmark.tags && bookmark.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 h-5 overflow-hidden">
-                                {bookmark.tags.slice(0, 3).map(tag => {
+                                {Array.from(new Set(bookmark.tags)).slice(0, 3).map((tag, idx) => {
                                     const tagConfig = context.availableTags?.find(t => t.name === tag);
                                     const customColor = tagConfig ? tagConfig.color : null;
 
@@ -259,7 +259,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     } : {};
 
                                     return (
-                                        <span key={tag}
+                                        <span key={`${tag}-${idx}`}
                                             style={style}
                                             className={cn(
                                                 "px-1 py-0.5 border rounded-[3px] font-medium text-[8px] whitespace-nowrap",

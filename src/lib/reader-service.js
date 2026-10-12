@@ -64,7 +64,7 @@ export function calculateReadingTime(textOrWords, wpm = 200) {
 export function formatReadingTime(minutes, t = null) {
     const min = Math.max(1, Math.round(minutes || 1));
     if (t && typeof t === 'function') {
-        return t('reader.readingTimeEstimate', {
+        return t('reader.readingTimeMinutes', {
             count: min,
             defaultValue: `${min} dk okuma`
         });
@@ -135,13 +135,18 @@ function cleanContentElement(element, baseUrl) {
             }
         });
 
-        // Resolve absolute links
+        // Resolve absolute links & prevent javascript: / untrusted protocols
         if (el.tagName === 'A') {
             const href = el.getAttribute('href');
             if (href) {
-                el.setAttribute('href', toAbsolute(href, baseUrl));
-                el.setAttribute('target', '_blank');
-                el.setAttribute('rel', 'noopener noreferrer');
+                const absHref = toAbsolute(href, baseUrl);
+                if (/^https?:\/\//i.test(absHref) || /^mailto:/i.test(absHref)) {
+                    el.setAttribute('href', absHref);
+                    el.setAttribute('target', '_blank');
+                    el.setAttribute('rel', 'noopener noreferrer');
+                } else {
+                    el.removeAttribute('href');
+                }
             }
         }
 
@@ -149,9 +154,14 @@ function cleanContentElement(element, baseUrl) {
         if (el.tagName === 'IMG') {
             const src = el.getAttribute('src') || el.getAttribute('data-src') || el.getAttribute('data-original');
             if (src && !src.startsWith('data:')) {
-                el.setAttribute('src', toAbsolute(src, baseUrl));
-                el.setAttribute('loading', 'lazy');
-                el.classList.add('rounded-lg', 'max-w-full', 'h-auto', 'my-4', 'shadow-xs');
+                const absSrc = toAbsolute(src, baseUrl);
+                if (/^https?:\/\//i.test(absSrc)) {
+                    el.setAttribute('src', absSrc);
+                    el.setAttribute('loading', 'lazy');
+                    el.classList.add('rounded-lg', 'max-w-full', 'h-auto', 'my-4', 'shadow-xs');
+                } else {
+                    el.remove();
+                }
             } else if (!src) {
                 el.remove();
             }

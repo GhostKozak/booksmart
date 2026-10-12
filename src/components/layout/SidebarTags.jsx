@@ -36,12 +36,12 @@ export function SidebarTags({
                         <div className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-2 px-2 tracking-wider">{t('sidebar.myTags')}</div>
                     )}
 
-                    {availableTags.map(tag => {
+                    {availableTags.map((tag, idx) => {
                         const tagStats = uniqueTags.find(t => t.name === tag.name)
                         const count = tagStats ? tagStats.count : 0
                         return (
                             <button
-                                key={tag.id || tag.name}
+                                key={tag.id ? `tag-${tag.id}` : `tag-${tag.name || idx}-${idx}`}
                                 onClick={() => setActiveTag(activeTag === tag.name ? null : tag.name)}
                                 className={cn(
                                     "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-all border border-transparent group",

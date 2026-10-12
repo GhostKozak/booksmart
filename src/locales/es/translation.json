@@ -235,7 +235,10 @@
         "cachedItems": "en caché",
         "title": "Título",
         "add": "Añadir",
-        "remove": "Eliminar"
+        "remove": "Eliminar",
+        "retry": "Reintentar",
+        "search": "Buscar...",
+        "openInNewTab": "Abrir en una nueva pestaña"
     },
     "modals": {
         "rules": {
@@ -565,7 +568,8 @@
         "copySummary": "Copiar resumen",
         "copied": "Resumen copiado al portapapeles",
         "appendToNotes": "Añadir a notas",
-        "appendedToNotes": "Resumen añadido a las notas"
+        "appendedToNotes": "Resumen añadido a las notas",
+        "addToNote": "Añadir a notas"
     },
     "offline": "Estás sin conexión — Los datos se guardan localmente",
     "bookmarks": {

@@ -98,6 +98,23 @@ describe('Reader Service - Article HTML Extraction', () => {
         expect(article.readingTimeMinutes).toBeGreaterThanOrEqual(1);
     });
 
+    it('extractArticleFromHtml strips javascript: links, scripts, and event handlers for XSS safety', () => {
+        const maliciousHtml = `
+            <article>
+                <h1>Secure Article</h1>
+                <p>Hello <a href="javascript:alert('pwned')">Malicious Link</a> world.</p>
+                <p><a href="https://trusted.com">Safe Link</a></p>
+                <img src="javascript:alert(2)" alt="bad img">
+                <div onclick="evil()">Click me</div>
+            </article>
+        `;
+
+        const article = extractArticleFromHtml(maliciousHtml, 'https://example.com/safe');
+        expect(article.contentHtml).not.toContain('javascript:');
+        expect(article.contentHtml).not.toContain('onclick');
+        expect(article.contentHtml).toContain('https://trusted.com');
+    });
+
     it('saveArticleToBookmarks saves bookmark with reading time into Okuma Listesi', async () => {
         const article = {
             title: 'How to Build Fast Apps',

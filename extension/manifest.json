@@ -21,13 +21,7 @@
   "content_scripts": [
     {
       "matches": [
-        "http://localhost/*",
-        "https://localhost/*",
-        "http://127.0.0.1/*",
-        "https://127.0.0.1/*",
-        "https://booksmart.app/*",
-        "https://*.booksmart.app/*",
-        "https://ghostkozak.github.io/booksmart/*"
+        "<all_urls>"
       ],
       "js": [
         "content.js"

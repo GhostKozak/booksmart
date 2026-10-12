@@ -235,7 +235,10 @@
         "cachedItems": "en cache",
         "title": "Titre",
         "add": "Ajouter",
-        "remove": "Supprimer"
+        "remove": "Supprimer",
+        "retry": "Réessayer",
+        "search": "Rechercher...",
+        "openInNewTab": "Ouvrir dans un nouvel onglet"
     },
     "modals": {
         "rules": {
@@ -565,7 +568,8 @@
         "copySummary": "Copier le résumé",
         "copied": "Résumé copié dans le presse-papiers",
         "appendToNotes": "Ajouter aux notes",
-        "appendedToNotes": "Résumé ajouté aux notes"
+        "appendedToNotes": "Résumé ajouté aux notes",
+        "addToNote": "Ajouter aux notes"
     },
     "offline": "Vous êtes hors ligne — Les données sont sauvegardées localement",
     "bookmarks": {
