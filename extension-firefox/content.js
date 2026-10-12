@@ -336,6 +336,38 @@
                     error: err.message
                 }, '*');
             }
+            return;
+        }
+
+        // 8. Fetch OpenGraph / Favicon metadata
+        if (type === 'BOOKSMART_FETCH_OG_METADATA') {
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'FETCH_OG_METADATA',
+                    url: payload?.url,
+                    timeoutMs: payload?.timeoutMs
+                }, (response) => {
+                    const err = chrome.runtime.lastError;
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_FETCH_OG_METADATA_RESULT',
+                        requestId,
+                        success: !err && response?.success,
+                        metadata: response?.metadata,
+                        error: err?.message || response?.error,
+                        url: payload?.url
+                    }, '*');
+                });
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_FETCH_OG_METADATA_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message,
+                    url: payload?.url
+                }, '*');
+            }
         }
     });
 })();

@@ -554,3 +554,64 @@ export function captureActiveTab(options = {}, timeoutMs = 6000) {
     });
 }
 
+/**
+ * Fetches OpenGraph / Favicon metadata using the companion extension.
+ * Completely serverless and bypasses CORS.
+ *
+ * @param {string} url
+ * @param {number} [timeoutMs=8000]
+ * @returns {Promise<{ url: string, title?: string, description?: string, image?: string, siteName?: string, favicon?: string }>}
+ */
+export function fetchOgMetadataWithExtension(url, timeoutMs = 8000) {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('Window environment not available'));
+    }
+
+    if (!url || !/^https?:\/\//i.test(url.trim())) {
+        return Promise.reject(new Error('Invalid URL'));
+    }
+
+    return new Promise((resolve, reject) => {
+        const requestId = 'og_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                reject(new Error('Timed out fetching OpenGraph metadata from extension'));
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_FETCH_OG_METADATA_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success && event.data.metadata) {
+                    resolve(event.data.metadata);
+                } else {
+                    reject(new Error(event.data.error || 'Failed to fetch OpenGraph metadata'));
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_FETCH_OG_METADATA',
+            requestId,
+            payload: { url: url.trim(), timeoutMs }
+        }, '*');
+    });
+}
+
+

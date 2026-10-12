@@ -171,6 +171,12 @@
             "dark": "Tema oscuro",
             "system": "Tema del sistema"
         },
+        "previewCache": {
+            "title": "Caché de OpenGraph y Favicon",
+            "desc": "Caché local IndexedDB para tarjetas de vista previa e iconos de sitios web.",
+            "clear": "Limpiar Caché",
+            "cleared": "Caché de vista previa limpiada con éxito"
+        },
         "vault": {
             "title": "Bóveda de claves API",
             "lockedDesc": "Sus claves API están cifradas. Ingrese la contraseña de su bóveda para desbloquear.",
@@ -224,6 +230,7 @@
         },
         "bookmarks_one": "marcador",
         "bookmarks_other": "marcadores",
+        "cachedItems": "en caché",
         "title": "Título",
         "add": "Añadir",
         "remove": "Eliminar"
@@ -513,11 +520,17 @@
         "magicSort": "Clasificación Mágica",
         "fixTitles": "Corregir Títulos (IA)",
         "smartDuplicates": "Duplicados Intel. (IA)",
+        "enrichPreviews": "Obtener Vistas Previas & Favicons",
+        "enriching": "Obteniendo Vistas Previas...",
+        "enrichingProgress": "Obteniendo vistas previas: {{current}}/{{total}}",
+        "enrichSuccess": "Vistas previas actualizadas con éxito para {{count}} marcadores",
+        "enrichError": "Ocurrió un error al obtener las vistas previas",
         "moreTools": "Más Herramientas",
         "tooltips": {
             "magicSort": "La IA analiza el contenido y categoriza los marcadores en las carpetas adecuadas.",
             "fixTitles": "La IA corrige títulos desordenados, rotos o faltantes basándose en la URL y el título actual.",
-            "smartDuplicates": "La IA detecta duplicados semánticos (diferentes URL apuntando exactamente al mismo contenido)."
+            "smartDuplicates": "La IA detecta duplicados semánticos (diferentes URL apuntando exactamente al mismo contenido).",
+            "enrichPreviews": "Obtiene la imagen de portada OpenGraph, la descripción y el favicon en alta resolución en la caché local."
         },
         "collection": {
             "button": "Colección",
@@ -534,7 +547,11 @@
         "openExternal": "Abrir en Nueva Pestaña",
         "summarize": "Resumir con IA",
         "summarySuccess": "Resumen generado por IA.",
-        "summaryError": "Error al generar el resumen de IA."
+        "summaryError": "Error al generar el resumen de IA.",
+        "cardView": "Tarjeta de Resumen",
+        "liveView": "Página Web en Vivo",
+        "refreshMetadata": "Actualizar Vista Previa",
+        "tryIframe": "Cargar Sitio en Vivo"
     },
     "offline": "Estás sin conexión — Los datos se guardan localmente",
     "bookmarks": {
@@ -738,6 +755,7 @@
         "browserTwoWaySync": "Sincronización bidireccional del navegador",
         "browserImport": "Importar marcadores del navegador",
         "browserPush": "Exportar marcadores al navegador",
+        "enrichPreviews": "Obtener vistas previas de OpenGraph y favicons",
         "categories": {
             "views": "Vistas",
             "actions": "Acciones",

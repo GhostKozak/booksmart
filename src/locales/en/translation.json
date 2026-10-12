@@ -184,6 +184,12 @@
             "dark": "Dark Theme",
             "system": "System Theme"
         },
+        "previewCache": {
+            "title": "OpenGraph & Favicon Cache",
+            "desc": "Local IndexedDB cache for website preview cards and icons.",
+            "clear": "Clear Cache",
+            "cleared": "Preview cache cleared successfully"
+        },
         "languages": {
             "en": "English",
             "tr": "Turkish",
@@ -226,7 +232,8 @@
             "yearsAgo": "{{count}}y ago"
         },
         "bookmarks_one": "bookmark",
-        "bookmarks_other": "bookmarks"
+        "bookmarks_other": "bookmarks",
+        "cachedItems": "cached items"
     },
     "modals": {
         "rules": {
@@ -513,11 +520,17 @@
         "magicSort": "Magic Sort",
         "fixTitles": "Fix Titles (AI)",
         "smartDuplicates": "Smart Dupes (AI)",
+        "enrichPreviews": "Fetch Previews & Favicons",
+        "enriching": "Fetching Previews...",
+        "enrichingProgress": "Fetching previews: {{current}}/{{total}}",
+        "enrichSuccess": "Successfully updated previews for {{count}} bookmarks",
+        "enrichError": "An error occurred while fetching previews",
         "moreTools": "More Tools",
         "tooltips": {
             "magicSort": "AI analyzes content and categorizes bookmarks into appropriate folders.",
             "fixTitles": "AI fixes messy, broken or missing titles based on the URL and current title.",
-            "smartDuplicates": "AI detects semantic duplicates (different URLs pointing to the exact same content)."
+            "smartDuplicates": "AI detects semantic duplicates (different URLs pointing to the exact same content).",
+            "enrichPreviews": "Fetches website OpenGraph cover image, description, and high-res favicon to local cache."
         },
         "collection": {
             "button": "Collection",
@@ -534,7 +547,11 @@
         "openExternal": "Open in New Tab",
         "summarize": "Summarize with AI",
         "summarySuccess": "AI Summary generated.",
-        "summaryError": "Failed to generate AI summary."
+        "summaryError": "Failed to generate AI summary.",
+        "cardView": "Overview Card",
+        "liveView": "Live Webpage",
+        "refreshMetadata": "Refresh Preview",
+        "tryIframe": "Load Live Site"
     },
     "offline": "You are offline — Data is saved locally",
     "bookmarks": {
@@ -738,6 +755,7 @@
         "browserTwoWaySync": "Two-Way Browser Sync",
         "browserImport": "Import Bookmarks from Browser",
         "browserPush": "Push Bookmarks to Browser",
+        "enrichPreviews": "Fetch OpenGraph Previews & Favicons",
         "categories": {
             "views": "Views",
             "actions": "Actions",

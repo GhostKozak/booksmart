@@ -58,6 +58,7 @@ import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 import { useTranslation } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
 import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from './lib/key-vault'
+import { batchEnrichBookmarks } from './lib/metadata-fetcher'
 
 const EMPTY_ARRAY = []
 
@@ -265,6 +266,31 @@ function App() {
     return () => clearTimeout(timer)
   }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
+  // ── Batch OpenGraph & Favicon Enricher ──
+  const [isEnrichingPreviews, setIsEnrichingPreviews] = useState(false)
+
+  const handleEnrichPreviews = useCallback(async () => {
+    const selectedBookmarks = rawBookmarks.filter(b => selectedIds.has(b.id))
+    if (selectedBookmarks.length === 0) return
+
+    setIsEnrichingPreviews(true)
+    const toastId = toast.loading(t('actionbar.enrichingProgress', { current: 0, total: selectedBookmarks.length }))
+
+    try {
+      const result = await batchEnrichBookmarks(selectedBookmarks, {
+        concurrency: 4,
+        onProgress: ({ processed, total }) => {
+          toast.loading(t('actionbar.enrichingProgress', { current: processed, total }), { id: toastId })
+        }
+      })
+      toast.success(t('actionbar.enrichSuccess', { count: result.processed }), { id: toastId })
+    } catch {
+      toast.error(t('actionbar.enrichError'), { id: toastId })
+    } finally {
+      setIsEnrichingPreviews(false)
+    }
+  }, [rawBookmarks, selectedIds, t])
+
   const hasFileLoaded = rawBookmarks.length > 0
   const isOnboardingActive = !hasFileLoaded && showOnboarding
 
@@ -391,6 +417,8 @@ function App() {
           onRemoveFromCollection={(collectionId) =>
             collectionsHook.removeBookmarksFromCollection(selectedIds, collectionId)
           }
+          onEnrichPreviews={handleEnrichPreviews}
+          isEnrichingPreviews={isEnrichingPreviews}
         />
 
         <Suspense fallback={null}>
@@ -530,6 +558,7 @@ function App() {
               openSettings={openSettings}
               clearAll={actions.clearAll}
               loadDemoData={loadDemoData}
+              onEnrichPreviews={handleEnrichPreviews}
             />
           )}
 

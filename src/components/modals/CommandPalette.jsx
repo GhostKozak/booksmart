@@ -68,7 +68,8 @@ export function CommandPalette({
     setIsShortcutsOpen,
     openSettings,
     clearAll,
-    loadDemoData
+    loadDemoData,
+    onEnrichPreviews
 }) {
     const { t } = useTranslation()
     const [query, setQuery] = useState('')
@@ -207,6 +208,14 @@ export function CommandPalette({
                 title: t('header.export', 'Export Bookmarks'),
                 icon: Download,
                 action: () => openExportModal?.()
+            },
+            {
+                id: 'action-enrich-previews',
+                category: t('commandPalette.categories.actions', 'Actions'),
+                title: t('commandPalette.enrichPreviews', 'Fetch OpenGraph Previews & Favicons'),
+                icon: Image,
+                disabled: bookmarks.length === 0,
+                action: () => onEnrichPreviews?.()
             },
             ...(isExtensionConnected ? [
                 {
@@ -348,7 +357,8 @@ export function CommandPalette({
         isExtensionConnected,
         twoWaySync,
         importFromBrowser,
-        pushToBrowser
+        pushToBrowser,
+        onEnrichPreviews
     ])
 
     const filteredCommands = useMemo(() => {

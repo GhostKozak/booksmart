@@ -8,7 +8,10 @@ const {
     pushBookmarksToBrowser,
     syncBrowserBookmarks,
     captureCurrentTab,
-    isSenderAuthorized
+    isSenderAuthorized,
+    fetchOgMetadata,
+    decodeHtmlEntities,
+    toAbsoluteUrl
 } = await import('../../../extension/background.js')
 
 describe('Extension background script helpers', () => {
@@ -210,6 +213,61 @@ describe('Extension background script helpers', () => {
             expect(res.importedBookmarks).toHaveLength(1)
             expect(res.importedBookmarks[0].url).toBe('https://browser-only.com')
             expect(res.exportedCount).toBe(1)
+        })
+    })
+
+    describe('OpenGraph extraction helpers', () => {
+        it('decodes HTML entities properly', () => {
+            expect(decodeHtmlEntities('&amp; &lt; &gt; &quot; &#39; &#x2F;')).toBe('& < > " \' /')
+            expect(decodeHtmlEntities('GitHub &amp; React: Modern &quot;Dev&quot;')).toBe('GitHub & React: Modern "Dev"')
+        })
+
+        it('resolves relative URLs to absolute URLs', () => {
+            expect(toAbsoluteUrl('/images/og.png', 'https://example.com/blog/article')).toBe('https://example.com/images/og.png')
+            expect(toAbsoluteUrl('https://cdn.example.com/og.png', 'https://example.com')).toBe('https://cdn.example.com/og.png')
+            expect(toAbsoluteUrl('invalid:url', 'https://example.com')).toBeNull()
+        })
+
+        it('fetches and parses OpenGraph metadata from HTML response', async () => {
+            const mockHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Fallback Title</title>
+                    <meta property="og:title" content="Awesome Site &amp; Tools" />
+                    <meta property="og:description" content="The best tools on the web." />
+                    <meta property="og:image" content="/assets/cover.png" />
+                    <meta property="og:site_name" content="Awesome Inc." />
+                    <link rel="apple-touch-icon" href="/icons/apple-icon.png" />
+                </head>
+                <body>Hello</body>
+                </html>
+            `
+
+            const originalFetch = globalThis.fetch
+            globalThis.fetch = vi.fn().mockResolvedValue({
+                ok: true,
+                status: 200,
+                url: 'https://awesome.org/home',
+                text: async () => mockHtml
+            })
+
+            const result = await fetchOgMetadata('https://awesome.org')
+
+            expect(result.success).toBe(true)
+            expect(result.metadata.title).toBe('Awesome Site & Tools')
+            expect(result.metadata.description).toBe('The best tools on the web.')
+            expect(result.metadata.image).toBe('https://awesome.org/assets/cover.png')
+            expect(result.metadata.siteName).toBe('Awesome Inc.')
+            expect(result.metadata.favicon).toBe('https://awesome.org/icons/apple-icon.png')
+
+            globalThis.fetch = originalFetch
+        })
+
+        it('handles private and loopback URLs by blocking them', async () => {
+            const result = await fetchOgMetadata('http://127.0.0.1:8080')
+            expect(result.success).toBe(false)
+            expect(result.error).toBe('restricted_private_network')
         })
     })
 })

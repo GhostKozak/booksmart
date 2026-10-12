@@ -184,6 +184,12 @@
             "dark": "Koyu Tema",
             "system": "Sistem Teması"
         },
+        "previewCache": {
+            "title": "OpenGraph ve Favicon Önbelleği",
+            "desc": "Web sitelerinin önizleme kartları ve simgeleri için yerel IndexedDB önbelleği.",
+            "clear": "Önbelleği Temizle",
+            "cleared": "Önizleme önbelleği başarıyla temizlendi"
+        },
         "languages": {
             "en": "İngilizce",
             "tr": "Türkçe",
@@ -226,7 +232,8 @@
             "yearsAgo": "{{count}} y önce"
         },
         "bookmarks_one": "yer imi",
-        "bookmarks_other": "yer imi"
+        "bookmarks_other": "yer imi",
+        "cachedItems": "adet önbellekte"
     },
     "modals": {
         "rules": {
@@ -513,11 +520,17 @@
         "magicSort": "Sihirli Sırala",
         "fixTitles": "Başlıkları Düzelt (YZ)",
         "smartDuplicates": "Akıllı Kopyalar (YZ)",
+        "enrichPreviews": "Önizleme & Favicon Getir",
+        "enriching": "Önizlemeler Alınıyor...",
+        "enrichingProgress": "Önizlemeler çekiliyor: {{current}}/{{total}}",
+        "enrichSuccess": "{{count}} yer iminin önizlemesi başarıyla güncellendi",
+        "enrichError": "Önizlemeler alınırken bir hata oluştu",
         "moreTools": "Daha Fazla Araç",
         "tooltips": {
             "magicSort": "Yapay zeka içeriği analiz eder ve yer imlerini uygun klasörlere akıllıca yerleştirir.",
             "fixTitles": "Yapay zeka, URL ve mevcut başlığa bakarak bozuk, karmaşık veya eksik başlıkları düzeltir.",
-            "smartDuplicates": "Yapay zeka anlamsal kopyaları (aynı içeriği gösteren farklı URL'ler) tespit eder."
+            "smartDuplicates": "Yapay zeka anlamsal kopyaları (aynı içeriği gösteren farklı URL'ler) tespit eder.",
+            "enrichPreviews": "Web sitelerinin OpenGraph kapak resmini, açıklamasını ve faviconunu yerel önbelleğe çeker."
         },
         "collection": {
             "button": "Koleksiyon",
@@ -534,7 +547,11 @@
         "openExternal": "Yeni Sekmede Aç",
         "summarize": "YZ ile Özetle",
         "summarySuccess": "YZ Özeti oluşturuldu.",
-        "summaryError": "YZ özeti oluşturulamadı."
+        "summaryError": "YZ özeti oluşturulamadı.",
+        "cardView": "Genel Bakış Kartı",
+        "liveView": "Canlı Web Sayfası",
+        "refreshMetadata": "Önizlemeyi Yenile",
+        "tryIframe": "Canlı Sayfayı Yükle"
     },
     "offline": "Çevrimdışısınız — Verileriniz yerel olarak kayıtlı",
     "bookmarks": {
@@ -738,6 +755,7 @@
         "browserTwoWaySync": "İki Yönlü Tarayıcı Senkronizasyonu",
         "browserImport": "Yer İmlerini Tarayıcıdan Çek",
         "browserPush": "Yer İmlerini Tarayıcıya Gönder",
+        "enrichPreviews": "OpenGraph Önizlemelerini ve Faviconları Getir",
         "categories": {
             "views": "Görünümler",
             "actions": "İşlemler",

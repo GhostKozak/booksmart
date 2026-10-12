@@ -10,6 +10,7 @@ import {
     pushBookmarksToBrowser,
     syncBrowserBookmarks,
     captureActiveTab,
+    fetchOgMetadataWithExtension,
     _resetExtensionStateForTesting
 } from '../extension-client'
 
@@ -323,6 +324,40 @@ describe('extension-client', () => {
         expect(sentPayload).not.toBeNull()
         expect(sentPayload.options).toEqual({})
         expect(sentPayload.bookmarks[0].url).toBe('https://safe.com')
+        postMessageSpy.mockRestore()
+    })
+
+    it('fetchOgMetadataWithExtension posts message and resolves received metadata', async () => {
+        let sentMessage = null
+        const postMessageSpy = vi.spyOn(window, 'postMessage').mockImplementation((data) => {
+            if (data?.type === 'BOOKSMART_FETCH_OG_METADATA') {
+                sentMessage = data
+                window.dispatchEvent(
+                    new MessageEvent('message', {
+                        data: {
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_FETCH_OG_METADATA_RESULT',
+                            requestId: data.requestId,
+                            success: true,
+                            metadata: {
+                                title: 'Example Domain',
+                                description: 'Example description',
+                                image: 'https://example.com/cover.png',
+                                siteName: 'example.com',
+                                favicon: 'https://example.com/favicon.ico'
+                            }
+                        }
+                    })
+                )
+            }
+        })
+
+        const metadata = await fetchOgMetadataWithExtension('https://example.com', 500)
+
+        expect(sentMessage).not.toBeNull()
+        expect(sentMessage.payload.url).toBe('https://example.com')
+        expect(metadata.title).toBe('Example Domain')
+        expect(metadata.image).toBe('https://example.com/cover.png')
         postMessageSpy.mockRestore()
     })
 })

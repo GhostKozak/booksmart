@@ -184,6 +184,12 @@
             "dark": "Dunkles Design",
             "system": "Systemdesign"
         },
+        "previewCache": {
+            "title": "OpenGraph- & Favicon-Cache",
+            "desc": "Lokaler IndexedDB-Cache für Webseiten-Vorschaukarten und Icons.",
+            "clear": "Cache Leeren",
+            "cleared": "Vorschau-Cache erfolgreich geleert"
+        },
         "languages": {
             "en": "Englisch",
             "tr": "Türkisch",
@@ -226,7 +232,8 @@
             "yearsAgo": "vor {{count}}j"
         },
         "bookmarks_one": "Lesezeichen",
-        "bookmarks_other": "Lesezeichen"
+        "bookmarks_other": "Lesezeichen",
+        "cachedItems": "im Cache"
     },
     "modals": {
         "rules": {
@@ -513,11 +520,17 @@
         "magicSort": "Magisches Sortieren",
         "fixTitles": "Titel Reparieren (KI)",
         "smartDuplicates": "Schlanke Duplikate (KI)",
+        "enrichPreviews": "Vorschauen & Favicons Laden",
+        "enriching": "Vorschauen werden geladen...",
+        "enrichingProgress": "Lade Vorschauen: {{current}}/{{total}}",
+        "enrichSuccess": "Vorschauen für {{count}} Lesezeichen erfolgreich aktualisiert",
+        "enrichError": "Fehler beim Laden der Vorschauen",
         "moreTools": "Mehr Werkzeuge",
         "tooltips": {
             "magicSort": "KI analysiert den Inhalt und kategorisiert Lesezeichen in passende Ordner.",
             "fixTitles": "KI repariert chaotische, fehlerhafte oder fehlende Titel basierend auf der URL und dem aktuellen Titel.",
-            "smartDuplicates": "KI erkennt semantische Duplikate (verschiedene URLs, die auf denselben Inhalt verweisen)."
+            "smartDuplicates": "KI erkennt semantische Duplikate (verschiedene URLs, die auf denselben Inhalt verweisen).",
+            "enrichPreviews": "Lädt OpenGraph-Titelbild, Beschreibung und hochauflösendes Favicon der Webseiten in den lokalen Cache."
         },
         "collection": {
             "button": "Sammlung",
@@ -534,7 +547,11 @@
         "openExternal": "In Neuem Tab Öffnen",
         "summarize": "Zusammenfassen mit KI",
         "summarySuccess": "KI-Zusammenfassung generiert.",
-        "summaryError": "Fehler beim Generieren der KI-Zusammenfassung."
+        "summaryError": "Fehler beim Generieren der KI-Zusammenfassung.",
+        "cardView": "Übersichtskarte",
+        "liveView": "Live-Webseite",
+        "refreshMetadata": "Vorschau Aktualisieren",
+        "tryIframe": "Live-Seite Laden"
     },
     "offline": "Sie sind offline — Daten werden lokal gespeichert",
     "bookmarks": {
@@ -738,6 +755,7 @@
         "browserTwoWaySync": "Zwei-Wege-Browser-Synchronisation",
         "browserImport": "Lesezeichen aus Browser importieren",
         "browserPush": "Lesezeichen in Browser exportieren",
+        "enrichPreviews": "OpenGraph-Vorschauen & Favicons abrufen",
         "categories": {
             "views": "Ansichten",
             "actions": "Aktionen",

@@ -10,10 +10,12 @@ import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
 import { BookmarkTags } from './bookmark/BookmarkTags';
 import { BookmarkCollections } from './bookmark/BookmarkCollections';
+import { useBookmarkPreview } from '../lib/metadata-fetcher';
 
 // Extracted Item Component for state management
 const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
     const { t } = useTranslation();
+    const { preview } = useBookmarkPreview(bookmark.url, { enabled: showThumbnails || detailed });
     const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
 
     const [prevProps, setPrevProps] = React.useState({ id: bookmark.id, showThumbnails, detailed });
@@ -61,7 +63,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                     <div className="relative bg-muted/30 border-b w-full aspect-video overflow-hidden">
                         {imageStatus !== 'error' && (
                             <img
-                                src={`https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
+                                src={preview?.image || `https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
                                 alt={`Screenshot of ${bookmark.title}`}
                                 className={cn(
                                     "w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out",
@@ -76,7 +78,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                         {/* Loading State or Error Fallback */}
                         {(imageStatus === 'loading' || imageStatus === 'error') && (
                             <div className="absolute inset-0 flex justify-center items-center bg-secondary/50">
-                                <Favicon url={bookmark.url} className="opacity-50 grayscale w-12 h-12" />
+                                <Favicon url={bookmark.url} customIcon={preview?.favicon} className="opacity-50 grayscale w-12 h-12" />
                             </div>
                         )}
 
@@ -130,7 +132,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                 <div className="flex flex-col flex-1 gap-2 p-3">
                     <div className="flex items-start gap-2">
                         <div className="flex justify-center items-center bg-muted/50 mt-0.5 rounded-full w-6 h-6 shrink-0">
-                            <Favicon url={bookmark.url} className="w-3.5 h-3.5" />
+                            <Favicon url={bookmark.url} customIcon={preview?.favicon} className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <LinkTooltip bookmark={bookmark}>
@@ -138,7 +140,7 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     {bookmark.title || t('common.untitled')}
                                 </h3>
                                 <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">
-                                    {bookmark.url}
+                                    {preview?.siteName ? `${preview.siteName} • ${bookmark.url}` : bookmark.url}
                                 </p>
                             </LinkTooltip>
                         </div>
@@ -181,9 +183,9 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                     </div>
 
                     {/* Notes / Descriptions */}
-                    {detailed && bookmark.note && (
+                    {detailed && (bookmark.note || preview?.description) && (
                         <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap break-words leading-relaxed max-h-24 overflow-y-auto pr-1">
-                            {bookmark.note}
+                            {bookmark.note || preview?.description}
                         </p>
                     )}
 

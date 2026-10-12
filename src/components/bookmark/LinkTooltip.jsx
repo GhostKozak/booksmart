@@ -4,15 +4,17 @@ import { Favicon } from '../Favicon';
 import { ExternalLink, Globe, Folder, Calendar, StickyNote } from 'lucide-react';
 import { cn, getRelativeTime } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useBookmarkPreview } from '../../lib/metadata-fetcher';
 
 /**
  * A rich hover tooltip for bookmark links.
- * Shows: screenshot thumbnail, title, URL, domain, folder, date, note preview.
+ * Shows: OpenGraph cover image / screenshot, title, URL, domain, folder, date, note/description preview.
  * Uses React Portal to render outside Virtuoso scroll container.
  */
 export function LinkTooltip({ bookmark, children, className }) {
     const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
+    const { preview } = useBookmarkPreview(bookmark?.url, { enabled: isVisible });
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [side, setSide] = useState('bottom'); // 'bottom' or 'top'
     const timeoutRef = useRef(null);
@@ -106,21 +108,27 @@ export function LinkTooltip({ bookmark, children, className }) {
             <div className="bg-popover shadow-2xl backdrop-blur-sm border border-border/60 rounded-xl overflow-hidden"
                 style={{ boxShadow: '0 20px 60px -10px rgba(0,0,0,0.3), 0 8px 20px -6px rgba(0,0,0,0.2)' }}
             >
-                {/* Screenshot Preview */}
+                {/* Screenshot / OpenGraph Preview */}
                 <div className="relative bg-muted/30 border-b w-full aspect-video overflow-hidden">
                     <img
-                        src={screenshotUrl}
+                        src={preview?.image || screenshotUrl}
                         alt=""
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-opacity duration-300"
                         loading="lazy"
-                        onError={(e) => { e.target.style.display = 'none'; }}
+                        onError={(e) => {
+                            if (e.target.src !== screenshotUrl) {
+                                e.target.src = screenshotUrl;
+                            } else {
+                                e.target.style.display = 'none';
+                            }
+                        }}
                     />
                     {/* Gradient overlay at bottom */}
-                    <div className="bottom-0 absolute inset-x-0 bg-linear-to-t from-black/50 to-transparent h-12" />
+                    <div className="bottom-0 absolute inset-x-0 bg-linear-to-t from-black/60 to-transparent h-12" />
                     {/* Domain badge */}
-                    <div className="bottom-2 left-2 absolute flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full font-medium text-[10px] text-white">
-                        <Globe className="w-3 h-3" />
-                        {domain}
+                    <div className="bottom-2 left-2 absolute flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full font-medium text-[10px] text-white max-w-[85%] truncate">
+                        <Globe className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{preview?.siteName || domain}</span>
                     </div>
                 </div>
 
@@ -128,9 +136,9 @@ export function LinkTooltip({ bookmark, children, className }) {
                 <div className="space-y-2 p-3">
                     {/* Title */}
                     <div className="flex items-start gap-2">
-                        <Favicon url={bookmark.url} className="mt-0.5 w-4 h-4 shrink-0" />
+                        <Favicon url={bookmark.url} customIcon={preview?.favicon} className="mt-0.5 w-4 h-4 shrink-0" />
                         <h4 className="font-semibold text-foreground text-sm line-clamp-2 leading-snug">
-                            {bookmark.title || t('common.untitled')}
+                            {bookmark.title || preview?.title || t('common.untitled')}
                         </h4>
                     </div>
 
@@ -139,15 +147,19 @@ export function LinkTooltip({ bookmark, children, className }) {
                         {bookmark.url}
                     </p>
 
-                    {/* Note preview (if exists) */}
-                    {bookmark.note && (
+                    {/* Note or OpenGraph Description preview */}
+                    {bookmark.note ? (
                         <div className="flex items-start gap-1.5 pl-6 text-[11px] text-muted-foreground/80">
                             <StickyNote className="mt-0.5 w-3 h-3 text-amber-500 shrink-0" />
                             <span className="italic line-clamp-2">
                                 {bookmark.note}
                             </span>
                         </div>
-                    )}
+                    ) : preview?.description ? (
+                        <p className="pl-6 text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed">
+                            {preview.description}
+                        </p>
+                    ) : null}
 
                     {/* Meta row: folder + date */}
                     <div className="flex justify-between items-center pt-1 border-border/40 border-t text-[10px] text-muted-foreground/70">

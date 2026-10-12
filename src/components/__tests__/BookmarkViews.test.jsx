@@ -31,6 +31,11 @@ vi.mock('../Favicon', () => ({ Favicon: () => <div data-testid="favicon" /> }));
 vi.mock('../bookmark/BookmarkTags', () => ({ BookmarkTags: () => <div data-testid="bookmark-tags" /> }));
 vi.mock('../bookmark/BookmarkCollections', () => ({ BookmarkCollections: () => <div data-testid="bookmark-collections" /> }));
 vi.mock('../bookmark/BookmarkFolderBadge', () => ({ BookmarkFolderBadge: ({ folderName }) => <div data-testid="folder-badge">{folderName}</div> }));
+vi.mock('../../lib/metadata-fetcher', () => ({
+    useBookmarkPreview: () => ({ preview: null, isLoading: false, refresh: vi.fn() }),
+    fetchMetadataForUrl: vi.fn(),
+    normalizeUrlForPreview: vi.fn((url) => url)
+}));
 
 // Mock Virtuoso
 vi.mock('react-virtuoso', () => ({

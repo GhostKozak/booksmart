@@ -99,6 +99,159 @@ async function checkUrlDirect(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
     }
 }
 
+/**
+ * Decodes basic HTML entities like &amp;, &quot;, &#39;, &lt;, &gt;
+ */
+function decodeHtmlEntities(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;|&apos;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+            try { return String.fromCharCode(parseInt(hex, 16)); } catch { return ''; }
+        })
+        .replace(/&#(\d+);/g, (_, dec) => {
+            try { return String.fromCharCode(parseInt(dec, 10)); } catch { return ''; }
+        })
+        .trim();
+}
+
+/**
+ * Resolves a potentially relative URL against a base URL safely.
+ */
+function toAbsoluteUrl(relativeUrl, baseUrl) {
+    if (!relativeUrl || typeof relativeUrl !== 'string') return null;
+    const trimmed = relativeUrl.trim();
+    if (!trimmed || trimmed.startsWith('data:') || trimmed.startsWith('javascript:')) return null;
+    try {
+        const parsed = new URL(trimmed, baseUrl);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+        return parsed.href;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Fetches page HTML and extracts OpenGraph / Twitter / standard metadata
+ * including title, description, cover image, site name, and favicon.
+ */
+async function fetchOgMetadata(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+    if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url.trim())) {
+        return { success: false, error: 'invalid_url', url };
+    }
+
+    const cleanUrl = url.trim();
+    if (isPrivateOrLoopbackUrl(cleanUrl)) {
+        return { success: false, error: 'restricted_private_network', url: cleanUrl };
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(cleanUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+            },
+            redirect: 'follow',
+            signal: controller.signal
+        });
+
+        clearTimeout(timer);
+
+        if (!response.ok) {
+            return {
+                success: false,
+                status: response.status,
+                error: `HTTP ${response.status}`,
+                url: cleanUrl
+            };
+        }
+
+        // Only read up to first ~300KB of HTML to save memory and parse rapidly
+        const rawText = await response.text();
+        const html = rawText.slice(0, 300000);
+        const finalUrl = response.url || cleanUrl;
+
+        // 1. Title: og:title -> twitter:title -> <title>
+        let title = '';
+        const ogTitleMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:title|twitter:title)["'][^>]+content=["']([^"']*)["']/i) ||
+                             html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["'](?:og:title|twitter:title)["']/i);
+        if (ogTitleMatch && ogTitleMatch[1]) {
+            title = decodeHtmlEntities(ogTitleMatch[1]);
+        } else {
+            const titleTagMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+            if (titleTagMatch && titleTagMatch[1]) {
+                title = decodeHtmlEntities(titleTagMatch[1]);
+            }
+        }
+
+        // 2. Description: og:description -> twitter:description -> meta description
+        let description = '';
+        const ogDescMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:description|twitter:description|description)["'][^>]+content=["']([^"']*)["']/i) ||
+                            html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["'](?:og:description|twitter:description|description)["']/i);
+        if (ogDescMatch && ogDescMatch[1]) {
+            description = decodeHtmlEntities(ogDescMatch[1]);
+        }
+
+        // 3. Image: og:image -> twitter:image
+        let image = null;
+        const ogImgMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|og:image:url|twitter:image|twitter:image:src)["'][^>]+content=["']([^"']*)["']/i) ||
+                           html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["'](?:og:image|og:image:url|twitter:image|twitter:image:src)["']/i);
+        if (ogImgMatch && ogImgMatch[1]) {
+            image = toAbsoluteUrl(decodeHtmlEntities(ogImgMatch[1]), finalUrl);
+        }
+
+        // 4. Site Name: og:site_name
+        let siteName = '';
+        const ogSiteMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:site_name)["'][^>]+content=["']([^"']*)["']/i) ||
+                            html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["'](?:og:site_name)["']/i);
+        if (ogSiteMatch && ogSiteMatch[1]) {
+            siteName = decodeHtmlEntities(ogSiteMatch[1]);
+        } else {
+            try {
+                siteName = new URL(finalUrl).hostname.replace(/^www\./, '');
+            } catch {
+                siteName = '';
+            }
+        }
+
+        // 5. Favicon: apple-touch-icon -> icon -> shortcut icon
+        let favicon = null;
+        const iconMatch = html.match(/<link[^>]+rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["'][^>]+href=["']([^"']*)["']/i) ||
+                          html.match(/<link[^>]+href=["']([^"']*)["'][^>]+rel=["'](?:apple-touch-icon(?:-precomposed)?|icon|shortcut icon)["']/i);
+        if (iconMatch && iconMatch[1]) {
+            favicon = toAbsoluteUrl(decodeHtmlEntities(iconMatch[1]), finalUrl);
+        }
+
+        return {
+            success: true,
+            metadata: {
+                url: cleanUrl,
+                finalUrl,
+                title,
+                description,
+                image,
+                siteName,
+                favicon
+            }
+        };
+    } catch (err) {
+        clearTimeout(timer);
+        return {
+            success: false,
+            error: err.name === 'AbortError' ? 'timeout' : (err.message || 'fetch_failed'),
+            url: cleanUrl
+        };
+    }
+}
+
 // --- Browser Bookmarks API & Two-Way Sync Helpers ---
 
 function normalizeBookmarkUrl(url) {
@@ -486,6 +639,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             return true;
         }
 
+        if (request.action === 'FETCH_OG_METADATA') {
+            fetchOgMetadata(request.url, request.timeoutMs)
+                .then(result => sendResponse(result))
+                .catch(err => sendResponse({ success: false, error: err.message, url: request.url }));
+            return true;
+        }
+
         const SENSITIVE_ACTIONS = [
             'GET_BROWSER_BOOKMARKS',
             'PUSH_BROWSER_BOOKMARKS',
@@ -590,6 +750,9 @@ if (typeof module !== 'undefined' && module.exports) {
         pushBookmarksToBrowser,
         syncBrowserBookmarks,
         captureCurrentTab,
+        fetchOgMetadata,
+        decodeHtmlEntities,
+        toAbsoluteUrl,
         isSenderAuthorized,
         SYSTEM_ROOT_FOLDER_IDS
     };

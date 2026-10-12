@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Check, XCircle, Download, Sparkles, Loader2, Zap, Menu, X, MoreVertical, Wand2, Search } from 'lucide-react';
+import { Trash2, Check, XCircle, Download, Sparkles, Loader2, Zap, Menu, X, MoreVertical, Wand2, Search, Image } from 'lucide-react';
 import { Button } from './ui/button';
 import { SelectionInfo } from './actionbar/SelectionInfo';
 import { TagBulkPopover } from './actionbar/TagBulkPopover';
@@ -29,7 +29,9 @@ export function FloatingActionBar({
     onFindSmartDuplicates,
     isProcessingAITitles,
     isProcessingAIDupes,
-    onCancelAITasks
+    onCancelAITasks,
+    onEnrichPreviews,
+    isEnrichingPreviews
 }) {
     const { t } = useTranslation();
     const [activePopover, setActivePopover] = useState(null); // 'move' | 'tag' | null
@@ -130,6 +132,13 @@ export function FloatingActionBar({
                             {isProcessingAIDupes ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 shrink-0" />}
                             <span>{t('actionbar.smartDuplicates')}</span>
                         </Button>
+
+                        {onEnrichPreviews && (
+                            <Button variant="outline" size="sm" className="justify-start gap-2 px-3 border-cyan-500/30 rounded-xl h-9 text-cyan-600 dark:text-cyan-400" onClick={() => { onEnrichPreviews(); setIsMenuOpen(false); }} disabled={isEnrichingPreviews} title={t('actionbar.tooltips.enrichPreviews', 'Fetch OpenGraph preview cards and favicons')}>
+                                {isEnrichingPreviews ? <Loader2 className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4 shrink-0" />}
+                                <span>{isEnrichingPreviews ? t('actionbar.enriching', 'Fetching Previews...') : t('actionbar.enrichPreviews', 'Fetch Previews & Favicons')}</span>
+                            </Button>
+                        )}
 
                         <div className="flex items-center gap-2 bg-muted/30 mt-1 p-1 px-1 rounded-xl">
                             <span className="mr-auto ml-2 font-medium text-[11px] text-muted-foreground">{t('bookmarks.columns.status')}</span>
@@ -251,6 +260,20 @@ export function FloatingActionBar({
                                     {t('actionbar.smartDuplicates')}
                                 </span>
                             </DropdownItem>
+
+                            {onEnrichPreviews && (
+                                <DropdownItem
+                                    onClick={onEnrichPreviews}
+                                    icon={isEnrichingPreviews ? Loader2 : Image}
+                                    disabled={isEnrichingPreviews}
+                                    className="text-cyan-600 dark:text-cyan-400"
+                                    title={t('actionbar.tooltips.enrichPreviews', 'Fetch OpenGraph preview cards and favicons')}
+                                >
+                                    <span className={cn(isEnrichingPreviews && "animate-pulse")}>
+                                        {isEnrichingPreviews ? t('actionbar.enriching', 'Fetching Previews...') : t('actionbar.enrichPreviews', 'Fetch Previews & Favicons')}
+                                    </span>
+                                </DropdownItem>
+                            )}
 
                             <DropdownSeparator />
 

@@ -171,6 +171,12 @@
             "dark": "Thème sombre",
             "system": "Thème du système"
         },
+        "previewCache": {
+            "title": "Cache OpenGraph et Favicon",
+            "desc": "Cache local IndexedDB pour les cartes d'aperçu et les icônes de sites.",
+            "clear": "Vider le cache",
+            "cleared": "Cache d'aperçu vidé avec succès"
+        },
         "vault": {
             "title": "Coffre-fort de clés API",
             "lockedDesc": "Vos clés API sont chiffrées. Entrez le mot de passe de votre coffre-fort pour déverrouiller.",
@@ -224,6 +230,7 @@
         },
         "bookmarks_one": "signet",
         "bookmarks_other": "signets",
+        "cachedItems": "en cache",
         "title": "Titre",
         "add": "Ajouter",
         "remove": "Supprimer"
@@ -513,11 +520,17 @@
         "magicSort": "Tri Magique",
         "fixTitles": "Réparer les Titres (IA)",
         "smartDuplicates": "Doublons Intelligents (IA)",
+        "enrichPreviews": "Récupérer Aperçus & Favicons",
+        "enriching": "Récupération des aperçus...",
+        "enrichingProgress": "Récupération des aperçus : {{current}}/{{total}}",
+        "enrichSuccess": "Aperçus mis à jour avec succès pour {{count}} signets",
+        "enrichError": "Erreur lors de la récupération des aperçus",
         "moreTools": "Plus d'outils",
         "tooltips": {
             "magicSort": "L'IA analyse le contenu et catégorise les signets dans les dossiers appropriés.",
             "fixTitles": "L'IA répare les titres désordonnés, cassés ou manquants en fonction de l'URL et du titre actuel.",
-            "smartDuplicates": "L'IA détecte les doublons sémantiques (différentes URL pointant vers le même contenu exact)."
+            "smartDuplicates": "L'IA détecte les doublons sémantiques (différentes URL pointant vers le même contenu exact).",
+            "enrichPreviews": "Récupère l'image de couverture OpenGraph, la description et le favicon haute résolution dans le cache local."
         },
         "collection": {
             "button": "Collection",
@@ -534,7 +547,11 @@
         "openExternal": "Ouvrir dans un Nouvel Onglet",
         "summarize": "Résumer avec l'IA",
         "summarySuccess": "Résumé généré par l'IA.",
-        "summaryError": "Échec de la génération du résumé par l'IA."
+        "summaryError": "Échec de la génération du résumé par l'IA.",
+        "cardView": "Carte Aperçu",
+        "liveView": "Page Web en Direct",
+        "refreshMetadata": "Actualiser l'Aperçu",
+        "tryIframe": "Charger le Site en Direct"
     },
     "offline": "Vous êtes hors ligne — Les données sont sauvegardées localement",
     "bookmarks": {
@@ -738,6 +755,7 @@
         "browserTwoWaySync": "Synchronisation bidirectionnelle du navigateur",
         "browserImport": "Importer les signets du navigateur",
         "browserPush": "Exporter les signets vers le navigateur",
+        "enrichPreviews": "Récupérer les aperçus OpenGraph & Favicons",
         "categories": {
             "views": "Vues",
             "actions": "Actions",
