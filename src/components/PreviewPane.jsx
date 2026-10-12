@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image, Sparkles, Copy, Check, Rss } from 'lucide-react';
+import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image, Sparkles, Copy, Check, Rss, BookOpen, Clock } from 'lucide-react';
 import { cn, isHttpUrl } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
@@ -22,6 +22,7 @@ import { Favicon } from './Favicon';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useAppStore } from '../store/useAppStore';
 import { subscribeToFeed, unsubscribeFeed } from '../lib/rss-service';
+import { formatReadingTime } from '../lib/reader-service';
 
 export function PreviewPane({ bookmark, onClose, className }) {
     const { t } = useTranslation();
@@ -47,7 +48,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
         setAiSummary(bookmark?.aiSummary || '');
     }
 
-    const { setIsRssReaderOpen, setSelectedFeedUrl } = useAppStore();
+    const { setIsRssReaderOpen, setSelectedFeedUrl, openReaderMode } = useAppStore();
     const [isSubscribingFeed, setIsSubscribingFeed] = useState(false);
 
     const subscribedFeed = useLiveQuery(async () => {
@@ -232,6 +233,15 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     <Button
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                        onClick={() => openReaderMode(bookmark)}
+                        title={t('reader.openReaderMode', 'Temiz Okuma Modunda Aç')}
+                    >
+                        <BookOpen className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8 text-purple-500 hover:text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/30"
                         onClick={handleSummarize}
                         disabled={isSummarizing}
@@ -285,6 +295,20 @@ export function PreviewPane({ bookmark, onClose, className }) {
                     >
                         <Globe className="w-3.5 h-3.5" />
                         <span>{t('preview.liveView', 'Live Webpage')}</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => openReaderMode(bookmark)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-md font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-all cursor-pointer"
+                        title={t('reader.openReaderMode', 'Temiz Okuma Modunda Aç')}
+                    >
+                        <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                        <span>{t('reader.modeShort', 'Okuma Modu')}</span>
+                        {bookmark.readingTimeMinutes && (
+                            <span className="text-[10px] font-semibold bg-amber-500/15 px-1.5 py-0.2 rounded-full">
+                                {formatReadingTime(bookmark.readingTimeMinutes, t)}
+                            </span>
+                        )}
                     </button>
                 </div>
                 {preview?.siteName && (
@@ -554,6 +578,20 @@ export function PreviewPane({ bookmark, onClose, className }) {
                         >
                             <RefreshCw className={cn("w-3.5 h-3.5 text-primary", isPreviewLoading && "animate-spin")} />
                             <span>{t('preview.refreshMetadata', 'Refresh Preview')}</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openReaderMode(bookmark)}
+                            className="text-xs gap-1.5 rounded-xl cursor-pointer text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                        >
+                            <BookOpen className="w-3.5 h-3.5 text-amber-500" />
+                            <span>{t('reader.openReaderMode', 'Temiz Okuma Modu')}</span>
+                            {bookmark.readingTimeMinutes && (
+                                <span className="opacity-75 text-[11px]">
+                                    ({formatReadingTime(bookmark.readingTimeMinutes, t)})
+                                </span>
+                            )}
                         </Button>
                         <Button
                             variant="outline"

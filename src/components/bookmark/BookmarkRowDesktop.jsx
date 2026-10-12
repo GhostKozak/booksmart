@@ -7,9 +7,10 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss, BookOpen } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
+import { useAppStore } from '../../store/useAppStore'
 
 export function BookmarkRowDesktop({
     bookmark,
@@ -54,6 +55,12 @@ export function BookmarkRowDesktop({
                             <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
                                 <Rss className="w-2.5 h-2.5" />
                                 <span>RSS</span>
+                            </span>
+                        )}
+                        {bookmark.readingTimeMinutes && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                                <BookOpen className="w-2.5 h-2.5" />
+                                <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
                             </span>
                         )}
                     </div>
@@ -195,6 +202,16 @@ export function BookmarkRowDesktop({
                     aria-label={t('preview.open')}
                 >
                     <Eye className="w-4 h-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-primary/10 w-8 h-8 hover:text-primary transition-colors"
+                    onClick={() => useAppStore.getState().openReaderMode(bookmark)}
+                    title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                    aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                >
+                    <BookOpen className="w-4 h-4" />
                 </Button>
             </div>
         </div>

@@ -4,13 +4,14 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss, BookOpen } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
 import { BookmarkTags } from './bookmark/BookmarkTags';
 import { BookmarkCollections } from './bookmark/BookmarkCollections';
 import { useBookmarkPreview } from '../lib/metadata-fetcher';
+import { useAppStore } from '../store/useAppStore';
 
 // Extracted Item Component for state management
 const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
@@ -118,6 +119,19 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                             >
                                 <Eye className="w-3.5 h-3.5" />
                             </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openReaderMode(bookmark);
+                                }}
+                                title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                            >
+                                <BookOpen className="w-3.5 h-3.5" />
+                            </Button>
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => context.toggleSelection(bookmark.id)}
@@ -144,6 +158,12 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                         <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
                                             <Rss className="w-2.5 h-2.5" />
                                             <span>RSS</span>
+                                        </span>
+                                    )}
+                                    {bookmark.readingTimeMinutes && (
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                                            <BookOpen className="w-2.5 h-2.5" />
+                                            <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
                                         </span>
                                     )}
                                 </div>
@@ -179,6 +199,19 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     aria-label={t('preview.open')}
                                 >
                                     <Eye className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openReaderMode(bookmark);
+                                    }}
+                                    title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                    aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                >
+                                    <BookOpen className="w-3.5 h-3.5" />
                                 </Button>
                                 <Checkbox
                                     checked={isSelected}

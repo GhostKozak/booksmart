@@ -824,5 +824,28 @@
         "subscribeBtn": "S'abonner au flux",
         "connectedToFeed": "Connecté au flux RSS",
         "noFeedFound": "Aucun flux RSS trouvé pour ce site."
+    },
+    "reader": {
+        "modeTitle": "Mode Lecture",
+        "modeShort": "Lecture",
+        "openReaderMode": "Ouvrir le mode lecture",
+        "readingTimeEstimate": "Temps de lecture estimé",
+        "smallerFont": "Diminuer la police",
+        "largerFont": "Agrandir la police",
+        "lightTheme": "Clair",
+        "sepiaTheme": "Sépia",
+        "darkTheme": "Sombre",
+        "reloadArticle": "Recharger l'article",
+        "markAsRead": "Marquer comme lu",
+        "markedAsRead": "Marqué comme lu",
+        "alreadyMarkedRead": "Déjà marqué comme lu",
+        "copyText": "Copier le texte",
+        "copiedToClipboard": "Texte copié dans le presse-papiers",
+        "loadingText": "Nettoyage de la page et extraction de l'article...",
+        "loadingDesc": "Suppression des publicités, menus et distractions.",
+        "endOfArticle": "Fin de l'article",
+        "words": "mots",
+        "readingTimeMinutes": "{{count}} min de lecture",
+        "minShort": "min"
     }
 }

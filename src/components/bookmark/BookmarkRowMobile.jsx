@@ -7,8 +7,9 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useAppStore } from '../../store/useAppStore'
 
 export function BookmarkRowMobile({
     bookmark,
@@ -53,6 +54,12 @@ export function BookmarkRowMobile({
                                 <span>RSS</span>
                             </span>
                         )}
+                        {bookmark.readingTimeMinutes && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                                <BookOpen className="w-2.5 h-2.5" />
+                                <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
+                            </span>
+                        )}
 
                         <div className="flex items-center gap-1 shrink-0">
                             <Button
@@ -74,6 +81,16 @@ export function BookmarkRowMobile({
                                 aria-label={t('preview.open')}
                             >
                                 <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-7 h-7 text-muted-foreground hover:text-primary"
+                                onClick={() => useAppStore.getState().openReaderMode(bookmark)}
+                                title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                            >
+                                <BookOpen className="w-3.5 h-3.5" />
                             </Button>
                             {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
                                 <Button

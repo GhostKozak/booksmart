@@ -824,5 +824,28 @@
         "subscribeBtn": "Feed abonnieren",
         "connectedToFeed": "Mit RSS verbunden",
         "noFeedFound": "Kein RSS-Feed für diese Website gefunden."
+    },
+    "reader": {
+        "modeTitle": "Lesemodus",
+        "modeShort": "Lesen",
+        "openReaderMode": "Lesemodus öffnen",
+        "readingTimeEstimate": "Geschätzte Lesezeit",
+        "smallerFont": "Schrift verkleinern",
+        "largerFont": "Schrift vergrößern",
+        "lightTheme": "Hell",
+        "sepiaTheme": "Sepia",
+        "darkTheme": "Dunkel",
+        "reloadArticle": "Artikel neu laden",
+        "markAsRead": "Als gelesen markieren",
+        "markedAsRead": "Als gelesen markiert",
+        "alreadyMarkedRead": "Bereits als gelesen markiert",
+        "copyText": "Text kopieren",
+        "copiedToClipboard": "Artikeltext in die Zwischenablage kopiert",
+        "loadingText": "Seite wird bereinigt und Artikeltext extrahiert...",
+        "loadingDesc": "Werbung, Menüs und störende Elemente werden entfernt.",
+        "endOfArticle": "Ende des Artikels",
+        "words": "Wörter",
+        "readingTimeMinutes": "{{count}} Min. Lesezeit",
+        "minShort": "Min."
     }
 }

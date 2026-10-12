@@ -824,5 +824,28 @@
         "subscribeBtn": "Akışa Abone Ol",
         "connectedToFeed": "RSS Akışına Bağlı",
         "noFeedFound": "Bu site için RSS akışı bulunamadı."
+    },
+    "reader": {
+        "modeTitle": "Okuma Modu",
+        "modeShort": "Okuma",
+        "openReaderMode": "Okuma Modunu Aç",
+        "readingTimeEstimate": "Tahmini Okuma Süresi",
+        "smallerFont": "Yazı Boyutunu Küçült",
+        "largerFont": "Yazı Boyutunu Büyüt",
+        "lightTheme": "Açık",
+        "sepiaTheme": "Sepya",
+        "darkTheme": "Koyu",
+        "reloadArticle": "Yeniden Yükle",
+        "markAsRead": "Okundu Olarak İşaretle",
+        "markedAsRead": "Okundu olarak işaretlendi",
+        "alreadyMarkedRead": "Zaten okundu olarak işaretli",
+        "copyText": "Metni Kopyala",
+        "copiedToClipboard": "Makale metni panoya kopyalandı",
+        "loadingText": "Sayfa temizleniyor ve makale metni çıkartılıyor...",
+        "loadingDesc": "Reklamlar, menüler ve dikkat dağıtıcı öğeler eleniyor.",
+        "endOfArticle": "Makalenin sonu",
+        "words": "kelime",
+        "readingTimeMinutes": "{{count}} dk okuma",
+        "minShort": "dk"
     }
 }

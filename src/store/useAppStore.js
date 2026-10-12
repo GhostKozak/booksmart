@@ -90,6 +90,12 @@ export const useAppStore = create((set, get) => ({
     selectedFeedUrl: null,
     setSelectedFeedUrl: (url) => set({ selectedFeedUrl: url }),
 
+    // --- Reader Mode ("Daha Sonra Oku" / Pocket Mode) Slice ---
+    readerBookmark: null,
+    setReaderBookmark: (bookmark) => set({ readerBookmark: bookmark }),
+    openReaderMode: (bookmark) => set({ readerBookmark: bookmark }),
+    closeReaderMode: () => set({ readerBookmark: null }),
+
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",
     resolvedTheme: "light",

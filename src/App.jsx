@@ -50,6 +50,7 @@ const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').th
 const AICostModal = lazy(() => import('./components/modals/AICostModal').then(m => ({ default: m.AICostModal })))
 const ExtensionGuideModal = lazy(() => import('./components/modals/ExtensionGuideModal').then(m => ({ default: m.ExtensionGuideModal })))
 const RssReaderModal = lazy(() => import('./components/modals/RssReaderModal').then(m => ({ default: m.RssReaderModal })))
+const ReaderViewModal = lazy(() => import('./components/modals/ReaderViewModal').then(m => ({ default: m.ReaderViewModal })))
 import { ExtensionPromptBanner } from './components/modals/ExtensionPromptBanner'
 
 // PWA Components
@@ -81,6 +82,7 @@ function App() {
     previewBookmark, setPreviewBookmark,
     isExtensionGuideOpen, setIsExtensionGuideOpen, openExtensionGuide,
     isRssReaderOpen, setIsRssReaderOpen,
+    readerBookmark, closeReaderMode,
     showOnboarding
   } = useAppStore()
 
@@ -667,6 +669,13 @@ function App() {
             <RssReaderModal
               isOpen={isRssReaderOpen}
               onClose={() => setIsRssReaderOpen(false)}
+            />
+          )}
+          {!!readerBookmark && (
+            <ReaderViewModal
+              isOpen={!!readerBookmark}
+              bookmark={readerBookmark}
+              onClose={closeReaderMode}
             />
           )}
         </Suspense>
