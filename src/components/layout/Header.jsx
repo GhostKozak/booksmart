@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { DropdownMenu, DropdownItem, DropdownSeparator, DropdownLabel } from '../ui/DropdownMenu'
+import { HeaderActionsMenu } from './HeaderActionsMenu'
 import { useTranslation } from 'react-i18next'
-import { Sun, Moon, Monitor, Download, Settings, Layers, Activity, Loader2, HelpCircle, BarChart3, List, Undo2, Redo2, Search, LogOut, History as HistoryIcon, X, LayoutGrid, Image, Filter, Sparkles, MoreVertical, Trash2, TextAlignStart, ArrowUpDown, AlignJustify, Table, CreditCard, FolderTree, GitMerge, RefreshCw, CloudDownload, CloudUpload, Rss } from 'lucide-react'
+import { Download, Undo2, Redo2, Search, History as HistoryIcon, X, Filter, TextAlignStart, RefreshCw, Rss } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -27,7 +27,7 @@ export function Header({
     hasFileLoaded, closeFile, bookmarkCount, clearAll,
     searchInputRef
 }) {
-    const { t, i18n } = useTranslation()
+    const { t } = useTranslation()
     const [isMobileSearchActive, setIsMobileSearchActive] = useState(false)
 
     const {
@@ -222,307 +222,40 @@ export function Header({
                     )}
                 </Button>
 
-                <DropdownMenu
-                    trigger={
-                        <Button variant="ghost" size="icon" className="rounded-full" aria-label={t('common.actions')} title={t('common.actions')}>
-                            <MoreVertical className="h-5 w-5" />
-                        </Button>
-                    }
-                >
-                    <div className="px-2 pt-2 pb-1">
-                        <DropdownLabel className="text-sm font-bold text-foreground mb-2 px-1 flex items-center gap-2">
-                            <MoreVertical className="h-4 w-4" />
-                            {t('common.actions')}
-                        </DropdownLabel>
-                    </div>
-
-                    {/* Companion Extension Section */}
-                    <div className={cn(
-                        "rounded-xl p-2 mx-2 mb-2 border",
-                        isExtensionConnected
-                            ? "bg-primary/5 dark:bg-primary/10 border-primary/20"
-                            : "bg-sky-500/5 dark:bg-sky-500/10 border-sky-500/20"
-                    )}>
-                        <DropdownLabel className={cn(
-                            "text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 font-bold flex items-center justify-between",
-                            isExtensionConnected ? "text-primary" : "text-sky-600 dark:text-sky-400"
-                        )}>
-                            <span>{t('header.browserSync.label', 'Companion Extension')}</span>
-                            <span className={cn(
-                                "text-[9px] px-1.5 py-0.5 rounded font-normal",
-                                isExtensionConnected
-                                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                    : "bg-muted text-muted-foreground"
-                            )}>
-                                {isExtensionConnected ? t('modals.extensionGuide.statusActive', 'Active') : t('settings.network.extensionNotDetected', 'Not Installed')}
-                            </span>
-                        </DropdownLabel>
-
-                        {isExtensionConnected ? (
-                            <>
-                                {twoWaySync && (
-                                    <DropdownItem onClick={() => twoWaySync()} disabled={isSyncing} className="py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
-                                        <RefreshCw className={cn("h-4 w-4 mr-2.5 text-primary", isSyncing && "animate-spin")} />
-                                        <span>{t('header.browserSync.twoWay', 'Two-Way Sync')}</span>
-                                    </DropdownItem>
-                                )}
-                                <div className="grid grid-cols-2 gap-1.5 mb-1">
-                                    {importFromBrowser && (
-                                        <DropdownItem onClick={() => importFromBrowser()} disabled={isSyncing} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
-                                            <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500" />
-                                            <span className="truncate">{t('header.browserSync.pull', 'Pull')}</span>
-                                        </DropdownItem>
-                                    )}
-                                    {pushToBrowser && (
-                                        <DropdownItem onClick={() => pushToBrowser()} disabled={isSyncing || bookmarkCount === 0} className="py-1.5 text-xs font-medium bg-background/50 hover:bg-primary/10 justify-center cursor-pointer">
-                                            <CloudUpload className="h-3.5 w-3.5 mr-1 text-emerald-500" />
-                                            <span className="truncate">{t('header.browserSync.push', 'Push')}</span>
-                                        </DropdownItem>
-                                    )}
-                                </div>
-                                <DropdownItem onClick={() => openExtensionGuide?.()} className="py-1.5 text-xs text-muted-foreground hover:text-foreground justify-center cursor-pointer">
-                                    <HelpCircle className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                                    <span>{t('modals.extensionGuide.title', 'Extension Guide')}</span>
-                                </DropdownItem>
-                            </>
-                        ) : (
-                            <>
-                                <p className="text-[11px] text-muted-foreground px-1 mb-2 leading-relaxed">
-                                    {t('header.extensionNotConnectedDesc', 'Enable serverless CORS-free health checks & 2-way sync with your browser.')}
-                                </p>
-                                <DropdownItem onClick={() => openExtensionGuide?.()} className="py-2 text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-400 bg-background/80 hover:bg-sky-500/10 mb-1 cursor-pointer">
-                                    <Sparkles className="h-4 w-4 mr-2 text-sky-500 shrink-0" />
-                                    <span>{t('header.installExtensionBtn', 'Install Companion Extension')}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-1.5 text-xs text-muted-foreground hover:text-foreground justify-center cursor-pointer">
-                                    <RefreshCw className={cn("h-3.5 w-3.5 mr-1", isCheckingLinks && "animate-spin")} />
-                                    <span>{t('settings.network.extensionRetryBtn', 'Check Connection')}</span>
-                                </DropdownItem>
-                            </>
-                        )}
-                    </div>
-
-                    {hasMaintenanceActions && (
-                        <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-2 mx-2 mb-2 border border-destructive/10">
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider mb-2 px-1 text-destructive/80 font-bold">{t('header.maintenance')}</DropdownLabel>
-                            {duplicateCount > 0 && (
-                                <>
-                                    {mergeDuplicates && (
-                                        <DropdownItem onClick={mergeDuplicates} className="text-primary py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-primary/10 cursor-pointer">
-                                            <GitMerge className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
-                                            {t('header.mergeDuplicates', { count: duplicateCount })}
-                                        </DropdownItem>
-                                    )}
-                                    <DropdownItem onClick={removeDuplicates} className="text-red-600 dark:text-red-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 mb-1 hover:bg-destructive hover:text-destructive-foreground">
-                                        <Layers className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
-                                        {t('header.removeDuplicates', { count: duplicateCount })}
-                                    </DropdownItem>
-                                </>
-                            )}
-                            {cleanableCount > 0 && (
-                                <DropdownItem onClick={cleanAllUrls} className="text-amber-600 dark:text-amber-400 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-background/50 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600">
-                                    <Sparkles className="h-4 w-4 sm:h-4 sm:w-4 mr-2.5" />
-                                    {t('header.cleanUrls', { count: cleanableCount })}
-                                </DropdownItem>
-                            )}
-                        </div>
-                    )}
-
-                    {bookmarkCount > 0 && (
-                        <div className="px-2">
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.view')}</DropdownLabel>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                                <DropdownItem onClick={() => setViewMode('list')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'list' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <List className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.listView') || 'List'}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('compact')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'compact' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <AlignJustify className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.compactView') || 'Compact'}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('grid')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'grid' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <LayoutGrid className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.gridView') || 'Grid'}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('card')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'card' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <CreditCard className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.cardView') || 'Cards'}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('table')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'table' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <Table className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.tableView') || 'Table'}</span>
-                                </DropdownItem>
-                                <DropdownItem onClick={() => setViewMode('tree')} className={cn("justify-center py-1.5 sm:py-2 font-medium text-xs", viewMode === 'tree' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <FolderTree className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.treeView') || 'Folder Tree'}</span>
-                                </DropdownItem>
-                            </div>
-
-                            <div className={cn("grid gap-2 mb-2", (viewMode === 'grid' || viewMode === 'card') ? "grid-cols-2" : "grid-cols-1")}>
-                                <DropdownItem onClick={() => setViewMode('analytics')} className={cn("py-1.5 sm:py-2 justify-center font-medium text-xs", viewMode === 'analytics' && "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground")}>
-                                    <BarChart3 className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                    <span className="truncate">{t('header.analytics')}</span>
-                                </DropdownItem>
-
-                                {(viewMode === 'grid' || viewMode === 'card') && (
-                                    <DropdownItem onClick={() => setShowThumbnails(!showThumbnails)} className="py-1.5 sm:py-2 justify-center font-medium text-xs">
-                                        <Image className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                        <span className="truncate">{showThumbnails ? t('header.hideThumbnails') : t('header.showThumbnails')}</span>
-                                    </DropdownItem>
-                                )}
-                            </div>
-
-                            <DropdownSeparator />
-
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.sort.label')}</DropdownLabel>
-                            <div className="grid grid-cols-2 gap-1.5 sm:max-h-60 overflow-y-auto pb-2">
-                                {[
-                                    { key: 'default', label: t('header.sort.default') },
-                                    { key: 'title-az', label: t('header.sort.titleAz') },
-                                    { key: 'title-za', label: t('header.sort.titleZa') },
-                                    { key: 'date-new', label: t('header.sort.dateNew') },
-                                    { key: 'date-old', label: t('header.sort.dateOld') },
-                                    { key: 'domain', label: t('header.sort.domain') },
-                                    { key: 'folder', label: t('header.sort.folder') },
-                                ].map(opt => (
-                                    <DropdownItem
-                                        key={opt.key}
-                                        onClick={() => setSortBy(opt.key)}
-                                        className={cn("text-[11px] sm:text-xs py-2 truncate", sortBy === opt.key ? "bg-accent text-accent-foreground font-semibold shadow-sm ring-1 ring-border" : "text-muted-foreground")}
-                                    >
-                                        {opt.label}
-                                    </DropdownItem>
-                                ))}
-                            </div>
-
-                            <DropdownSeparator />
-                        </div>
-                    )}
-
-                    <div className="px-2">
-                        <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('settings.language.label')}</DropdownLabel>
-                        <div className="grid grid-cols-5 gap-1.5 mb-2">
-                            {[
-                                { code: 'tr', flag: '🇹🇷' },
-                                { code: 'en', flag: '🇺🇸' },
-                                { code: 'es', flag: '🇪🇸' },
-                                { code: 'fr', flag: '🇫🇷' },
-                                { code: 'de', flag: '🇩🇪' },
-                            ].map(lang => (
-                                <DropdownItem
-                                    key={lang.code}
-                                    onClick={() => i18n.changeLanguage(lang.code)}
-                                    className={cn("justify-center py-2 h-10 sm:h-12 text-xl transition-all hover:scale-105", i18n.language.startsWith(lang.code) && "bg-accent shadow-inner ring-1 ring-border")}
-                                >
-                                    <span className="drop-shadow-md">{lang.flag}</span>
-                                </DropdownItem>
-                            ))}
-                        </div>
-
-                        <DropdownSeparator />
-
-                        <div className="px-1 mb-2">
-                            <DropdownItem onClick={checkAllLinks} disabled={isCheckingLinks} className="py-2.5 font-medium justify-center border border-border/50">
-                                {isCheckingLinks ? <Loader2 className="h-4 w-4 mr-2.5 animate-spin" /> : <Activity className="h-4 w-4 mr-2.5 text-rose-500" />}
-                                <span>{isCheckingLinks ? t('header.checking') : t('header.checkHeart')}</span>
-                                {isExtensionConnected && (
-                                    <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-normal">
-                                        CORS-Free
-                                    </span>
-                                )}
-                            </DropdownItem>
-                        </div>
-
-                        <div className="px-1 mb-2">
-                            <DropdownLabel className="text-[10px] sm:text-[11px] uppercase tracking-wider px-1 mb-1">{t('header.themeLabel')}</DropdownLabel>
-                            <div className="flex items-center gap-1 p-1 bg-accent/30 border border-border/50 rounded-lg">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setTheme('system') }}
-                                    className={cn(
-                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
-                                        theme === 'system' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                                    )}
-                                >
-                                    <Monitor className={cn("h-3.5 w-3.5", t('header.system') ? "sm:mr-1.5" : "")} />
-                                    <span className="hidden sm:inline">{t('header.system')}</span>
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setTheme('light') }}
-                                    className={cn(
-                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
-                                        theme === 'light' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                                    )}
-                                >
-                                    <Sun className={cn("h-3.5 w-3.5", t('header.lightMode') ? "sm:mr-1.5" : "")} />
-                                    <span className="hidden sm:inline">{t('header.lightMode')}</span>
-                                </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setTheme('dark') }}
-                                    className={cn(
-                                        "flex-1 flex justify-center items-center py-1.5 rounded-md text-xs font-medium transition-all",
-                                        theme === 'dark' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                                    )}
-                                >
-                                    <Moon className={cn("h-3.5 w-3.5", t('header.darkMode') ? "sm:mr-1.5" : "")} />
-                                    <span className="hidden sm:inline">{t('header.darkMode')}</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <DropdownSeparator />
-
-                        <DropdownItem onClick={() => setIsRssReaderOpen(true)} className="py-2.5 mb-1 font-medium cursor-pointer">
-                            <Rss className="h-4 w-4 mr-2.5 text-amber-500" />
-                            <span>{t('rss.readerTitle', 'RSS & Bülten Akışları')}</span>
-                            {totalUnreadRss > 0 && (
-                                <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">
-                                    {totalUnreadRss}
-                                </span>
-                            )}
-                        </DropdownItem>
-
-                        <DropdownItem onClick={() => setIsCommandPaletteOpen(true)} className="py-2.5 mb-2 font-medium">
-                            <Search className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                            <span>{t('commandPalette.title', 'Command Palette')}</span>
-                            <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-muted border rounded">⌘K</kbd>
-                        </DropdownItem>
-
-                        <div className="grid grid-cols-2 gap-2 mb-2">
-                            <DropdownItem onClick={() => setIsShortcutsOpen(true)} className="py-2.5">
-                                <HelpCircle className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                                {t('header.shortcuts')}
-                            </DropdownItem>
-
-                            <DropdownItem onClick={() => openSettings('folders')} className="py-2.5">
-                                <Settings className="h-4 w-4 mr-2.5 text-muted-foreground" />
-                                {t('header.settings')}
-                            </DropdownItem>
-                        </div>
-
-                        {hasFileLoaded && (
-                            <>
-                                <DropdownSeparator />
-
-                                <DropdownItem onClick={openExportModal} className="sm:hidden w-full py-3.5 font-medium mb-2 justify-center border border-border/60 text-foreground hover:bg-accent">
-                                    <Download className="h-4 w-4 mr-2.5" />
-                                    {t('header.export')}
-                                </DropdownItem>
-
-                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                    <DropdownItem onClick={closeFile} className="py-2.5 font-medium text-muted-foreground hover:text-foreground justify-center bg-muted/30">
-                                        <LogOut className="h-4 w-4 mr-2" />
-                                        <span>{t('header.closeFile')}</span>
-                                    </DropdownItem>
-
-                                    <DropdownItem onClick={clearAll} className="text-red-600 dark:text-red-400 py-2.5 font-semibold hover:bg-destructive hover:text-destructive-foreground justify-center bg-destructive/5 border border-destructive/10">
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        {t('common.clearAll')}
-                                    </DropdownItem>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </DropdownMenu>
+                <HeaderActionsMenu
+                    isExtensionConnected={isExtensionConnected}
+                    twoWaySync={twoWaySync}
+                    isSyncing={isSyncing}
+                    importFromBrowser={importFromBrowser}
+                    pushToBrowser={pushToBrowser}
+                    openExtensionGuide={openExtensionGuide}
+                    hasMaintenanceActions={hasMaintenanceActions}
+                    duplicateCount={duplicateCount}
+                    mergeDuplicates={mergeDuplicates}
+                    removeDuplicates={removeDuplicates}
+                    cleanableCount={cleanableCount}
+                    cleanAllUrls={cleanAllUrls}
+                    checkAllLinks={checkAllLinks}
+                    isCheckingLinks={isCheckingLinks}
+                    setIsCommandPaletteOpen={setIsCommandPaletteOpen}
+                    setIsShortcutsOpen={setIsShortcutsOpen}
+                    setIsRssReaderOpen={setIsRssReaderOpen}
+                    totalUnreadRss={totalUnreadRss}
+                    bookmarkCount={bookmarkCount}
+                    viewMode={viewMode}
+                    setViewMode={setViewMode}
+                    showThumbnails={showThumbnails}
+                    setShowThumbnails={setShowThumbnails}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    theme={theme}
+                    setTheme={setTheme}
+                    openSettings={openSettings}
+                    hasFileLoaded={hasFileLoaded}
+                    openExportModal={openExportModal}
+                    closeFile={closeFile}
+                    clearAll={clearAll}
+                />
 
                 <div className="hidden sm:flex items-center border-l pl-2 ml-2 gap-1">
                     {isExtensionConnected && (
