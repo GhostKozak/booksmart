@@ -20,6 +20,7 @@ import { useBrowserSync } from './hooks/use-browser-sync'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 import { saveAutoBackup } from './lib/backup-manager'
+import { refreshAllFeeds } from './lib/rss-service'
 import { demoBookmarks } from './lib/demo-bookmarks'
 import { useAppStore } from './store/useAppStore'
 
@@ -100,6 +101,33 @@ function App() {
     }
     init()
   }, [initTheme])
+
+  // ── Background RSS Feeds Auto-Polling (startup & every 60 mins) ──
+  useEffect(() => {
+    const checkFeeds = async () => {
+      try {
+        const feeds = await db.feeds.toArray();
+        if (!feeds || feeds.length === 0) return;
+
+        const now = Date.now();
+        const minLastChecked = Math.min(...feeds.map(f => f.lastChecked || 0));
+        // Refresh if feeds have not been checked in the last 45 minutes
+        if (now - minLastChecked > 45 * 60 * 1000) {
+          await refreshAllFeeds({ silent: false });
+        }
+      } catch (err) {
+        console.warn('[RSS] Background feed poll error:', err);
+      }
+    };
+
+    const initialTimer = setTimeout(checkFeeds, 5000);
+    const interval = setInterval(checkFeeds, 60 * 60 * 1000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, []);
 
   // ── Data from IndexedDB ──
   const searchInputRef = useRef(null)

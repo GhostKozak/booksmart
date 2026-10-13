@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/schema';
 import {
@@ -13,7 +13,9 @@ import {
     Eye,
     EyeOff,
     Search,
-    BookOpen
+    BookOpen,
+    Upload,
+    Download
 } from 'lucide-react';
 import { SimpleModal } from '../ui/SimpleModal';
 import { Button } from '../ui/button';
@@ -28,9 +30,23 @@ import {
     unsubscribeFeed,
     markFeedItemRead,
     markAllFeedItemsRead,
-    addFeedItemToBookmarks
+    addFeedItemToBookmarks,
+    exportFeedsToOpml,
+    importFeedsFromOpml
 } from '../../lib/rss-service';
 import { toast } from 'sonner';
+
+/**
+ * Safely extracts hostname from a URL without throwing on malformed or relative inputs.
+ */
+function getSafeHostname(url) {
+    if (!url || typeof url !== 'string') return '';
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+        return '';
+    }
+}
 
 export function RssReaderModal({ isOpen, onClose }) {
     const { t } = useTranslation();
@@ -41,19 +57,23 @@ export function RssReaderModal({ isOpen, onClose }) {
     const [newFeedUrl, setNewFeedUrl] = useState('');
     const [searchFilter, setSearchFilter] = useState('');
     const [onlyUnread, setOnlyUnread] = useState(false);
+    const opmlInputRef = useRef(null);
 
     // Live query for feeds and items with default empty array
     const feeds = useLiveQuery(() => db.feeds.toArray(), [], []);
 
+    // Query items and always sort newest-to-oldest in JavaScript
     const rawItems = useLiveQuery(async () => {
+        let items = [];
         if (selectedFeedUrl) {
-            return await db.feedItems
+            items = await db.feedItems
                 .where('feedUrl')
                 .equals(selectedFeedUrl)
-                .reverse()
-                .sortBy('pubDate');
+                .toArray();
+        } else {
+            items = await db.feedItems.toArray();
         }
-        return await db.feedItems.reverse().sortBy('pubDate');
+        return items.sort((a, b) => (b.pubDate || 0) - (a.pubDate || 0));
     }, [selectedFeedUrl], []);
 
     const totalUnreadCount = useMemo(() => {
@@ -61,7 +81,7 @@ export function RssReaderModal({ isOpen, onClose }) {
     }, [feeds]);
 
     const filteredItems = useMemo(() => {
-        let list = rawItems;
+        let list = rawItems || [];
         if (onlyUnread) {
             list = list.filter(item => !item.read);
         }
@@ -79,7 +99,8 @@ export function RssReaderModal({ isOpen, onClose }) {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         try {
-            const res = await refreshAllFeeds();
+            // silent: true prevents duplicate toast between service and modal
+            const res = await refreshAllFeeds({ silent: true });
             toast.success(t('rss.refreshedSuccess', {
                 count: res.newItemsTotal,
                 defaultValue: `Akışlar güncellendi. ${res.newItemsTotal} yeni yazı.`
@@ -97,11 +118,17 @@ export function RssReaderModal({ isOpen, onClose }) {
 
         setIsAddingFeed(true);
         try {
-            const { feed } = await subscribeToFeed(null, newFeedUrl.trim());
-            toast.success(t('rss.subscribeSuccess', {
-                title: feed.title,
-                defaultValue: `"${feed.title}" akışına abone olundu!`
-            }));
+            const { feed, isExisting } = await subscribeToFeed(null, newFeedUrl.trim());
+            if (isExisting) {
+                toast.info(t('rss.alreadySubscribed', {
+                    defaultValue: `"${feed.title}" akışı zaten kayıtlı.`
+                }));
+            } else {
+                toast.success(t('rss.subscribeSuccess', {
+                    title: feed.title,
+                    defaultValue: `"${feed.title}" akışına abone olundu!`
+                }));
+            }
             setNewFeedUrl('');
             setSelectedFeedUrl(feed.feedUrl);
         } catch (err) {
@@ -141,13 +168,57 @@ export function RssReaderModal({ isOpen, onClose }) {
 
     const handleSaveToBookmarks = async (item) => {
         try {
-            await addFeedItemToBookmarks(item, 'Okuma Listesi');
-            toast.success(t('rss.savedToBookmarks', {
-                title: item.title,
-                defaultValue: `"${item.title.slice(0, 35)}" yer imlerine kaydedildi!`
-            }));
+            const res = await addFeedItemToBookmarks(item, 'Okuma Listesi');
+            if (res?.isExisting) {
+                toast.info(t('rss.alreadySaved', {
+                    defaultValue: `"${item.title.slice(0, 35)}" zaten kütüphanenizde kayıtlı.`
+                }));
+            } else {
+                toast.success(t('rss.savedToBookmarks', {
+                    title: item.title,
+                    defaultValue: `"${item.title.slice(0, 35)}" yer imlerine kaydedildi!`
+                }));
+            }
         } catch {
             toast.error('Kaydedilemedi');
+        }
+    };
+
+    const handleExportOpml = async () => {
+        try {
+            const opml = await exportFeedsToOpml();
+            const blob = new Blob([opml], { type: 'text/x-opml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `booksmart-feeds-${new Date().toISOString().slice(0, 10)}.opml`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success(t('rss.opmlExportSuccess', { defaultValue: 'OPML dosyası dışa aktarıldı.' }));
+        } catch {
+            toast.error(t('rss.opmlExportError', { defaultValue: 'OPML dışa aktarma başarısız.' }));
+        }
+    };
+
+    const handleImportOpml = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsAddingFeed(true);
+        try {
+            const text = await file.text();
+            const res = await importFeedsFromOpml(text);
+            toast.success(t('rss.opmlImportSuccess', {
+                count: res.importedCount,
+                defaultValue: `${res.importedCount} akış başarıyla içe aktarıldı.`
+            }));
+        } catch (err) {
+            toast.error(err.message || t('rss.opmlImportError', { defaultValue: 'OPML içe aktarma başarısız.' }));
+        } finally {
+            setIsAddingFeed(false);
+            if (opmlInputRef.current) {
+                opmlInputRef.current.value = '';
+            }
         }
     };
 
@@ -193,13 +264,13 @@ export function RssReaderModal({ isOpen, onClose }) {
                         </Button>
                     </form>
 
-                    {/* All Feeds Toggle */}
-                    <div className="p-2 border-b border-border/50">
+                    {/* All Feeds Toggle & OPML Tools */}
+                    <div className="p-2 border-b border-border/50 flex items-center justify-between gap-1">
                         <button
                             type="button"
                             onClick={() => setSelectedFeedUrl(null)}
                             className={cn(
-                                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer",
+                                "flex-1 flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer",
                                 !selectedFeedUrl
                                     ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -213,6 +284,36 @@ export function RssReaderModal({ isOpen, onClose }) {
                                 {totalUnreadCount}
                             </span>
                         </button>
+
+                        <div className="flex items-center gap-0.5 shrink-0">
+                            <input
+                                type="file"
+                                ref={opmlInputRef}
+                                onChange={handleImportOpml}
+                                accept=".opml,.xml"
+                                className="hidden"
+                            />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                                onClick={() => opmlInputRef.current?.click()}
+                                title={t('rss.importOpml', 'OPML İçe Aktar')}
+                                disabled={isAddingFeed}
+                            >
+                                <Upload className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
+                                onClick={handleExportOpml}
+                                title={t('rss.exportOpml', 'OPML Dışa Aktar')}
+                                disabled={feeds.length === 0}
+                            >
+                                <Download className="w-3.5 h-3.5" />
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Subscribed Feeds Scrollable */}
@@ -247,7 +348,7 @@ export function RssReaderModal({ isOpen, onClose }) {
 
                                         <div className="flex items-center gap-1 shrink-0">
                                             {(feed.unreadCount || 0) > 0 && (
-                                                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-medium">
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-medium">
                                                     {feed.unreadCount}
                                                 </span>
                                             )}
@@ -362,7 +463,7 @@ export function RssReaderModal({ isOpen, onClose }) {
                                                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1">
                                                     <Favicon url={item.link} className="w-3.5 h-3.5 shrink-0" />
                                                     <span className="font-medium truncate max-w-[160px]">
-                                                        {item.author || (new URL(item.link || 'https://site.com').hostname)}
+                                                        {item.author || getSafeHostname(item.link) || 'Web'}
                                                     </span>
                                                     <span>•</span>
                                                     <span>{getRelativeTime(Math.floor(item.pubDate / 1000), t)}</span>

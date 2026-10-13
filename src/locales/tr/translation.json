@@ -827,7 +827,15 @@
         "openInReader": "Akışı Aç",
         "subscribeBtn": "Akışa Abone Ol",
         "connectedToFeed": "RSS Akışına Bağlı",
-        "noFeedFound": "Bu site için RSS akışı bulunamadı."
+        "noFeedFound": "Bu site için RSS akışı bulunamadı.",
+        "alreadySubscribed": "\"{{title}}\" akışı zaten kayıtlı.",
+        "alreadySaved": "Bu yazı zaten kütüphanenizde kayıtlı.",
+        "importOpml": "OPML İçe Aktar",
+        "exportOpml": "OPML Dışa Aktar",
+        "opmlExportSuccess": "OPML dosyası dışa aktarıldı.",
+        "opmlExportError": "OPML dışa aktarma başarısız.",
+        "opmlImportSuccess": "{{count}} akış başarıyla içe aktarıldı.",
+        "opmlImportError": "OPML içe aktarma başarısız."
     },
     "reader": {
         "modeTitle": "Okuma Modu",

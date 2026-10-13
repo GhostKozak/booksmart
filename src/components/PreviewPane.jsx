@@ -57,7 +57,24 @@ export function PreviewPane({ bookmark, onClose, className }) {
             const byFeedUrl = await db.feeds.get(bookmark.feedUrl);
             if (byFeedUrl) return byFeedUrl;
         }
-        return await db.feeds.where('siteUrl').equals(bookmark.url).first();
+        const direct = await db.feeds.where('siteUrl').equals(bookmark.url).first();
+        if (direct) return direct;
+
+        // Origin-level match for sub-pages or individual articles of a subscribed site
+        try {
+            const bookmarkOrigin = new URL(bookmark.url).origin;
+            const feeds = await db.feeds.toArray();
+            return feeds.find(f => {
+                if (!f.siteUrl) return false;
+                try {
+                    return new URL(f.siteUrl).origin === bookmarkOrigin;
+                } catch {
+                    return false;
+                }
+            }) || null;
+        } catch {
+            return null;
+        }
     }, [bookmark?.url, bookmark?.feedUrl]);
 
     const handleSubscribeFeed = async () => {

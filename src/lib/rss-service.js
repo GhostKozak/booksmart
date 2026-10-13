@@ -16,6 +16,23 @@ export function normalizeFeedInputUrl(input) {
 }
 
 /**
+ * Resolves a potentially relative URL against a base URL safely.
+ */
+export function resolveAbsoluteUrl(href, baseUrl) {
+    if (!href || typeof href !== 'string') return '';
+    const trimmed = href.trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) {
+        return trimmed;
+    }
+    try {
+        return new URL(trimmed, baseUrl).href;
+    } catch {
+        return trimmed;
+    }
+}
+
+/**
  * Strips HTML tags and normalizes whitespace for summaries.
  */
 export function cleanHtmlText(htmlStr) {
@@ -40,7 +57,7 @@ export function cleanHtmlText(htmlStr) {
 }
 
 /**
- * Parses pubDate string or timestamp to epoch seconds / ms.
+ * Parses pubDate string or timestamp to epoch milliseconds.
  */
 export function parsePubDate(dateStr) {
     if (!dateStr) return Date.now();
@@ -49,21 +66,43 @@ export function parsePubDate(dateStr) {
 }
 
 /**
- * Parses RSS 2.0, Atom 1.0, or RDF XML into a normalized feed object.
+ * Parses RSS 2.0, Atom 1.0, RDF, or JSON Feed into a normalized feed object.
  */
 export function parseFeedXml(xmlStr, feedUrl = '') {
     if (!xmlStr || typeof xmlStr !== 'string') {
-        throw new Error('Invalid XML content');
+        throw new Error('Invalid XML or JSON content');
     }
 
+    let cleanStr = xmlStr.trim();
+    // Strip UTF-8 BOM if present
+    if (cleanStr.charCodeAt(0) === 0xFEFF) {
+        cleanStr = cleanStr.slice(1).trim();
+    }
+
+    // 1. JSON Feed Support (JSON Feed 1.1 specification)
+    if (cleanStr.startsWith('{')) {
+        try {
+            const json = JSON.parse(cleanStr);
+            if (json && (json.version?.includes('jsonfeed.org') || Array.isArray(json.items))) {
+                return parseJsonFeed(json, feedUrl);
+            }
+        } catch {
+            // Not valid JSON, continue with XML parsing
+        }
+    }
+
+    // 2. XML Parsing (RSS 2.0 / Atom 1.0 / RDF)
     const parser = new DOMParser();
-    let doc = parser.parseFromString(xmlStr, 'application/xml');
+    let doc = parser.parseFromString(cleanStr, 'application/xml');
 
     const parserError = doc.querySelector('parsererror');
     if (parserError) {
-        // Fallback: try parsing as text/html for lenient XML
-        const htmlDoc = parser.parseFromString(xmlStr, 'text/html');
-        if (htmlDoc.querySelector('rss, feed, channel')) {
+        // Fallback: try parsing as text/html for lenient XML.
+        // NOTE: In HTML5, `<link>` is a void element without children.
+        // We replace `<link` with `<rsslink` so HTML5 DOM does not strip the link text URL!
+        const preprocessed = cleanStr.replace(/<(\/?)link([\s>])/gi, '<$1rsslink$2');
+        const htmlDoc = parser.parseFromString(preprocessed, 'text/html');
+        if (htmlDoc.querySelector('rss, feed, channel, rdf')) {
             doc = htmlDoc;
         } else {
             throw new Error('Failed to parse feed XML: ' + parserError.textContent.slice(0, 100));
@@ -71,7 +110,7 @@ export function parseFeedXml(xmlStr, feedUrl = '') {
     }
 
     const isAtom = !!doc.querySelector('feed');
-    const isRss = !!doc.querySelector('rss, channel, RDF');
+    const isRss = !!doc.querySelector('rss, channel, rdf\\:RDF, RDF');
 
     if (!isAtom && !isRss) {
         throw new Error('Unrecognized feed format (neither RSS nor Atom)');
@@ -84,14 +123,62 @@ export function parseFeedXml(xmlStr, feedUrl = '') {
     }
 }
 
+function parseJsonFeed(json, feedUrl) {
+    const feedTitle = json.title || 'Untitled Feed';
+    const feedDescription = json.description || '';
+    let siteUrl = json.home_page_url || '';
+    if (!siteUrl && feedUrl) {
+        try {
+            siteUrl = new URL(feedUrl).origin;
+        } catch {
+            siteUrl = feedUrl;
+        }
+    }
+
+    const items = (Array.isArray(json.items) ? json.items : []).map(item => {
+        const title = item.title || 'Untitled Post';
+        let link = item.url || siteUrl;
+        link = resolveAbsoluteUrl(link, siteUrl || feedUrl);
+        const guid = item.id ? String(item.id) : link || title;
+        const rawDate = item.date_published || item.date_modified || '';
+        const rawDesc = item.content_html || item.content_text || item.summary || '';
+        const summary = cleanHtmlText(rawDesc).slice(0, 300);
+        const author = item.authors?.[0]?.name || item.author?.name || '';
+
+        return {
+            title,
+            link,
+            guid,
+            pubDate: parsePubDate(rawDate),
+            summary,
+            author,
+            read: 0
+        };
+    });
+
+    return {
+        type: 'json',
+        title: feedTitle,
+        description: feedDescription,
+        siteUrl,
+        feedUrl,
+        items
+    };
+}
+
 function parseRssFeed(doc, feedUrl) {
     const channel = doc.querySelector('channel') || doc;
     const feedTitle = channel.querySelector('title')?.textContent?.trim() || 'Untitled Feed';
     const feedDescription = channel.querySelector('description')?.textContent?.trim() || '';
-    let siteUrl = channel.querySelector('link')?.textContent?.trim() || '';
+    let siteUrl = channel.querySelector('rsslink')?.textContent?.trim() ||
+                  channel.querySelector('link')?.textContent?.trim() ||
+                  channel.querySelector('rsslink')?.getAttribute('href') ||
+                  channel.querySelector('link')?.getAttribute('href') || '';
 
-    // If channel link is a node or relative
-    if (!siteUrl && feedUrl) {
+    // If channel link is relative or empty, resolve with feedUrl
+    if (siteUrl && feedUrl) {
+        siteUrl = resolveAbsoluteUrl(siteUrl, feedUrl);
+    } else if (!siteUrl && feedUrl) {
         try {
             siteUrl = new URL(feedUrl).origin;
         } catch {
@@ -102,8 +189,23 @@ function parseRssFeed(doc, feedUrl) {
     const itemNodes = Array.from(doc.querySelectorAll('item'));
     const items = itemNodes.map(item => {
         const title = item.querySelector('title')?.textContent?.trim() || 'Untitled Post';
-        const link = item.querySelector('link')?.textContent?.trim() || '';
-        const guid = item.querySelector('guid')?.textContent?.trim() || link || title;
+        
+        // Extract link: check rsslink text (from HTML fallback), standard link text, or href attributes
+        let link = item.querySelector('rsslink')?.textContent?.trim() ||
+                   item.querySelector('link')?.textContent?.trim() ||
+                   item.querySelector('rsslink')?.getAttribute('href') ||
+                   item.querySelector('link')?.getAttribute('href') || '';
+
+        const guidEl = item.querySelector('guid');
+        const guidText = guidEl?.textContent?.trim() || '';
+
+        if (!link && guidText && /^https?:\/\//i.test(guidText)) {
+            link = guidText;
+        }
+
+        link = resolveAbsoluteUrl(link || siteUrl, siteUrl || feedUrl);
+        const guid = guidText || link || title;
+
         const rawDate = item.querySelector('pubDate, dc\\:date, date')?.textContent?.trim() || '';
         const rawDesc = item.querySelector('description, content\\:encoded, encoded')?.textContent || '';
         const summary = cleanHtmlText(rawDesc).slice(0, 300);
@@ -136,12 +238,14 @@ function parseAtomFeed(doc, feedUrl) {
     const feedDescription = feed.querySelector('subtitle, tagline')?.textContent?.trim() || '';
 
     let siteUrl = '';
-    const linkElems = Array.from(feed.querySelectorAll('link'));
+    const linkElems = Array.from(feed.querySelectorAll('rsslink, link'));
     const altLink = linkElems.find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'));
     if (altLink) {
-        siteUrl = altLink.getAttribute('href') || '';
+        siteUrl = altLink.getAttribute('href') || altLink.textContent?.trim() || '';
     }
-    if (!siteUrl && feedUrl) {
+    if (siteUrl && feedUrl) {
+        siteUrl = resolveAbsoluteUrl(siteUrl, feedUrl);
+    } else if (!siteUrl && feedUrl) {
         try {
             siteUrl = new URL(feedUrl).origin;
         } catch {
@@ -153,15 +257,22 @@ function parseAtomFeed(doc, feedUrl) {
     const items = entryNodes.map(entry => {
         const title = entry.querySelector('title')?.textContent?.trim() || 'Untitled Post';
         let link = '';
-        const entryLinks = Array.from(entry.querySelectorAll('link'));
+        const entryLinks = Array.from(entry.querySelectorAll('rsslink, link'));
         const entryAlt = entryLinks.find(l => l.getAttribute('rel') === 'alternate' || !l.getAttribute('rel'));
         if (entryAlt) {
-            link = entryAlt.getAttribute('href') || '';
+            link = entryAlt.getAttribute('href') || entryAlt.textContent?.trim() || '';
         } else if (entryLinks.length > 0) {
-            link = entryLinks[0].getAttribute('href') || '';
+            link = entryLinks[0].getAttribute('href') || entryLinks[0].textContent?.trim() || '';
         }
 
-        const id = entry.querySelector('id')?.textContent?.trim() || link || title;
+        const id = entry.querySelector('id')?.textContent?.trim() || '';
+        if (!link && id && /^https?:\/\//i.test(id)) {
+            link = id;
+        }
+
+        link = resolveAbsoluteUrl(link || siteUrl, siteUrl || feedUrl);
+        const guid = id || link || title;
+
         const rawDate = entry.querySelector('published, updated, issueDate')?.textContent?.trim() || '';
         const rawSummary = entry.querySelector('summary, content')?.textContent || '';
         const summary = cleanHtmlText(rawSummary).slice(0, 300);
@@ -170,7 +281,7 @@ function parseAtomFeed(doc, feedUrl) {
         return {
             title,
             link: link || siteUrl,
-            guid: id,
+            guid,
             pubDate: parsePubDate(rawDate),
             summary,
             author,
@@ -189,7 +300,7 @@ function parseAtomFeed(doc, feedUrl) {
 }
 
 /**
- * Attempts to autodiscover an RSS/Atom feed URL from a webpage URL or HTML.
+ * Attempts to autodiscover an RSS/Atom/JSON feed URL from a webpage URL or HTML.
  */
 export function discoverFeedUrlFromHtml(htmlStr, baseUrl) {
     if (!htmlStr || typeof htmlStr !== 'string') return null;
@@ -197,32 +308,55 @@ export function discoverFeedUrlFromHtml(htmlStr, baseUrl) {
     try {
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlStr, 'text/html');
-        const linkNodes = Array.from(doc.querySelectorAll('link[rel~="alternate"]'));
+
+        // Look for standard link tags (rel="alternate", rel="feed", or specific feed types)
+        const linkNodes = Array.from(doc.querySelectorAll(
+            'link[rel~="alternate"], link[rel~="feed"], link[type*="rss"], link[type*="atom"], link[type*="xml"], link[type*="json"]'
+        ));
 
         for (const link of linkNodes) {
             const type = (link.getAttribute('type') || '').toLowerCase();
             const href = link.getAttribute('href');
             if (!href) continue;
 
-            if (type.includes('rss+xml') || type.includes('atom+xml') || type.includes('application/xml')) {
-                try {
-                    return new URL(href, baseUrl).href;
-                } catch {
-                    return href;
-                }
+            if (
+                type.includes('rss+xml') ||
+                type.includes('atom+xml') ||
+                type.includes('application/xml') ||
+                type.includes('feed+json') ||
+                (type.includes('text/xml') && /\.(rss|atom|xml)$/i.test(href)) ||
+                href.endsWith('/feed') ||
+                href.endsWith('/rss')
+            ) {
+                return resolveAbsoluteUrl(href, baseUrl);
             }
+        }
+
+        // Also check anchor tags (<a href="/rss.xml">, <a href="/feed">)
+        const feedAnchor = Array.from(doc.querySelectorAll('a[href]')).find(a => {
+            const h = (a.getAttribute('href') || '').toLowerCase();
+            const text = (a.textContent || '').toLowerCase();
+            return (
+                h.endsWith('/feed') ||
+                h.endsWith('/rss') ||
+                h.endsWith('/rss.xml') ||
+                h.endsWith('/atom.xml') ||
+                h.endsWith('/feed.xml') ||
+                (text.includes('rss') && /\.(xml|rss|atom)$/i.test(h))
+            );
+        });
+
+        if (feedAnchor) {
+            const href = feedAnchor.getAttribute('href');
+            if (href) return resolveAbsoluteUrl(href, baseUrl);
         }
     } catch {
         // Fallback regex scan
-        const match = htmlStr.match(/<link[^>]+type=["'](application\/(rss\+xml|atom\+xml))["'][^>]+href=["']([^"']+)["']/i) ||
-            htmlStr.match(/<link[^>]+href=["']([^"']+)["'][^>]+type=["'](application\/(rss\+xml|atom\+xml))["']/i);
+        const match = htmlStr.match(/<link[^>]+type=["'](application\/(rss\+xml|atom\+xml|feed\+json))["'][^>]+href=["']([^"']+)["']/i) ||
+                      htmlStr.match(/<link[^>]+href=["']([^"']+)["'][^>]+type=["'](application\/(rss\+xml|atom\+xml|feed\+json))["']/i);
         if (match) {
             const href = match[3] || match[1];
-            try {
-                return new URL(href, baseUrl).href;
-            } catch {
-                return href;
-            }
+            return resolveAbsoluteUrl(href, baseUrl);
         }
     }
 
@@ -230,7 +364,7 @@ export function discoverFeedUrlFromHtml(htmlStr, baseUrl) {
 }
 
 /**
- * Generates candidate feed URLs for common platforms (Substack, Medium, WordPress, GitHub, etc.)
+ * Generates candidate feed URLs for common platforms (Substack, Medium, Reddit, YouTube, WordPress, GitHub, etc.)
  */
 export function getCandidateFeedUrls(siteUrl) {
     if (!siteUrl) return [];
@@ -242,7 +376,7 @@ export function getCandidateFeedUrls(siteUrl) {
         const candidates = [];
 
         // Direct feed patterns
-        if (/\.(rss|atom|xml)$/i.test(pathname) || pathname.endsWith('/feed')) {
+        if (/\.(rss|atom|xml|json)$/i.test(pathname) || pathname.endsWith('/feed')) {
             candidates.push(siteUrl);
         }
 
@@ -262,6 +396,26 @@ export function getCandidateFeedUrls(siteUrl) {
             }
         }
 
+        // Reddit (e.g. https://reddit.com/r/technology -> /.rss)
+        if (urlObj.hostname.includes('reddit.com')) {
+            if (pathname) {
+                candidates.push(`${origin}${pathname}/.rss`);
+                candidates.push(`${origin}${pathname}.rss`);
+            }
+        }
+
+        // YouTube (e.g. channel or playlist)
+        if (urlObj.hostname.includes('youtube.com')) {
+            const channelMatch = pathname.match(/\/channel\/(UC[a-zA-Z0-9_-]+)/);
+            if (channelMatch) {
+                candidates.push(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelMatch[1]}`);
+            }
+            const playlistId = urlObj.searchParams.get('list');
+            if (playlistId) {
+                candidates.push(`https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`);
+            }
+        }
+
         // GitHub Releases/Commits
         if (urlObj.hostname === 'github.com') {
             const parts = pathname.split('/').filter(Boolean);
@@ -271,9 +425,10 @@ export function getCandidateFeedUrls(siteUrl) {
             }
         }
 
-        // Standard CMS probes
+        // Standard CMS probes (WordPress, Hugo, Ghost, Jekyll, Dev.to, Hashnode)
         if (pathname && pathname !== '/') {
             candidates.push(`${origin}${pathname}/feed/`);
+            candidates.push(`${origin}${pathname}/feed`);
             candidates.push(`${origin}${pathname}/rss.xml`);
             candidates.push(`${origin}${pathname}/atom.xml`);
         }
@@ -282,6 +437,7 @@ export function getCandidateFeedUrls(siteUrl) {
         candidates.push(`${origin}/rss.xml`);
         candidates.push(`${origin}/atom.xml`);
         candidates.push(`${origin}/index.xml`);
+        candidates.push(`${origin}/feed.json`);
         candidates.push(`${origin}/rss`);
 
         return Array.from(new Set(candidates));
@@ -291,7 +447,7 @@ export function getCandidateFeedUrls(siteUrl) {
 }
 
 /**
- * Fetches feed XML text bypassing CORS using companion extension or fallback proxies.
+ * Fetches feed XML or JSON text bypassing CORS using companion extension or fallback proxies.
  */
 export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
     if (!url) throw new Error('No URL specified');
@@ -314,7 +470,7 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
         const res = await fetch(normalizedUrl, {
             method: 'GET',
             headers: {
-                'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html, */*'
+                'Accept': 'application/rss+xml, application/atom+xml, application/feed+json, application/xml, text/xml, text/html, */*'
             },
             signal: controller.signal
         });
@@ -330,9 +486,12 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
     const userProxy = getStoredCorsProxy();
     const proxyEndpoints = [];
     if (userProxy) {
-        proxyEndpoints.push(`${userProxy.replace(/\/+$/, '')}/${normalizedUrl}`);
+        const cleanProxy = userProxy.replace(/\/+$/, '');
+        proxyEndpoints.push(`${cleanProxy}/${normalizedUrl}`);
+        proxyEndpoints.push(`${cleanProxy}/${encodeURIComponent(normalizedUrl)}`);
     }
-    proxyEndpoints.push(`https://corsproxy.io/?url=${encodeURIComponent(normalizedUrl)}`);
+    // Correct corsproxy.io syntax (https://corsproxy.io/?<url>)
+    proxyEndpoints.push(`https://corsproxy.io/?${encodeURIComponent(normalizedUrl)}`);
     proxyEndpoints.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`);
     proxyEndpoints.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(normalizedUrl)}`);
 
@@ -392,23 +551,26 @@ export async function discoverFeed(siteUrl) {
         }
     }
 
-    // Probe candidate URLs concurrently
+    // Probe candidate URLs in throttled small batches of 2 to avoid hammering CORS proxies
     const candidates = getCandidateFeedUrls(normalizedUrl).filter(c => c !== normalizedUrl);
     if (candidates.length > 0) {
-        try {
-            const result = await Promise.any(
-                candidates.map(async (candidate) => {
-                    const candidateXml = await fetchFeedXmlRaw(candidate, 4000);
-                    const parsed = parseFeedXml(candidateXml, candidate);
-                    if (parsed && parsed.items) {
-                        return { feedUrl: candidate, parsed };
-                    }
-                    throw new Error('Not a feed');
-                })
-            );
-            if (result) return result;
-        } catch {
-            // All candidates failed
+        for (let i = 0; i < candidates.length; i += 2) {
+            const batch = candidates.slice(i, i + 2);
+            try {
+                const result = await Promise.any(
+                    batch.map(async (candidate) => {
+                        const candidateXml = await fetchFeedXmlRaw(candidate, 3500);
+                        const parsed = parseFeedXml(candidateXml, candidate);
+                        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                            return { feedUrl: candidate, parsed };
+                        }
+                        throw new Error('Not a feed');
+                    })
+                );
+                if (result) return result;
+            } catch {
+                // Batch failed, continue to next pair of candidates
+            }
         }
     }
 
@@ -432,24 +594,15 @@ export async function subscribeToFeed(bookmark = null, customFeedUrl = null) {
     const { feedUrl, parsed } = feedInfo;
     const now = Date.now();
 
-    const feedRecord = {
-        feedUrl,
-        bookmarkId: bookmark?.id || null,
-        title: parsed.title || bookmark?.title || 'Feed',
-        description: parsed.description || '',
-        siteUrl: parsed.siteUrl || bookmark?.url || feedUrl,
-        lastChecked: now,
-        itemCount: parsed.items.length,
-        unreadCount: parsed.items.length
-    };
-
-    // Save Feed record
-    await db.feeds.put(feedRecord);
+    // Check if feed already exists in database
+    const existingFeed = await db.feeds.get(feedUrl);
+    const existingItems = await db.feedItems.where('feedUrl').equals(feedUrl).toArray();
+    const existingLinks = new Set(existingItems.map(i => i.link));
 
     // Save Items (avoiding duplicates based on link)
     const itemsToInsert = parsed.items.map(it => ({
         feedUrl,
-        bookmarkId: bookmark?.id || null,
+        bookmarkId: bookmark?.id || existingFeed?.bookmarkId || null,
         title: it.title,
         link: it.link,
         guid: it.guid,
@@ -459,21 +612,35 @@ export async function subscribeToFeed(bookmark = null, customFeedUrl = null) {
         read: 0
     }));
 
-    if (itemsToInsert.length > 0) {
-        const existingItems = await db.feedItems.where('feedUrl').equals(feedUrl).toArray();
-        const existingLinks = new Set(existingItems.map(i => i.link));
-        const newItems = itemsToInsert.filter(it => !existingLinks.has(it.link));
-        if (newItems.length > 0) {
-            await db.feedItems.bulkAdd(newItems);
-        }
+    const newItems = itemsToInsert.filter(it => !existingLinks.has(it.link));
+    if (newItems.length > 0) {
+        await db.feedItems.bulkAdd(newItems);
     }
 
-    // Link feedUrl to bookmark
+    // Accurate count of total and unread items
+    const unreadCount = await db.feedItems.where('feedUrl').equals(feedUrl).and(i => !i.read).count();
+    const totalCount = await db.feedItems.where('feedUrl').equals(feedUrl).count();
+
+    const feedRecord = {
+        feedUrl,
+        bookmarkId: bookmark?.id || existingFeed?.bookmarkId || null,
+        title: parsed.title || bookmark?.title || existingFeed?.title || 'Feed',
+        description: parsed.description || existingFeed?.description || '',
+        siteUrl: parsed.siteUrl || bookmark?.url || existingFeed?.siteUrl || feedUrl,
+        lastChecked: now,
+        itemCount: totalCount,
+        unreadCount
+    };
+
+    // Save Feed record
+    await db.feeds.put(feedRecord);
+
+    // Link feedUrl to bookmark if bookmark was passed
     if (bookmark?.id) {
         await db.bookmarks.update(bookmark.id, { feedUrl });
     }
 
-    return { feed: feedRecord, items: itemsToInsert };
+    return { feed: feedRecord, items: itemsToInsert, isExisting: !!existingFeed };
 }
 
 /**
@@ -496,8 +663,10 @@ export async function unsubscribeFeed(feedUrl) {
 
 /**
  * Refreshes all subscribed feeds, detects new articles, and notifies user.
+ * @param {Object} [options]
+ * @param {boolean} [options.silent=false] If true, suppresses toast notification
  */
-export async function refreshAllFeeds() {
+export async function refreshAllFeeds({ silent = false } = {}) {
     const feeds = await db.feeds.toArray();
     if (feeds.length === 0) {
         return { totalFeeds: 0, newItemsTotal: 0 };
@@ -506,46 +675,51 @@ export async function refreshAllFeeds() {
     let newItemsTotal = 0;
     const newArticles = [];
 
-    for (const feed of feeds) {
-        try {
-            const raw = await fetchFeedXmlRaw(feed.feedUrl, 8000);
-            const parsed = parseFeedXml(raw, feed.feedUrl);
+    // Process feeds in concurrent chunks of 4 for speed
+    const CHUNK_SIZE = 4;
+    for (let i = 0; i < feeds.length; i += CHUNK_SIZE) {
+        const chunk = feeds.slice(i, i + CHUNK_SIZE);
+        await Promise.allSettled(chunk.map(async (feed) => {
+            try {
+                const raw = await fetchFeedXmlRaw(feed.feedUrl, 8000);
+                const parsed = parseFeedXml(raw, feed.feedUrl);
 
-            // Fetch existing links for this feed to prevent duplicate entries
-            const existingItems = await db.feedItems.where('feedUrl').equals(feed.feedUrl).toArray();
-            const existingLinks = new Set(existingItems.map(i => i.link));
+                // Fetch existing links for this feed to prevent duplicate entries
+                const existingItems = await db.feedItems.where('feedUrl').equals(feed.feedUrl).toArray();
+                const existingLinks = new Set(existingItems.map(i => i.link));
 
-            const newItems = parsed.items.filter(it => !existingLinks.has(it.link));
+                const newItems = parsed.items.filter(it => !existingLinks.has(it.link));
 
-            if (newItems.length > 0) {
-                const toAdd = newItems.map(it => ({
-                    feedUrl: feed.feedUrl,
-                    bookmarkId: feed.bookmarkId || null,
-                    title: it.title,
-                    link: it.link,
-                    guid: it.guid,
-                    pubDate: it.pubDate,
-                    summary: it.summary,
-                    author: it.author || '',
-                    read: 0
-                }));
-                await db.feedItems.bulkAdd(toAdd);
-                newItemsTotal += toAdd.length;
-                newArticles.push(...toAdd.slice(0, 3));
+                if (newItems.length > 0) {
+                    const toAdd = newItems.map(it => ({
+                        feedUrl: feed.feedUrl,
+                        bookmarkId: feed.bookmarkId || null,
+                        title: it.title,
+                        link: it.link,
+                        guid: it.guid,
+                        pubDate: it.pubDate,
+                        summary: it.summary,
+                        author: it.author || '',
+                        read: 0
+                    }));
+                    await db.feedItems.bulkAdd(toAdd);
+                    newItemsTotal += toAdd.length;
+                    newArticles.push(...toAdd.slice(0, 3));
+                }
+
+                const unreadCount = await db.feedItems.where('feedUrl').equals(feed.feedUrl).and(i => !i.read).count();
+                const totalCount = await db.feedItems.where('feedUrl').equals(feed.feedUrl).count();
+
+                await db.feeds.update(feed.feedUrl, {
+                    title: parsed.title || feed.title,
+                    lastChecked: Date.now(),
+                    unreadCount,
+                    itemCount: totalCount
+                });
+            } catch (feedErr) {
+                console.warn(`[RSS] Failed refreshing feed ${feed.feedUrl}:`, feedErr.message);
             }
-
-            const unreadCount = await db.feedItems.where('feedUrl').equals(feed.feedUrl).and(i => !i.read).count();
-            const totalCount = await db.feedItems.where('feedUrl').equals(feed.feedUrl).count();
-
-            await db.feeds.update(feed.feedUrl, {
-                title: parsed.title || feed.title,
-                lastChecked: Date.now(),
-                unreadCount,
-                itemCount: totalCount
-            });
-        } catch (feedErr) {
-            console.warn(`[RSS] Failed refreshing feed ${feed.feedUrl}:`, feedErr.message);
-        }
+        }));
     }
 
     if (newItemsTotal > 0) {
@@ -554,7 +728,9 @@ export async function refreshAllFeeds() {
             ? `Yeni yazı: "${headline.slice(0, 50)}"`
             : `${newItemsTotal} yeni yazı yayımlandı!`;
 
-        toast.info(msg);
+        if (!silent) {
+            toast.info(msg);
+        }
 
         // Native notification if supported
         if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -588,19 +764,14 @@ export async function markFeedItemRead(itemId, read = 1) {
 
 /**
  * Marks all items in a feed (or across all feeds) as read.
+ * Uses Dexie batch modification for instantaneous execution.
  */
 export async function markAllFeedItemsRead(feedUrl = null) {
     if (feedUrl) {
-        const items = await db.feedItems.where('feedUrl').equals(feedUrl).toArray();
-        for (const it of items) {
-            await db.feedItems.update(it.id, { read: 1 });
-        }
+        await db.feedItems.where('feedUrl').equals(feedUrl).modify({ read: 1 });
         await db.feeds.update(feedUrl, { unreadCount: 0 });
     } else {
-        const allItems = await db.feedItems.toArray();
-        for (const it of allItems) {
-            await db.feedItems.update(it.id, { read: 1 });
-        }
+        await db.feedItems.toCollection().modify({ read: 1 });
         const feeds = await db.feeds.toArray();
         for (const f of feeds) {
             await db.feeds.update(f.feedUrl, { unreadCount: 0 });
@@ -610,9 +781,22 @@ export async function markAllFeedItemsRead(feedUrl = null) {
 
 /**
  * Adds an article from a feed into the BookSmart bookmarks library.
+ * Performs duplicate detection and calculates estimated reading time.
  */
 export async function addFeedItemToBookmarks(feedItem, targetFolder = 'Okuma Listesi') {
     if (!feedItem || !feedItem.link) return null;
+
+    // Check if URL is already in bookmarks
+    const existing = await db.bookmarks.where('url').equals(feedItem.link).first();
+    if (existing) {
+        if (feedItem.id) {
+            await markFeedItemRead(feedItem.id, 1);
+        }
+        return { ...existing, isExisting: true };
+    }
+
+    const words = feedItem.summary ? feedItem.summary.trim().split(/\s+/).filter(Boolean).length : 0;
+    const readingTime = Math.max(1, Math.ceil(words / 200));
 
     const newBookmark = {
         title: feedItem.title || 'RSS Article',
@@ -621,6 +805,7 @@ export async function addFeedItemToBookmarks(feedItem, targetFolder = 'Okuma Lis
         newFolder: targetFolder,
         tags: ['rss', 'newsletter'],
         ruleTags: [],
+        readingTimeMinutes: readingTime,
         addDate: Math.floor(Date.now() / 1000),
         note: feedItem.summary ? `RSS Özeti: ${feedItem.summary}` : '',
         status: 'unchanged'
@@ -629,10 +814,60 @@ export async function addFeedItemToBookmarks(feedItem, targetFolder = 'Okuma Lis
     const id = await db.bookmarks.add(newBookmark);
     newBookmark.id = id;
 
-    // Mark as read
+    // Mark as read in feed
     if (feedItem.id) {
         await markFeedItemRead(feedItem.id, 1);
     }
 
     return newBookmark;
+}
+
+/**
+ * Exports all subscribed feeds to an OPML 2.0 XML string.
+ */
+export async function exportFeedsToOpml() {
+    const feeds = await db.feeds.toArray();
+    const dateStr = new Date().toUTCString();
+    let opml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    opml += `<opml version="2.0">\n`;
+    opml += `  <head>\n`;
+    opml += `    <title>BookSmart RSS Subscriptions</title>\n`;
+    opml += `    <dateCreated>${dateStr}</dateCreated>\n`;
+    opml += `  </head>\n`;
+    opml += `  <body>\n`;
+    for (const feed of feeds) {
+        const title = (feed.title || '').replace(/"/g, '&quot;');
+        const feedUrl = (feed.feedUrl || '').replace(/"/g, '&quot;');
+        const siteUrl = (feed.siteUrl || feed.feedUrl || '').replace(/"/g, '&quot;');
+        opml += `    <outline type="rss" text="${title}" title="${title}" xmlUrl="${feedUrl}" htmlUrl="${siteUrl}"/>\n`;
+    }
+    opml += `  </body>\n`;
+    opml += `</opml>`;
+    return opml;
+}
+
+/**
+ * Imports feeds from an OPML XML string.
+ */
+export async function importFeedsFromOpml(opmlStr) {
+    if (!opmlStr || typeof opmlStr !== 'string') {
+        throw new Error('Invalid OPML content');
+    }
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(opmlStr, 'application/xml');
+    const outlines = Array.from(doc.querySelectorAll('outline[xmlUrl], outline[xmlurl]'));
+
+    let importedCount = 0;
+    const errors = [];
+    for (const outline of outlines) {
+        const feedUrl = outline.getAttribute('xmlUrl') || outline.getAttribute('xmlurl');
+        if (!feedUrl) continue;
+        try {
+            await subscribeToFeed(null, feedUrl);
+            importedCount++;
+        } catch (err) {
+            errors.push({ feedUrl, error: err.message });
+        }
+    }
+    return { total: outlines.length, importedCount, errors };
 }

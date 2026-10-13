@@ -827,7 +827,15 @@
         "openInReader": "Open Feed",
         "subscribeBtn": "Subscribe to Feed",
         "connectedToFeed": "Connected to RSS",
-        "noFeedFound": "No RSS feed found for this website."
+        "noFeedFound": "No RSS feed found for this website.",
+        "alreadySubscribed": "\"{{title}}\" is already subscribed.",
+        "alreadySaved": "This article is already saved in your bookmarks.",
+        "importOpml": "Import OPML",
+        "exportOpml": "Export OPML",
+        "opmlExportSuccess": "OPML exported successfully.",
+        "opmlExportError": "Failed to export OPML.",
+        "opmlImportSuccess": "{{count}} feeds imported successfully.",
+        "opmlImportError": "Failed to import OPML."
     },
     "reader": {
         "modeTitle": "Reader Mode",

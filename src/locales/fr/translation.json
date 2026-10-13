@@ -827,7 +827,15 @@
         "openInReader": "Ouvrir le flux",
         "subscribeBtn": "S'abonner au flux",
         "connectedToFeed": "Connecté au flux RSS",
-        "noFeedFound": "Aucun flux RSS trouvé pour ce site."
+        "noFeedFound": "Aucun flux RSS trouvé pour ce site.",
+        "alreadySubscribed": "\"{{title}}\" est déjà abonné.",
+        "alreadySaved": "Cet article est déjà enregistré dans vos favoris.",
+        "importOpml": "Importer OPML",
+        "exportOpml": "Exporter OPML",
+        "opmlExportSuccess": "OPML exporté avec succès.",
+        "opmlExportError": "Échec de l'exportation OPML.",
+        "opmlImportSuccess": "{{count}} flux importés avec succès.",
+        "opmlImportError": "Échec de l'importation OPML."
     },
     "reader": {
         "modeTitle": "Mode Lecture",

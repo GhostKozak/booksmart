@@ -827,7 +827,15 @@
         "openInReader": "Abrir fuente",
         "subscribeBtn": "Suscribirse a la fuente",
         "connectedToFeed": "Conectado a RSS",
-        "noFeedFound": "No se encontró fuente RSS para este sitio."
+        "noFeedFound": "No se encontró fuente RSS para este sitio.",
+        "alreadySubscribed": "\"{{title}}\" ya está suscrito.",
+        "alreadySaved": "Este artículo ya está guardado en tus marcadores.",
+        "importOpml": "Importar OPML",
+        "exportOpml": "Exportar OPML",
+        "opmlExportSuccess": "OPML exportado con éxito.",
+        "opmlExportError": "Error al exportar OPML.",
+        "opmlImportSuccess": "{{count}} fuentes importadas con éxito.",
+        "opmlImportError": "Error al importar OPML."
     },
     "reader": {
         "modeTitle": "Modo Lectura",
