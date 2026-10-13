@@ -1280,6 +1280,16 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
                     message: request.message,
                     isWarning: request.isWarning
                 });
+            } else if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    if (tabs && tabs[0]?.id) {
+                        showInPageToast(tabs[0].id, {
+                            title: request.title,
+                            message: request.message,
+                            isWarning: request.isWarning
+                        });
+                    }
+                });
             }
             sendResponse({ success: true });
             return true;

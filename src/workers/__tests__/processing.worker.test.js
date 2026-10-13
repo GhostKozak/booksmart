@@ -333,6 +333,31 @@ describe('processing.worker', () => {
             const callArgs = workerPostMessage.mock.calls[0][0];
             expect(callArgs.payload.duplicateCount).toBe(1);
         });
+
+        it('should detect duplicates across different folders even when activeFolder filter is applied', async () => {
+            const payload = {
+                bookmarks: [
+                    { id: '1', url: 'https://example.com/item', title: 'Item Dev', originalFolder: 'Dev' },
+                    { id: '2', url: 'https://example.com/item', title: 'Item Design', originalFolder: 'Design' }
+                ],
+                rules: [],
+                resolvedConflicts: {},
+                searchQuery: '',
+                searchMode: 'simple',
+                activeTag: null,
+                activeFolder: 'Dev',
+                smartFilter: null,
+                dateFilter: {},
+                sortBy: 'default',
+                fuseOptions: {}
+            };
+            workerOnMessage({ data: { type: 'PROCESS_DATA', payload } });
+            const callArgs = workerPostMessage.mock.calls[0][0];
+            expect(callArgs.payload.processedBookmarks).toHaveLength(1);
+            const b1 = callArgs.payload.processedBookmarks[0];
+            expect(b1.hasDuplicate).toBe(true);
+            expect(b1.otherLocations).toContain('Design');
+        });
     });
 
     describe('statistics calculation', () => {

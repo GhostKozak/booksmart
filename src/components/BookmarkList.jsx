@@ -12,7 +12,7 @@ export function BookmarkList({ bookmarks, selectedIds, toggleSelection, toggleAl
 
     // Common grid layout to ensure perfect alignment
     // Checkbox | Eye | Title | Location | Status | Health
-    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,2fr)_minmax(0,1.5fr)_90px_90px_80px] lg:gap-4 lg:items-center lg:px-4 lg:pr-6"
+    const gridLayout = "lg:grid lg:grid-cols-[40px_minmax(0,2fr)_minmax(0,1.5fr)_90px_90px_140px] lg:gap-4 lg:items-center lg:px-4 lg:pr-6"
 
     const header = (
         <div className={cn(

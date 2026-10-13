@@ -456,18 +456,35 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal, cors
 
     let pageText = `URL: ${url}`;
     // Try direct fetch first — privacy-first approach, no third-party proxy.
-    // If CORS blocks it, we fall back to just the URL for AI summarization.
+    // If CORS blocks it or request times out after 5s, we fall back to just the URL for AI summarization.
     try {
-        const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
-        const res = await fetch(fetchUrl, { signal: abortSignal });
-        if (res.ok) {
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 15000) : html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').substring(0, 15000);
-            pageText = `Content from URL (${url}):\n\n${textOnly}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const onParentAbort = () => controller.abort();
+        if (abortSignal) {
+            if (abortSignal.aborted) {
+                controller.abort();
+            } else {
+                abortSignal.addEventListener('abort', onParentAbort);
+            }
+        }
+        try {
+            const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
+            const res = await fetch(fetchUrl, { signal: controller.signal });
+            if (res.ok) {
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 15000) : html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').substring(0, 15000);
+                pageText = `Content from URL (${url}):\n\n${textOnly}`;
+            }
+        } finally {
+            clearTimeout(timeoutId);
+            if (abortSignal) {
+                abortSignal.removeEventListener('abort', onParentAbort);
+            }
         }
     } catch (e) {
-        console.warn("Could not fetch page content directly (CORS), summarizing from URL only.", e);
+        console.warn("Could not fetch page content directly (CORS or timeout), summarizing from URL only.", e);
     }
 
     const lang = sanitizeLanguageCode(localStorage.getItem('i18nextLng') || 'en');
@@ -550,18 +567,35 @@ export async function generateOneSentenceSummary(bookmark, apiKey, modelId, { ab
         contextParts.push(`Page Description (OpenGraph): ${previewMetadata.description}`);
     }
 
-    // Try fetching content if possible
+    // Try fetching content if possible (with 5s timeout)
     try {
-        const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
-        const res = await fetch(fetchUrl, { signal: abortSignal });
-        if (res.ok) {
-            const html = await res.text();
-            if (typeof DOMParser !== 'undefined') {
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 8000) : '';
-                if (textOnly) {
-                    contextParts.push(`Page Text Excerpt: ${textOnly}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const onParentAbort = () => controller.abort();
+        if (abortSignal) {
+            if (abortSignal.aborted) {
+                controller.abort();
+            } else {
+                abortSignal.addEventListener('abort', onParentAbort);
+            }
+        }
+        try {
+            const fetchUrl = corsProxy ? getProxiedUrl(url, corsProxy) : url;
+            const res = await fetch(fetchUrl, { signal: controller.signal });
+            if (res.ok) {
+                const html = await res.text();
+                if (typeof DOMParser !== 'undefined') {
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    const textOnly = doc.body ? doc.body.textContent.replace(/\s+/g, ' ').substring(0, 8000) : '';
+                    if (textOnly) {
+                        contextParts.push(`Page Text Excerpt: ${textOnly}`);
+                    }
                 }
+            }
+        } finally {
+            clearTimeout(timeoutId);
+            if (abortSignal) {
+                abortSignal.removeEventListener('abort', onParentAbort);
             }
         }
     } catch {

@@ -220,13 +220,14 @@ const processData = ({
     }
 
     // 7. Duplicate Detection Setup
+    // Use the entire bookmarks dataset so duplicates across different folders/tags are always accurately detected
     const urlMap = new Map();
-    filtered.forEach(b => {
+    bookmarks.forEach(b => {
         const u = normalizeUrl(b.url);
         if (!urlMap.has(u)) {
             urlMap.set(u, []);
         }
-        urlMap.get(u).push({ id: b.id, folder: b.originalFolder });
+        urlMap.get(u).push({ id: b.id, folder: b.newFolder || b.originalFolder });
     });
 
     // 8. Rule Application & Processing

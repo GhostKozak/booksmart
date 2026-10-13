@@ -85,8 +85,8 @@ function toAbsolute(href, baseUrl) {
 }
 
 const UNWANTED_SELECTORS = [
-    'script', 'style', 'noscript', 'iframe', 'object', 'embed',
-    'nav', 'header', 'footer', 'aside', 'form', 'svg',
+    'script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'canvas', 'audio', 'video',
+    'nav', 'header', 'footer', 'aside', 'form', 'svg', 'button', 'input', 'textarea', 'select', 'base',
     '.ad', '.ads', '.advertisement', '.ad-banner', '.advert',
     '.cookie', '.cookie-banner', '.cookie-notice', '#cookie-banner',
     '.social-share', '.share-buttons', '.share-bar', '.social-links',

@@ -4,7 +4,7 @@ import { Favicon } from './Favicon'
 import { BookmarkHealthStatus } from './bookmark/BookmarkHealthStatus'
 import { LinkTooltip } from './bookmark/LinkTooltip'
 import { Button } from './ui/button'
-import { Folder, ChevronDown, Pencil, Eye, FolderOpen } from 'lucide-react'
+import { Folder, ChevronDown, Pencil, Eye, FolderOpen, BookOpen, GitMerge } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
@@ -17,6 +17,7 @@ const BookmarkLeaf = ({
     toggleSelection,
     onPreview,
     onEdit,
+    onMergeDuplicate,
     linkHealth,
     ignoredUrls,
     toggleIgnoreUrl,
@@ -62,24 +63,48 @@ const BookmarkLeaf = ({
                     status={healthStatus}
                     onToggleIgnore={toggleIgnoreUrl}
                 />
-                <div className="flex items-center md:opacity-0 group-hover/leaf:opacity-100 transition-opacity">
+                <div className="flex items-center md:opacity-0 group-hover/leaf:opacity-100 transition-opacity gap-0.5">
+                    {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-7 h-7 text-primary hover:bg-primary/10 cursor-pointer"
+                            onClick={() => onMergeDuplicate(bookmark)}
+                            title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                            aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                        >
+                            <GitMerge className="w-3.5 h-3.5" />
+                        </Button>
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary"
+                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                         onClick={() => onEdit?.(bookmark)}
                         title={t('common.edit')}
+                        aria-label={t('common.edit')}
                     >
                         <Pencil className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary"
+                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                         onClick={() => onPreview(bookmark)}
                         title={t('preview.open')}
+                        aria-label={t('preview.open')}
                     >
                         <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
+                        onClick={() => useAppStore.getState().openReaderMode(bookmark)}
+                        title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                        aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                    >
+                        <BookOpen className="w-3.5 h-3.5" />
                     </Button>
                 </div>
             </div>
@@ -98,6 +123,7 @@ const FolderNode = ({
     toggleSelection,
     onPreview,
     onEdit,
+    onMergeDuplicate,
     linkHealth,
     ignoredUrls,
     toggleIgnoreUrl,
@@ -202,6 +228,7 @@ const FolderNode = ({
                                 toggleSelection={toggleSelection}
                                 onPreview={onPreview}
                                 onEdit={onEdit}
+                                onMergeDuplicate={onMergeDuplicate}
                                 linkHealth={linkHealth}
                                 ignoredUrls={ignoredUrls}
                                 toggleIgnoreUrl={toggleIgnoreUrl}
@@ -219,6 +246,7 @@ const FolderNode = ({
                             toggleSelection={toggleSelection}
                             onPreview={onPreview}
                             onEdit={onEdit}
+                            onMergeDuplicate={onMergeDuplicate}
                             linkHealth={linkHealth}
                             ignoredUrls={ignoredUrls}
                             toggleIgnoreUrl={toggleIgnoreUrl}
@@ -239,7 +267,8 @@ export function BookmarkTree({
     ignoredUrls,
     toggleIgnoreUrl,
     onPreview,
-    onEdit
+    onEdit,
+    onMergeDuplicate
 }) {
     const { t } = useTranslation()
 
@@ -337,6 +366,7 @@ export function BookmarkTree({
                         toggleSelection={toggleSelection}
                         onPreview={onPreview}
                         onEdit={onEdit}
+                        onMergeDuplicate={onMergeDuplicate}
                         linkHealth={linkHealth}
                         ignoredUrls={ignoredUrls}
                         toggleIgnoreUrl={toggleIgnoreUrl}
@@ -359,6 +389,7 @@ export function BookmarkTree({
                             toggleSelection={toggleSelection}
                             onPreview={onPreview}
                             onEdit={onEdit}
+                            onMergeDuplicate={onMergeDuplicate}
                             linkHealth={linkHealth}
                             ignoredUrls={ignoredUrls}
                             toggleIgnoreUrl={toggleIgnoreUrl}

@@ -12,7 +12,8 @@ import {
     Loader2,
     Eye,
     EyeOff,
-    Search
+    Search,
+    BookOpen
 } from 'lucide-react';
 import { SimpleModal } from '../ui/SimpleModal';
 import { Button } from '../ui/button';
@@ -395,6 +396,21 @@ export function RssReaderModal({ isOpen, onClose }) {
                                                     title={isRead ? t('rss.markUnread', 'Okunmadı Yap') : t('rss.markRead', 'Okundu Yap')}
                                                 >
                                                     {isRead ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                </Button>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-7 w-7 text-primary/80 hover:text-primary hover:bg-primary/10 cursor-pointer"
+                                                    onClick={() => {
+                                                        if (!isRead && item.id) {
+                                                            markFeedItemRead(item.id, 1);
+                                                        }
+                                                        useAppStore.getState().openReaderMode({ id: item.id, title: item.title, url: item.link });
+                                                    }}
+                                                    title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                                >
+                                                    <BookOpen className="w-3.5 h-3.5" />
                                                 </Button>
 
                                                 <Button

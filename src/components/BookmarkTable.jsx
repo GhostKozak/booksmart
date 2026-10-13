@@ -9,7 +9,7 @@ import { BookmarkCollections } from './bookmark/BookmarkCollections'
 import { BookmarkFolderBadge } from './bookmark/BookmarkFolderBadge'
 import { LinkTooltip } from './bookmark/LinkTooltip'
 import { Button } from './ui/button'
-import { Pencil, Eye, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Pencil, Eye, ArrowUpDown, ArrowUp, ArrowDown, BookOpen, GitMerge } from 'lucide-react'
 import { cn, getRelativeTime } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
@@ -24,6 +24,7 @@ export function BookmarkTable({
     toggleIgnoreUrl,
     onPreview,
     onEdit,
+    onMergeDuplicate,
     availableFolders = [],
     availableTags = [],
     allCollections = [],
@@ -117,7 +118,7 @@ export function BookmarkTable({
                             <th className="w-[70px] px-3 py-3 font-semibold text-xs uppercase text-muted-foreground tracking-wider text-center">
                                 {t('bookmarks.columns.health')}
                             </th>
-                            <th className="w-[85px] px-3 py-3 font-semibold text-xs uppercase text-muted-foreground tracking-wider text-center">
+                            <th className="w-[130px] px-3 py-3 font-semibold text-xs uppercase text-muted-foreground tracking-wider text-center">
                                 {t('common.actions') || 'Actions'}
                             </th>
                         </tr>
@@ -207,23 +208,47 @@ export function BookmarkTable({
                                 {/* Actions */}
                                 <td className="px-3 py-2 align-middle text-center">
                                     <div className="flex items-center justify-center gap-0.5">
+                                        {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="w-7 h-7 text-primary hover:bg-primary/10 cursor-pointer"
+                                                onClick={() => onMergeDuplicate(bookmark)}
+                                                title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                                                aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
+                                            >
+                                                <GitMerge className="w-3.5 h-3.5" />
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="w-7 h-7 hover:bg-primary/10 hover:text-primary"
+                                            className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                                             onClick={() => onEdit?.(bookmark)}
                                             title={t('common.edit')}
+                                            aria-label={t('common.edit')}
                                         >
                                             <Pencil className="w-3.5 h-3.5" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="w-7 h-7 hover:bg-primary/10 hover:text-primary"
+                                            className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                                             onClick={() => onPreview(bookmark)}
                                             title={t('preview.open')}
+                                            aria-label={t('preview.open')}
                                         >
                                             <Eye className="w-3.5 h-3.5" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
+                                            onClick={() => useAppStore.getState().openReaderMode(bookmark)}
+                                            title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                            aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                        >
+                                            <BookOpen className="w-3.5 h-3.5" />
                                         </Button>
                                     </div>
                                 </td>
