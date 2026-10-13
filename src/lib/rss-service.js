@@ -429,16 +429,17 @@ export function getCandidateFeedUrls(siteUrl) {
         if (pathname && pathname !== '/') {
             candidates.push(`${origin}${pathname}/feed/`);
             candidates.push(`${origin}${pathname}/feed`);
+            candidates.push(`${origin}${pathname}/rss`);
             candidates.push(`${origin}${pathname}/rss.xml`);
             candidates.push(`${origin}${pathname}/atom.xml`);
         }
-        candidates.push(`${origin}/feed/`);
         candidates.push(`${origin}/feed`);
+        candidates.push(`${origin}/rss`);
+        candidates.push(`${origin}/feed/`);
         candidates.push(`${origin}/rss.xml`);
         candidates.push(`${origin}/atom.xml`);
         candidates.push(`${origin}/index.xml`);
         candidates.push(`${origin}/feed.json`);
-        candidates.push(`${origin}/rss`);
 
         return Array.from(new Set(candidates));
     } catch {
@@ -463,7 +464,26 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
         }
     }
 
-    // 2. Direct fetch (many feeds have CORS headers enabled e.g. Substack, GitHub)
+    // 2. Local dev server proxy (available when running BookSmart locally on Vite)
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            const devProxyUrl = `/booksmart/api/feed-proxy?url=${encodeURIComponent(normalizedUrl)}`;
+            const res = await fetch(devProxyUrl, { signal: controller.signal });
+            clearTimeout(timer);
+            if (res.ok) {
+                const text = await res.text();
+                if (text && text.trim().length > 0) {
+                    return text;
+                }
+            }
+        } catch {
+            // Local dev proxy unavailable or failed, fall through to direct/public proxies
+        }
+    }
+
+    // 3. Direct fetch (many feeds have CORS headers enabled e.g. Substack, GitHub)
     try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -482,30 +502,39 @@ export async function fetchFeedXmlRaw(url, timeoutMs = 9000) {
         // Direct fetch blocked by CORS or network error
     }
 
-    // 3. Configured CORS Proxy or fallback proxy pool
+    // 4. Configured CORS Proxy or fallback proxy pool
     const userProxy = getStoredCorsProxy();
     const proxyEndpoints = [];
     if (userProxy) {
         const cleanProxy = userProxy.replace(/\/+$/, '');
-        proxyEndpoints.push(`${cleanProxy}/${normalizedUrl}`);
-        proxyEndpoints.push(`${cleanProxy}/${encodeURIComponent(normalizedUrl)}`);
+        proxyEndpoints.push({ url: `${cleanProxy}/${normalizedUrl}`, type: 'raw' });
+        proxyEndpoints.push({ url: `${cleanProxy}/${encodeURIComponent(normalizedUrl)}`, type: 'raw' });
     }
-    // Correct corsproxy.io syntax (https://corsproxy.io/?<url>)
-    proxyEndpoints.push(`https://corsproxy.io/?${encodeURIComponent(normalizedUrl)}`);
-    proxyEndpoints.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`);
-    proxyEndpoints.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(normalizedUrl)}`);
+
+    // Resilient public proxies pool
+    proxyEndpoints.push({ url: `https://api.allorigins.win/raw?url=${encodeURIComponent(normalizedUrl)}`, type: 'raw' });
+    proxyEndpoints.push({ url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(normalizedUrl)}`, type: 'raw' });
+    proxyEndpoints.push({ url: `https://api.allorigins.win/get?url=${encodeURIComponent(normalizedUrl)}`, type: 'json' });
+    proxyEndpoints.push({ url: `https://corsproxy.io/?${encodeURIComponent(normalizedUrl)}`, type: 'raw' });
 
     let lastError = null;
     for (const endpoint of proxyEndpoints) {
         try {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
-            const res = await fetch(endpoint, { signal: controller.signal });
+            const res = await fetch(endpoint.url, { signal: controller.signal });
             clearTimeout(timer);
             if (res.ok) {
-                const text = await res.text();
-                if (text && text.trim().length > 0) {
-                    return text;
+                if (endpoint.type === 'json') {
+                    const data = await res.json();
+                    if (data && typeof data.contents === 'string' && data.contents.trim().length > 0) {
+                        return data.contents;
+                    }
+                } else {
+                    const text = await res.text();
+                    if (text && text.trim().length > 0) {
+                        return text;
+                    }
                 }
             }
         } catch (err) {
@@ -559,7 +588,7 @@ export async function discoverFeed(siteUrl) {
             try {
                 const result = await Promise.any(
                     batch.map(async (candidate) => {
-                        const candidateXml = await fetchFeedXmlRaw(candidate, 3500);
+                        const candidateXml = await fetchFeedXmlRaw(candidate, 5000);
                         const parsed = parseFeedXml(candidateXml, candidate);
                         if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
                             return { feedUrl: candidate, parsed };

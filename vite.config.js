@@ -4,6 +4,60 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+function rssDevProxyPlugin() {
+  return {
+    name: 'rss-feed-dev-proxy',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url || (!req.url.startsWith('/api/feed-proxy') && !req.url.startsWith('/booksmart/api/feed-proxy'))) {
+          return next();
+        }
+
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 204;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', '*');
+          res.end();
+          return;
+        }
+
+        try {
+          const parsedUrl = new URL(req.url, 'http://localhost:5173');
+          const targetUrl = parsedUrl.searchParams.get('url');
+          if (!targetUrl) {
+            res.statusCode = 400;
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Missing target URL' }));
+            return;
+          }
+
+          const decodedUrl = decodeURIComponent(targetUrl);
+          const response = await fetch(decodedUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+              'Accept': 'application/rss+xml, application/atom+xml, application/feed+json, application/xml, text/xml, text/html, */*',
+              'Accept-Language': 'en-US,en;q=0.9'
+            }
+          });
+
+          res.statusCode = response.status;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Content-Type', response.headers.get('content-type') || 'text/xml; charset=utf-8');
+          const body = await response.text();
+          res.end(body);
+        } catch (err) {
+          res.statusCode = 502;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+    }
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   test: {
@@ -15,6 +69,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    rssDevProxyPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.svg', 'icons/*.png', 'screenshots/*.png'],

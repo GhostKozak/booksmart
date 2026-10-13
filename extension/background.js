@@ -272,7 +272,8 @@ async function fetchFeedXml(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
         const res = await fetch(cleanUrl, {
             method: 'GET',
             headers: {
-                'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*'
+                'Accept': 'application/rss+xml, application/atom+xml, application/feed+json, application/xml, text/xml, text/html, */*',
+                'Accept-Language': 'en-US,en;q=0.9'
             },
             redirect: 'follow',
             signal: controller.signal
