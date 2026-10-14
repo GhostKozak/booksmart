@@ -2,7 +2,7 @@
  * BookSmart - Copyright (C) 2026 BookSmart Contributors
  * Licensed under the GNU GPLv3 or later.
  */
-import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useUndoRedo } from './hooks/use-undo-redo'
 import { useTaxonomy } from './hooks/use-taxonomy'
 import { useAppActions } from './hooks/use-app-actions'
@@ -34,25 +34,8 @@ import { MainContent } from './components/layout/MainContent'
 import { FloatingActionBar } from './components/FloatingActionBar'
 import { ConflictNotificationBar } from './components/ConflictNotificationBar'
 
-// Lazy loaded components
-const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })))
-const ExportModal = lazy(() => import('./components/modals/ExportModal').then(m => ({ default: m.ExportModal })))
-const RuleModal = lazy(() => import('./components/modals/RuleModal').then(m => ({ default: m.RuleModal })))
-const RuleConflictModal = lazy(() => import('./components/modals/RuleConflictModal').then(m => ({ default: m.RuleConflictModal })))
-const ClearAllModal = lazy(() => import('./components/modals/ClearAllModal').then(m => ({ default: m.ClearAllModal })))
-const ShortcutsModal = lazy(() => import('./components/modals/ShortcutsModal').then(m => ({ default: m.ShortcutsModal })))
-const CommandPalette = lazy(() => import('./components/modals/CommandPalette').then(m => ({ default: m.CommandPalette })))
-const SortConfirmationModal = lazy(() => import('./components/modals/SortConfirmationModal').then(m => ({ default: m.SortConfirmationModal })))
-const CollectionModal = lazy(() => import('./components/modals/CollectionModal').then(m => ({ default: m.CollectionModal })))
-const EditBookmarkModal = lazy(() => import('./components/EditBookmarkModal').then(m => ({ default: m.EditBookmarkModal })))
-const AICostModal = lazy(() => import('./components/modals/AICostModal').then(m => ({ default: m.AICostModal })))
-const ExtensionGuideModal = lazy(() => import('./components/modals/ExtensionGuideModal').then(m => ({ default: m.ExtensionGuideModal })))
-const RssReaderModal = lazy(() => import('./components/modals/RssReaderModal').then(m => ({ default: m.RssReaderModal })))
-const ReaderViewModal = lazy(() => import('./components/modals/ReaderViewModal').then(m => ({ default: m.ReaderViewModal })))
-const QrCodeModal = lazy(() => import('./components/modals/QrCodeModal').then(m => ({ default: m.QrCodeModal })))
-const ReminderModal = lazy(() => import('./components/modals/ReminderModal').then(m => ({ default: m.ReminderModal })))
-const ShareCollectionModal = lazy(() => import('./components/modals/ShareCollectionModal').then(m => ({ default: m.ShareCollectionModal })))
-const SnapshotViewerModal = lazy(() => import('./components/modals/SnapshotViewerModal').then(m => ({ default: m.SnapshotViewerModal })))
+// Modal Container
+import { AppModalContainer } from './components/modals/AppModalContainer'
 import { ExtensionPromptBanner } from './components/modals/ExtensionPromptBanner'
 
 // PWA Components
@@ -61,7 +44,7 @@ import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
-import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from './lib/key-vault'
+import { getEffectiveApiKey, getStoredProvider, isVaultUnlocked, hasVault } from './lib/key-vault'
 import { batchEnrichBookmarks } from './lib/metadata-fetcher'
 
 const EMPTY_ARRAY = []
@@ -75,21 +58,14 @@ function App() {
     isSidebarOpen, setIsSidebarOpen,
     searchQuery, searchMode, activeTag, activeFolder, smartFilter,
     dateFilter, sortBy, activeCollection, resolvedTheme, initTheme,
-    settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen, openSettings,
     isConflictModalOpen, setIsConflictModalOpen,
-    showBackupModal, setShowBackupModal,
-    isShortcutsOpen, setIsShortcutsOpen,
-    isCommandPaletteOpen, setIsCommandPaletteOpen,
-    isCollectionModalOpen, setIsCollectionModalOpen, setEditingCollection, editingCollection,
-    editingBookmark, setEditingBookmark,
+    setIsShortcutsOpen,
+    setIsCommandPaletteOpen,
+    setIsCollectionModalOpen, setEditingCollection,
+    setEditingBookmark,
     previewBookmark, setPreviewBookmark,
-    isExtensionGuideOpen, setIsExtensionGuideOpen, openExtensionGuide,
-    isRssReaderOpen, setIsRssReaderOpen,
-    readerBookmark, openReaderMode, closeReaderMode,
-    qrModalBookmark, closeQrCode,
-    reminderModalBookmark, closeReminderModal,
-    shareHubCollection, closeShareHub,
-    snapshotModalBookmark, closeSnapshotViewer,
+    openExtensionGuide,
+    openReaderMode,
     showOnboarding
   } = useAppStore()
 
@@ -484,177 +460,28 @@ function App() {
           isEnrichingPreviews={isEnrichingPreviews}
         />
 
-        <Suspense fallback={null}>
-          {isCollectionModalOpen && (
-            <CollectionModal
-              isOpen={isCollectionModalOpen}
-              onClose={() => {
-                setIsCollectionModalOpen(false)
-                setEditingCollection(null)
-              }}
-              editingCollection={editingCollection}
-              onSave={async (data) => {
-                if (data.id) {
-                  await collectionsHook.updateCollection(data.id, {
-                    name: data.name,
-                    icon: data.icon,
-                    color: data.color
-                  })
-                } else {
-                  await collectionsHook.createCollection(data)
-                }
-              }}
-            />
-          )}
-
-          {editingBookmark && (
-            <EditBookmarkModal
-              isOpen={!!editingBookmark}
-              onClose={() => setEditingBookmark(null)}
-              bookmark={editingBookmark}
-              onSave={handleEditSave}
-              availableFolders={taxonomy.availableFolders}
-              availableTags={taxonomy.availableTags}
-            />
-          )}
-        </Suspense>
-
-        {/* Settings Modal */}
-        <Suspense fallback={null}>
-          {isSettingsOpen && (
-            <SettingsModal
-              isOpen={isSettingsOpen}
-              onClose={() => setIsSettingsOpen(false)}
-              activeTab={settingsTab}
-              onTabChange={setSettingsTab}
-              folders={taxonomy.availableFolders}
-              setFolders={taxonomy.setAvailableFolders}
-              tags={taxonomy.availableTags}
-              setTags={taxonomy.setAvailableTags}
-              discoveredFolders={taxonomy.discoveredFolders}
-              discoveredTags={taxonomy.discoveredTags}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={null}>
-          {showBackupModal && (
-            <ClearAllModal
-              isOpen={showBackupModal}
-              onClose={() => setShowBackupModal(false)}
-              onConfirm={actions.confirmClearAll}
-            />
-          )}
-
-          {isShortcutsOpen && (
-            <ShortcutsModal
-              isOpen={isShortcutsOpen}
-              onClose={() => setIsShortcutsOpen(false)}
-            />
-          )}
-
-          {isCommandPaletteOpen && (
-            <CommandPalette
-              isOpen={isCommandPaletteOpen}
-              onClose={() => setIsCommandPaletteOpen(false)}
-              setViewMode={useAppStore.getState().setViewMode}
-              toggleAll={useAppStore.getState().toggleAll}
-              bookmarks={worker.bookmarks}
-              selectedIds={selectedIds}
-              setSelectedIds={setSelectedIds}
-              handleBatchDelete={operations.handleBatchDelete}
-              undo={undo}
-              redo={redo}
-              canUndo={canUndo}
-              canRedo={canRedo}
-              mergeDuplicates={operations.mergeDuplicates}
-              removeDuplicates={operations.removeDuplicates}
-              duplicateCount={worker.duplicateCount}
-              cleanAllUrls={operations.cleanAllUrls}
-              cleanableCount={operations.cleanableCount}
-              checkAllLinks={worker.checkAllLinks}
-              isCheckingLinks={worker.isCheckingLinks}
-              openExportModal={() => actions.guardedExport(exporter.openExportModal)}
-              isExtensionConnected={worker.isExtensionConnected}
-              importFromBrowser={browserSync.importFromBrowser}
-              pushToBrowser={browserSync.pushToBrowser}
-              twoWaySync={browserSync.twoWaySync}
-              handleAutoCategorize={autoCategorize.handleAutoCategorize}
-              handleMagicSort={() => requestAIOperation('magicSort', handleMagicSort)}
-              handleFixTitles={() => requestAIOperation('fixTitles', aiTools.handleFixTitles)}
-              handleFindSmartDuplicates={() => requestAIOperation('smartDuplicates', aiTools.handleFindSmartDuplicates)}
-              setTheme={useAppStore.getState().setTheme}
-              setIsShortcutsOpen={setIsShortcutsOpen}
-              openSettings={openSettings}
-              clearAll={actions.clearAll}
-              loadDemoData={loadDemoData}
-              onEnrichPreviews={handleEnrichPreviews}
-            />
-          )}
-
-          {exporter.isExportModalOpen && (
-            <ExportModal
-              isOpen={exporter.isExportModalOpen}
-              onClose={() => exporter.setIsExportModalOpen(false)}
-              exportFormat={exporter.exportFormat}
-              setExportFormat={exporter.setExportFormat}
-              exportOnlySelected={exporter.exportOnlySelected}
-              selectedCount={selectedIds.size}
-              selectedFolder={exporter.selectedFolder}
-              setSelectedFolder={exporter.setSelectedFolder}
-              availableFolders={taxonomy.availableFolders}
-              dataToExport={exporter.dataToExport}
-              exportPayload={exporter.exportPayload}
-              onExport={exporter.performExport}
-            />
-          )}
-
-          {ruleManager.isRuleModalOpen && (
-            <RuleModal
-              isOpen={ruleManager.isRuleModalOpen}
-              onClose={ruleManager.cancelEditing}
-              editingRuleId={ruleManager.editingRuleId}
-              newRule={ruleManager.newRule}
-              setNewRule={ruleManager.setNewRule}
-              onSave={ruleManager.addRule}
-              availableFolders={taxonomy.availableFolders}
-              availableTags={taxonomy.availableTags}
-              discoveredFolders={taxonomy.discoveredFolders}
-              saveToTaxonomy={taxonomy.saveToTaxonomy}
-            />
-          )}
-
-          {isConflictModalOpen && worker.ruleConflicts.length > 0 && (
-            <RuleConflictModal
-              isOpen={isConflictModalOpen && worker.ruleConflicts.length > 0}
-              onClose={() => setIsConflictModalOpen(false)}
-              conflict={worker.ruleConflicts[0] || null}
-              availableFolders={taxonomy.availableFolders}
-              discoveredFolders={taxonomy.discoveredFolders}
-              onResolve={(id, folder) => {
-                worker.resolveConflict(id, folder)
-                if (worker.ruleConflicts.length <= 1) {
-                  setIsConflictModalOpen(false)
-                }
-              }}
-              onSkip={() => setIsConflictModalOpen(false)}
-            />
-          )}
-          {pendingAIOperation && (
-            <AICostModal
-              isOpen={!!pendingAIOperation}
-              onClose={() => setPendingAIOperation(null)}
-              operation={pendingAIOperation.operation}
-              bookmarks={pendingAIOperation.bookmarks}
-              currentModel={getStoredModel()}
-              onConfirm={(chosenModel) => {
-                const exec = pendingAIOperation.execute
-                setPendingAIOperation(null)
-                exec(chosenModel)
-              }}
-            />
-          )}
-        </Suspense>
+        <AppModalContainer
+          taxonomy={taxonomy}
+          worker={worker}
+          actions={actions}
+          operations={operations}
+          exporter={exporter}
+          ruleManager={ruleManager}
+          collectionsHook={collectionsHook}
+          browserSync={browserSync}
+          autoCategorize={autoCategorize}
+          aiTools={aiTools}
+          undoRedo={{ undo, redo, canUndo, canRedo }}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          pendingAIOperation={pendingAIOperation}
+          setPendingAIOperation={setPendingAIOperation}
+          requestAIOperation={requestAIOperation}
+          handleMagicSort={handleMagicSort}
+          handleEditSave={handleEditSave}
+          loadDemoData={loadDemoData}
+          handleEnrichPreviews={handleEnrichPreviews}
+        />
 
         {/* Non-intrusive conflict notification */}
         {worker.ruleConflicts.length > 0 && !isConflictModalOpen && selectedIds.size === 0 && (
@@ -664,17 +491,6 @@ function App() {
           />
         )}
 
-        <Suspense fallback={null}>
-          {!!actions.pendingSortUpdates && (
-            <SortConfirmationModal
-              isOpen={!!actions.pendingSortUpdates}
-              onClose={() => actions.setPendingSortUpdates(null)}
-              onConfirm={actions.applySortUpdates}
-              updates={actions.pendingSortUpdates || []}
-            />
-          )}
-        </Suspense>
-
         <OfflineIndicator />
         <PWAUpdatePrompt />
 
@@ -682,57 +498,6 @@ function App() {
           isExtensionConnected={worker.isExtensionConnected}
           onOpenGuide={openExtensionGuide}
         />
-
-        <Suspense fallback={null}>
-          {isExtensionGuideOpen && (
-            <ExtensionGuideModal
-              isOpen={isExtensionGuideOpen}
-              onClose={() => setIsExtensionGuideOpen(false)}
-              isConnected={worker.isExtensionConnected}
-            />
-          )}
-          {isRssReaderOpen && (
-            <RssReaderModal
-              isOpen={isRssReaderOpen}
-              onClose={() => setIsRssReaderOpen(false)}
-            />
-          )}
-          {!!readerBookmark && (
-            <ReaderViewModal
-              isOpen={!!readerBookmark}
-              bookmark={readerBookmark}
-              onClose={closeReaderMode}
-            />
-          )}
-          {!!qrModalBookmark && (
-            <QrCodeModal
-              isOpen={!!qrModalBookmark}
-              bookmark={qrModalBookmark}
-              onClose={closeQrCode}
-            />
-          )}
-          {!!reminderModalBookmark && (
-            <ReminderModal
-              isOpen={!!reminderModalBookmark}
-              bookmark={reminderModalBookmark}
-              onClose={closeReminderModal}
-            />
-          )}
-          {!!shareHubCollection && (
-            <ShareCollectionModal
-              isOpen={!!shareHubCollection}
-              collection={shareHubCollection}
-              onClose={closeShareHub}
-            />
-          )}
-          {!!snapshotModalBookmark && (
-            <SnapshotViewerModal
-              isOpen={!!snapshotModalBookmark}
-              bookmark={snapshotModalBookmark}
-              onClose={closeSnapshotViewer}
-            />
-          )}
-        </Suspense>
       </div>
       <Toaster position="bottom-right" richColors closeButton theme={resolvedTheme} />
     </div>
