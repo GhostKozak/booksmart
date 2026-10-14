@@ -3,19 +3,30 @@ import { SimpleModal } from './ui/SimpleModal'
 import { Input } from './ui/input'
 import { SimpleCombobox } from './ui/SimpleCombobox'
 import { Button } from './ui/button'
-import { X, Tag } from 'lucide-react'
+import { X, Tag, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '../lib/utils'
+import { cn, isHttpUrl } from '../lib/utils'
+import { fetchMetadataForUrl } from '../lib/metadata-fetcher'
+import { toast } from 'sonner'
+
+function normalizeTags(rawTags) {
+    if (Array.isArray(rawTags)) return rawTags;
+    if (typeof rawTags === 'string') {
+        return rawTags.split(',').map(t => t.trim()).filter(Boolean);
+    }
+    return [];
+}
 
 export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, availableFolders = [], availableTags = [] }) {
     const { t } = useTranslation()
-    const [title, setTitle] = useState('')
-    const [url, setUrl] = useState('')
-    const [note, setNote] = useState('')
-    const [folder, setFolder] = useState('')
-    const [tags, setTags] = useState([])
+    const [title, setTitle] = useState(bookmark?.title || '')
+    const [url, setUrl] = useState(bookmark?.url || '')
+    const [note, setNote] = useState(bookmark?.note || '')
+    const [folder, setFolder] = useState(bookmark?.newFolder || bookmark?.originalFolder || '')
+    const [tags, setTags] = useState(() => normalizeTags(bookmark?.tags))
     const [tagInput, setTagInput] = useState('')
     const [saving, setSaving] = useState(false)
+    const [isFetchingMeta, setIsFetchingMeta] = useState(false)
 
     const [prevSync, setPrevSync] = useState({ id: bookmark?.id, isOpen });
 
@@ -26,10 +37,35 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
             setUrl(bookmark.url || '');
             setNote(bookmark.note || '');
             setFolder(bookmark.newFolder || bookmark.originalFolder || '');
-            setTags(bookmark.tags || []);
+            setTags(normalizeTags(bookmark.tags));
             setTagInput('');
         }
     }
+
+    const handleAutoFetchMetadata = async () => {
+        const cleanUrl = (url || '').trim();
+        if (!cleanUrl || !isHttpUrl(cleanUrl)) {
+            toast.error(t('bookmarks.editModal.invalidUrl', 'Lütfen geçerli bir web bağlantısı (https://...) girin.'));
+            return;
+        }
+        setIsFetchingMeta(true);
+        try {
+            const meta = await fetchMetadataForUrl(cleanUrl, { forceRefresh: true });
+            if (meta) {
+                if (meta.title) setTitle(meta.title);
+                if (meta.description && !note) setNote(meta.description);
+                toast.success(t('bookmarks.editModal.metadataFetched', 'Sayfa bilgileri çekildi!'));
+            } else {
+                toast.info(t('bookmarks.editModal.noMetadata', 'Sayfa bilgisi bulunamadı.'));
+            }
+        } catch (err) {
+            console.error('Failed to auto-fetch metadata:', err);
+            toast.error(t('common.error', 'Bilgiler alınamadı'));
+        } finally {
+            setIsFetchingMeta(false);
+        }
+    };
+
 
     const handleAddTag = (tagName) => {
         const name = tagName.trim()
@@ -83,13 +119,26 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">URL</label>
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium">URL</label>
+                        <button
+                            type="button"
+                            onClick={handleAutoFetchMetadata}
+                            disabled={isFetchingMeta || !url.trim()}
+                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50 cursor-pointer"
+                            title={t('bookmarks.editModal.fetchFromUrl', 'Sayfadan başlık ve açıklamayı otomatik çek')}
+                        >
+                            <Sparkles className={cn("w-3.5 h-3.5", isFetchingMeta && "animate-spin text-amber-500")} />
+                            <span>{isFetchingMeta ? t('common.loading', 'Yükleniyor...') : t('bookmarks.editModal.fetchMetadata', 'Bilgileri URL\'den Çek')}</span>
+                        </button>
+                    </div>
                     <Input
                         value={url}
                         onChange={e => setUrl(e.target.value)}
                         placeholder="https://..."
                     />
                 </div>
+
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium">{t('sidebar.sections.folders')}</label>

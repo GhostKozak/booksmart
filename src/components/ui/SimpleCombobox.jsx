@@ -15,7 +15,7 @@ export function SimpleCombobox({
 }) {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(value || '');
     const containerRef = useRef(null);
     const inputRef = useRef(null);
 

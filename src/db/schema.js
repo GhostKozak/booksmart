@@ -64,3 +64,17 @@ db.version(7).stores({
     readerArticles: 'url, bookmarkId, title, readingTimeMinutes, wordCount, savedAt'
 });
 
+db.version(8).stores({
+    bookmarks: '++id, url, title, originalFolder, newFolder, *tags, *ruleTags, addDate, *collections, feedUrl, readingTimeMinutes, reminderAt',
+    folders: 'id, name, order',
+    tags: 'id, name, order',
+    rules: 'id, type, value, targetFolder, *tags',
+    ignoredUrls: 'url',
+    collections: 'id, name, order',
+    previews: 'url, updatedAt',
+    feeds: 'feedUrl, bookmarkId, title, siteUrl, lastChecked',
+    feedItems: '++id, feedUrl, bookmarkId, link, pubDate, read',
+    readerArticles: 'url, bookmarkId, title, readingTimeMinutes, wordCount, savedAt'
+});
+
+

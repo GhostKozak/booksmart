@@ -90,6 +90,7 @@
             "collections": "Collections"
         },
         "smartFilters": {
+            "reminders": "Reminders",
             "duplicates": "Duplicates",
             "deadLinks": "Dead Links",
             "longUrls": "Long URLs (200+)",
@@ -607,8 +608,14 @@
             "titlePlaceholder": "Bookmark title",
             "folderPlaceholder": "Select or type a folder",
             "tagsPlaceholder": "Type tag and press Enter",
+            "fetchMetadata": "Fetch Info from URL",
+            "fetchFromUrl": "Auto-fetch title and description from page",
+            "invalidUrl": "Please enter a valid web URL (https://...).",
+            "metadataFetched": "Page info fetched successfully!",
+            "noMetadata": "No metadata found for page.",
             "undoDesc": "Edit \"{{title}}\""
         },
+
         "tree": {
             "expandAll": "Expand All",
             "collapseAll": "Collapse All"
@@ -710,8 +717,27 @@
             "markdown": "Copy as Markdown",
             "text": "Copy as Text",
             "copied": "{{count}} bookmarks copied to clipboard",
+            "copiedMarkdown": "Markdown list copied to clipboard!",
             "empty": "This collection is empty",
             "footer": "{{count}} bookmarks shared via BookSmart"
+        },
+        "hub": {
+            "modalTitle": "Public Link Hub & Bento Portfolio",
+            "layoutStyle": "Layout Style",
+            "accentColor": "Accent Color",
+            "customColor": "Custom Color",
+            "bioLabel": "Description / Bio",
+            "bioPlaceholder": "e.g. 50 curated resources for developers and designers",
+            "authorLabel": "Curator / Author (Optional)",
+            "openLivePreview": "Open Live Preview",
+            "downloadHtml": "Download HTML (index.html)",
+            "downloadSuccess": "Downloaded as \"index.html\"! Ready for GitHub Pages.",
+            "copiedHtml": "HTML source code copied to clipboard!",
+            "copyHtmlCode": "Copy HTML Source Code",
+            "livePreviewTitle": "Live Preview",
+            "githubGuideTitle": "How to Host Free on GitHub Pages (1 Minute)",
+            "shareAsHub": "Share as Bento / Linktree Hub",
+            "menuItem": "Web Page (Bento / Hub)"
         }
     },
     "onboarding": {
@@ -859,5 +885,42 @@
         "words": "words",
         "readingTimeMinutes": "{{count}} min read",
         "minShort": "min"
+    },
+    "qr": {
+        "title": "Share via QR Code to Mobile",
+        "modalTitle": "Share via QR Code",
+        "scanTip": "Open your phone camera to scan this QR code.",
+        "downloadPng": "Download PNG",
+        "copiedLink": "Link copied to clipboard!",
+        "downloadedSuccess": "QR code image downloaded!"
+    },
+    "reminders": {
+        "setReminder": "Remind Me Later",
+        "modalTitle": "Remind Me Later",
+        "activeAlarm": "Active Alarm:",
+        "remove": "Remove",
+        "quickPresets": "Quick Presets",
+        "customDateTime": "Custom Date & Time",
+        "enablePush": "Enable desktop notifications for reminders?",
+        "allow": "Allow",
+        "permissionGranted": "Notification permission granted!",
+        "savedSuccess": "Reminder scheduled!",
+        "removedSuccess": "Reminder removed.",
+        "overdue": "Overdue",
+        "inMinutes": "in {{count}}m",
+        "inHours": "in {{count}}h",
+        "tomorrow": "Tomorrow",
+        "inDays": "in {{count}}d",
+        "notificationTitle": "Reading Reminder",
+        "openNow": "Open",
+        "snooze1Day": "Snooze 1 Day",
+        "snoozedSuccess": "Snoozed for 1 day",
+        "presets": {
+            "tomorrow": "Tomorrow (09:00)",
+            "in3days": "In 3 Days",
+            "weekend": "Read This Weekend (Sat 10:00)",
+            "nextweek": "Next Week (Mon 09:00)"
+        }
     }
 }
+

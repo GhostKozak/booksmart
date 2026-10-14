@@ -1,4 +1,4 @@
-import { Upload, Folder, Search, CloudDownload } from 'lucide-react'
+import { Upload, Folder, Search, CloudDownload, Sparkles } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { BookmarkList } from '../BookmarkList'
@@ -49,8 +49,10 @@ export function MainContent({
         viewMode, setViewMode, showThumbnails,
         selectedIds, toggleSelection, toggleAll,
         smartFilter, setSmartFilter,
-        setSearchQuery, setActiveTag, setActiveFolder
+        setSearchQuery, setActiveTag, setActiveFolder,
+        activeCollection
     } = useAppStore()
+
     const showOnboarding = useAppStore(state => state.showOnboarding)
     const setOnboardingComplete = useAppStore(state => state.setOnboardingComplete)
 
@@ -188,6 +190,46 @@ export function MainContent({
                         )}
                     </div>
                 </div>
+
+                {(() => {
+                    const currentCollection = activeCollection ? allCollections?.find(c => c.id === activeCollection) : null;
+                    if (!currentCollection) return null;
+
+                    return (
+                        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border bg-card/60 backdrop-blur-sm shadow-xs animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className="text-2xl w-10 h-10 flex items-center justify-center rounded-xl shadow-xs"
+                                    style={{ backgroundColor: `${currentCollection.color || '#6366f1'}20` }}
+                                >
+                                    {currentCollection.icon || '📚'}
+                                </span>
+                                <div>
+                                    <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">
+                                        {currentCollection.name}
+                                        <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                            {displayBookmarks.length} {t('common.bookmarks', 'Yer İmi')}
+                                        </span>
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => useAppStore.getState().openShareHub(currentCollection)}
+                                    className="gap-2 text-xs h-8 border-primary/30 hover:bg-primary/10 hover:border-primary text-primary font-medium cursor-pointer"
+                                >
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                    <span>{t('collections.hub.shareAsHub', 'Bento / Linktree Hub Olarak Paylaş')}</span>
+                                </Button>
+                            </div>
+                        </div>
+                    );
+                })()}
+
 
                 {viewMode === 'analytics' ? (
                     <AnalyticsDashboard

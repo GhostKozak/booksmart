@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Library, Plus, ChevronRight, ChevronDown, MoreHorizontal, Pencil, Trash2, Share2 } from 'lucide-react'
+import { Library, Plus, ChevronRight, ChevronDown, MoreHorizontal, Pencil, Trash2, Share2, Sparkles } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
@@ -123,6 +123,16 @@ export function SidebarCollections({
                                         >
                                             <Pencil className="h-3 w-3" />
                                             {t('common.edit')}
+                                        </button>
+                                        <button
+                                            className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded-md hover:bg-accent text-primary font-medium transition-colors cursor-pointer"
+                                            onClick={() => {
+                                                useAppStore.getState().openShareHub(collection)
+                                                setContextMenu(null)
+                                            }}
+                                        >
+                                            <Sparkles className="h-3 w-3 text-amber-500" />
+                                            {t('collections.hub.menuItem', 'Web Sayfası (Bento / Hub)')}
                                         </button>
                                         <button
                                             className="flex items-center gap-2 w-full px-3 py-1.5 text-xs rounded-md hover:bg-accent transition-colors"

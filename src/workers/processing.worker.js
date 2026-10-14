@@ -212,7 +212,10 @@ const processData = ({
         filtered = filtered.filter(b => domainMatch(b.url, SHOPPING_DOMAINS));
     } else if (smartFilter === 'news') {
         filtered = filtered.filter(b => domainMatch(b.url, NEWS_DOMAINS));
+    } else if (smartFilter === 'reminders') {
+        filtered = filtered.filter(b => b.reminderAt && Number(b.reminderAt) > 0);
     }
+
 
     // 6. Collection Filter
     if (activeCollection) {
@@ -402,7 +405,7 @@ const processData = ({
     const foldersMap = new Map();
     const seenUrls = new Set();
     const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-    let old = 0, http = 0, untitled = 0, docs = 0, longurl = 0, media = 0, social = 0, shopping = 0, news = 0, duplicateCount = 0;
+    let old = 0, http = 0, untitled = 0, docs = 0, longurl = 0, media = 0, social = 0, shopping = 0, news = 0, reminders = 0, duplicateCount = 0;
 
     bookmarks.forEach(b => {
         // Tags
@@ -437,6 +440,7 @@ const processData = ({
         if (domainMatch(b.url, SOCIAL_DOMAINS)) social++;
         if (domainMatch(b.url, SHOPPING_DOMAINS)) shopping++;
         if (domainMatch(b.url, NEWS_DOMAINS)) news++;
+        if (b.reminderAt && Number(b.reminderAt) > 0) reminders++;
         // Duplicate count
         const normalized = normalizeUrl(b.url);
         if (seenUrls.has(normalized)) {
@@ -454,7 +458,7 @@ const processData = ({
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
-    const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news };
+    const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news, reminders };
 
     return {
         processedBookmarks: processed,

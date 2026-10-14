@@ -7,9 +7,10 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss, BookOpen } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
+import { ReminderBadge } from './ReminderBadge'
 
 export function BookmarkRowMobile({
     bookmark,
@@ -60,6 +61,12 @@ export function BookmarkRowMobile({
                                 <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
                             </span>
                         )}
+                        {bookmark.reminderAt && (
+                            <ReminderBadge
+                                reminderAt={bookmark.reminderAt}
+                                onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                            />
+                        )}
 
                         <div className="flex items-center gap-1 shrink-0">
                             <Button
@@ -91,6 +98,29 @@ export function BookmarkRowMobile({
                                 aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
                             >
                                 <BookOpen className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-7 h-7 text-muted-foreground hover:text-primary"
+                                onClick={() => useAppStore.getState().openQrCode(bookmark)}
+                                title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                            >
+                                <QrCode className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                    "w-7 h-7 transition-colors",
+                                    bookmark.reminderAt ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground hover:text-primary"
+                                )}
+                                onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                                title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                            >
+                                <Bell className="w-3.5 h-3.5" />
                             </Button>
                             {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
                                 <Button

@@ -24,7 +24,7 @@ export function useBookmarkWorker({
     const [bookmarks, setBookmarks] = useState([])
     const [uniqueTags, setUniqueTags] = useState([])
     const [uniqueFolders, setUniqueFolders] = useState([])
-    const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0, longurl: 0, media: 0, social: 0, shopping: 0, news: 0 })
+    const [smartCounts, setSmartCounts] = useState({ old: 0, http: 0, untitled: 0, docs: 0, longurl: 0, media: 0, social: 0, shopping: 0, news: 0, reminders: 0 })
     const [duplicateCount, setDuplicateCount] = useState(0)
     const [linkHealth, setLinkHealth] = useState({})
     const [isCheckingLinks, setIsCheckingLinks] = useState(false)

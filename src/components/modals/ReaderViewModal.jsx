@@ -13,13 +13,16 @@ import {
     Plus,
     Loader2,
     Share2,
-    BookmarkCheck
+    BookmarkCheck,
+    QrCode,
+    Bell
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Favicon } from '../Favicon';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../../db/schema';
+import { useAppStore } from '../../store/useAppStore';
 import {
     fetchAndExtractArticle,
     getReaderPreferences,
@@ -340,6 +343,29 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
                             title={t('reader.copyText', 'Metni Kopyala')}
                         >
                             {hasCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => useAppStore.getState().openQrCode(bookmark)}
+                            className="h-8 w-8 cursor-pointer text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
+                            title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                        >
+                            <QrCode className="w-3.5 h-3.5" />
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                            className={cn(
+                                "h-8 w-8 cursor-pointer",
+                                bookmark?.reminderAt ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground hover:text-foreground"
+                            )}
+                            title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                        >
+                            <Bell className="w-3.5 h-3.5" />
                         </Button>
 
                         {bookmark?.url && (

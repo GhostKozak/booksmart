@@ -7,10 +7,11 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss, BookOpen } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
+import { ReminderBadge } from './ReminderBadge'
 
 export function BookmarkRowDesktop({
     bookmark,
@@ -62,6 +63,12 @@ export function BookmarkRowDesktop({
                                 <BookOpen className="w-2.5 h-2.5" />
                                 <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
                             </span>
+                        )}
+                        {bookmark.reminderAt && (
+                            <ReminderBadge
+                                reminderAt={bookmark.reminderAt}
+                                onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                            />
                         )}
                     </div>
                     {!compact && (
@@ -212,6 +219,29 @@ export function BookmarkRowDesktop({
                     aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
                 >
                     <BookOpen className="w-4 h-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-primary/10 w-8 h-8 hover:text-primary transition-colors"
+                    onClick={() => useAppStore.getState().openQrCode(bookmark)}
+                    title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                    aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                >
+                    <QrCode className="w-4 h-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "hover:bg-primary/10 w-8 h-8 transition-colors",
+                        bookmark.reminderAt ? "text-amber-500 hover:text-amber-600" : "hover:text-primary"
+                    )}
+                    onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                    title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                    aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                >
+                    <Bell className="w-4 h-4" />
                 </Button>
             </div>
         </div>

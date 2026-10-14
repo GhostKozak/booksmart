@@ -4,12 +4,13 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss, BookOpen } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss, BookOpen, QrCode, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
 import { BookmarkTags } from './bookmark/BookmarkTags';
 import { BookmarkCollections } from './bookmark/BookmarkCollections';
+import { ReminderBadge } from './bookmark/ReminderBadge';
 import { useBookmarkPreview } from '../lib/metadata-fetcher';
 import { useAppStore } from '../store/useAppStore';
 
@@ -132,6 +133,35 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                             >
                                 <BookOpen className="w-3.5 h-3.5" />
                             </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openQrCode(bookmark);
+                                }}
+                                title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                            >
+                                <QrCode className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className={cn(
+                                    "bg-background/80 shadow-sm backdrop-blur-sm w-6 h-6 transition-all",
+                                    bookmark.reminderAt ? "text-amber-500 hover:text-amber-600 bg-amber-500/20" : "hover:bg-primary hover:text-primary-foreground"
+                                )}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openReminderModal(bookmark);
+                                }}
+                                title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                            >
+                                <Bell className="w-3.5 h-3.5" />
+                            </Button>
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => context.toggleSelection(bookmark.id)}
@@ -165,6 +195,12 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                             <BookOpen className="w-2.5 h-2.5" />
                                             <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
                                         </span>
+                                    )}
+                                    {bookmark.reminderAt && (
+                                        <ReminderBadge
+                                            reminderAt={bookmark.reminderAt}
+                                            onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                                        />
                                     )}
                                 </div>
                                 <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">
@@ -212,6 +248,35 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                     aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
                                 >
                                     <BookOpen className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openQrCode(bookmark);
+                                    }}
+                                    title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                    aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                >
+                                    <QrCode className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                        "w-6 h-6 transition-colors",
+                                        bookmark.reminderAt ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground hover:text-primary"
+                                    )}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openReminderModal(bookmark);
+                                    }}
+                                    title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                    aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                >
+                                    <Bell className="w-3.5 h-3.5" />
                                 </Button>
                                 <Checkbox
                                     checked={isSelected}

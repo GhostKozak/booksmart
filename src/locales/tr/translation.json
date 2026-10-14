@@ -90,6 +90,7 @@
             "collections": "Koleksiyonlar"
         },
         "smartFilters": {
+            "reminders": "Hatırlatıcılar",
             "duplicates": "Yinelenenler",
             "deadLinks": "Ölü Linkler",
             "longUrls": "Uzun URL'ler (200+)",
@@ -607,8 +608,14 @@
             "titlePlaceholder": "Yer imi başlığı",
             "folderPlaceholder": "Klasör seçin veya yazın",
             "tagsPlaceholder": "Etiket yazıp Enter'a basın",
+            "fetchMetadata": "Bilgileri URL'den Çek",
+            "fetchFromUrl": "Sayfadan başlık ve açıklamayı otomatik çek",
+            "invalidUrl": "Lütfen geçerli bir web bağlantısı (https://...) girin.",
+            "metadataFetched": "Sayfa bilgileri çekildi!",
+            "noMetadata": "Sayfa bilgisi bulunamadı.",
             "undoDesc": "\"{{title}}\" düzenlendi"
         },
+
         "tree": {
             "expandAll": "Tümünü Aç",
             "collapseAll": "Tümünü Kapat"
@@ -710,8 +717,27 @@
             "markdown": "Markdown Olarak Kopyala",
             "text": "Metin Olarak Kopyala",
             "copied": "{{count}} yer imi panoya kopyalandı",
+            "copiedMarkdown": "Markdown listesi panoya kopyalandı!",
             "empty": "Bu koleksiyon boş",
             "footer": "{{count}} yer imi BookSmart ile paylaşıldı"
+        },
+        "hub": {
+            "modalTitle": "Koleksiyon Paylaşım Sayfası (Public Link Hub / Bento)",
+            "layoutStyle": "Görünüm Tasarımı",
+            "accentColor": "Vurgu Rengi",
+            "customColor": "Özel Renk",
+            "bioLabel": "Başlık Açıklaması / Bio",
+            "bioPlaceholder": "Örn: Yazılımcılar ve tasarımcılar için 50 faydalı kaynak",
+            "authorLabel": "Yazar / İsim (İsteğe bağlı)",
+            "openLivePreview": "Yeni Sekmede Canlı Aç",
+            "downloadHtml": "HTML İndir (index.html)",
+            "downloadSuccess": "\"index.html\" olarak indirildi! GitHub Pages için hazır.",
+            "copiedHtml": "HTML kodu panoya kopyalandı!",
+            "copyHtmlCode": "Tüm HTML Kodunu Kopyala",
+            "livePreviewTitle": "Canlı Önizleme",
+            "githubGuideTitle": "GitHub Pages ile Ücretsiz Nasıl Yayınlanır? (1 Dakika)",
+            "shareAsHub": "Bento / Linktree Hub Olarak Paylaş",
+            "menuItem": "Web Sayfası (Bento / Hub)"
         }
     },
     "onboarding": {
@@ -859,5 +885,42 @@
         "words": "kelime",
         "readingTimeMinutes": "{{count}} dk okuma",
         "minShort": "dk"
+    },
+    "qr": {
+        "title": "QR Kod ile Telefona Aktar",
+        "modalTitle": "Telefona Aktar (QR Kod)",
+        "scanTip": "Telefonunuzun kamerasını açarak QR kodu tarayın.",
+        "downloadPng": "PNG Olarak İndir",
+        "copiedLink": "Bağlantı panoya kopyalandı!",
+        "downloadedSuccess": "QR kod görseli indirildi!"
+    },
+    "reminders": {
+        "setReminder": "Daha Sonra Hatırlat",
+        "modalTitle": "Daha Sonra Hatırlat",
+        "activeAlarm": "Kurulu Alarm:",
+        "remove": "Kaldır",
+        "quickPresets": "Hızlı Seçenekler",
+        "customDateTime": "Özel Tarih ve Saat",
+        "enablePush": "Masaüstü bildirimlerini açmak ister misiniz?",
+        "allow": "İzin Ver",
+        "permissionGranted": "Bildirim izni verildi!",
+        "savedSuccess": "Hatırlatıcı kuruldu!",
+        "removedSuccess": "Hatırlatıcı kaldırıldı.",
+        "overdue": "Vakti Geçti",
+        "inMinutes": "{{count}} dk sonra",
+        "inHours": "{{count}} sa sonra",
+        "tomorrow": "Yarın",
+        "inDays": "{{count}} gün kaldı",
+        "notificationTitle": "Okuma Hatırlatıcısı",
+        "openNow": "Aç",
+        "snooze1Day": "1 Gün Ertele",
+        "snoozedSuccess": "1 gün ertelendi",
+        "presets": {
+            "tomorrow": "Yarın (09:00)",
+            "in3days": "3 Gün Sonra",
+            "weekend": "Hafta Sonu Oku (Cts 10:00)",
+            "nextweek": "Gelecek Hafta (Pzt 09:00)"
+        }
     }
 }
+

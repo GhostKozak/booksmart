@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image, Sparkles, Copy, Check, Rss, BookOpen, Clock } from 'lucide-react';
+import { ExternalLink, X, RefreshCw, AlertTriangle, StickyNote, Wand2, Loader2, LayoutDashboard, Globe, Image, Sparkles, Copy, Check, Rss, BookOpen, Clock, QrCode, Bell } from 'lucide-react';
 import { cn, isHttpUrl } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
@@ -255,6 +255,27 @@ export function PreviewPane({ bookmark, onClose, className }) {
                         title={t('reader.openReaderMode', 'Temiz Okuma Modunda Aç')}
                     >
                         <BookOpen className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 cursor-pointer"
+                        onClick={() => useAppStore.getState().openQrCode(bookmark)}
+                        title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                    >
+                        <QrCode className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                            "h-8 w-8 hover:bg-amber-500/10 cursor-pointer",
+                            bookmark?.reminderAt ? "text-amber-500" : "text-muted-foreground hover:text-foreground"
+                        )}
+                        onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                        title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                    >
+                        <Bell className="h-4 w-4" />
                     </Button>
                     <Button
                         variant="ghost"

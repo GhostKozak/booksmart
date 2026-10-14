@@ -96,6 +96,25 @@ export const useAppStore = create((set, get) => ({
     openReaderMode: (bookmark) => set({ readerBookmark: bookmark }),
     closeReaderMode: () => set({ readerBookmark: null }),
 
+    // --- QR Code Modal Slice ---
+    qrModalBookmark: null,
+    setQrModalBookmark: (bookmark) => set({ qrModalBookmark: bookmark }),
+    openQrCode: (bookmark) => set({ qrModalBookmark: bookmark }),
+    closeQrCode: () => set({ qrModalBookmark: null }),
+
+    // --- Reminder Modal Slice ---
+    reminderModalBookmark: null,
+    setReminderModalBookmark: (bookmark) => set({ reminderModalBookmark: bookmark }),
+    openReminderModal: (bookmark) => set({ reminderModalBookmark: bookmark }),
+    closeReminderModal: () => set({ reminderModalBookmark: null }),
+
+    // --- Public Link Hub / Bento Sharing Slice ---
+    shareHubCollection: null,
+    setShareHubCollection: (collection) => set({ shareHubCollection: collection }),
+    openShareHub: (collection) => set({ shareHubCollection: collection }),
+    closeShareHub: () => set({ shareHubCollection: null }),
+
+
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",
     resolvedTheme: "light",

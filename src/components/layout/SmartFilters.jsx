@@ -1,4 +1,4 @@
-import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, ChevronRight, ChevronDown } from 'lucide-react'
+import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
@@ -14,6 +14,7 @@ export function SmartFilters({
     const onToggle = () => toggleSection('filters')
 
     const filters = [
+        { key: 'reminders', label: t('sidebar.smartFilters.reminders', 'Hatırlatıcılar'), icon: Bell, count: smartCounts.reminders || 0, color: 'indigo' },
         { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
         { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http, color: 'red' },
         { key: 'untitled', label: t('sidebar.smartFilters.untitled'), icon: FileQuestion, count: smartCounts.untitled, color: 'orange' },
@@ -28,6 +29,7 @@ export function SmartFilters({
     ]
 
     const colorMap = {
+        indigo: { active: 'bg-indigo-100 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-400' },
         amber: { active: 'bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400' },
         red: { active: 'bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' },
         orange: { active: 'bg-orange-100 text-orange-700 font-medium dark:bg-orange-900/30 dark:text-orange-400' },
@@ -39,6 +41,7 @@ export function SmartFilters({
         emerald: { active: 'bg-emerald-100 text-emerald-700 font-medium dark:bg-emerald-900/30 dark:text-emerald-400' },
         teal: { active: 'bg-teal-100 text-teal-700 font-medium dark:bg-teal-900/30 dark:text-teal-400' },
     }
+
 
     return (
         <>

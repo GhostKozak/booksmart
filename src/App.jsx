@@ -21,6 +21,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db, migrateFromLocalStorage, seedDefaults, deduplicateTaxonomy } from './db'
 import { saveAutoBackup } from './lib/backup-manager'
 import { refreshAllFeeds } from './lib/rss-service'
+import { checkAndNotifyDueReminders } from './lib/reminder-service'
 import { demoBookmarks } from './lib/demo-bookmarks'
 import { useAppStore } from './store/useAppStore'
 
@@ -52,6 +53,9 @@ const AICostModal = lazy(() => import('./components/modals/AICostModal').then(m 
 const ExtensionGuideModal = lazy(() => import('./components/modals/ExtensionGuideModal').then(m => ({ default: m.ExtensionGuideModal })))
 const RssReaderModal = lazy(() => import('./components/modals/RssReaderModal').then(m => ({ default: m.RssReaderModal })))
 const ReaderViewModal = lazy(() => import('./components/modals/ReaderViewModal').then(m => ({ default: m.ReaderViewModal })))
+const QrCodeModal = lazy(() => import('./components/modals/QrCodeModal').then(m => ({ default: m.QrCodeModal })))
+const ReminderModal = lazy(() => import('./components/modals/ReminderModal').then(m => ({ default: m.ReminderModal })))
+const ShareCollectionModal = lazy(() => import('./components/modals/ShareCollectionModal').then(m => ({ default: m.ShareCollectionModal })))
 import { ExtensionPromptBanner } from './components/modals/ExtensionPromptBanner'
 
 // PWA Components
@@ -83,7 +87,10 @@ function App() {
     previewBookmark, setPreviewBookmark,
     isExtensionGuideOpen, setIsExtensionGuideOpen, openExtensionGuide,
     isRssReaderOpen, setIsRssReaderOpen,
-    readerBookmark, closeReaderMode,
+    readerBookmark, openReaderMode, closeReaderMode,
+    qrModalBookmark, closeQrCode,
+    reminderModalBookmark, closeReminderModal,
+    shareHubCollection, closeShareHub,
     showOnboarding
   } = useAppStore()
 
@@ -101,6 +108,24 @@ function App() {
     }
     init()
   }, [initTheme])
+
+  // ── Background Due-Reminders Polling (startup & every 60s) ──
+  useEffect(() => {
+    const checkReminders = () => {
+      checkAndNotifyDueReminders({
+        t,
+        onOpenBookmark: (b) => openReaderMode(b)
+      });
+    };
+
+    const initialTimer = setTimeout(checkReminders, 3000);
+    const interval = setInterval(checkReminders, 60 * 1000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [t, openReaderMode]);
 
   // ── Background RSS Feeds Auto-Polling (startup & every 60 mins) ──
   useEffect(() => {
@@ -704,6 +729,27 @@ function App() {
               isOpen={!!readerBookmark}
               bookmark={readerBookmark}
               onClose={closeReaderMode}
+            />
+          )}
+          {!!qrModalBookmark && (
+            <QrCodeModal
+              isOpen={!!qrModalBookmark}
+              bookmark={qrModalBookmark}
+              onClose={closeQrCode}
+            />
+          )}
+          {!!reminderModalBookmark && (
+            <ReminderModal
+              isOpen={!!reminderModalBookmark}
+              bookmark={reminderModalBookmark}
+              onClose={closeReminderModal}
+            />
+          )}
+          {!!shareHubCollection && (
+            <ShareCollectionModal
+              isOpen={!!shareHubCollection}
+              collection={shareHubCollection}
+              onClose={closeShareHub}
             />
           )}
         </Suspense>
