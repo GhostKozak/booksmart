@@ -399,8 +399,12 @@ const processData = ({
                 }
                 case 'domain':
                     return getDomain(a.url).localeCompare(getDomain(b.url));
+                case 'domain-desc':
+                    return getDomain(b.url).localeCompare(getDomain(a.url));
                 case 'folder':
                     return (a.newFolder || a.originalFolder || '').localeCompare(b.newFolder || b.originalFolder || '');
+                case 'folder-desc':
+                    return (b.newFolder || b.originalFolder || '').localeCompare(a.newFolder || a.originalFolder || '');
                 default:
                     return 0;
             }

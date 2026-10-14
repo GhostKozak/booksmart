@@ -73,7 +73,9 @@
             "dateNew": "Tarih (En Yeni)",
             "dateOld": "Tarih (En Eski)",
             "domain": "Alan Adı",
-            "folder": "Klasör"
+            "folder": "Klasör",
+            "asc": "Artan Sıralama (A→Z, Eski→Yeni)",
+            "desc": "Azalan Sıralama (Z→A, Yeni→Eski)"
         },
         "themeLabel": "Tema"
     },
@@ -131,7 +133,22 @@
             "tags": "Etiketler",
             "backup": "Yedekleme & Veri",
             "rules": "Kurallar",
-            "ai": "Yapay Zeka"
+            "ai": "Yapay Zeka",
+            "about": "Hakkında"
+        },
+        "about": {
+            "title": "BookSmart Hakkında",
+            "desc": "Sürüm bilgisi, yerel depolama ve gizlilik güvencesi",
+            "version": "Sürüm",
+            "privacyTitle": "100% Yerel & Gizlilik Odaklı",
+            "privacyDesc": "Tüm yer imleriniz, klasörleriniz, etiketleriniz ve şifrelenmiş API anahtarlarınız yalnızca bu tarayıcının IndexedDB deposunda saklanır. Verileriniz asla harici sunuculara veya buluta aktarılmaz.",
+            "stats": "Yerel Veritabanı İstatistikleri",
+            "totalBookmarks": "Toplam Yer İmi",
+            "totalFolders": "Klasör",
+            "totalTags": "Etiket",
+            "totalSnapshots": "Çevrimdışı Arşiv",
+            "github": "GitHub Deposu",
+            "license": "Açık Kaynak MIT Lisansı"
         },
         "language": {
             "label": "Dil",

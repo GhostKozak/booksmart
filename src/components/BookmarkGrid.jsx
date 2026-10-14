@@ -4,7 +4,7 @@ import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Favicon } from './Favicon';
 import { cn } from '../lib/utils';
-import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss, BookOpen, QrCode, Bell } from 'lucide-react';
+import { Folder, ExternalLink, Eye, Pencil, Sparkles, Rss, BookOpen, QrCode, Bell, Highlighter, HardDrive } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { LinkTooltip } from './bookmark/LinkTooltip';
@@ -201,6 +201,36 @@ const GridItem = ({ bookmark, isSelected, folderColor, folderName, context, show
                                             reminderAt={bookmark.reminderAt}
                                             onClick={() => useAppStore.getState().openReminderModal(bookmark)}
                                         />
+                                    )}
+                                    {Boolean(bookmark.highlightsCount || (bookmark.highlights && bookmark.highlights.length > 0)) && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                useAppStore.getState().openReaderMode(bookmark);
+                                            }}
+                                            className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer shrink-0"
+                                            title={t('reader.highlights.badgeTooltip', 'Vurguları Reader Mode\'da aç')}
+                                        >
+                                            <Highlighter className="w-2.5 h-2.5" />
+                                            <span>{bookmark.highlightsCount || (bookmark.highlights ? bookmark.highlights.length : 1)}</span>
+                                        </button>
+                                    )}
+                                    {bookmark.hasSnapshot && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                useAppStore.getState().openSnapshotViewer(bookmark);
+                                            }}
+                                            className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition-colors cursor-pointer shrink-0"
+                                            title={t('snapshots.badgeTooltip', 'Çevrimdışı HTML Arşivini Aç')}
+                                        >
+                                            <HardDrive className="w-2.5 h-2.5" />
+                                            <span>{t('snapshots.badgeShort', 'Çevrimdışı')}</span>
+                                        </button>
                                     )}
                                 </div>
                                 <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">

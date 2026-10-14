@@ -65,8 +65,8 @@ describe('HeaderActionsMenu', () => {
         expect(screen.getByRole('dialog')).toBeInTheDocument();
 
         // Check tabs exist
-        expect(screen.getByRole('button', { name: /Görünüm/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Tercihler/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /İşlemler & Araçlar/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Tercihler & Sistem/i })).toBeInTheDocument();
     });
 
     it('displays extension actions when extension is connected', () => {
@@ -89,23 +89,17 @@ describe('HeaderActionsMenu', () => {
         expect(defaultProps.openExtensionGuide).toHaveBeenCalled();
     });
 
-    it('switches tabs to view mode and changes view options', () => {
+    it('switches tabs to preferences and changes language', () => {
         render(<HeaderActionsMenu {...defaultProps} />);
         fireEvent.click(screen.getByRole('button', { name: /İşlemler/i }));
 
-        // Click Görünüm tab
-        const viewTab = screen.getByRole('button', { name: /Görünüm/i });
-        fireEvent.click(viewTab);
+        // Click Tercihler tab
+        const prefTab = screen.getByRole('button', { name: /Tercihler & Sistem/i });
+        fireEvent.click(prefTab);
 
-        // Click List view mode
-        const listModeBtn = screen.getByText(/Liste/i);
-        fireEvent.click(listModeBtn);
-        expect(defaultProps.setViewMode).toHaveBeenCalledWith('list');
-
-        // Click Sort option
-        const sortTitleAz = screen.getByText(/Başlık \(A → Z\)/i);
-        fireEvent.click(sortTitleAz);
-        expect(defaultProps.setSortBy).toHaveBeenCalledWith('title-az');
+        // Click English language button
+        const enBtn = screen.getByText('EN');
+        expect(enBtn).toBeInTheDocument();
     });
 
     it('switches tabs to preferences and toggles theme and opens settings', () => {

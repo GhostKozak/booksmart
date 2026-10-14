@@ -279,10 +279,22 @@ describe('processing.worker', () => {
             expect(domains).toEqual(['https://nodejs.org', 'https://reactjs.org', 'https://vuejs.org']);
         });
 
+        it('should sort by domain descending', async () => {
+            const result = process({ sortBy: 'domain-desc' });
+            const domains = result.payload.processedBookmarks.map(b => b.url);
+            expect(domains).toEqual(['https://vuejs.org', 'https://reactjs.org', 'https://nodejs.org']);
+        });
+
         it('should sort by folder', async () => {
             const result = process({ sortBy: 'folder' });
             const folders = result.payload.processedBookmarks.map(b => b.originalFolder);
             expect(folders).toEqual(['Design', 'Dev', 'Dev']);
+        });
+
+        it('should sort by folder descending', async () => {
+            const result = process({ sortBy: 'folder-desc' });
+            const folders = result.payload.processedBookmarks.map(b => b.originalFolder);
+            expect(folders).toEqual(['Dev', 'Dev', 'Design']);
         });
     });
 

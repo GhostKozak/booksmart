@@ -3,10 +3,9 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
     MoreVertical, X, Sparkles, RefreshCw, CloudDownload, CloudUpload,
-    HelpCircle, Layers, GitMerge, List, AlignJustify, LayoutGrid,
-    CreditCard, Table, FolderTree, BarChart3, Image, Activity,
+    HelpCircle, Layers, GitMerge, Activity,
     Loader2, Monitor, Sun, Moon, Search, Settings, Download,
-    LogOut, Trash2, Rss, ArrowUpDown, Sliders, Check
+    LogOut, Trash2, Rss, Sliders, Check
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
@@ -33,14 +32,6 @@ export function HeaderActionsMenu({
     setIsShortcutsOpen,
     setIsRssReaderOpen,
     totalUnreadRss = 0,
-    // Views & Sorting
-    bookmarkCount = 0,
-    viewMode = 'list',
-    setViewMode,
-    showThumbnails = true,
-    setShowThumbnails,
-    sortBy = 'default',
-    setSortBy,
     // Preferences & Settings
     theme = 'system',
     setTheme,
@@ -53,7 +44,7 @@ export function HeaderActionsMenu({
 }) {
     const { t, i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('actions'); // 'actions' | 'view' | 'preferences'
+    const [activeTab, setActiveTab] = useState('actions'); // 'actions' | 'preferences'
     const menuRef = useRef(null);
 
     // Responsive screen size detection
@@ -110,33 +101,13 @@ export function HeaderActionsMenu({
         }
     }, [isOpen, isMobile]);
 
+    // Helper to close modal after action
     const handleActionClick = useCallback((actionFn) => {
         if (typeof actionFn === 'function') {
             actionFn();
         }
         setIsOpen(false);
     }, []);
-
-    // Sort options definition
-    const sortOptions = [
-        { key: 'default', label: t('header.sort.default', 'Varsayılan') },
-        { key: 'title-az', label: t('header.sort.titleAz', 'Başlık (A → Z)') },
-        { key: 'title-za', label: t('header.sort.titleZa', 'Başlık (Z → A)') },
-        { key: 'date-new', label: t('header.sort.dateNew', 'Tarih (En Yeni)') },
-        { key: 'date-old', label: t('header.sort.dateOld', 'Tarih (En Eski)') },
-        { key: 'domain', label: t('header.sort.domain', 'Alan Adı') },
-        { key: 'folder', label: t('header.sort.folder', 'Klasör') },
-    ];
-
-    // View modes definition
-    const viewModes = [
-        { key: 'list', label: t('header.listView', 'Liste'), icon: List },
-        { key: 'compact', label: t('header.compactView', 'Kompakt'), icon: AlignJustify },
-        { key: 'grid', label: t('header.gridView', 'Izgara'), icon: LayoutGrid },
-        { key: 'card', label: t('header.cardView', 'Kartlar'), icon: CreditCard },
-        { key: 'table', label: t('header.tableView', 'Tablo'), icon: Table },
-        { key: 'tree', label: t('header.treeView', 'Klasör Ağacı'), icon: FolderTree },
-    ];
 
     // Languages definition
     const languages = [
@@ -189,9 +160,9 @@ export function HeaderActionsMenu({
                 </div>
             </div>
 
-            {/* Segmented Navigation Tabs */}
+            {/* Segmented Navigation Tabs (2 Tabs: İşlemler & Tercihler) */}
             <div className="px-3 pt-2.5 pb-1.5 shrink-0 bg-muted/20">
-                <div className="grid grid-cols-3 gap-1 p-1 bg-muted/70 dark:bg-muted/40 rounded-xl text-xs font-semibold">
+                <div className="grid grid-cols-2 gap-1 p-1 bg-muted/70 dark:bg-muted/40 rounded-xl text-xs font-semibold">
                     <button
                         type="button"
                         onClick={() => setActiveTab('actions')}
@@ -203,24 +174,10 @@ export function HeaderActionsMenu({
                         )}
                     >
                         <Sparkles className="w-3.5 h-3.5 text-primary" />
-                        <span>{t('header.tools', 'İşlemler')}</span>
+                        <span>{t('header.tools', 'İşlemler & Araçlar')}</span>
                         {(hasMaintenanceActions || totalUnreadRss > 0) && (
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                         )}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('view')}
-                        className={cn(
-                            "flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg transition-all text-xs font-medium cursor-pointer",
-                            activeTab === 'view'
-                                ? "bg-background text-foreground shadow-xs font-semibold"
-                                : "text-muted-foreground hover:text-foreground hover:bg-background/40"
-                        )}
-                    >
-                        <LayoutGrid className="w-3.5 h-3.5 text-sky-500" />
-                        <span>{t('header.view', 'Görünüm')}</span>
                     </button>
 
                     <button
@@ -234,7 +191,7 @@ export function HeaderActionsMenu({
                         )}
                     >
                         <Settings className="w-3.5 h-3.5 text-violet-500" />
-                        <span>{t('header.settings', 'Tercihler')}</span>
+                        <span>{t('header.settings', 'Tercihler & Sistem')}</span>
                     </button>
                 </div>
             </div>
@@ -248,135 +205,102 @@ export function HeaderActionsMenu({
                 {activeTab === 'actions' && (
                     <div className="space-y-3 animate-in fade-in-50 duration-150">
                         {/* Companion Extension Box */}
-                        <div className={cn(
-                            "rounded-xl p-3 border transition-all",
-                            isExtensionConnected
-                                ? "bg-primary/5 dark:bg-primary/10 border-primary/20"
-                                : "bg-sky-500/5 dark:bg-sky-500/10 border-sky-500/20"
-                        )}>
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="font-semibold text-xs text-foreground">
-                                        {t('header.browserSync.label', 'Tarayıcı Eşitleme & Eklenti')}
-                                    </span>
+                        <div className="p-3 rounded-2xl border border-border/60 bg-muted/30 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                    <RefreshCw className={cn("h-3.5 w-3.5 text-primary", isSyncing && "animate-spin")} />
+                                    <span>{t('header.browserSync.label', 'Tarayıcı Yer İmleri Eşitleme')}</span>
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] px-1.5 py-0.5 rounded font-medium",
-                                    isExtensionConnected
-                                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                                        : "bg-muted text-muted-foreground"
-                                    )}>
-                                    {isExtensionConnected ? 'CORS-Free' : t('settings.network.extensionNotDetected', 'Bağlı Değil')}
+                                    "text-[9px] px-1.5 py-0.2 rounded font-medium",
+                                    isExtensionConnected ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+                                )}>
+                                    {isExtensionConnected ? 'Companion Connected' : 'Extension Offline'}
                                 </span>
                             </div>
 
                             {isExtensionConnected ? (
-                                <div className="space-y-1.5">
-                                    {twoWaySync && (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={isSyncing}
-                                            onClick={() => twoWaySync()}
-                                            className="w-full justify-center h-9 font-semibold text-xs bg-background/80 hover:bg-primary/10 border-primary/30 text-primary cursor-pointer"
-                                        >
-                                            <RefreshCw className={cn("h-3.5 w-3.5 mr-2 text-primary", isSyncing && "animate-spin")} />
-                                            <span>{t('header.browserSync.twoWay', 'İki Yönlü Eşitle (Two-Way Sync)')}</span>
-                                        </Button>
-                                    )}
-                                    <div className="grid grid-cols-2 gap-1.5">
-                                        {importFromBrowser && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                disabled={isSyncing}
-                                                onClick={() => importFromBrowser()}
-                                                className="h-8 text-xs font-medium bg-background/50 hover:bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-border/50 justify-center cursor-pointer"
-                                            >
-                                                <CloudDownload className="h-3.5 w-3.5 mr-1 text-sky-500 shrink-0" />
-                                                <span className="truncate">{t('header.browserSync.pull', 'Tarayıcıdan Çek')}</span>
-                                            </Button>
-                                        )}
-                                        {pushToBrowser && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                disabled={isSyncing || bookmarkCount === 0}
-                                                onClick={() => pushToBrowser()}
-                                                className="h-8 text-xs font-medium bg-background/50 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-border/50 justify-center cursor-pointer"
-                                            >
-                                                <CloudUpload className="h-3.5 w-3.5 mr-1 text-emerald-500 shrink-0" />
-                                                <span className="truncate">{t('header.browserSync.push', 'Tarayıcıya Yaz')}</span>
-                                            </Button>
-                                        )}
-                                    </div>
+                                <div className="grid grid-cols-3 gap-1.5">
                                     <Button
-                                        variant="ghost"
+                                        variant="outline"
                                         size="sm"
-                                        onClick={() => handleActionClick(openExtensionGuide)}
-                                        className="w-full h-7 text-[11px] text-muted-foreground hover:text-foreground justify-center cursor-pointer"
+                                        disabled={isSyncing}
+                                        onClick={() => handleActionClick(twoWaySync)}
+                                        className="h-8 text-xs font-medium border-primary/30 hover:bg-primary/10 hover:border-primary text-primary cursor-pointer justify-center"
+                                        title={t('header.browserSync.twoWay', 'İki Yönlü Eşitle')}
                                     >
-                                        <HelpCircle className="h-3 w-3 mr-1 text-muted-foreground" />
-                                        <span>{t('modals.extensionGuide.title', 'Eklenti Rehberi & Ayarları')}</span>
+                                        <RefreshCw className={cn("h-3 w-3 mr-1 shrink-0", isSyncing && "animate-spin")} />
+                                        <span className="truncate">{t('header.browserSync.twoWay', 'İki Yönlü Eşitle')}</span>
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isSyncing}
+                                        onClick={() => handleActionClick(importFromBrowser)}
+                                        className="h-8 text-xs font-medium border-border/70 hover:bg-accent cursor-pointer justify-center"
+                                        title={t('header.browserSync.pull', 'Tarayıcıdan Çek')}
+                                    >
+                                        <CloudDownload className="h-3 w-3 mr-1 shrink-0" />
+                                        <span className="truncate">{t('header.browserSync.pull', 'Çek')}</span>
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={isSyncing}
+                                        onClick={() => handleActionClick(pushToBrowser)}
+                                        className="h-8 text-xs font-medium border-border/70 hover:bg-accent cursor-pointer justify-center"
+                                        title={t('header.browserSync.push', 'Tarayıcıya Gönder')}
+                                    >
+                                        <CloudUpload className="h-3 w-3 mr-1 shrink-0" />
+                                        <span className="truncate">{t('header.browserSync.push', 'Gönder')}</span>
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                                        {t('header.extensionNotConnectedDesc', 'Sunucusuz CORS-free link sağlığı kontrolü ve tarayıcınızla çift yönlü yer imi eşitleme için eklentiyi kullanın.')}
+                                <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-card border border-border/50">
+                                    <p className="text-[11px] text-muted-foreground leading-snug">
+                                        {t('header.extensionNotConnectedDesc', 'Sunucusuz CORS\'suz link kontrolü ve iki yönlü senkronizasyonu açın.')}
                                     </p>
-                                    <div className="flex gap-1.5">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleActionClick(openExtensionGuide)}
-                                            className="flex-1 h-8 text-xs font-semibold text-sky-600 dark:text-sky-400 bg-background/80 hover:bg-sky-500/10 border-sky-500/30 cursor-pointer"
-                                        >
-                                            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-sky-500 shrink-0" />
-                                            <span>{t('header.installExtensionBtn', 'Eklenti Rehberi')}</span>
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={checkAllLinks}
-                                            disabled={isCheckingLinks}
-                                            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 cursor-pointer"
-                                            title={t('settings.network.extensionRetryBtn', 'Bağlantıyı Yeniden Dene')}
-                                        >
-                                            <RefreshCw className={cn("h-3.5 w-3.5", isCheckingLinks && "animate-spin")} />
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => handleActionClick(openExtensionGuide)}
+                                        className="h-7 px-2.5 text-[11px] shrink-0 rounded-lg cursor-pointer font-medium"
+                                    >
+                                        {t('header.installExtensionBtn', 'Eklenti Rehberi')}
+                                    </Button>
                                 </div>
                             )}
                         </div>
 
-                        {/* Maintenance Box (If applicable) */}
+                        {/* Maintenance Operations (Duplicates & URL Cleaning) */}
                         {hasMaintenanceActions && (
-                            <div className="bg-destructive/5 dark:bg-destructive/10 rounded-xl p-3 border border-destructive/20 space-y-1.5">
-                                <div className="flex items-center justify-between text-destructive text-[11px] font-bold uppercase tracking-wider mb-1">
-                                    <span>{t('header.maintenance', 'Bakım ve Temizlik')}</span>
-                                    <span className="px-1.5 py-0.2 rounded-full bg-destructive/10 text-[10px]">
-                                        {duplicateCount + cleanableCount}
+                            <div className="p-3 rounded-2xl border border-amber-500/25 bg-amber-500/5 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                                        <Layers className="h-3.5 w-3.5" />
+                                        <span>{t('header.maintenance', 'Bakım & İyileştirme')}</span>
                                     </span>
                                 </div>
+
                                 {duplicateCount > 0 && (
                                     <div className="grid grid-cols-2 gap-1.5">
-                                        {mergeDuplicates && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleActionClick(mergeDuplicates)}
-                                                className="h-8 text-xs font-medium text-primary hover:bg-primary/10 border-primary/20 bg-background/60 cursor-pointer"
-                                            >
-                                                <GitMerge className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                                                <span className="truncate">{t('header.mergeDuplicates', { count: duplicateCount, defaultValue: `${duplicateCount} Yinelemeyi Birleştir` })}</span>
-                                            </Button>
-                                        )}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleActionClick(mergeDuplicates)}
+                                            className="h-8 text-xs font-medium text-primary hover:bg-primary/10 border-primary/20 bg-background/60 cursor-pointer justify-center"
+                                        >
+                                            <GitMerge className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                                            <span className="truncate">{t('header.mergeDuplicates', { count: duplicateCount, defaultValue: `${duplicateCount} Birleştir` })}</span>
+                                        </Button>
+
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => handleActionClick(removeDuplicates)}
-                                            className="h-8 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-destructive hover:text-destructive-foreground border-destructive/20 bg-background/60 cursor-pointer"
+                                            className="h-8 text-xs font-medium text-destructive hover:bg-destructive/10 border-destructive/20 bg-background/60 cursor-pointer justify-center"
                                         >
                                             <Layers className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                                             <span className="truncate">{t('header.removeDuplicates', { count: duplicateCount, defaultValue: `${duplicateCount} Yinelemeyi Kaldır` })}</span>
@@ -470,104 +394,7 @@ export function HeaderActionsMenu({
                 )}
 
                 {/* ============================================================== */}
-                {/* TAB 2: GÖRÜNÜM & SIRALAMA (VIEW MODES & SORTING)              */}
-                {/* ============================================================== */}
-                {activeTab === 'view' && (
-                    <div className="space-y-3.5 animate-in fade-in-50 duration-150">
-                        {/* View Modes Section */}
-                        <div>
-                            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-2">
-                                {t('header.view', 'Görünüm Modu')}
-                            </div>
-                            <div className="grid grid-cols-3 gap-1.5">
-                                {viewModes.map((mode) => {
-                                    const Icon = mode.icon;
-                                    const isActive = viewMode === mode.key;
-                                    return (
-                                        <button
-                                            key={mode.key}
-                                            type="button"
-                                            onClick={() => setViewMode(mode.key)}
-                                            className={cn(
-                                                "flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all text-xs cursor-pointer gap-1",
-                                                isActive
-                                                    ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
-                                                    : "bg-background/60 hover:bg-accent/60 border-border/50 text-foreground/80 hover:text-foreground"
-                                            )}
-                                        >
-                                            <Icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
-                                            <span className="truncate max-w-full text-[11px]">{mode.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Analytics & Thumbnail View Options */}
-                        <div className="space-y-1.5 pt-1 border-t border-border/40">
-                            <div className="grid grid-cols-2 gap-1.5">
-                                <button
-                                    type="button"
-                                    onClick={() => setViewMode('analytics')}
-                                    className={cn(
-                                        "flex items-center justify-center gap-1.5 p-2 rounded-xl border text-xs font-medium cursor-pointer transition-all",
-                                        viewMode === 'analytics'
-                                            ? "bg-primary text-primary-foreground border-primary font-semibold shadow-xs"
-                                            : "bg-background/60 hover:bg-accent/60 border-border/50 text-foreground/80"
-                                    )}
-                                >
-                                    <BarChart3 className="h-3.5 w-3.5" />
-                                    <span className="truncate">{t('header.analytics', 'Analiz Paneli')}</span>
-                                </button>
-
-                                {(viewMode === 'grid' || viewMode === 'card') && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowThumbnails(!showThumbnails)}
-                                        className="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-border/50 bg-background/60 hover:bg-accent/60 text-xs font-medium text-foreground/80 cursor-pointer transition-all"
-                                    >
-                                        <Image className="h-3.5 w-3.5 text-primary" />
-                                        <span className="truncate">
-                                            {showThumbnails ? t('header.hideThumbnails', 'Kapakları Gizle') : t('header.showThumbnails', 'Kapakları Göster')}
-                                        </span>
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Sorting Section */}
-                        <div className="pt-1 border-t border-border/40">
-                            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1 mb-2">
-                                <span>{t('header.sort.label', 'Sıralama Ölçütü')}</span>
-                                <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-1.5">
-                                {sortOptions.map(opt => {
-                                    const isSelected = sortBy === opt.key;
-                                    return (
-                                        <button
-                                            key={opt.key}
-                                            type="button"
-                                            onClick={() => setSortBy(opt.key)}
-                                            className={cn(
-                                                "flex items-center justify-between px-2.5 py-2 rounded-lg border text-xs transition-all cursor-pointer text-left",
-                                                isSelected
-                                                    ? "bg-accent text-accent-foreground font-semibold border-primary/40 ring-1 ring-primary/20 shadow-xs"
-                                                    : "bg-background/60 hover:bg-accent/50 border-border/40 text-muted-foreground hover:text-foreground"
-                                            )}
-                                        >
-                                            <span className="truncate">{opt.label}</span>
-                                            {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0 ml-1" />}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* ============================================================== */}
-                {/* TAB 3: TERCİHLER & SİSTEM (THEME, LANGUAGE, EXPORT, FILE)      */}
+                {/* TAB 2: TERCİHLER & SİSTEM (THEME, LANGUAGE, EXPORT, FILE)      */}
                 {/* ============================================================== */}
                 {activeTab === 'preferences' && (
                     <div className="space-y-3.5 animate-in fade-in-50 duration-150">
@@ -723,7 +550,7 @@ export function HeaderActionsMenu({
             {/* Desktop Floating Popover (rendered inline attached to trigger) */}
             {isOpen && !isMobile && (
                 <div
-                    className="absolute right-0 top-full mt-2 w-[410px] max-h-[84vh] z-50 bg-card/98 backdrop-blur-2xl text-popover-foreground shadow-2xl border border-border/70 rounded-2xl flex flex-col ring-1 ring-white/10 dark:ring-white/5 animate-in slide-in-from-top-2 zoom-in-95 duration-150 origin-top-right"
+                    className="absolute right-0 top-full mt-2 w-[380px] max-h-[84vh] z-50 bg-card/98 backdrop-blur-2xl text-popover-foreground shadow-2xl border border-border/70 rounded-2xl flex flex-col ring-1 ring-white/10 dark:ring-white/5 animate-in slide-in-from-top-2 zoom-in-95 duration-150 origin-top-right"
                     role="dialog"
                     aria-modal="true"
                     aria-label={t('common.actions', 'İşlemler')}

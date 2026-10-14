@@ -52,7 +52,6 @@ export function Header({
     // File
     hasFileLoaded = false,
     closeFile,
-    bookmarkCount = 0,
     clearAll,
     searchInputRef
 }) {
@@ -72,12 +71,6 @@ export function Header({
         setIsAdvancedSearchOpen,
         dateFilter,
         setDateFilter,
-        viewMode,
-        setViewMode,
-        showThumbnails,
-        setShowThumbnails,
-        sortBy,
-        setSortBy,
         openSettings,
         openExtensionGuide,
         isSidebarOpen,
@@ -392,13 +385,6 @@ export function Header({
                     setIsShortcutsOpen={setIsShortcutsOpen}
                     setIsRssReaderOpen={setIsRssReaderOpen}
                     totalUnreadRss={totalUnreadRss}
-                    bookmarkCount={bookmarkCount}
-                    viewMode={viewMode}
-                    setViewMode={setViewMode}
-                    showThumbnails={showThumbnails}
-                    setShowThumbnails={setShowThumbnails}
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
                     theme={theme}
                     setTheme={setTheme}
                     openSettings={openSettings}

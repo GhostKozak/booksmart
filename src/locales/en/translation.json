@@ -73,7 +73,9 @@
             "dateNew": "Date (Newest)",
             "dateOld": "Date (Oldest)",
             "domain": "Domain",
-            "folder": "Folder"
+            "folder": "Folder",
+            "asc": "Ascending (A→Z, Oldest first)",
+            "desc": "Descending (Z→A, Newest first)"
         },
         "themeLabel": "Theme"
     },
@@ -131,7 +133,22 @@
             "tags": "Tags",
             "backup": "Backup & Data",
             "rules": "Rules",
-            "ai": "AI"
+            "ai": "AI",
+            "about": "About"
+        },
+        "about": {
+            "title": "About BookSmart",
+            "desc": "Version info, local storage, and privacy guarantee",
+            "version": "Version",
+            "privacyTitle": "100% Local & Privacy-First",
+            "privacyDesc": "All your bookmarks, folders, tags, and encrypted API keys are stored solely in this browser's IndexedDB storage. Your data is never transmitted to external servers or cloud services.",
+            "stats": "Local Database Statistics",
+            "totalBookmarks": "Total Bookmarks",
+            "totalFolders": "Folders",
+            "totalTags": "Tags",
+            "totalSnapshots": "Offline Snapshots",
+            "github": "GitHub Repository",
+            "license": "Open Source MIT License"
         },
         "language": {
             "label": "Language",

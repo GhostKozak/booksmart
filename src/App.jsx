@@ -32,14 +32,10 @@ import { MainContent } from './components/layout/MainContent'
 
 // Existing Components
 import { FloatingActionBar } from './components/FloatingActionBar'
-import { SimpleModal } from './components/ui/SimpleModal'
-import { Button } from './components/ui/button'
 import { ConflictNotificationBar } from './components/ConflictNotificationBar'
 
 // Lazy loaded components
-const TaxonomyManager = lazy(() => import('./components/TaxonomyManager').then(m => ({ default: m.TaxonomyManager })))
-const BackupSettings = lazy(() => import('./components/BackupSettings').then(m => ({ default: m.BackupSettings })))
-const AISettings = lazy(() => import('./components/AISettings').then(m => ({ default: m.AISettings })))
+const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })))
 const ExportModal = lazy(() => import('./components/modals/ExportModal').then(m => ({ default: m.ExportModal })))
 const RuleModal = lazy(() => import('./components/modals/RuleModal').then(m => ({ default: m.RuleModal })))
 const RuleConflictModal = lazy(() => import('./components/modals/RuleConflictModal').then(m => ({ default: m.RuleConflictModal })))
@@ -395,7 +391,6 @@ function App() {
           isSyncing={browserSync.isSyncing}
           openExportModal={() => actions.guardedExport(exporter.openExportModal)}
           hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
-          bookmarkCount={worker.bookmarks.length}
           clearAll={actions.clearAll}
           searchInputRef={searchInputRef}
         />
@@ -525,55 +520,22 @@ function App() {
         </Suspense>
 
         {/* Settings Modal */}
-        <SimpleModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          title={t('settings.title')}
-        >
-          <Suspense fallback={<div className="p-8 text-muted-foreground text-center">{t('common.loading', 'Loading...')}</div>}>
-            {settingsTab === 'backup' ? (
-              <BackupSettings />
-            ) : settingsTab === 'ai' ? (
-              <AISettings />
-            ) : (
-              <TaxonomyManager
-                folders={taxonomy.availableFolders}
-                setFolders={taxonomy.setAvailableFolders}
-                tags={taxonomy.availableTags}
-                setTags={taxonomy.setAvailableTags}
-                discoveredFolders={taxonomy.discoveredFolders}
-                discoveredTags={taxonomy.discoveredTags}
-                defaultTab={settingsTab}
-              />
-            )}
-          </Suspense>
-          <div className="flex justify-center gap-2 mt-4 pt-2 border-t">
-            <Button
-              variant={settingsTab === 'folders' || settingsTab === 'tags' ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSettingsTab('folders')}
-              className="h-7 text-xs"
-            >
-              {t('sidebar.sections.library')}
-            </Button>
-            <Button
-              variant={settingsTab === 'ai' ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSettingsTab('ai')}
-              className="h-7 text-xs"
-            >
-              {t('settings.tabs.ai')}
-            </Button>
-            <Button
-              variant={settingsTab === 'backup' ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSettingsTab('backup')}
-              className="h-7 text-xs"
-            >
-              {t('settings.tabs.backup')}
-            </Button>
-          </div>
-        </SimpleModal>
+        <Suspense fallback={null}>
+          {isSettingsOpen && (
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              activeTab={settingsTab}
+              onTabChange={setSettingsTab}
+              folders={taxonomy.availableFolders}
+              setFolders={taxonomy.setAvailableFolders}
+              tags={taxonomy.availableTags}
+              setTags={taxonomy.setAvailableTags}
+              discoveredFolders={taxonomy.discoveredFolders}
+              discoveredTags={taxonomy.discoveredTags}
+            />
+          )}
+        </Suspense>
 
         <Suspense fallback={null}>
           {showBackupModal && (
