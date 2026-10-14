@@ -1,3 +1,5 @@
+import { resolveEffectiveModel } from '../services/ai-service';
+
 const VAULT_KEY = 'bs_vault';
 const SALT_KEY = 'bs_vault_salt';
 const PBKDF2_ITER = 600_000;
@@ -140,7 +142,8 @@ export function getStoredProvider() {
 }
 
 export function getStoredModel() {
-    return sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || 'gpt-4o-mini';
+    const raw = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || 'gpt-4o-mini';
+    return resolveEffectiveModel(raw);
 }
 
 export function getStoredOllamaUrl() {

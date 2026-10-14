@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from './ui/button'
-import { AI_MODELS, DEFAULT_MODEL } from '../services/ai-service'
+import { AI_MODELS, DEFAULT_MODEL, resolveEffectiveModel } from '../services/ai-service'
 import {
     unlockVault,
     lockVault,
@@ -66,7 +66,7 @@ export function SettingsModal({
     // AI & Vault State
     const [apiKey, setApiKey] = useState('')
     const [ollamaUrl, setOllamaUrl] = useState(() => sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url') || '')
-    const [selectedModel, setSelectedModel] = useState(() => sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || DEFAULT_MODEL)
+    const [selectedModel, setSelectedModel] = useState(() => resolveEffectiveModel(sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model') || DEFAULT_MODEL))
     const [autoSummarize, setAutoSummarize] = useState(() => getAutoSummarizeEnabled())
     const [vaultPassword, setVaultPassword] = useState('')
     const [vaultNewPassword, setVaultNewPassword] = useState('')
@@ -98,7 +98,7 @@ export function SettingsModal({
             if (storedKey) setApiKey(storedKey)
         }
         const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
-        if (storedModel) setSelectedModel(storedModel)
+        if (storedModel) setSelectedModel(resolveEffectiveModel(storedModel))
         const storedOllama = sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url')
         if (storedOllama) setOllamaUrl(storedOllama)
         setVaultPassword('')
@@ -150,7 +150,7 @@ export function SettingsModal({
             setUnlocked(true)
             setVaultPassword('')
             const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
-            if (storedModel) setSelectedModel(storedModel)
+            if (storedModel) setSelectedModel(resolveEffectiveModel(storedModel))
             toast.success(t('settings.vault.unlockedBadge', 'Kasa açıldı'))
         } catch {
             setUnlockError(t('settings.vault.wrongPassword'))
@@ -204,9 +204,10 @@ export function SettingsModal({
         } else if (!vaultExists) {
             sessionStorage.setItem('bs_api_key', apiKey)
         }
-        sessionStorage.setItem('bs_model', selectedModel)
+        const effectiveModel = resolveEffectiveModel(selectedModel)
+        sessionStorage.setItem('bs_model', effectiveModel)
         sessionStorage.setItem('bs_ollama_url', ollamaUrl)
-        const modelInfo = AI_MODELS.find((m) => m.id === selectedModel)
+        const modelInfo = AI_MODELS.find((m) => m.id === effectiveModel)
         if (modelInfo) {
             sessionStorage.setItem('bs_provider', modelInfo.provider)
         }

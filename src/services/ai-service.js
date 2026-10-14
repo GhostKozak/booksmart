@@ -1,43 +1,59 @@
 import { executeAIRequest } from './ai/provider-dispatcher';
 import { cleanJsonString, sanitizeLanguageCode, getProxiedUrl } from './ai/ai-utils';
 
+export const MODEL_ALIASES = {
+    'gemini-2.5-flash-lite': 'gemini-3.5-flash-lite',
+    'gemini-2.0-flash-lite': 'gemini-3.5-flash-lite',
+    'gemini-1.5-flash-8b': 'gemini-3.5-flash-lite',
+    'gemini-1.5-flash': 'gemini-3.5-flash',
+    'gemini-1.5-pro': 'gemini-3.5-pro',
+    'gpt-3.5-turbo': 'gpt-4o-mini',
+};
+
 export const AI_MODELS = [
     // --- OpenAI ---
     { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
     { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
-    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'openai' },
+    { id: 'o3-mini', name: 'o3-mini', provider: 'openai' },
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Legacy)', provider: 'openai' },
 
-    // --- Local ---
+    // --- Local (Ollama) ---
     { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
     { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
     { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
 
-    // --- Gemini 2.5 (Stable) ---
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'gemini' },
+    // --- Google Gemini (Modern 3.5 & 2.5) ---
+    { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite (Recommended)', provider: 'gemini' },
+    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', provider: 'gemini' },
+    { id: 'gemini-3.5-pro', name: 'Gemini 3.5 Pro', provider: 'gemini' },
     { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'gemini' },
-    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite', provider: 'gemini' },
-
-    // --- Gemini 2.0 ---
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'gemini' },
     { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'gemini' },
-    { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', provider: 'gemini' },
-    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)', provider: 'gemini' },
-
-    // --- Gemini 1.5 ---
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'gemini' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'gemini' },
-    { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash-8B', provider: 'gemini' },
 
     // --- Anthropic (Direct) ---
+    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic' },
     { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic' },
     { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
 
     // --- OpenRouter ---
+    { id: 'anthropic/claude-3.7-sonnet', name: 'Claude 3.7 Sonnet (via OpenRouter)', provider: 'openrouter' },
     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (via OpenRouter)', provider: 'openrouter' },
-    { id: 'anthropic/claude-3-opus', name: 'Claude 3 Opus (via OpenRouter)', provider: 'openrouter' },
+    { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1 (via OpenRouter)', provider: 'openrouter' },
+    { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (via OpenRouter)', provider: 'openrouter' },
     { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B (via OpenRouter)', provider: 'openrouter' },
 ];
 
 export const DEFAULT_MODEL = 'gpt-4o-mini';
+
+/**
+ * Resolves any deprecated or legacy model ID to its modern supported replacement.
+ * @param {string} [modelId]
+ * @returns {string}
+ */
+export function resolveEffectiveModel(modelId) {
+    if (!modelId) return DEFAULT_MODEL;
+    return MODEL_ALIASES[modelId] || modelId;
+}
 
 const CHUNK_SIZE = 20;
 const MAX_CONCURRENCY = 3;
@@ -51,7 +67,8 @@ const MAX_CONCURRENCY = 3;
  * @returns {Promise<Object>} - Map of { id: category }
  */
 export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
-    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const effectiveModel = resolveEffectiveModel(modelId);
+    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
     const chunks = [];
@@ -66,7 +83,7 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
     const processChunk = async (chunk) => {
         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
         try {
-            const categories = await fetchCategories(chunk, apiKey, provider, modelId, abortSignal);
+            const categories = await fetchCategories(chunk, apiKey, provider, effectiveModel, abortSignal);
             if (!abortSignal?.aborted) Object.assign(results, categories);
         } catch (error) {
             if (error.name === 'AbortError') throw error;
@@ -122,7 +139,8 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
 }
 
 export async function summarizeContent(url, apiKey, modelId, { abortSignal, corsProxy } = {}) {
-    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const effectiveModel = resolveEffectiveModel(modelId);
+    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
     const systemPrompt = `You are a helpful assistant. Summarize the main content, topic, and purpose of the given URL or text in a short paragraph (2-3 sentences). Write the summary in the same language as the website content. Do not include introductory phrases.`;
@@ -164,7 +182,7 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal, cors
         { role: "user", content: `Please summarize this page in '${lang}'. The summary MUST be translated natively to the language code '${lang}':\n${pageText}` }
     ];
 
-    return executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
+    return executeAIRequest({ provider, messages, apiKey, model: effectiveModel, asJson: false, signal: abortSignal });
 }
 
 /**
@@ -209,7 +227,8 @@ export async function generateOneSentenceSummary(bookmark, apiKey, modelId, { ab
         throw new Error("Bookmark URL is required");
     }
 
-    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const effectiveModel = resolveEffectiveModel(modelId);
+    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
     const url = bookmark.url;
     const title = bookmark.title || previewMetadata?.title || '';
@@ -279,12 +298,13 @@ Rules:
         { role: "user", content: userContent }
     ];
 
-    const rawSummary = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
+    const rawSummary = await executeAIRequest({ provider, messages, apiKey, model: effectiveModel, asJson: false, signal: abortSignal });
     return cleanOneSentenceSummary(rawSummary);
 }
 
 export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
-    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const effectiveModel = resolveEffectiveModel(modelId);
+    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
     const chunks = [];
@@ -312,7 +332,7 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
                 { role: "user", content: JSON.stringify(simplified) }
             ];
 
-            const chunkResults = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: true, signal: abortSignal });
+            const chunkResults = await executeAIRequest({ provider, messages, apiKey, model: effectiveModel, asJson: true, signal: abortSignal });
             if (!abortSignal?.aborted && chunkResults && typeof chunkResults === 'object') {
                 Object.assign(results, chunkResults);
             }
@@ -346,7 +366,8 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
 }
 
 export async function findSmartDuplicates(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
-    const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
+    const effectiveModel = resolveEffectiveModel(modelId);
+    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
     const DEDUPE_CHUNK_SIZE = 50;
@@ -372,7 +393,7 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
                 { role: "user", content: JSON.stringify(simplified) }
             ];
 
-            const raw = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
+            const raw = await executeAIRequest({ provider, messages, apiKey, model: effectiveModel, asJson: false, signal: abortSignal });
             let resultJson = [];
             try {
                 resultJson = JSON.parse(cleanJsonString(raw));

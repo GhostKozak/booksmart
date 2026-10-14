@@ -130,5 +130,25 @@ describe('ai-cost-estimator', () => {
             expect(pricing.inputPerM).toBe(0.80);
             expect(pricing.outputPerM).toBe(4.00);
         });
+
+        it('should return correct pricing for newly added models', () => {
+            const geminiPricing = getModelPricing('gemini-3.5-flash-lite');
+            expect(geminiPricing.inputPerM).toBe(0.0375);
+            expect(geminiPricing.outputPerM).toBe(0.15);
+
+            const o3Pricing = getModelPricing('o3-mini');
+            expect(o3Pricing.inputPerM).toBe(1.10);
+            expect(o3Pricing.outputPerM).toBe(4.40);
+
+            const claude37Pricing = getModelPricing('claude-3-7-sonnet-20250219');
+            expect(claude37Pricing.inputPerM).toBe(3.00);
+            expect(claude37Pricing.outputPerM).toBe(15.00);
+        });
+
+        it('should resolve legacy models through aliases', () => {
+            const legacyPricing = getModelPricing('gemini-2.5-flash-lite');
+            expect(legacyPricing).toBeDefined();
+            expect(legacyPricing.inputPerM).toBe(0.0375);
+        });
     });
 });

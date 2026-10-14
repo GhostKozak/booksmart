@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { categorizeBookmarks, summarizeContent, generateOneSentenceSummary, cleanOneSentenceSummary, AI_MODELS } from '../ai-service';
+import {
+    categorizeBookmarks,
+    summarizeContent,
+    generateOneSentenceSummary,
+    cleanOneSentenceSummary,
+    resolveEffectiveModel,
+    MODEL_ALIASES,
+    AI_MODELS
+} from '../ai-service';
 
 // Mock Fetch
 global.fetch = vi.fn();
@@ -145,6 +153,49 @@ describe('AI Service', () => {
         it('throws error when bookmark URL is missing', async () => {
             await expect(generateOneSentenceSummary({}, 'key', 'gpt-4o-mini'))
                 .rejects.toThrow('Bookmark URL is required');
+        });
+    });
+
+    describe('resolveEffectiveModel & Model Aliasing', () => {
+        it('maps deprecated Gemini models to modern Gemini 3.5 equivalents', () => {
+            expect(resolveEffectiveModel('gemini-2.5-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gemini-2.0-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gemini-1.5-flash')).toBe('gemini-3.5-flash');
+            expect(resolveEffectiveModel('gemini-1.5-pro')).toBe('gemini-3.5-pro');
+        });
+
+        it('maps legacy GPT-3.5 to GPT-4o Mini', () => {
+            expect(resolveEffectiveModel('gpt-3.5-turbo')).toBe('gpt-4o-mini');
+        });
+
+        it('retains modern supported models unchanged', () => {
+            expect(resolveEffectiveModel('gemini-3.5-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gpt-4o-mini')).toBe('gpt-4o-mini');
+            expect(resolveEffectiveModel('claude-3-7-sonnet-20250219')).toBe('claude-3-7-sonnet-20250219');
+        });
+
+        it('falls back to DEFAULT_MODEL when null or empty', () => {
+            expect(resolveEffectiveModel(null)).toBe('gpt-4o-mini');
+            expect(resolveEffectiveModel('')).toBe('gpt-4o-mini');
+            expect(resolveEffectiveModel(undefined)).toBe('gpt-4o-mini');
+        });
+
+        it('routes legacy gemini-2.5-flash-lite to gemini-3.5-flash-lite when calling categorizeBookmarks', async () => {
+            const bookmarks = [{ id: '1', title: 'Test', url: 'https://test.com' }];
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    candidates: [{ content: { parts: [{ text: JSON.stringify({ '1': { folder: 'Dev' } }) }] } }]
+                })
+            });
+
+            await categorizeBookmarks(bookmarks, 'gemini-key', 'gemini-2.5-flash-lite');
+
+            // Should have made call to Gemini endpoint using gemini-3.5-flash-lite
+            expect(fetch).toHaveBeenCalledWith(
+                expect.stringContaining('gemini-3.5-flash-lite'),
+                expect.any(Object)
+            );
         });
     });
 });
