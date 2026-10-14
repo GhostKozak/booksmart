@@ -92,4 +92,21 @@ describe('ExportModal', () => {
         const downloadBtn = downloadButtons.find(b => b.textContent.includes('modals.export.download'))
         expect(downloadBtn).toBeDisabled()
     })
+
+    it('handles availableFolders containing objects without crashing on localeCompare', () => {
+        const objectFolders = [
+            { id: '1', name: 'Work', color: '#3b82f6', order: 0 },
+            { id: '2', name: 'Dev', color: '#10b981', order: 1 },
+            null,
+            'Reading'
+        ]
+
+        expect(() => {
+            render(<ExportModal {...defaultProps} availableFolders={objectFolders} />)
+        }).not.toThrow()
+
+        expect(screen.getByText('📁 Work')).toBeInTheDocument()
+        expect(screen.getByText('📁 Dev')).toBeInTheDocument()
+        expect(screen.getByText('📁 Reading')).toBeInTheDocument()
+    })
 })

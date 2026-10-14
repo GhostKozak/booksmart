@@ -215,7 +215,7 @@ const FolderNode = ({
                 <div className="space-y-0.5">
                     {/* Render subfolders sorted by name */}
                     {Object.values(node.subfolders)
-                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
                         .map(sub => (
                             <FolderNode
                                 key={sub.name}
@@ -376,7 +376,7 @@ export function BookmarkTree({
 
                 {/* Render Root-level Subfolders */}
                 {Object.values(tree.subfolders)
-                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
                     .map(sub => (
                         <FolderNode
                             key={sub.name}

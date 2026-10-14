@@ -25,12 +25,20 @@ export function ExportModal({
 
     // Sorted unique folders
     const sortedFolders = useMemo(() => {
-        const set = new Set((availableFolders || []).filter(Boolean))
+        const folderNames = (availableFolders || [])
+            .map(f => (typeof f === 'string' ? f : f?.name))
+            .filter(Boolean)
+            .map(s => String(s).trim())
+            .filter(s => s.length > 0)
+
+        const set = new Set(folderNames)
         set.add('Root')
         return Array.from(set).sort((a, b) => {
             if (a === 'Root') return -1
             if (b === 'Root') return 1
-            return a.localeCompare(b)
+            const strA = typeof a === 'string' ? a : String(a?.name || a || '')
+            const strB = typeof b === 'string' ? b : String(b?.name || b || '')
+            return strA.localeCompare(strB, undefined, { sensitivity: 'base' })
         })
     }, [availableFolders])
 
