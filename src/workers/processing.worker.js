@@ -1,4 +1,5 @@
 import Fuse from 'fuse.js'
+import { semanticSearch } from '../lib/semantic-search-service'
 
 // --- Security Helpers ---
 
@@ -134,6 +135,8 @@ const processData = ({
                     (b.url || '').toLowerCase().includes(query)
                 );
             }
+        } else if (searchMode === 'semantic') {
+            filtered = semanticSearch(filtered, searchQuery);
         } else {
             // Simple Mode
             filtered = filtered.filter(b => {

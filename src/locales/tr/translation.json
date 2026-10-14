@@ -17,7 +17,9 @@
                 "fuzzy": "Bulanık",
                 "fuzzyTitle": "Yaklaşık eşleşme (yazım hatası toleranslı)",
                 "regex": "Regex",
-                "regexTitle": "Düzenli İfade"
+                "regexTitle": "Düzenli İfade",
+                "semantic": "Anlamsal (AI)",
+                "semanticTitle": "Anlamsal arama: Başlıkta geçmese bile yakın anlamları bulur (Yerel AI)"
             },
             "date": {
                 "added": "Eklendi",
@@ -62,6 +64,7 @@
         "lightMode": "Açık Mod",
         "darkMode": "Koyu Mod",
         "regexPlaceholder": "örn: ^https?://.*\\.dev",
+        "semanticPlaceholder": "Anlamsal ara (örn: React hızlandırma)...",
         "sort": {
             "label": "Sırala",
             "default": "Varsayılan",

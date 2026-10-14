@@ -108,6 +108,33 @@ describe('processing.worker', () => {
         });
     });
 
+    describe('semantic search', () => {
+        it('should filter conceptually matching bookmarks using semantic mode', async () => {
+            const result = process({
+                searchQuery: 'Frontend web interface framework',
+                searchMode: 'semantic'
+            });
+            expect(result.payload.processedBookmarks.length).toBeGreaterThan(0);
+            expect(['1', '2']).toContain(result.payload.processedBookmarks[0].id);
+        });
+
+        it('should find React optimization bookmark with semantically related terms', async () => {
+            const customBookmarks = [
+                { id: '10', url: 'https://example.com/python', title: 'Python Django Backend', originalFolder: 'Dev', tags: ['python'] },
+                { id: '11', url: 'https://example.com/react-opt', title: 'useMemo ve useCallback İpuçları', originalFolder: 'Dev', tags: ['frontend'] },
+                { id: '12', url: 'https://example.com/figma', title: 'Figma Renk Paleti', originalFolder: 'Design', tags: ['ui'] }
+            ];
+            const result = process({
+                bookmarks: customBookmarks,
+                searchQuery: 'React hızlandırma',
+                searchMode: 'semantic'
+            });
+            expect(result.payload.processedBookmarks.length).toBeGreaterThan(0);
+            expect(result.payload.processedBookmarks[0].id).toBe('11');
+            expect(result.payload.processedBookmarks[0].title).toBe('useMemo ve useCallback İpuçları');
+        });
+    });
+
     describe('date filtering', () => {
         it('should filter by start date', async () => {
             const startDate = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];

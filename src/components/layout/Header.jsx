@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { HeaderActionsMenu } from './HeaderActionsMenu'
 import { useTranslation } from 'react-i18next'
-import { Download, Undo2, Redo2, Search, History as HistoryIcon, X, Filter, TextAlignStart, RefreshCw, Rss } from 'lucide-react'
+import { Download, Undo2, Redo2, Search, History as HistoryIcon, X, Filter, TextAlignStart, RefreshCw, Rss, Sparkles } from 'lucide-react'
 import { Logo } from '../ui/Logo'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -130,15 +130,26 @@ export function Header({
                         </Button>
                     )}
                     <div className="relative flex-1 min-w-0">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        {searchMode === 'semantic' ? (
+                            <Sparkles className="absolute left-2.5 top-2.5 h-4 w-4 text-violet-500 animate-pulse" />
+                        ) : (
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        )}
                         <Input
                             ref={searchInputRef}
                             type="search"
                             aria-label={t('app.searchPlaceholder')}
-                            placeholder={searchMode === 'regex' ? t('header.regexPlaceholder') : t('app.searchPlaceholder')}
+                            placeholder={
+                                searchMode === 'semantic'
+                                    ? t('header.semanticPlaceholder', 'Anlamsal ara (örn: React hızlandırma)...')
+                                    : searchMode === 'regex'
+                                        ? t('header.regexPlaceholder')
+                                        : t('app.searchPlaceholder')
+                            }
                             className={cn(
                                 "pl-8 pr-8 bg-background/50 focus:bg-background transition-colors h-9 sm:h-10 text-sm",
-                                searchMode === 'regex' && "font-mono text-xs"
+                                searchMode === 'regex' && "font-mono text-xs",
+                                searchMode === 'semantic' && "border-violet-500/40 focus:border-violet-500 focus-visible:ring-violet-500/20"
                             )}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}

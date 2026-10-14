@@ -17,7 +17,9 @@
                 "fuzzy": "Fuzzy",
                 "fuzzyTitle": "Approximate match (typo tolerant)",
                 "regex": "Regex",
-                "regexTitle": "Regular Expression"
+                "regexTitle": "Regular Expression",
+                "semantic": "Semantic (AI)",
+                "semanticTitle": "Semantic search: Finds conceptually related items even if keywords differ (Local AI)"
             },
             "date": {
                 "added": "Added",
@@ -62,6 +64,7 @@
         "lightMode": "Light Mode",
         "darkMode": "Dark Mode",
         "regexPlaceholder": "e.g. ^https?://.*\\.dev",
+        "semanticPlaceholder": "Semantic search (e.g. React optimization)...",
         "sort": {
             "label": "Sort By",
             "default": "Default",
