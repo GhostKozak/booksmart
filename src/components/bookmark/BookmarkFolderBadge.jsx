@@ -3,8 +3,8 @@ import { cn } from '../../lib/utils'
 export function BookmarkFolderBadge({ folderName, availableFolders = [], isMatched = false, className }) {
     if (!folderName) return null
 
-    const folderConfig = availableFolders?.find(f => f.name === folderName);
-    const customColor = folderConfig?.color;
+    const folderConfig = availableFolders?.find(f => (typeof f === 'string' ? f === folderName : f?.name === folderName));
+    const customColor = typeof folderConfig === 'object' ? folderConfig?.color : null;
 
     const style = !isMatched && customColor ? {
         borderColor: customColor + '40',

@@ -17,7 +17,9 @@
                 "fuzzy": "Difuso",
                 "fuzzyTitle": "Coincidencia aproximada (tolerante a errores)",
                 "regex": "Regex",
-                "regexTitle": "Expresión Regular"
+                "regexTitle": "Expresión Regular",
+                "semantic": "Semantic (AI)",
+                "semanticTitle": "Semantic search: Finds conceptually related items even if keywords differ (Local AI)"
             },
             "date": {
                 "added": "Añadido",
@@ -70,9 +72,12 @@
             "dateNew": "Fecha (Más nuevo)",
             "dateOld": "Fecha (Más antiguo)",
             "domain": "Dominio",
-            "folder": "Carpeta"
+            "folder": "Carpeta",
+            "asc": "Ascending (A→Z, Oldest first)",
+            "desc": "Descending (Z→A, Newest first)"
         },
-        "themeLabel": "Tema"
+        "themeLabel": "Tema",
+        "semanticPlaceholder": "Semantic search (e.g. React optimization)..."
     },
     "sidebar": {
         "allBookmarks": "Todos",
@@ -100,7 +105,10 @@
             "old": "Estantes polvorientos (> 5a)",
             "http": "No seguro (HTTP)",
             "untitled": "Sin título / Genérico",
-            "docs": "Documentos y PDFs"
+            "docs": "Documentos y PDFs",
+            "highlights": "Highlights & Notes",
+            "snapshots": "Offline Snapshots",
+            "reminders": "Reminders"
         },
         "rules": {
             "title": "Reglas",
@@ -109,7 +117,13 @@
             "createFirst": "Crea tu primera regla",
             "edit": "Editar Regla",
             "delete": "Eliminar Regla"
-        }
+        },
+        "inbox": "Inbox",
+        "activeFilter": "Active Filter",
+        "clearFilter": "Clear Filter",
+        "filterSearchPlaceholder": "Search folders, tags...",
+        "noSearchResults": "No matching items found",
+        "shortcutsHint": "Shortcuts"
     },
     "settings": {
         "title": "Ajustes",
@@ -119,7 +133,8 @@
             "tags": "Etiquetas",
             "backup": "Copia y Datos",
             "rules": "Reglas",
-            "ai": "IA"
+            "ai": "IA",
+            "about": "About"
         },
         "language": {
             "label": "Idioma",
@@ -198,6 +213,20 @@
             "willEncrypt": "Su clave API actual se cifrará en la bóveda.",
             "unlockedBadge": "Bóveda desbloqueada",
             "enterPassword": "Por favor, introduce una contraseña para la bóveda"
+        },
+        "about": {
+            "title": "About BookSmart",
+            "desc": "Version info, local storage, and privacy guarantee",
+            "version": "Version",
+            "privacyTitle": "100% Local & Privacy-First",
+            "privacyDesc": "All your bookmarks, folders, tags, and encrypted API keys are stored solely in this browser's IndexedDB storage. Your data is never transmitted to external servers or cloud services.",
+            "stats": "Local Database Statistics",
+            "totalBookmarks": "Total Bookmarks",
+            "totalFolders": "Folders",
+            "totalTags": "Tags",
+            "totalSnapshots": "Offline Snapshots",
+            "github": "GitHub Repository",
+            "license": "Open Source MIT License"
         }
     },
     "common": {
@@ -611,7 +640,12 @@
             "titlePlaceholder": "Título del marcador",
             "folderPlaceholder": "Seleccione o escriba una carpeta",
             "tagsPlaceholder": "Escriba etiqueta y presione Enter",
-            "undoDesc": "Editar \"{{title}}\""
+            "undoDesc": "Editar \"{{title}}\"",
+            "fetchMetadata": "Fetch Info from URL",
+            "fetchFromUrl": "Auto-fetch title and description from page",
+            "invalidUrl": "Please enter a valid web URL (https://...).",
+            "metadataFetched": "Page info fetched successfully!",
+            "noMetadata": "No metadata found for page."
         }
     },
     "main": {
@@ -711,7 +745,26 @@
             "text": "Copiar como Texto",
             "copied": "{{count}} marcadores copiados al portapapeles",
             "empty": "Esta colección está vacía",
-            "footer": "{{count}} marcadores compartidos a través de BookSmart"
+            "footer": "{{count}} marcadores compartidos a través de BookSmart",
+            "copiedMarkdown": "Markdown list copied to clipboard!"
+        },
+        "hub": {
+            "modalTitle": "Public Link Hub & Bento Portfolio",
+            "layoutStyle": "Layout Style",
+            "accentColor": "Accent Color",
+            "customColor": "Custom Color",
+            "bioLabel": "Description / Bio",
+            "bioPlaceholder": "e.g. 50 curated resources for developers and designers",
+            "authorLabel": "Curator / Author (Optional)",
+            "openLivePreview": "Open Live Preview",
+            "downloadHtml": "Download HTML (index.html)",
+            "downloadSuccess": "Downloaded as \"index.html\"! Ready for GitHub Pages.",
+            "copiedHtml": "HTML source code copied to clipboard!",
+            "copyHtmlCode": "Copy HTML Source Code",
+            "livePreviewTitle": "Live Preview",
+            "githubGuideTitle": "How to Host Free on GitHub Pages (1 Minute)",
+            "shareAsHub": "Share as Bento / Linktree Hub",
+            "menuItem": "Web Page (Bento / Hub)"
         }
     },
     "onboarding": {
@@ -858,6 +911,84 @@
         "endOfArticle": "Fin del artículo",
         "words": "palabras",
         "readingTimeMinutes": "{{count}} min de lectura",
-        "minShort": "min"
+        "minShort": "min",
+        "highlights": {
+            "title": "Highlights & Notes",
+            "toggleSidebar": "Highlights & Notes",
+            "countSuffix": "highlights",
+            "badgeTooltip": "Open highlights in Reader Mode",
+            "addNote": "Add Margin Note",
+            "note": "Note",
+            "editNote": "Edit Note",
+            "notePlaceholder": "Write an annotation or thought about this highlight...",
+            "noteSaved": "Note saved",
+            "savedSuccess": "Highlight saved!",
+            "deleted": "Highlight removed",
+            "allCopied": "All highlights copied as Markdown!",
+            "copyAllMarkdown": "Copy All as Markdown",
+            "emptyTitle": "No highlights yet",
+            "emptyDesc": "Select any text in the article to color-highlight and add annotations.",
+            "scrollTo": "Jump to text location",
+            "colors": {
+                "yellow": "Yellow",
+                "green": "Green",
+                "blue": "Blue",
+                "purple": "Purple"
+            }
+        }
+    },
+    "qr": {
+        "title": "Share via QR Code to Mobile",
+        "modalTitle": "Share via QR Code",
+        "scanTip": "Open your phone camera to scan this QR code.",
+        "downloadPng": "Download PNG",
+        "copiedLink": "Link copied to clipboard!",
+        "downloadedSuccess": "QR code image downloaded!"
+    },
+    "reminders": {
+        "setReminder": "Remind Me Later",
+        "modalTitle": "Remind Me Later",
+        "activeAlarm": "Active Alarm:",
+        "remove": "Remove",
+        "quickPresets": "Quick Presets",
+        "customDateTime": "Custom Date & Time",
+        "enablePush": "Enable desktop notifications for reminders?",
+        "allow": "Allow",
+        "permissionGranted": "Notification permission granted!",
+        "savedSuccess": "Reminder scheduled!",
+        "removedSuccess": "Reminder removed.",
+        "overdue": "Overdue",
+        "inMinutes": "in {{count}}m",
+        "inHours": "in {{count}}h",
+        "tomorrow": "Tomorrow",
+        "inDays": "in {{count}}d",
+        "notificationTitle": "Reading Reminder",
+        "openNow": "Open",
+        "snooze1Day": "Snooze 1 Day",
+        "snoozedSuccess": "Snoozed for 1 day",
+        "presets": {
+            "tomorrow": "Tomorrow (09:00)",
+            "in3days": "In 3 Days",
+            "weekend": "Read This Weekend (Sat 10:00)",
+            "nextweek": "Next Week (Mon 09:00)"
+        }
+    },
+    "snapshots": {
+        "viewerTitle": "Offline Archive (HTML Snapshot)",
+        "downloadHtml": "Download HTML",
+        "downloadedSuccess": "Offline HTML file downloaded!",
+        "deletedSuccess": "Offline snapshot deleted.",
+        "savedSuccess": "Page archived offline!",
+        "savedBadge": "Archived",
+        "saveOffline": "Archive Offline",
+        "badgeTooltip": "Open Offline HTML Snapshot",
+        "badgeShort": "Offline",
+        "notFoundTitle": "No Offline Archive Yet",
+        "notFoundDesc": "A local HTML snapshot has not been saved for this page yet. You can save it from Reader Mode using 'Archive Offline', or check available archives on Wayback Machine.",
+        "checkWayback": "Search on Wayback Machine",
+        "saveToWayback": "Save to Wayback Machine",
+        "offlineReady": "Offline Ready",
+        "savedAt": "Saved At",
+        "fileSize": "Size"
     }
 }

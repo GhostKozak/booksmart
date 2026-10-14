@@ -429,8 +429,8 @@ export function BookmarkGrid({
         const isSelected = ctx.selectedIds?.has(bookmark.id);
 
         const folderName = bookmark.newFolder || bookmark.originalFolder;
-        const folderConfig = ctx.availableFolders?.find(f => f.name === folderName);
-        const folderColor = folderConfig ? folderConfig.color : null;
+        const folderConfig = ctx.availableFolders?.find(f => (typeof f === 'string' ? f === folderName : f?.name === folderName));
+        const folderColor = typeof folderConfig === 'object' ? folderConfig?.color : null;
 
         return (
             <GridItem

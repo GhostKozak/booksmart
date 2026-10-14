@@ -14,8 +14,8 @@ export function BookmarkTags({ tags, ruleTags = [], availableTags = [], classNam
             {allTags.map(tag => {
                 const isRuleTag = uniqueRuleTags.has(tag) && !uniqueTags.has(tag); // Strictly rule-only
 
-                const tagConfig = availableTags?.find(t => t.name === tag);
-                const customColor = tagConfig ? tagConfig.color : null;
+                const tagConfig = availableTags?.find(t => (typeof t === 'string' ? t === tag : t?.name === tag));
+                const customColor = typeof tagConfig === 'object' ? tagConfig?.color : null;
 
                 // Dynamic style if custom color exists, else fallback to classes
                 const style = customColor ? {

@@ -571,7 +571,7 @@ export function generateCollectionHubHtml(collection, bookmarks = [], options = 
     </div>
 
     <footer class="footer">
-      <p>Curated with <a href="https://github.com/booksmart" target="_blank" rel="noopener noreferrer">BookSmart</a></p>
+      <p>Curated with <a href="https://github.com/GhostKozak/booksmart" target="_blank" rel="noopener noreferrer">BookSmart</a></p>
     </footer>
   </div>
 

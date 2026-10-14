@@ -22,7 +22,7 @@ export function useBookmarkOperations({
     const removeDuplicates = async () => {
         const urls = new Set()
         const toDeleteIds = []
-        const sortedBookmarks = [...rawBookmarks].sort((a, b) => b.addDate - a.addDate)
+        const sortedBookmarks = [...rawBookmarks].sort((a, b) => (parseInt(b.addDate) || 0) - (parseInt(a.addDate) || 0))
 
         sortedBookmarks.forEach(b => {
             const normalized = normalizeUrl(b.url)

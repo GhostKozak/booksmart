@@ -13,16 +13,18 @@ export function BookmarkCollections({ collectionIds = [], allCollections = [], o
 
     return (
         <div className={cn("flex gap-1 mt-1 flex-wrap", className)}>
-            {resolvedCollections.map(collection => (
-                <span
-                    key={collection.id}
-                    className="group/col inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors"
-                    style={{
-                        backgroundColor: collection.color + '15',
-                        color: collection.color,
-                        borderColor: collection.color + '30'
-                    }}
-                >
+            {resolvedCollections.map(collection => {
+                const color = collection.color || '#6366f1'
+                return (
+                    <span
+                        key={collection.id}
+                        className="group/col inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors"
+                        style={{
+                            backgroundColor: color + '15',
+                            color: color,
+                            borderColor: color + '30'
+                        }}
+                    >
                     <span className="text-[10px] leading-none">{collection.icon}</span>
                     {collection.name}
                     {onRemove && (
@@ -38,7 +40,7 @@ export function BookmarkCollections({ collectionIds = [], allCollections = [], o
                         </button>
                     )}
                 </span>
-            ))}
+            )})}
         </div>
     )
 }

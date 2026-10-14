@@ -42,9 +42,9 @@ export function BookmarkTable({
         } else if (column === 'date') {
             setSortBy(sortBy === 'date-new' ? 'date-old' : 'date-new')
         } else if (column === 'folder') {
-            setSortBy(sortBy === 'folder' ? 'default' : 'folder')
+            setSortBy(sortBy === 'folder' ? 'folder-desc' : 'folder')
         } else if (column === 'url') {
-            setSortBy(sortBy === 'domain' ? 'default' : 'domain')
+            setSortBy(sortBy === 'domain' ? 'domain-desc' : 'domain')
         }
     }
 
@@ -58,8 +58,10 @@ export function BookmarkTable({
             if (sortBy === 'date-old') return <ArrowUp className="h-3 w-3 ml-1 text-primary shrink-0" />
         } else if (column === 'folder') {
             if (sortBy === 'folder') return <ArrowUp className="h-3 w-3 ml-1 text-primary shrink-0" />
+            if (sortBy === 'folder-desc') return <ArrowDown className="h-3 w-3 ml-1 text-primary shrink-0" />
         } else if (column === 'url') {
             if (sortBy === 'domain') return <ArrowUp className="h-3 w-3 ml-1 text-primary shrink-0" />
+            if (sortBy === 'domain-desc') return <ArrowDown className="h-3 w-3 ml-1 text-primary shrink-0" />
         }
         return <ArrowUpDown className="h-3 w-3 ml-1 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
     }

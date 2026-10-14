@@ -86,7 +86,12 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
         }
     }
 
-    const availableTagNames = availableTags.map(t => t.name)
+    const availableTagNames = (availableTags || [])
+        .map(t => (typeof t === 'string' ? t : t?.name))
+        .filter(Boolean)
+    const availableFolderNames = (availableFolders || [])
+        .map(f => (typeof f === 'string' ? f : f?.name))
+        .filter(Boolean)
 
     const handleSave = async () => {
         if (!title.trim() && !url.trim()) return
@@ -145,7 +150,7 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
                     <SimpleCombobox
                         value={folder}
                         onChange={setFolder}
-                        options={availableFolders.map(f => f.name)}
+                        options={availableFolderNames}
                         placeholder={t('bookmarks.editModal.folderPlaceholder')}
                         allowCreate={true}
                     />
