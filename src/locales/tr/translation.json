@@ -80,6 +80,12 @@
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
         "uncategorized": "Kategorisiz",
+        "inbox": "Gelen Kutusu",
+        "activeFilter": "Aktif Filtre",
+        "clearFilter": "Filtreyi Temizle",
+        "filterSearchPlaceholder": "Klasör, etiket ara...",
+        "noSearchResults": "Eşleşen öğe bulunamadı",
+        "shortcutsHint": "Kısayollar",
         "myFolders": "Klasörlerim",
         "myTags": "Etiketlerim",
         "discovered": "Keşfedilenler",

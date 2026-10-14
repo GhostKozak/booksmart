@@ -80,6 +80,12 @@
     "sidebar": {
         "allBookmarks": "All Bookmarks",
         "uncategorized": "Uncategorized",
+        "inbox": "Inbox",
+        "activeFilter": "Active Filter",
+        "clearFilter": "Clear Filter",
+        "filterSearchPlaceholder": "Search folders, tags...",
+        "noSearchResults": "No matching items found",
+        "shortcutsHint": "Shortcuts",
         "myFolders": "My Folders",
         "myTags": "My Tags",
         "discovered": "Discovered",

@@ -76,6 +76,7 @@ function App() {
 
   // ── UI State from Store ──
   const {
+    isSidebarOpen, setIsSidebarOpen,
     searchQuery, searchMode, activeTag, activeFolder, smartFilter,
     dateFilter, sortBy, activeCollection, resolvedTheme, initTheme,
     settingsTab, isSettingsOpen, setSettingsTab, setIsSettingsOpen, openSettings,
@@ -401,6 +402,14 @@ function App() {
       </div>
 
       <div className="relative flex flex-1 overflow-hidden">
+        {/* Mobile Backdrop Overlay */}
+        {isSidebarOpen && !isOnboardingActive && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 lg:hidden animate-in fade-in duration-200"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
         <div
           className={`sidebar-slide relative z-30 ${isOnboardingActive ? '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden' : 'translate-x-0 opacity-100'}`}
         >

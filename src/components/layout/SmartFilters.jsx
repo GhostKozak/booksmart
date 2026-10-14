@@ -1,12 +1,31 @@
-import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, Highlighter, HardDrive, ChevronRight, ChevronDown } from 'lucide-react'
+import React from 'react'
+import {
+    Archive,
+    History as HistoryIcon,
+    ShieldAlert,
+    FileQuestion,
+    File,
+    XCircle,
+    Link,
+    Video,
+    MessageCircle,
+    ShoppingCart,
+    Newspaper,
+    Bell,
+    Highlighter,
+    HardDrive,
+    ChevronRight,
+    ChevronDown
+} from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
-
 import { useAppStore } from '../../store/useAppStore'
 
 export function SmartFilters({
-    smartCounts,
-    deadLinkCount
+    smartCounts = {},
+    deadLinkCount = 0,
+    filterSearch = '',
+    onItemSelect
 }) {
     const { t } = useTranslation()
     const { smartFilter, setSmartFilter, collapsedSections, toggleSection } = useAppStore()
@@ -17,77 +36,103 @@ export function SmartFilters({
         { key: 'highlights', label: t('sidebar.smartFilters.highlights', 'Vurgular & Notlar'), icon: Highlighter, count: smartCounts.highlights || 0, color: 'yellow' },
         { key: 'snapshots', label: t('sidebar.smartFilters.snapshots', 'Çevrimdışı Arşiv'), icon: HardDrive, count: smartCounts.snapshots || 0, color: 'emerald' },
         { key: 'reminders', label: t('sidebar.smartFilters.reminders', 'Hatırlatıcılar'), icon: Bell, count: smartCounts.reminders || 0, color: 'indigo' },
-        { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
-        { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http, color: 'red' },
-        { key: 'untitled', label: t('sidebar.smartFilters.untitled'), icon: FileQuestion, count: smartCounts.untitled, color: 'orange' },
-        { key: 'docs', label: t('sidebar.smartFilters.docs'), icon: File, count: smartCounts.docs, color: 'blue' },
+        { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old || 0, color: 'amber' },
+        { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http || 0, color: 'red' },
+        { key: 'untitled', label: t('sidebar.smartFilters.untitled'), icon: FileQuestion, count: smartCounts.untitled || 0, color: 'orange' },
+        { key: 'docs', label: t('sidebar.smartFilters.docs'), icon: File, count: smartCounts.docs || 0, color: 'blue' },
         { key: 'divider' },
-        { key: 'dead', label: t('sidebar.smartFilters.deadLinks'), icon: XCircle, count: deadLinkCount, color: 'gray' },
-        { key: 'longurl', label: t('sidebar.smartFilters.longUrls'), icon: Link, count: smartCounts.longurl, color: 'purple' },
-        { key: 'media', label: t('sidebar.smartFilters.media'), icon: Video, count: smartCounts.media, color: 'pink' },
-        { key: 'social', label: t('sidebar.smartFilters.social'), icon: MessageCircle, count: smartCounts.social, color: 'sky' },
-        { key: 'shopping', label: t('sidebar.smartFilters.shopping'), icon: ShoppingCart, count: smartCounts.shopping, color: 'emerald' },
-        { key: 'news', label: t('sidebar.smartFilters.news'), icon: Newspaper, count: smartCounts.news, color: 'teal' },
+        { key: 'dead', label: t('sidebar.smartFilters.deadLinks'), icon: XCircle, count: deadLinkCount || 0, color: 'gray' },
+        { key: 'longurl', label: t('sidebar.smartFilters.longUrls'), icon: Link, count: smartCounts.longurl || 0, color: 'purple' },
+        { key: 'media', label: t('sidebar.smartFilters.media'), icon: Video, count: smartCounts.media || 0, color: 'pink' },
+        { key: 'social', label: t('sidebar.smartFilters.social'), icon: MessageCircle, count: smartCounts.social || 0, color: 'sky' },
+        { key: 'shopping', label: t('sidebar.smartFilters.shopping'), icon: ShoppingCart, count: smartCounts.shopping || 0, color: 'emerald' },
+        { key: 'news', label: t('sidebar.smartFilters.news'), icon: Newspaper, count: smartCounts.news || 0, color: 'teal' },
     ]
 
     const colorMap = {
-        yellow: { active: 'bg-yellow-100 text-yellow-800 font-medium dark:bg-yellow-900/30 dark:text-yellow-300' },
-        indigo: { active: 'bg-indigo-100 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-400' },
-        amber: { active: 'bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400' },
-        red: { active: 'bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' },
-        orange: { active: 'bg-orange-100 text-orange-700 font-medium dark:bg-orange-900/30 dark:text-orange-400' },
-        blue: { active: 'bg-blue-100 text-blue-700 font-medium dark:bg-blue-900/30 dark:text-blue-400' },
-        gray: { active: 'bg-gray-200 text-gray-800 font-medium dark:bg-gray-700/50 dark:text-gray-200' },
-        purple: { active: 'bg-purple-100 text-purple-700 font-medium dark:bg-purple-900/30 dark:text-purple-400' },
-        pink: { active: 'bg-pink-100 text-pink-700 font-medium dark:bg-pink-900/30 dark:text-pink-400' },
-        sky: { active: 'bg-sky-100 text-sky-700 font-medium dark:bg-sky-900/30 dark:text-sky-400' },
-        emerald: { active: 'bg-emerald-100 text-emerald-700 font-medium dark:bg-emerald-900/30 dark:text-emerald-400' },
-        teal: { active: 'bg-teal-100 text-teal-700 font-medium dark:bg-teal-900/30 dark:text-teal-400' },
+        yellow: { active: 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 font-semibold' },
+        indigo: { active: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-semibold' },
+        amber: { active: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold' },
+        red: { active: 'bg-red-500/15 text-red-700 dark:text-red-300 font-semibold' },
+        orange: { active: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 font-semibold' },
+        blue: { active: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 font-semibold' },
+        gray: { active: 'bg-gray-500/15 text-gray-700 dark:text-gray-300 font-semibold' },
+        purple: { active: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 font-semibold' },
+        pink: { active: 'bg-pink-500/15 text-pink-700 dark:text-pink-300 font-semibold' },
+        sky: { active: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold' },
+        emerald: { active: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-semibold' },
+        teal: { active: 'bg-teal-500/15 text-teal-700 dark:text-teal-300 font-semibold' },
     }
 
+    const searchTerm = (filterSearch || '').trim().toLowerCase()
+    const filteredList = searchTerm
+        ? filters.filter(f => f.key !== 'divider' && f.label && f.label.toLowerCase().includes(searchTerm))
+        : filters
+
+    const handleFilterClick = (filterKey) => {
+        const next = smartFilter === filterKey ? null : filterKey
+        setSmartFilter(next)
+        onItemSelect?.()
+    }
+
+    if (searchTerm && filteredList.length === 0) {
+        return null
+    }
 
     return (
-        <>
+        <div className="space-y-1">
             <div
-                className="flex items-center justify-between mb-1 border-t pt-2 flex-shrink-0 cursor-pointer hover:text-primary transition-colors group"
+                className="flex items-center justify-between py-1.5 px-2 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors group select-none"
                 onClick={onToggle}
             >
-                <h2 className="font-semibold text-base lg:text-lg flex items-center gap-2">
-                    {collapsed ? <ChevronRight className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary" /> : <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground group-hover:text-primary" />}
-                    <Archive className="h-4 w-4 lg:h-5 lg:w-5" /> {t('sidebar.sections.smartFilters')}
-                </h2>
+                <div className="flex items-center gap-2 font-medium text-sm text-foreground/80 group-hover:text-foreground">
+                    {collapsed ? (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:text-foreground" />
+                    ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-hover:text-foreground" />
+                    )}
+                    <Archive className="h-4 w-4 text-emerald-500" />
+                    <span>{t('sidebar.sections.smartFilters')}</span>
+                </div>
             </div>
 
             {!collapsed && (
-                <div className="mb-2 space-y-1 flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 animate-in fade-in slide-in-from-top-1 duration-200">
-                    {filters.map(filter => {
+                <div className="space-y-0.5 pl-2 pt-0.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {filteredList.map((filter, idx) => {
                         if (filter.key === 'divider') {
-                            return <div key="divider" className="my-1 border-t border-dashed" />
+                            return <div key={`divider-${idx}`} className="my-1.5 border-t border-border/50" />
                         }
 
                         const Icon = filter.icon
                         const isActive = smartFilter === filter.key
-                        const colors = colorMap[filter.color]
+                        const colors = colorMap[filter.color] || { active: 'bg-primary/10 text-primary font-semibold' }
 
                         return (
                             <button
                                 key={filter.key}
-                                onClick={() => setSmartFilter(smartFilter === filter.key ? null : filter.key)}
+                                onClick={() => handleFilterClick(filter.key)}
                                 className={cn(
-                                    "flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md transition-colors",
-                                    isActive ? colors.active : "text-muted-foreground hover:bg-muted"
+                                    "flex items-center justify-between w-full px-2.5 py-1.5 text-xs rounded-md transition-all text-left",
+                                    isActive
+                                        ? cn(colors.active, "shadow-xs")
+                                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                                 )}
                             >
-                                <div className="flex items-center gap-2">
-                                    <Icon className="h-4 w-4 opacity-70" />
-                                    <span>{filter.label}</span>
+                                <div className="flex items-center gap-2 min-w-0 truncate group-hover:translate-x-0.5 transition-transform duration-150">
+                                    <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
+                                    <span className="truncate">{filter.label}</span>
                                 </div>
-                                <span className="text-xs bg-muted-foreground/10 px-1.5 py-0.5 rounded-full">{filter.count}</span>
+                                <span className={cn(
+                                    "text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0",
+                                    isActive ? "bg-background/80" : "bg-muted text-muted-foreground"
+                                )}>
+                                    {filter.count}
+                                </span>
                             </button>
                         )
                     })}
                 </div>
             )}
-        </>
+        </div>
     )
 }
