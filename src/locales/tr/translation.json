@@ -91,6 +91,7 @@
         },
         "smartFilters": {
             "highlights": "Vurgular & Notlar",
+            "snapshots": "Çevrimdışı Arşiv",
             "reminders": "Hatırlatıcılar",
             "duplicates": "Yinelenenler",
             "deadLinks": "Ölü Linkler",
@@ -946,6 +947,24 @@
             "weekend": "Hafta Sonu Oku (Cts 10:00)",
             "nextweek": "Gelecek Hafta (Pzt 09:00)"
         }
+    },
+    "snapshots": {
+        "viewerTitle": "Çevrimdışı Arşiv (HTML Snapshot)",
+        "downloadHtml": "HTML İndir",
+        "downloadedSuccess": "Çevrimdışı HTML dosyası indirildi!",
+        "deletedSuccess": "Çevrimdışı arşiv silindi.",
+        "savedSuccess": "Sayfa çevrimdışı arşivlendi!",
+        "savedBadge": "Arşivlendi",
+        "saveOffline": "Çevrimdışı Arşivle",
+        "badgeTooltip": "Çevrimdışı HTML Arşivini Aç",
+        "badgeShort": "Çevrimdışı",
+        "notFoundTitle": "Henüz Çevrimdışı Arşiv Yok",
+        "notFoundDesc": "Bu sayfanın henüz yerel HTML arşivi alınmamış. Reader Mode içerisinden 'Çevrimdışı Arşivle' butonuna tıklayarak kaydedebilir veya Wayback Machine ile arşivine göz atabilirsiniz.",
+        "checkWayback": "Wayback Machine'de Ara",
+        "saveToWayback": "Wayback Machine'e Arşivle",
+        "offlineReady": "Çevrimdışı Hazır",
+        "savedAt": "Kayıt Tarihi",
+        "fileSize": "Boyut"
     }
 }
 

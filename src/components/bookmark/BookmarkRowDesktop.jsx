@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { LinkTooltip } from './LinkTooltip'
 import { cn, getRelativeTime } from '../../lib/utils'
-import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell, Highlighter } from 'lucide-react'
+import { ArrowRight, Eye, Layers, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell, Highlighter, HardDrive } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
@@ -83,6 +83,21 @@ export function BookmarkRowDesktop({
                             >
                                 <Highlighter className="w-2.5 h-2.5" />
                                 <span>{bookmark.highlightsCount || (bookmark.highlights ? bookmark.highlights.length : 1)} {t('reader.highlights.countSuffix', 'vurgu')}</span>
+                            </button>
+                        )}
+                        {bookmark.hasSnapshot && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    useAppStore.getState().openSnapshotViewer(bookmark);
+                                }}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition-colors cursor-pointer shrink-0"
+                                title={t('snapshots.badgeTooltip', 'Çevrimdışı HTML Arşivini Aç')}
+                            >
+                                <HardDrive className="w-2.5 h-2.5" />
+                                <span>{t('snapshots.badgeShort', 'Çevrimdışı')}</span>
                             </button>
                         )}
                     </div>

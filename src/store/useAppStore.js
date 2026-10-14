@@ -114,6 +114,12 @@ export const useAppStore = create((set, get) => ({
     openShareHub: (collection) => set({ shareHubCollection: collection }),
     closeShareHub: () => set({ shareHubCollection: null }),
 
+    // --- Offline Snapshot Viewer Modal Slice ---
+    snapshotModalBookmark: null,
+    setSnapshotModalBookmark: (bookmark) => set({ snapshotModalBookmark: bookmark }),
+    openSnapshotViewer: (bookmark) => set({ snapshotModalBookmark: bookmark }),
+    closeSnapshotViewer: () => set({ snapshotModalBookmark: null }),
+
 
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",

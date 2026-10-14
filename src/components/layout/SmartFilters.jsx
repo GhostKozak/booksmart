@@ -1,4 +1,4 @@
-import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, Highlighter, ChevronRight, ChevronDown } from 'lucide-react'
+import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, Highlighter, HardDrive, ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
@@ -15,6 +15,7 @@ export function SmartFilters({
 
     const filters = [
         { key: 'highlights', label: t('sidebar.smartFilters.highlights', 'Vurgular & Notlar'), icon: Highlighter, count: smartCounts.highlights || 0, color: 'yellow' },
+        { key: 'snapshots', label: t('sidebar.smartFilters.snapshots', 'Çevrimdışı Arşiv'), icon: HardDrive, count: smartCounts.snapshots || 0, color: 'emerald' },
         { key: 'reminders', label: t('sidebar.smartFilters.reminders', 'Hatırlatıcılar'), icon: Bell, count: smartCounts.reminders || 0, color: 'indigo' },
         { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
         { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http, color: 'red' },

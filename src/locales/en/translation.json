@@ -91,6 +91,7 @@
         },
         "smartFilters": {
             "highlights": "Highlights & Notes",
+            "snapshots": "Offline Snapshots",
             "reminders": "Reminders",
             "duplicates": "Duplicates",
             "deadLinks": "Dead Links",
@@ -946,6 +947,24 @@
             "weekend": "Read This Weekend (Sat 10:00)",
             "nextweek": "Next Week (Mon 09:00)"
         }
+    },
+    "snapshots": {
+        "viewerTitle": "Offline Archive (HTML Snapshot)",
+        "downloadHtml": "Download HTML",
+        "downloadedSuccess": "Offline HTML file downloaded!",
+        "deletedSuccess": "Offline snapshot deleted.",
+        "savedSuccess": "Page archived offline!",
+        "savedBadge": "Archived",
+        "saveOffline": "Archive Offline",
+        "badgeTooltip": "Open Offline HTML Snapshot",
+        "badgeShort": "Offline",
+        "notFoundTitle": "No Offline Archive Yet",
+        "notFoundDesc": "A local HTML snapshot has not been saved for this page yet. You can save it from Reader Mode using 'Archive Offline', or check available archives on Wayback Machine.",
+        "checkWayback": "Search on Wayback Machine",
+        "saveToWayback": "Save to Wayback Machine",
+        "offlineReady": "Offline Ready",
+        "savedAt": "Saved At",
+        "fileSize": "Size"
     }
 }
 

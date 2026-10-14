@@ -16,7 +16,9 @@ import {
     BookmarkCheck,
     QrCode,
     Bell,
-    Highlighter
+    Highlighter,
+    HardDrive,
+    History
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Favicon } from '../Favicon';
@@ -35,6 +37,11 @@ import {
     addHighlight,
     applyHighlightsToHtml
 } from '../../lib/highlight-service';
+import {
+    saveSnapshot,
+    getSnapshot,
+    getWaybackMachineUrl
+} from '../../lib/snapshot-service';
 import { HighlightSelectionMenu } from '../reader/HighlightSelectionMenu';
 import { ReaderHighlightsSidebar } from '../reader/ReaderHighlightsSidebar';
 import { toast } from 'sonner';
@@ -55,6 +62,10 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
     const [showHighlightsSidebar, setShowHighlightsSidebar] = useState(false);
     const [selectionMenu, setSelectionMenu] = useState(null);
 
+    // ── Offline Snapshot State ──
+    const [isSnapshotSaved, setIsSnapshotSaved] = useState(false);
+    const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
+
     const loadHighlights = useCallback(async () => {
         if (!bookmark) return;
         const list = await getHighlightsForBookmark(bookmark.id, bookmark.url);
@@ -73,10 +84,38 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
             }
         });
 
+        getSnapshot(bookmark.url, bookmark.id).then(snap => {
+            if (isMounted) {
+                setIsSnapshotSaved(!!snap);
+            }
+        });
+
         return () => {
             isMounted = false;
         };
     }, [isOpen, bookmark]);
+
+    const handleToggleSnapshot = async () => {
+        if (!bookmark || !article) return;
+        setIsSavingSnapshot(true);
+        try {
+            const saved = await saveSnapshot({
+                bookmarkId: bookmark.id,
+                url: bookmark.url,
+                title: article.title,
+                html: article.contentHtml,
+                textContent: article.textContent
+            });
+            if (saved) {
+                setIsSnapshotSaved(true);
+                toast.success(t('snapshots.savedSuccess', 'Sayfa çevrimdışı IndexedDB\'ye arşivlendi!'));
+            }
+        } catch {
+            toast.error(t('common.error', 'Hata'));
+        } finally {
+            setIsSavingSnapshot(false);
+        }
+    };
 
     const handleCreateHighlight = async ({ text, color, note }) => {
         if (!text || !bookmark) return;
@@ -485,6 +524,32 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
                                 </span>
                             )}
                         </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleToggleSnapshot}
+                            disabled={isSavingSnapshot || !article}
+                            className={cn(
+                                "h-8 w-8 cursor-pointer relative",
+                                isSnapshotSaved ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" : "text-muted-foreground hover:text-foreground"
+                            )}
+                            title={isSnapshotSaved ? t('snapshots.savedBadge', 'Çevrimdışı Arşivlendi') : t('snapshots.saveOffline', 'Çevrimdışı Arşivle (Snapshot)')}
+                        >
+                            <HardDrive className="w-3.5 h-3.5" />
+                        </Button>
+
+                        {bookmark?.url && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => window.open(getWaybackMachineUrl(bookmark.url), '_blank')}
+                                className="h-8 w-8 cursor-pointer text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                                title="Internet Archive (Wayback Machine)"
+                            >
+                                <History className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
 
                         <Button
                             variant="ghost"

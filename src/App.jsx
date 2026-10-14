@@ -56,6 +56,7 @@ const ReaderViewModal = lazy(() => import('./components/modals/ReaderViewModal')
 const QrCodeModal = lazy(() => import('./components/modals/QrCodeModal').then(m => ({ default: m.QrCodeModal })))
 const ReminderModal = lazy(() => import('./components/modals/ReminderModal').then(m => ({ default: m.ReminderModal })))
 const ShareCollectionModal = lazy(() => import('./components/modals/ShareCollectionModal').then(m => ({ default: m.ShareCollectionModal })))
+const SnapshotViewerModal = lazy(() => import('./components/modals/SnapshotViewerModal').then(m => ({ default: m.SnapshotViewerModal })))
 import { ExtensionPromptBanner } from './components/modals/ExtensionPromptBanner'
 
 // PWA Components
@@ -91,6 +92,7 @@ function App() {
     qrModalBookmark, closeQrCode,
     reminderModalBookmark, closeReminderModal,
     shareHubCollection, closeShareHub,
+    snapshotModalBookmark, closeSnapshotViewer,
     showOnboarding
   } = useAppStore()
 
@@ -750,6 +752,13 @@ function App() {
               isOpen={!!shareHubCollection}
               collection={shareHubCollection}
               onClose={closeShareHub}
+            />
+          )}
+          {!!snapshotModalBookmark && (
+            <SnapshotViewerModal
+              isOpen={!!snapshotModalBookmark}
+              bookmark={snapshotModalBookmark}
+              onClose={closeSnapshotViewer}
             />
           )}
         </Suspense>

@@ -216,6 +216,8 @@ const processData = ({
         filtered = filtered.filter(b => b.reminderAt && Number(b.reminderAt) > 0);
     } else if (smartFilter === 'highlights') {
         filtered = filtered.filter(b => (b.highlightsCount && Number(b.highlightsCount) > 0) || (b.highlights && b.highlights.length > 0));
+    } else if (smartFilter === 'snapshots') {
+        filtered = filtered.filter(b => b.hasSnapshot);
     }
 
 
@@ -407,7 +409,7 @@ const processData = ({
     const foldersMap = new Map();
     const seenUrls = new Set();
     const fiveYearsAgo = Date.now() - (5 * 365 * 24 * 60 * 60 * 1000);
-    let old = 0, http = 0, untitled = 0, docs = 0, longurl = 0, media = 0, social = 0, shopping = 0, news = 0, reminders = 0, highlights = 0, duplicateCount = 0;
+    let old = 0, http = 0, untitled = 0, docs = 0, longurl = 0, media = 0, social = 0, shopping = 0, news = 0, reminders = 0, highlights = 0, snapshots = 0, duplicateCount = 0;
 
     bookmarks.forEach(b => {
         // Tags
@@ -444,6 +446,7 @@ const processData = ({
         if (domainMatch(b.url, NEWS_DOMAINS)) news++;
         if (b.reminderAt && Number(b.reminderAt) > 0) reminders++;
         if ((b.highlightsCount && Number(b.highlightsCount) > 0) || (b.highlights && b.highlights.length > 0)) highlights++;
+        if (b.hasSnapshot) snapshots++;
         // Duplicate count
         const normalized = normalizeUrl(b.url);
         if (seenUrls.has(normalized)) {
@@ -461,7 +464,7 @@ const processData = ({
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
-    const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news, reminders, highlights };
+    const smartCounts = { old, http, untitled, docs, longurl, media, social, shopping, news, reminders, highlights, snapshots };
 
     return {
         processedBookmarks: processed,
