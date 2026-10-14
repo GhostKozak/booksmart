@@ -1,0 +1,408 @@
+import * as React from 'react';
+import { Card } from '../ui/card';
+import { Checkbox } from '../ui/checkbox';
+import { Favicon } from '../Favicon';
+import { cn } from '../../lib/utils';
+import { Folder, Eye, Pencil, Sparkles, Rss, BookOpen, QrCode, Bell, Highlighter, HardDrive } from 'lucide-react';
+import { Button } from '../ui/button';
+import { useTranslation } from 'react-i18next';
+import { LinkTooltip } from './LinkTooltip';
+import { BookmarkTags } from './BookmarkTags';
+import { BookmarkCollections } from './BookmarkCollections';
+import { ReminderBadge } from './ReminderBadge';
+import { useBookmarkPreview } from '../../lib/metadata-fetcher';
+import { useAppStore } from '../../store/useAppStore';
+
+export const BookmarkGridCard = ({ bookmark, isSelected, folderColor, folderName, context, showThumbnails, detailed }) => {
+    const { t } = useTranslation();
+    const { preview } = useBookmarkPreview(bookmark.url, { enabled: showThumbnails || detailed });
+    const [imageStatus, setImageStatus] = React.useState('loading'); // 'loading' | 'loaded' | 'error'
+
+    const [prevProps, setPrevProps] = React.useState({ id: bookmark.id, showThumbnails, detailed });
+
+    if (
+        prevProps.id !== bookmark.id ||
+        prevProps.showThumbnails !== showThumbnails ||
+        prevProps.detailed !== detailed
+    ) {
+        setPrevProps({ id: bookmark.id, showThumbnails, detailed });
+        if (showThumbnails || detailed) {
+            setImageStatus('loading');
+        }
+    }
+
+    return (
+        <div className="flex flex-col h-full">
+            <Card
+                className={cn(
+                    "group relative flex flex-col hover:shadow-lg border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background focus-visible:ring-offset-2 h-full overflow-hidden transition-all hover:-translate-y-1 cursor-pointer",
+                    isSelected ? "ring-2 ring-primary border-primary/50" : "hover:border-primary/20",
+                )}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (e.ctrlKey || e.metaKey) {
+                            context.toggleSelection(bookmark.id);
+                        } else {
+                            context.onPreview(bookmark);
+                        }
+                    }
+                }}
+                onClick={(e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        context.toggleSelection(bookmark.id);
+                    } else {
+                        context.onPreview(bookmark);
+                    }
+                }}
+            >
+                {/* Screenshot Thumbnail */}
+                {(showThumbnails || detailed) && (
+                    <div className="relative bg-muted/30 border-b w-full aspect-video overflow-hidden">
+                        {imageStatus !== 'error' && (
+                            <img
+                                src={preview?.image || `https://s.wordpress.com/mshots/v1/${encodeURIComponent(bookmark.url)}?w=400&h=225`}
+                                alt={`Screenshot of ${bookmark.title}`}
+                                className={cn(
+                                    "w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out",
+                                    imageStatus === 'loaded' ? 'opacity-100' : 'opacity-0'
+                                )}
+                                loading="lazy"
+                                onLoad={() => setImageStatus('loaded')}
+                                onError={() => setImageStatus('error')}
+                            />
+                        )}
+
+                        {/* Loading State or Error Fallback */}
+                        {(imageStatus === 'loading' || imageStatus === 'error') && (
+                            <div className="absolute inset-0 flex justify-center items-center bg-secondary/50">
+                                <Favicon url={bookmark.url} customIcon={preview?.favicon} className="opacity-50 grayscale w-12 h-12" />
+                            </div>
+                        )}
+
+                        {/* Selection Overlay */}
+                        {isSelected && (
+                            <div className="z-5 absolute inset-0 flex justify-center items-center bg-primary/10">
+                                <div className="bg-primary p-1 rounded-full text-primary-foreground">
+                                    <Folder className="w-6 h-6" />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="top-2 right-2 z-10 absolute flex gap-1">
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    context.onEdit?.(bookmark);
+                                }}
+                                title={t('common.edit')}
+                                aria-label={t('common.edit')}
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    context.onPreview(bookmark);
+                                }}
+                                title={t('preview.open')}
+                                aria-label={t('preview.open')}
+                            >
+                                <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openReaderMode(bookmark);
+                                }}
+                                title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                            >
+                                <BookOpen className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="bg-background/80 hover:bg-primary shadow-sm backdrop-blur-sm w-6 h-6 hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openQrCode(bookmark);
+                                }}
+                                title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                            >
+                                <QrCode className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className={cn(
+                                    "bg-background/80 shadow-sm backdrop-blur-sm w-6 h-6 transition-all",
+                                    bookmark.reminderAt ? "text-amber-500 hover:text-amber-600 bg-amber-500/20" : "hover:bg-primary hover:text-primary-foreground"
+                                )}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    useAppStore.getState().openReminderModal(bookmark);
+                                }}
+                                title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                            >
+                                <Bell className="w-3.5 h-3.5" />
+                            </Button>
+                            <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() => context.toggleSelection(bookmark.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-background/80 data-[state=checked]:bg-primary shadow-sm backdrop-blur-sm focus-visible:ring-2 data-[state=checked]:text-primary-foreground"
+                                aria-label={t('common.select')}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-col flex-1 gap-2 p-3">
+                    <div className="flex items-start gap-2">
+                        <div className="flex justify-center items-center bg-muted/50 mt-0.5 rounded-full w-6 h-6 shrink-0">
+                            <Favicon url={bookmark.url} customIcon={preview?.favicon} className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <LinkTooltip bookmark={bookmark}>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <h3 className="font-semibold text-sm line-clamp-1 leading-tight" title={bookmark.title}>
+                                        {bookmark.title || t('common.untitled')}
+                                    </h3>
+                                    {bookmark.feedUrl && (
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                                            <Rss className="w-2.5 h-2.5" />
+                                            <span>RSS</span>
+                                        </span>
+                                    )}
+                                    {bookmark.readingTimeMinutes && (
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                                            <BookOpen className="w-2.5 h-2.5" />
+                                            <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
+                                        </span>
+                                    )}
+                                    {bookmark.reminderAt && (
+                                        <ReminderBadge
+                                            reminderAt={bookmark.reminderAt}
+                                            onClick={() => useAppStore.getState().openReminderModal(bookmark)}
+                                        />
+                                    )}
+                                    {Boolean(bookmark.highlightsCount || (bookmark.highlights && bookmark.highlights.length > 0)) && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                useAppStore.getState().openReaderMode(bookmark);
+                                            }}
+                                            className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer shrink-0"
+                                            title={t('reader.highlights.badgeTooltip', 'Vurguları Reader Mode\'da aç')}
+                                        >
+                                            <Highlighter className="w-2.5 h-2.5" />
+                                            <span>{bookmark.highlightsCount || (bookmark.highlights ? bookmark.highlights.length : 1)}</span>
+                                        </button>
+                                    )}
+                                    {bookmark.hasSnapshot && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                useAppStore.getState().openSnapshotViewer(bookmark);
+                                            }}
+                                            className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition-colors cursor-pointer shrink-0"
+                                            title={t('snapshots.badgeTooltip', 'Çevrimdışı HTML Arşivini Aç')}
+                                        >
+                                            <HardDrive className="w-2.5 h-2.5" />
+                                            <span>{t('snapshots.badgeShort', 'Çevrimdışı')}</span>
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="opacity-80 text-[10px] text-muted-foreground break-all line-clamp-1">
+                                    {preview?.siteName ? `${preview.siteName} • ${bookmark.url}` : bookmark.url}
+                                </p>
+                            </LinkTooltip>
+                        </div>
+                        {!(showThumbnails || detailed) && (
+                            <div className="flex items-center gap-1 mt-0.5 shrink-0">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        context.onEdit?.(bookmark);
+                                    }}
+                                    title={t('common.edit')}
+                                    aria-label={t('common.edit')}
+                                >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        context.onPreview(bookmark);
+                                    }}
+                                    title={t('preview.open')}
+                                    aria-label={t('preview.open')}
+                                >
+                                    <Eye className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openReaderMode(bookmark);
+                                    }}
+                                    title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                    aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                >
+                                    <BookOpen className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openQrCode(bookmark);
+                                    }}
+                                    title={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                    aria-label={t('qr.title', 'QR Kod ile Telefona Aktar')}
+                                >
+                                    <QrCode className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn(
+                                        "w-6 h-6 transition-colors",
+                                        bookmark.reminderAt ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground hover:text-primary"
+                                    )}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useAppStore.getState().openReminderModal(bookmark);
+                                    }}
+                                    title={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                    aria-label={t('reminders.setReminder', 'Daha Sonra Hatırlat')}
+                                >
+                                    <Bell className="w-3.5 h-3.5" />
+                                </Button>
+                                <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => context.toggleSelection(bookmark.id)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    aria-label={t('common.select')}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Notes / AI Summary / Descriptions */}
+                    {detailed && (bookmark.aiSummary || bookmark.note || preview?.description) && (
+                        <div className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap break-words leading-relaxed max-h-24 overflow-y-auto pr-1">
+                            {bookmark.aiSummary ? (
+                                <p className="flex items-start gap-1 text-foreground/90 font-medium italic">
+                                    <Sparkles className="w-3.5 h-3.5 text-purple-500 shrink-0 mt-0.5" />
+                                    <span>{bookmark.aiSummary}</span>
+                                </p>
+                            ) : (
+                                <p>{bookmark.note || preview?.description}</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tags */}
+                    {detailed ? (
+                        <BookmarkTags
+                            tags={bookmark.tags}
+                            ruleTags={bookmark.ruleTags}
+                            availableTags={context.availableTags}
+                            className="mt-1 max-h-20 overflow-y-auto"
+                        />
+                    ) : (
+                        bookmark.tags && bookmark.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 h-5 overflow-hidden">
+                                {Array.from(new Set(bookmark.tags)).slice(0, 3).map((tag, idx) => {
+                                    const tagConfig = context.availableTags?.find(t => t.name === tag);
+                                    const customColor = tagConfig ? tagConfig.color : null;
+
+                                    const style = customColor ? {
+                                        backgroundColor: customColor + '15',
+                                        color: customColor,
+                                        borderColor: customColor + '40'
+                                    } : {};
+
+                                    return (
+                                        <span key={`${tag}-${idx}`}
+                                            style={style}
+                                            className={cn(
+                                                "px-1 py-0.5 border rounded-[3px] font-medium text-[8px] whitespace-nowrap",
+                                                !customColor && "bg-purple-100/50 text-purple-700/70 border-purple-200/50 dark:bg-purple-900/10 dark:text-purple-400/70 dark:border-purple-800/30"
+                                            )}>
+                                            #{tag}
+                                        </span>
+                                    )
+                                })}
+                                {bookmark.tags.length > 3 && (
+                                    <span className="self-center opacity-60 text-[8px] text-muted-foreground">
+                                        +{bookmark.tags.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                        )
+                    )}
+
+                    {/* Collections */}
+                    {detailed && bookmark.collections && bookmark.collections.length > 0 && (
+                        <BookmarkCollections
+                            collectionIds={bookmark.collections}
+                            allCollections={context.allCollections}
+                            onRemove={context.onRemoveFromCollection ? (collectionId) => context.onRemoveFromCollection(bookmark.id, collectionId) : undefined}
+                            className="mt-1"
+                        />
+                    )}
+
+                    <div className="flex justify-between items-center mt-auto pt-2 border-t text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-1 max-w-[70%]">
+                            <Folder
+                                className="w-3 h-3 shrink-0"
+                                style={{ color: folderColor }}
+                            />
+                            <span
+                                className="truncate"
+                                title={folderName}
+                                style={{ color: folderColor }}
+                            >
+                                {folderName}
+                            </span>
+                        </div>
+                        {bookmark.addDate && (
+                            <span className="opacity-70">
+                                {new Date(parseInt(bookmark.addDate) * 1000).toLocaleDateString(undefined, { month: 'short', year: '2-digit' })}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </Card>
+        </div>
+    );
+};

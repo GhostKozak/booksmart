@@ -28,6 +28,8 @@ import { AnalyticsDashboard } from '../AnalyticsDashboard'
 import { OnboardingWizard } from '../OnboardingWizard'
 import { BookmarkTable } from '../BookmarkTable'
 import { BookmarkTree } from '../BookmarkTree'
+import { MainDropzone } from './MainDropzone'
+import { MainEmptyState } from './MainEmptyState'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
@@ -176,140 +178,32 @@ export function MainContent({
 
     if (!hasFileLoaded) {
         return (
-            <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 p-3 sm:p-6 focus:outline-none overflow-x-hidden overflow-y-auto">
-                <div className="flex flex-col justify-center items-center p-4 sm:p-8 h-full max-w-4xl mx-auto">
-                    <div
-                        {...getRootProps()}
-                        className={cn(
-                            "flex flex-col justify-center items-center p-8 sm:p-14 border-2 border-dashed rounded-3xl w-full text-center transition-all cursor-pointer backdrop-blur-xs bg-card/40 shadow-xs",
-                            isDragActive
-                                ? "border-primary bg-primary/10 scale-[1.02] shadow-lg shadow-primary/10"
-                                : "border-border/80 hover:border-primary/50 hover:bg-card/70"
-                        )}
-                    >
-                        <input {...getInputProps()} />
-                        <div className="bg-primary/10 mb-4 sm:mb-6 p-4 sm:p-5 rounded-2xl ring-4 ring-primary/5 animate-float">
-                            <Logo className="w-12 sm:w-16 h-12 sm:h-16" />
-                        </div>
-                        <h3 className="mb-2 font-bold text-xl sm:text-2xl tracking-tight text-foreground">{t('main.dropzone.title')}</h3>
-                        <p className="max-w-md text-muted-foreground text-xs sm:text-sm leading-relaxed mb-6">
-                            {t('main.dropzone.desc')}
-                        </p>
-                        <Button variant="outline" className="cursor-pointer rounded-xl font-medium px-5 h-9 border-primary/30 hover:border-primary hover:bg-primary/5">
-                            {t('main.dropzone.browse')}
-                        </Button>
-                    </div>
-
-                    {isExtensionConnected && importFromBrowser ? (
-                        <div className="mt-6 flex flex-col items-center">
-                            <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>{t('main.dropzone.extensionConnected', 'Companion Extension Connected')}</span>
-                            </div>
-                            <Button
-                                type="button"
-                                variant="default"
-                                disabled={isSyncing}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    importFromBrowser();
-                                }}
-                                className="gap-2 px-5 py-2.5 rounded-xl font-medium shadow-sm hover:shadow transition-all cursor-pointer"
-                            >
-                                <CloudDownload className={cn("h-4 w-4", isSyncing && "animate-spin")} />
-                                <span>{t('main.dropzone.importFromBrowserDirect', 'Import Browser Bookmarks (1-Click)')}</span>
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="mt-6 flex flex-col items-center max-w-md text-center p-4 rounded-2xl bg-card/60 border border-border/60 shadow-xs">
-                            <h4 className="text-sm font-semibold text-foreground mb-1">
-                                {t('main.dropzone.pullWithoutFileTitle', 'Direct Browser Import')}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                                {t('main.dropzone.pullWithoutFileDesc', 'Import bookmarks straight from your browser without exporting an HTML file first.')}
-                            </p>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openExtensionGuide?.();
-                                }}
-                                className="gap-2 text-xs h-9 px-4 rounded-xl font-medium hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
-                            >
-                                <CloudDownload className="h-3.5 w-3.5 text-primary" />
-                                <span>{t('main.dropzone.setupExtensionBtn', 'Install Extension & Pull Bookmarks')}</span>
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </main>
+            <MainDropzone
+                getRootProps={getRootProps}
+                getInputProps={getInputProps}
+                isDragActive={isDragActive}
+                isExtensionConnected={isExtensionConnected}
+                importFromBrowser={importFromBrowser}
+                isSyncing={isSyncing}
+                openExtensionGuide={openExtensionGuide}
+            />
         )
     }
 
     if (displayBookmarks.length === 0) {
         return (
-            <main id="main-content" tabIndex={-1} className="relative flex-1 bg-secondary/10 p-3 sm:p-6 focus:outline-none overflow-x-hidden overflow-y-auto">
-                <div className="slide-in-from-bottom-4 flex flex-col justify-center items-center p-8 h-full max-w-md mx-auto text-center animate-in duration-500 fade-in">
-                    <div className="bg-muted/70 ring-8 ring-muted/30 shadow-xs mb-6 p-6 rounded-2xl animate-float">
-                        <Logo className="opacity-40 grayscale w-12 h-12" />
-                    </div>
-                    <h3 className="mb-2 font-bold text-xl tracking-tight text-foreground">{t('main.empty.title')}</h3>
-                    <p className="mb-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                        {t('main.empty.desc')}
-                    </p>
-
-                    {/* Active Filter Chips in Empty State */}
-                    {hasAnyActiveFilter && (
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 mb-5 max-w-sm">
-                            {searchQuery && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-muted border border-border/80 text-foreground font-mono">
-                                    <Search className="w-3 h-3 text-muted-foreground" />
-                                    <span>&ldquo;{searchQuery}&rdquo;</span>
-                                    <button type="button" onClick={() => setSearchQuery('')} className="hover:text-red-500 ml-1">
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {activeFolder && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-muted border border-border/80 text-foreground">
-                                    <Folder className="w-3 h-3 text-muted-foreground" />
-                                    <span>{activeFolder}</span>
-                                    <button type="button" onClick={() => setActiveFolder(null)} className="hover:text-red-500 ml-1">
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {activeTag && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-muted border border-border/80 text-foreground">
-                                    <Hash className="w-3 h-3 text-muted-foreground" />
-                                    <span>{activeTag}</span>
-                                    <button type="button" onClick={() => setActiveTag(null)} className="hover:text-red-500 ml-1">
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {smartFilter && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-muted border border-border/80 text-foreground">
-                                    <Filter className="w-3 h-3 text-muted-foreground" />
-                                    <span>{t(`sidebar.smartFilters.${smartFilter}`, smartFilter)}</span>
-                                    <button type="button" onClick={() => setSmartFilter(null)} className="hover:text-red-500 ml-1">
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                        </div>
-                    )}
-
-                    <Button
-                        variant="outline"
-                        onClick={clearAllFilters}
-                        className="rounded-xl border-primary/30 hover:border-primary hover:bg-primary/5 cursor-pointer font-medium text-xs sm:text-sm px-4 h-9"
-                    >
-                        {t('main.empty.clearSearch')}
-                    </Button>
-                </div>
-            </main>
+            <MainEmptyState
+                hasAnyActiveFilter={hasAnyActiveFilter}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                activeFolder={activeFolder}
+                setActiveFolder={setActiveFolder}
+                activeTag={activeTag}
+                setActiveTag={setActiveTag}
+                smartFilter={smartFilter}
+                setSmartFilter={setSmartFilter}
+                clearAllFilters={clearAllFilters}
+            />
         )
     }
 

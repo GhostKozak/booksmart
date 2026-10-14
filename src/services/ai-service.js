@@ -1,3 +1,6 @@
+import { executeAIRequest } from './ai/provider-dispatcher';
+import { cleanJsonString, sanitizeLanguageCode, getProxiedUrl } from './ai/ai-utils';
+
 export const AI_MODELS = [
     // --- OpenAI ---
     { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
@@ -38,29 +41,6 @@ export const DEFAULT_MODEL = 'gpt-4o-mini';
 
 const CHUNK_SIZE = 20;
 const MAX_CONCURRENCY = 3;
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
-async function withRetry(fn, signal) {
-    let lastError;
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-        try {
-            return await fn();
-        } catch (error) {
-            if (error.name === 'AbortError') throw error;
-            lastError = error;
-            const isRateLimit = error.message?.includes('429') || error.message?.includes('rate limit');
-            const isServerError = error.message?.includes('500') || error.message?.includes('502') || error.message?.includes('503');
-            if (!isRateLimit && !isServerError) throw error;
-            if (attempt < MAX_RETRIES) {
-                const delay = RETRY_DELAY_MS * Math.pow(2, attempt) * (0.5 + Math.random() * 0.5);
-                await new Promise(r => setTimeout(r, delay));
-            }
-        }
-    }
-    throw lastError;
-}
 
 /**
  * Categorize a list of bookmarks using an LLM.
@@ -71,7 +51,6 @@ async function withRetry(fn, signal) {
  * @returns {Promise<Object>} - Map of { id: category }
  */
 export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
-    // Determine provider from modelId
     const modelInfo = AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
     const provider = modelInfo.provider;
 
@@ -84,7 +63,6 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
     const results = {};
     let processingError = null;
 
-    // Helper to process a single chunk
     const processChunk = async (chunk) => {
         if (abortSignal?.aborted) throw new DOMException("Aborted", "AbortError");
         try {
@@ -101,7 +79,6 @@ export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress
         }
     };
 
-    // Concurrency Control
     const queue = [...chunks];
     const workers = [];
 
@@ -141,311 +118,7 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
         { role: "user", content: JSON.stringify(simplified) }
     ];
 
-    if (provider === 'openai') {
-        return callOpenAI(messages, apiKey, modelId, true, signal);
-    } else if (provider === 'gemini') {
-        return callGemini(messages, apiKey, modelId, true, signal);
-    } else if (provider === 'openrouter') {
-        return callOpenRouter(messages, apiKey, modelId, true, signal);
-    } else if (provider === 'ollama') {
-        return callOllama(messages, apiKey, modelId, true, signal);
-    } else if (provider === 'anthropic') {
-        return callAnthropic(messages, apiKey, modelId, true, signal);
-    }
-
-    throw new Error("Invalid provider");
-}
-
-async function callOpenAI(messages, apiKey, model, asJson = true, signal) {
-    const body = {
-        model: model,
-        messages: messages
-    };
-    if (asJson) {
-        body.response_format = { type: "json_object" };
-    }
-
-    const response = await withRetry(async () => {
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
-            },
-            body: JSON.stringify(body),
-            signal
-        });
-        if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error?.message || "OpenAI API Error");
-        }
-        return res;
-    }, signal);
-
-    const data = await response.json();
-    const text = data.choices[0].message.content;
-
-    if (asJson) {
-        try {
-            return JSON.parse(cleanJsonString(text));
-        } catch (e) {
-            console.error("Failed to parse OpenAI response", e);
-            return {};
-        }
-    }
-    return text;
-}
-
-async function callGemini(messages, apiKey, model, asJson = true, signal) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-
-    // Convert standard messages to Gemini format
-    let systemInstruction = undefined;
-    const contents = [];
-
-    messages.forEach(msg => {
-        if (msg.role === 'system') {
-            systemInstruction = {
-                parts: [{ text: msg.content }]
-            };
-        } else {
-            contents.push({
-                role: msg.role === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.content }]
-            });
-        }
-    });
-
-    const body = { contents };
-    if (systemInstruction) {
-        body.system_instruction = systemInstruction;
-    }
-    if (asJson) {
-        body.generationConfig = { response_mime_type: "application/json" };
-    }
-
-    const response = await withRetry(async () => {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-goog-api-key": apiKey
-            },
-            body: JSON.stringify(body),
-            signal
-        });
-        if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error?.message || "Gemini API Error");
-        }
-        return res;
-    }, signal);
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    if (asJson) {
-        try {
-            return JSON.parse(cleanJsonString(text));
-        } catch (e) {
-            console.error("Failed to parse Gemini response", e);
-            return {};
-        }
-    }
-    return text;
-}
-
-function cleanJsonString(text) {
-    if (!text) return "{}";
-    let cleaned = text.trim();
-    // Remove markdown code blocks — handles multi-line fences and extra backticks
-    const fenceMatch = cleaned.match(/^`{3,}(?:json)?\s*\n?([\s\S]*?)`{3,}\s*$/);
-    if (fenceMatch) {
-        cleaned = fenceMatch[1].trim();
-    }
-    return cleaned;
-}
-
-/**
- * Sanitize language code to prevent prompt injection.
- * Only allows valid BCP 47-like codes (e.g., 'en', 'tr', 'zh-CN').
- */
-function sanitizeLanguageCode(lang) {
-    if (!lang || typeof lang !== 'string') return 'en';
-    // Allow only alphanumeric, hyphens, underscores (max 10 chars)
-    const sanitized = lang.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 10);
-    return sanitized || 'en';
-}
-
-/**
- * Validate and sanitize Ollama base URL to prevent SSRF.
- * Only allows http/https protocols and localhost/private network addresses.
- */
-function sanitizeOllamaUrl(baseUrl) {
-    const cleanUrl = (baseUrl || 'http://localhost:11434').replace(/\/+$/, '');
-    try {
-        const parsed = new URL(cleanUrl);
-        // Only allow http and https protocols
-        if (!['http:', 'https:'].includes(parsed.protocol)) {
-            throw new Error('Invalid protocol for Ollama URL. Only http and https are allowed.');
-        }
-        // Only allow localhost and private network addresses
-        const hostname = parsed.hostname.toLowerCase();
-        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
-        const isPrivateNetwork = hostname.startsWith('10.') ||
-            hostname.startsWith('192.168.') ||
-            /^172\.(1[6-9]|2[0-9]|3[01])\./.test(hostname);
-        if (!isLocalhost && !isPrivateNetwork) {
-            throw new Error('Ollama URL must point to localhost or a private network address.');
-        }
-        return parsed.origin;
-    } catch (e) {
-        if (e.message.includes('Ollama')) throw e;
-        throw new Error('Invalid Ollama URL format.');
-    }
-}
-
-async function callOpenRouter(messages, apiKey, model, asJson = true, signal) {
-    const body = {
-        model: model,
-        messages: messages
-    };
-    if (asJson) {
-        body.response_format = { type: "json_object" };
-    }
-
-    const response = await withRetry(async () => {
-        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-                "HTTP-Referer": window.location.href, // Required by OpenRouter
-                "X-Title": "BookSmart"
-            },
-            body: JSON.stringify(body),
-            signal
-        });
-        if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error?.message || "OpenRouter API Error");
-        }
-        return res;
-    }, signal);
-
-    const data = await response.json();
-    const text = data.choices[0].message.content;
-
-    if (asJson) {
-        try {
-            return JSON.parse(cleanJsonString(text));
-        } catch (e) {
-            console.error("Failed to parse OpenRouter response", e);
-            return {};
-        }
-    }
-    return text;
-}
-
-async function callAnthropic(messages, apiKey, model, asJson = true, signal) {
-    const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
-    const chatMessages = messages.filter(m => m.role !== 'system');
-
-    const body = {
-        model: model,
-        max_tokens: 4096,
-        messages: chatMessages.map(m => ({ role: m.role, content: m.content }))
-    };
-    if (systemMessages) {
-        body.system = systemMessages;
-    }
-
-    const response = await withRetry(async () => {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": apiKey,
-                "anthropic-version": "2023-06-01",
-                "anthropic-dangerous-direct-browser-access": "true"
-            },
-            body: JSON.stringify(body),
-            signal
-        });
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.error?.message || "Anthropic API Error");
-        }
-        return res;
-    }, signal);
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || "";
-
-    if (asJson) {
-        try {
-            return JSON.parse(cleanJsonString(text));
-        } catch (e) {
-            console.error("Failed to parse Anthropic response", e);
-            return {};
-        }
-    }
-    return text;
-}
-
-async function callOllama(messages, baseUrl, model, asJson = true, signal) {
-    const cleanUrl = sanitizeOllamaUrl(baseUrl);
-    const url = `${cleanUrl}/v1/chat/completions`;
-
-    const body = {
-        model: model,
-        messages: messages
-    };
-    if (asJson) {
-        body.response_format = { type: "json_object" };
-    }
-
-    const response = await withRetry(async () => {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body),
-            signal
-        });
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.error?.message || "Ollama API Error. Is Ollama running?");
-        }
-        return res;
-    }, signal);
-
-    const data = await response.json();
-    const text = data.choices[0].message.content;
-
-    if (asJson) {
-        try {
-            return JSON.parse(cleanJsonString(text));
-        } catch (e) {
-            console.error("Failed to parse Ollama response", e);
-            return {};
-        }
-    }
-    return text;
-}
-
-function getProxiedUrl(url, corsProxy) {
-    if (!corsProxy) return url;
-    const cleanProxy = corsProxy.trim();
-    if (!cleanProxy) return url;
-    if (cleanProxy.includes('?url=')) {
-        return `${cleanProxy}${encodeURIComponent(url)}`;
-    }
-    if (cleanProxy.endsWith('/')) {
-        return `${cleanProxy}${url}`;
-    }
-    return `${cleanProxy}/${url}`;
+    return executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: true, signal });
 }
 
 export async function summarizeContent(url, apiKey, modelId, { abortSignal, corsProxy } = {}) {
@@ -455,8 +128,6 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal, cors
     const systemPrompt = `You are a helpful assistant. Summarize the main content, topic, and purpose of the given URL or text in a short paragraph (2-3 sentences). Write the summary in the same language as the website content. Do not include introductory phrases.`;
 
     let pageText = `URL: ${url}`;
-    // Try direct fetch first — privacy-first approach, no third-party proxy.
-    // If CORS blocks it or request times out after 5s, we fall back to just the URL for AI summarization.
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -493,18 +164,7 @@ export async function summarizeContent(url, apiKey, modelId, { abortSignal, cors
         { role: "user", content: `Please summarize this page in '${lang}'. The summary MUST be translated natively to the language code '${lang}':\n${pageText}` }
     ];
 
-    if (provider === 'openai') {
-        return callOpenAI(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'gemini') {
-        return callGemini(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'openrouter') {
-        return callOpenRouter(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'ollama') {
-        return callOllama(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'anthropic') {
-        return callAnthropic(messages, apiKey, modelId, false, abortSignal);
-    }
-    throw new Error("Invalid provider");
+    return executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
 }
 
 /**
@@ -619,21 +279,7 @@ Rules:
         { role: "user", content: userContent }
     ];
 
-    let rawSummary = '';
-    if (provider === 'openai') {
-        rawSummary = await callOpenAI(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'gemini') {
-        rawSummary = await callGemini(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'openrouter') {
-        rawSummary = await callOpenRouter(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'ollama') {
-        rawSummary = await callOllama(messages, apiKey, modelId, false, abortSignal);
-    } else if (provider === 'anthropic') {
-        rawSummary = await callAnthropic(messages, apiKey, modelId, false, abortSignal);
-    } else {
-        throw new Error("Invalid provider");
-    }
-
+    const rawSummary = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
     return cleanOneSentenceSummary(rawSummary);
 }
 
@@ -666,19 +312,10 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
                 { role: "user", content: JSON.stringify(simplified) }
             ];
 
-            let chunkResults = {};
-            if (provider === 'openai') {
-                chunkResults = await callOpenAI(messages, apiKey, modelId, true, abortSignal);
-            } else if (provider === 'gemini') {
-                chunkResults = await callGemini(messages, apiKey, modelId, true, abortSignal);
-            } else if (provider === 'openrouter') {
-                chunkResults = await callOpenRouter(messages, apiKey, modelId, true, abortSignal);
-            } else if (provider === 'ollama') {
-                chunkResults = await callOllama(messages, apiKey, modelId, true, abortSignal);
-            } else if (provider === 'anthropic') {
-                chunkResults = await callAnthropic(messages, apiKey, modelId, true, abortSignal);
+            const chunkResults = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: true, signal: abortSignal });
+            if (!abortSignal?.aborted && chunkResults && typeof chunkResults === 'object') {
+                Object.assign(results, chunkResults);
             }
-            if (!abortSignal?.aborted) Object.assign(results, chunkResults);
         } catch (error) {
             if (error.name === 'AbortError') throw error;
             console.error("Error processing titles chunk:", error);
@@ -735,27 +372,13 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
                 { role: "user", content: JSON.stringify(simplified) }
             ];
 
+            const raw = await executeAIRequest({ provider, messages, apiKey, model: modelId, asJson: false, signal: abortSignal });
             let resultJson = [];
-            const handleResponse = async (callFn) => {
-                const raw = await callFn(messages, apiKey, modelId, false, abortSignal);
-                try {
-                    return JSON.parse(cleanJsonString(raw));
-                } catch (e) {
-                    console.error("Failed to parse", e);
-                    return [];
-                }
-            };
-
-            if (provider === 'openai') {
-                resultJson = await handleResponse(callOpenAI);
-            } else if (provider === 'gemini') {
-                resultJson = await handleResponse(callGemini);
-            } else if (provider === 'openrouter') {
-                resultJson = await handleResponse(callOpenRouter);
-            } else if (provider === 'ollama') {
-                resultJson = await handleResponse(callOllama);
-            } else if (provider === 'anthropic') {
-                resultJson = await handleResponse(callAnthropic);
+            try {
+                resultJson = JSON.parse(cleanJsonString(raw));
+            } catch (e) {
+                console.error("Failed to parse", e);
+                resultJson = [];
             }
 
             if (!abortSignal?.aborted && Array.isArray(resultJson)) {
@@ -790,4 +413,3 @@ Example output: [["id1", "id2"], ["id3", "id4", "id5"]]. Only return the JSON ar
     if (processingError) throw processingError;
     return duplicateGroups;
 }
-

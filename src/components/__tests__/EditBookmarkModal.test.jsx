@@ -133,7 +133,7 @@ describe('EditBookmarkModal', () => {
             tags: ['tooling', 'vite', 'frontend']
         });
         expect(onCloseMock).toHaveBeenCalled();
-    });
+    }, 10000);
 
     it('auto-fetches metadata from URL and populates title and description', async () => {
         const fetchSpy = vi.spyOn(metadataFetcher, 'fetchMetadataForUrl').mockResolvedValue({

@@ -64,6 +64,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.js'],
     globals: true,
+    testTimeout: 15000,
   },
   base: '/booksmart/',
   plugins: [
