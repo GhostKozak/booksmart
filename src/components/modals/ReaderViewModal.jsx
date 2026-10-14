@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     X,
     BookOpen,
@@ -15,7 +15,8 @@ import {
     Share2,
     BookmarkCheck,
     QrCode,
-    Bell
+    Bell,
+    Highlighter
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Favicon } from '../Favicon';
@@ -29,6 +30,13 @@ import {
     setReaderPreferences,
     formatReadingTime
 } from '../../lib/reader-service';
+import {
+    getHighlightsForBookmark,
+    addHighlight,
+    applyHighlightsToHtml
+} from '../../lib/highlight-service';
+import { HighlightSelectionMenu } from '../reader/HighlightSelectionMenu';
+import { ReaderHighlightsSidebar } from '../reader/ReaderHighlightsSidebar';
 import { toast } from 'sonner';
 
 export function ReaderViewModal({ isOpen, onClose, bookmark }) {
@@ -41,6 +49,111 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
 
     const [prefs, setPrefsState] = useState(() => getReaderPreferences());
     const contentRef = useRef(null);
+
+    // ── Highlights & Annotations State ──
+    const [highlights, setHighlights] = useState([]);
+    const [showHighlightsSidebar, setShowHighlightsSidebar] = useState(false);
+    const [selectionMenu, setSelectionMenu] = useState(null);
+
+    const loadHighlights = useCallback(async () => {
+        if (!bookmark) return;
+        const list = await getHighlightsForBookmark(bookmark.id, bookmark.url);
+        setHighlights(list || []);
+    }, [bookmark]);
+
+    useEffect(() => {
+        let isMounted = true;
+        if (!isOpen || !bookmark) {
+            return;
+        }
+
+        getHighlightsForBookmark(bookmark.id, bookmark.url).then(list => {
+            if (isMounted) {
+                setHighlights(list || []);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [isOpen, bookmark]);
+
+    const handleCreateHighlight = async ({ text, color, note }) => {
+        if (!text || !bookmark) return;
+        const created = await addHighlight({
+            bookmarkId: bookmark.id,
+            url: bookmark.url,
+            text,
+            color,
+            note
+        });
+        if (created) {
+            setHighlights(prev => [...prev, created]);
+            toast.success(t('reader.highlights.savedSuccess', 'Vurgu kaydedildi!'));
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+        }
+    };
+
+    const handleTextSelection = useCallback(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !contentRef.current) {
+            setSelectionMenu(null);
+            return;
+        }
+
+        const selectedText = selection.toString().trim();
+        if (selectedText.length < 2) {
+            setSelectionMenu(null);
+            return;
+        }
+
+        // Ensure selection is inside the article container
+        if (!contentRef.current.contains(selection.anchorNode)) {
+            setSelectionMenu(null);
+            return;
+        }
+
+        try {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                setSelectionMenu({
+                    position: {
+                        top: rect.top,
+                        left: rect.left + rect.width / 2
+                    },
+                    text: selectedText
+                });
+            }
+        } catch {
+            setSelectionMenu(null);
+        }
+    }, []);
+
+    const scrollToHighlight = (highlightId) => {
+        if (!contentRef.current) return;
+        const mark = contentRef.current.querySelector(`[data-highlight-id="${highlightId}"]`);
+        if (mark) {
+            mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            mark.classList.add('animate-pulse');
+            setTimeout(() => mark.classList.remove('animate-pulse'), 2000);
+        }
+    };
+
+    const articleContentHtml = article?.contentHtml;
+    const renderedContentHtml = useMemo(() => {
+        if (!articleContentHtml) return '';
+        return applyHighlightsToHtml(articleContentHtml, highlights);
+    }, [articleContentHtml, highlights]);
+
+    const handleArticleClick = (e) => {
+        const mark = e.target.closest('[data-highlight-id]');
+        if (mark) {
+            setShowHighlightsSidebar(true);
+        }
+    };
 
     const updatePrefs = useCallback((newPartial) => {
         setPrefsState(prev => {
@@ -358,6 +471,24 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
                         <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => setShowHighlightsSidebar(prev => !prev)}
+                            className={cn(
+                                "h-8 w-8 cursor-pointer relative",
+                                showHighlightsSidebar || highlights.length > 0 ? "text-amber-500 hover:text-amber-600 bg-amber-500/10" : "text-muted-foreground hover:text-foreground"
+                            )}
+                            title={t('reader.highlights.toggleSidebar', 'Vurgular ve Notlar')}
+                        >
+                            <Highlighter className="w-3.5 h-3.5" />
+                            {highlights.length > 0 && (
+                                <span className="absolute -top-1 -right-1 text-[9px] font-bold px-1 rounded-full bg-amber-500 text-white min-w-3.5 h-3.5 flex items-center justify-center">
+                                    {highlights.length}
+                                </span>
+                            )}
+                        </Button>
+
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => useAppStore.getState().openReminderModal(bookmark)}
                             className={cn(
                                 "h-8 w-8 cursor-pointer",
@@ -392,114 +523,139 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
                     </div>
                 </header>
 
-                {/* ── Article Content Area ── */}
-                <main
-                    ref={contentRef}
-                    onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-10 selection:bg-amber-500/25"
-                >
-                    <div className="max-w-2xl mx-auto">
-                        {isLoading ? (
-                            <div className="py-24 flex flex-col items-center justify-center gap-3 text-center opacity-70">
-                                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
-                                <div className="space-y-1">
-                                    <p className="font-semibold text-sm">{t('reader.loadingText', 'Sayfa temizleniyor ve makale metni çıkartılıyor...')}</p>
-                                    <p className="text-xs opacity-75">{t('reader.loadingDesc', 'Reklamlar, menüler ve dikkat dağıtıcı öğeler eleniyor.')}</p>
+                {/* ── Article Content Area & Highlights Sidebar ── */}
+                <div className="flex-1 flex overflow-hidden relative">
+                    <main
+                        ref={contentRef}
+                        onScroll={handleScroll}
+                        onMouseUp={handleTextSelection}
+                        onTouchEnd={handleTextSelection}
+                        onClick={handleArticleClick}
+                        className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-10 selection:bg-amber-500/25 relative"
+                    >
+                        <div className="max-w-2xl mx-auto">
+                            {isLoading ? (
+                                <div className="py-24 flex flex-col items-center justify-center gap-3 text-center opacity-70">
+                                    <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                                    <div className="space-y-1">
+                                        <p className="font-semibold text-sm">{t('reader.loadingText', 'Sayfa temizleniyor ve makale metni çıkartılıyor...')}</p>
+                                        <p className="text-xs opacity-75">{t('reader.loadingDesc', 'Reklamlar, menüler ve dikkat dağıtıcı öğeler eleniyor.')}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : error ? (
-                            <div className="py-16 text-center space-y-4">
-                                <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-md mx-auto">
-                                    {error}
-                                </div>
-                                <div className="flex justify-center gap-2">
-                                    <Button size="sm" variant="outline" onClick={() => loadArticle(true)}>
-                                        <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> {t('common.retry', 'Tekrar Dene')}
-                                    </Button>
-                                    {bookmark?.url && (
-                                        <Button size="sm" variant="default" onClick={() => window.open(bookmark.url, '_blank')}>
-                                            <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> {t('preview.openExternal', 'Orijinal Sitede Oku')}
+                            ) : error ? (
+                                <div className="py-16 text-center space-y-4">
+                                    <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm max-w-md mx-auto">
+                                        {error}
+                                    </div>
+                                    <div className="flex justify-center gap-2">
+                                        <Button size="sm" variant="outline" onClick={() => loadArticle(true)}>
+                                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> {t('common.retry', 'Tekrar Dene')}
                                         </Button>
-                                    )}
-                                </div>
-                            </div>
-                        ) : article ? (
-                            <article className={cn("transition-all duration-150", fontStyles[prefs.font] || fontStyles.serif)}>
-                                {/* Metadata Header */}
-                                <header className="mb-8 pb-6 border-b border-current/15">
-                                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-tight">
-                                        {article.title}
-                                    </h1>
-
-                                    <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-xs opacity-75">
-                                        <div className="flex items-center gap-1.5 font-medium">
-                                            <Favicon url={article.url} className="w-3.5 h-3.5" />
-                                            <span>{article.siteName || (new URL(article.url).hostname)}</span>
-                                        </div>
-
-                                        {article.byline && (
-                                            <>
-                                                <span>•</span>
-                                                <span>{article.byline}</span>
-                                            </>
+                                        {bookmark?.url && (
+                                            <Button size="sm" variant="default" onClick={() => window.open(bookmark.url, '_blank')}>
+                                                <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> {t('preview.openExternal', 'Orijinal Sitede Oku')}
+                                            </Button>
                                         )}
-
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                                            <Clock className="w-3 h-3" />
-                                            {formatReadingTime(article.readingTimeMinutes, t)}
-                                        </span>
-
-                                        <span className="opacity-75">
-                                            ({article.wordCount} {t('reader.words', 'kelime')})
-                                        </span>
                                     </div>
-                                </header>
+                                </div>
+                            ) : article ? (
+                                <article className={cn("transition-all duration-150", fontStyles[prefs.font] || fontStyles.serif)}>
+                                    {/* Metadata Header */}
+                                    <header className="mb-8 pb-6 border-b border-current/15">
+                                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-4 leading-tight">
+                                            {article.title}
+                                        </h1>
 
-                                {/* Lead Hero Image */}
-                                {article.leadImage && (
-                                    <div className="mb-8 overflow-hidden rounded-xl shadow-md max-h-[420px] bg-black/5">
-                                        <img
-                                            src={article.leadImage}
-                                            alt={article.title}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                )}
+                                        <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-xs opacity-75">
+                                            <div className="flex items-center gap-1.5 font-medium">
+                                                <Favicon url={article.url} className="w-3.5 h-3.5" />
+                                                <span>{article.siteName || (new URL(article.url).hostname)}</span>
+                                            </div>
 
-                                {/* Article Body */}
-                                <div
-                                    style={{
-                                        fontSize: `${prefs.fontSize}px`,
-                                        lineHeight: prefs.lineHeight === 'relaxed' ? 1.75 : 1.55
-                                    }}
-                                    className={cn(
-                                        "prose max-w-none break-words",
-                                        themeArticleStyles[prefs.theme] || themeArticleStyles.light
+                                            {article.byline && (
+                                                <>
+                                                    <span>•</span>
+                                                    <span>{article.byline}</span>
+                                                </>
+                                            )}
+
+                                            <span>•</span>
+                                            <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                                                <Clock className="w-3 h-3" />
+                                                {formatReadingTime(article.readingTimeMinutes, t)}
+                                            </span>
+
+                                            <span className="opacity-75">
+                                                ({article.wordCount} {t('reader.words', 'kelime')})
+                                            </span>
+                                        </div>
+                                    </header>
+
+                                    {/* Lead Hero Image */}
+                                    {article.leadImage && (
+                                        <div className="mb-8 overflow-hidden rounded-xl shadow-md max-h-[420px] bg-black/5">
+                                            <img
+                                                src={article.leadImage}
+                                                alt={article.title}
+                                                className="w-full h-full object-cover"
+                                                loading="lazy"
+                                            />
+                                        </div>
                                     )}
-                                    dangerouslySetInnerHTML={{ __html: article.contentHtml }}
-                                />
 
-                                {/* Article Footer */}
-                                <footer className="mt-14 pt-6 border-t border-current/15 flex flex-wrap items-center justify-between gap-3 text-xs opacity-75">
-                                    <span>{t('reader.endOfArticle', 'Makalenin sonu')}</span>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={handleMarkAsRead}
-                                            className="h-7 text-xs gap-1.5 cursor-pointer"
-                                        >
-                                            <Check className="w-3 h-3" />
-                                            <span>{t('reader.markAsRead', 'Okundu Olarak İşaretle')}</span>
-                                        </Button>
-                                    </div>
-                                </footer>
-                            </article>
-                        ) : null}
-                    </div>
-                </main>
+                                    {/* Article Body */}
+                                    <div
+                                        style={{
+                                            fontSize: `${prefs.fontSize}px`,
+                                            lineHeight: prefs.lineHeight === 'relaxed' ? 1.75 : 1.55
+                                        }}
+                                        className={cn(
+                                            "prose max-w-none break-words",
+                                            themeArticleStyles[prefs.theme] || themeArticleStyles.light
+                                        )}
+                                        dangerouslySetInnerHTML={{ __html: renderedContentHtml }}
+                                    />
+
+                                    {/* Article Footer */}
+                                    <footer className="mt-14 pt-6 border-t border-current/15 flex flex-wrap items-center justify-between gap-3 text-xs opacity-75">
+                                        <span>{t('reader.endOfArticle', 'Makalenin sonu')}</span>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={handleMarkAsRead}
+                                                className="h-7 text-xs gap-1.5 cursor-pointer"
+                                            >
+                                                <Check className="w-3 h-3" />
+                                                <span>{t('reader.markAsRead', 'Okundu Olarak İşaretle')}</span>
+                                            </Button>
+                                        </div>
+                                    </footer>
+                                </article>
+                            ) : null}
+                        </div>
+                    </main>
+
+                    {showHighlightsSidebar && (
+                        <ReaderHighlightsSidebar
+                            isOpen={showHighlightsSidebar}
+                            onClose={() => setShowHighlightsSidebar(false)}
+                            bookmark={bookmark}
+                            highlights={highlights}
+                            onRefreshHighlights={loadHighlights}
+                            onScrollToHighlight={scrollToHighlight}
+                        />
+                    )}
+                </div>
+
+                {selectionMenu && (
+                    <HighlightSelectionMenu
+                        position={selectionMenu.position}
+                        selectedText={selectionMenu.text}
+                        onHighlight={handleCreateHighlight}
+                        onClose={() => setSelectionMenu(null)}
+                    />
+                )}
             </div>
         </div>
     );

@@ -90,6 +90,7 @@
             "collections": "Collections"
         },
         "smartFilters": {
+            "highlights": "Highlights & Notes",
             "reminders": "Reminders",
             "duplicates": "Duplicates",
             "deadLinks": "Dead Links",
@@ -884,7 +885,31 @@
         "endOfArticle": "End of article",
         "words": "words",
         "readingTimeMinutes": "{{count}} min read",
-        "minShort": "min"
+        "minShort": "min",
+        "highlights": {
+            "title": "Highlights & Notes",
+            "toggleSidebar": "Highlights & Notes",
+            "countSuffix": "highlights",
+            "badgeTooltip": "Open highlights in Reader Mode",
+            "addNote": "Add Margin Note",
+            "note": "Note",
+            "editNote": "Edit Note",
+            "notePlaceholder": "Write an annotation or thought about this highlight...",
+            "noteSaved": "Note saved",
+            "savedSuccess": "Highlight saved!",
+            "deleted": "Highlight removed",
+            "allCopied": "All highlights copied as Markdown!",
+            "copyAllMarkdown": "Copy All as Markdown",
+            "emptyTitle": "No highlights yet",
+            "emptyDesc": "Select any text in the article to color-highlight and add annotations.",
+            "scrollTo": "Jump to text location",
+            "colors": {
+                "yellow": "Yellow",
+                "green": "Green",
+                "blue": "Blue",
+                "purple": "Purple"
+            }
+        }
     },
     "qr": {
         "title": "Share via QR Code to Mobile",

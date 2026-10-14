@@ -7,7 +7,7 @@ import { BookmarkCollections } from './BookmarkCollections'
 import { BookmarkFolderBadge } from './BookmarkFolderBadge'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/button'
-import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell } from 'lucide-react'
+import { ArrowRight, XCircle, Layers, Check, Eye, StickyNote, Pencil, GitMerge, Rss, BookOpen, QrCode, Bell, Highlighter } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
 import { ReminderBadge } from './ReminderBadge'
@@ -66,6 +66,21 @@ export function BookmarkRowMobile({
                                 reminderAt={bookmark.reminderAt}
                                 onClick={() => useAppStore.getState().openReminderModal(bookmark)}
                             />
+                        )}
+                        {Boolean(bookmark.highlightsCount || (bookmark.highlights && bookmark.highlights.length > 0)) && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    useAppStore.getState().openReaderMode(bookmark);
+                                }}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer shrink-0"
+                                title={t('reader.highlights.badgeTooltip', 'Vurguları Reader Mode\'da aç')}
+                            >
+                                <Highlighter className="w-2.5 h-2.5" />
+                                <span>{bookmark.highlightsCount || (bookmark.highlights ? bookmark.highlights.length : 1)} {t('reader.highlights.countSuffix', 'vurgu')}</span>
+                            </button>
                         )}
 
                         <div className="flex items-center gap-1 shrink-0">

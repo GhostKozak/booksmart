@@ -90,6 +90,7 @@
             "collections": "Koleksiyonlar"
         },
         "smartFilters": {
+            "highlights": "Vurgular & Notlar",
             "reminders": "Hatırlatıcılar",
             "duplicates": "Yinelenenler",
             "deadLinks": "Ölü Linkler",
@@ -884,7 +885,31 @@
         "endOfArticle": "Makalenin sonu",
         "words": "kelime",
         "readingTimeMinutes": "{{count}} dk okuma",
-        "minShort": "dk"
+        "minShort": "dk",
+        "highlights": {
+            "title": "Vurgular ve Notlar",
+            "toggleSidebar": "Vurgular ve Notlar",
+            "countSuffix": "vurgu",
+            "badgeTooltip": "Vurguları Reader Mode'da aç",
+            "addNote": "Kenar Notu Ekle",
+            "note": "Not",
+            "editNote": "Notu Düzenle",
+            "notePlaceholder": "Bu vurgu hakkında bir düşünce veya not yazın...",
+            "noteSaved": "Not kaydedildi",
+            "savedSuccess": "Vurgu kaydedildi!",
+            "deleted": "Vurgu silindi",
+            "allCopied": "Tüm vurgular Markdown olarak kopyalandı!",
+            "copyAllMarkdown": "Tümünü Markdown Olarak Kopyala",
+            "emptyTitle": "Henüz vurgu yok",
+            "emptyDesc": "Makaleden herhangi bir metin seçerek renkli vurgulayabilir ve kenar notları ekleyebilirsiniz.",
+            "scrollTo": "Metinde konumuna git",
+            "colors": {
+                "yellow": "Sarı",
+                "green": "Yeşil",
+                "blue": "Mavi",
+                "purple": "Mor"
+            }
+        }
     },
     "qr": {
         "title": "QR Kod ile Telefona Aktar",

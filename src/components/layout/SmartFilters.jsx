@@ -1,4 +1,4 @@
-import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, ChevronRight, ChevronDown } from 'lucide-react'
+import { Archive, History as HistoryIcon, ShieldAlert, FileQuestion, File, XCircle, Link, Video, MessageCircle, ShoppingCart, Newspaper, Bell, Highlighter, ChevronRight, ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useTranslation } from 'react-i18next'
 
@@ -14,6 +14,7 @@ export function SmartFilters({
     const onToggle = () => toggleSection('filters')
 
     const filters = [
+        { key: 'highlights', label: t('sidebar.smartFilters.highlights', 'Vurgular & Notlar'), icon: Highlighter, count: smartCounts.highlights || 0, color: 'yellow' },
         { key: 'reminders', label: t('sidebar.smartFilters.reminders', 'Hatırlatıcılar'), icon: Bell, count: smartCounts.reminders || 0, color: 'indigo' },
         { key: 'old', label: t('sidebar.smartFilters.old'), icon: HistoryIcon, count: smartCounts.old, color: 'amber' },
         { key: 'http', label: t('sidebar.smartFilters.http'), icon: ShieldAlert, count: smartCounts.http, color: 'red' },
@@ -29,6 +30,7 @@ export function SmartFilters({
     ]
 
     const colorMap = {
+        yellow: { active: 'bg-yellow-100 text-yellow-800 font-medium dark:bg-yellow-900/30 dark:text-yellow-300' },
         indigo: { active: 'bg-indigo-100 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-400' },
         amber: { active: 'bg-amber-100 text-amber-700 font-medium dark:bg-amber-900/30 dark:text-amber-400' },
         red: { active: 'bg-red-100 text-red-700 font-medium dark:bg-red-900/30 dark:text-red-400' },
