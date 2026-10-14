@@ -11,6 +11,8 @@ vi.mock('../../db', () => ({
             bulkAdd: vi.fn(),
             bulkPut: vi.fn(),
             update: vi.fn(),
+            get: vi.fn(),
+            toArray: vi.fn(),
             where: vi.fn(() => ({
                 anyOf: vi.fn(() => ({
                     modify: vi.fn()
@@ -21,7 +23,9 @@ vi.mock('../../db', () => ({
             })),
         },
         folders: {
-            add: vi.fn()
+            add: vi.fn(),
+            toArray: vi.fn(),
+            update: vi.fn()
         },
         tags: {
             toArray: vi.fn(),
@@ -361,6 +365,119 @@ describe('useBookmarkOperations', () => {
             const { result } = renderHook(() => useBookmarkOperations(props));
             await act(async () => { await result.current.handleBatchAddTags('newtag'); });
             expect(db.bookmarks.bulkPut).toHaveBeenCalled();
+        });
+    });
+
+    describe('moveFolder', () => {
+        it('should move folder inside target parent folder and update descendants', async () => {
+            const props = { ...defaultProps };
+            db.bookmarks.toArray.mockResolvedValueOnce([
+                { id: 'b1', originalFolder: 'Dev', newFolder: 'Dev' },
+                { id: 'b2', originalFolder: 'Dev > React', newFolder: 'Dev > React' },
+                { id: 'b3', originalFolder: 'Other', newFolder: 'Other' }
+            ]);
+            db.folders.toArray.mockResolvedValueOnce([
+                { id: 'f1', name: 'Dev' },
+                { id: 'f2', name: 'Dev > React' }
+            ]);
+
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            let success;
+            await act(async () => {
+                success = await result.current.moveFolder('Dev', 'Work');
+            });
+
+            expect(success).toBe(true);
+            expect(db.bookmarks.update).toHaveBeenCalledWith('b1', {
+                originalFolder: 'Work > Dev',
+                newFolder: 'Work > Dev'
+            });
+            expect(db.bookmarks.update).toHaveBeenCalledWith('b2', {
+                originalFolder: 'Work > Dev > React',
+                newFolder: 'Work > Dev > React'
+            });
+            expect(db.folders.update).toHaveBeenCalledWith('f1', { name: 'Work > Dev' });
+            expect(db.folders.update).toHaveBeenCalledWith('f2', { name: 'Work > Dev > React' });
+            expect(props.addCommand).toHaveBeenCalled();
+        });
+
+        it('should move folder to root level when target is null or __ROOT__', async () => {
+            const props = { ...defaultProps };
+            db.bookmarks.toArray.mockResolvedValueOnce([
+                { id: 'b1', originalFolder: 'Work > Dev', newFolder: 'Work > Dev' }
+            ]);
+            db.folders.toArray.mockResolvedValueOnce([
+                { id: 'f1', name: 'Work > Dev' }
+            ]);
+
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            let success;
+            await act(async () => {
+                success = await result.current.moveFolder('Work > Dev', '__ROOT__');
+            });
+
+            expect(success).toBe(true);
+            expect(db.bookmarks.update).toHaveBeenCalledWith('b1', {
+                originalFolder: 'Dev',
+                newFolder: 'Dev'
+            });
+            expect(db.folders.update).toHaveBeenCalledWith('f1', { name: 'Dev' });
+        });
+
+        it('should prevent cyclic moves when moving parent into its own child', async () => {
+            const props = { ...defaultProps };
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            let success;
+            await act(async () => {
+                success = await result.current.moveFolder('Work', 'Work > Dev > React');
+            });
+
+            expect(success).toBe(false);
+            expect(db.bookmarks.update).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('moveBookmark', () => {
+        it('should move bookmark to target folder', async () => {
+            const props = { ...defaultProps };
+            db.bookmarks.get.mockResolvedValueOnce({
+                id: 'b1',
+                title: 'Test',
+                originalFolder: 'OldFolder',
+                newFolder: 'OldFolder'
+            });
+
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            let success;
+            await act(async () => {
+                success = await result.current.moveBookmark('b1', 'NewFolder');
+            });
+
+            expect(success).toBe(true);
+            expect(db.bookmarks.update).toHaveBeenCalledWith('b1', {
+                originalFolder: 'NewFolder',
+                newFolder: 'NewFolder'
+            });
+            expect(props.addCommand).toHaveBeenCalled();
+        });
+
+        it('should do nothing if bookmark already in target folder', async () => {
+            const props = { ...defaultProps };
+            db.bookmarks.get.mockResolvedValueOnce({
+                id: 'b1',
+                title: 'Test',
+                originalFolder: 'FolderA',
+                newFolder: 'FolderA'
+            });
+
+            const { result } = renderHook(() => useBookmarkOperations(props));
+            let success;
+            await act(async () => {
+                success = await result.current.moveBookmark('b1', 'FolderA');
+            });
+
+            expect(success).toBe(false);
+            expect(db.bookmarks.update).not.toHaveBeenCalled();
         });
     });
 });

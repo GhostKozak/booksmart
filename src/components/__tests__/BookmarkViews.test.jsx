@@ -312,5 +312,70 @@ describe('Bookmark Views', () => {
             // Folder B is visible again after expand all
             expect(screen.getByText('Folder B')).toBeInTheDocument();
         });
+
+        it('creates a new root folder via tree toolbar button', () => {
+            render(
+                <BookmarkTree
+                    bookmarks={[]}
+                    selectedIds={new Set()}
+                    toggleSelection={vi.fn()}
+                    linkHealth={{}}
+                    ignoredUrls={new Set()}
+                    onPreview={vi.fn()}
+                    onEdit={vi.fn()}
+                />
+            );
+
+            // Click "Yeni Klasör" button in tree header
+            const newFolderBtn = screen.getByText('bookmarks.tree.newFolderBtn');
+            fireEvent.click(newFolderBtn);
+
+            // Input is shown
+            const input = screen.getByPlaceholderText('bookmarks.tree.rootFolderPlaceholder');
+            expect(input).toBeInTheDocument();
+
+            // Type folder name and submit
+            fireEvent.change(input, { target: { value: 'My New Root' } });
+            fireEvent.keyDown(input, { key: 'Enter' });
+
+            // Folder appears in the tree
+            expect(screen.getByText('My New Root')).toBeInTheDocument();
+        });
+
+        it('creates a new subfolder inside an existing folder', () => {
+            const nestedBookmarks = [
+                { id: '1', title: 'Bookmark 1', url: 'https://b1.com', originalFolder: 'ParentFolder' }
+            ];
+
+            render(
+                <BookmarkTree
+                    bookmarks={nestedBookmarks}
+                    selectedIds={new Set()}
+                    toggleSelection={vi.fn()}
+                    linkHealth={{}}
+                    ignoredUrls={new Set()}
+                    onPreview={vi.fn()}
+                    onEdit={vi.fn()}
+                />
+            );
+
+            // Folder is rendered
+            expect(screen.getByText('ParentFolder')).toBeInTheDocument();
+
+            // Click the add subfolder button on ParentFolder
+            const addSubfolderBtn = screen.getByTitle('bookmarks.tree.addSubfolder');
+            fireEvent.click(addSubfolderBtn);
+
+            // Subfolder input appears
+            const input = screen.getByPlaceholderText('bookmarks.tree.newSubfolderPlaceholder');
+            expect(input).toBeInTheDocument();
+
+            // Type subfolder name and press Enter
+            fireEvent.change(input, { target: { value: 'ChildFolder' } });
+            fireEvent.keyDown(input, { key: 'Enter' });
+
+            // Subfolder appears in the tree
+            expect(screen.getByText('ChildFolder')).toBeInTheDocument();
+        });
     });
 });

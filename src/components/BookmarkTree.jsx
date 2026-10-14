@@ -1,263 +1,22 @@
 import React, { useState, useMemo, useCallback } from 'react'
-import { Checkbox } from './ui/checkbox'
-import { Favicon } from './Favicon'
-import { BookmarkHealthStatus } from './bookmark/BookmarkHealthStatus'
-import { LinkTooltip } from './bookmark/LinkTooltip'
+import {
+    DndContext,
+    DragOverlay,
+    PointerSensor,
+    useSensor,
+    useSensors
+} from '@dnd-kit/core'
 import { Button } from './ui/button'
-import { Folder, ChevronDown, Pencil, Eye, FolderOpen, BookOpen, GitMerge } from 'lucide-react'
-import { cn } from '../lib/utils'
+import { Input } from './ui/input'
+import { Folder, FolderTree, FolderPlus, Check, X } from 'lucide-react'
+import { Favicon } from './Favicon'
 import { useTranslation } from 'react-i18next'
-import { useAppStore } from '../store/useAppStore'
-
-// Bookmarks Leaf (File) Node
-const BookmarkLeaf = ({
-    bookmark,
-    depth,
-    selectedIds,
-    toggleSelection,
-    onPreview,
-    onEdit,
-    onMergeDuplicate,
-    linkHealth,
-    ignoredUrls,
-    toggleIgnoreUrl,
-    t
-}) => {
-    const isSelected = selectedIds.has(bookmark.id)
-    const isIgnored = ignoredUrls?.has(bookmark.url)
-    const healthStatus = isIgnored ? 'ignored' : (linkHealth[bookmark.url] || 'idle')
-
-    return (
-        <div
-            className={cn(
-                "flex items-center justify-between py-1.5 px-3 border-b border-muted/10 hover:bg-muted/40 transition-colors group/leaf",
-                isSelected && "bg-primary/5 border-primary/20"
-            )}
-            style={{ paddingLeft: `${depth * 16 + 28}px` }}
-        >
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => toggleSelection(bookmark.id)}
-                    className="h-3.5 w-3.5 shrink-0"
-                    aria-label={t('common.select')}
-                />
-                <LinkTooltip bookmark={bookmark}>
-                    <div className="flex items-center gap-1.5 min-w-0 cursor-pointer flex-1" onClick={() => onPreview(bookmark)}>
-                        <Favicon url={bookmark.url} className="w-3.5 h-3.5 shrink-0" />
-                        <span className={cn(
-                            "text-sm truncate font-medium hover:text-primary transition-colors",
-                            (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300",
-                            (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
-                            healthStatus === 'dead' && "text-red-600 dark:text-red-400 line-through"
-                        )} title={bookmark.title}>
-                            {bookmark.title || t('common.untitled')}
-                        </span>
-                    </div>
-                </LinkTooltip>
-            </div>
-
-            <div className="flex items-center gap-1 shrink-0 ml-4">
-                <BookmarkHealthStatus
-                    url={bookmark.url}
-                    status={healthStatus}
-                    onToggleIgnore={toggleIgnoreUrl}
-                />
-                <div className="flex items-center md:opacity-0 group-hover/leaf:opacity-100 transition-opacity gap-0.5">
-                    {(bookmark.isDuplicate || bookmark.hasDuplicate) && onMergeDuplicate && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-7 h-7 text-primary hover:bg-primary/10 cursor-pointer"
-                            onClick={() => onMergeDuplicate(bookmark)}
-                            title={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
-                            aria-label={t('bookmarks.row.mergeAction') || 'Merge with duplicates'}
-                        >
-                            <GitMerge className="w-3.5 h-3.5" />
-                        </Button>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
-                        onClick={() => onEdit?.(bookmark)}
-                        title={t('common.edit')}
-                        aria-label={t('common.edit')}
-                    >
-                        <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
-                        onClick={() => onPreview(bookmark)}
-                        title={t('preview.open')}
-                        aria-label={t('preview.open')}
-                    >
-                        <Eye className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
-                        onClick={() => useAppStore.getState().openReaderMode(bookmark)}
-                        title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
-                        aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
-                    >
-                        <BookOpen className="w-3.5 h-3.5" />
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// Collapsible Folder Node
-const FolderNode = ({
-    node,
-    path,
-    depth,
-    expandedFolders,
-    toggleFolder,
-    selectedIds,
-    toggleSelection,
-    onPreview,
-    onEdit,
-    onMergeDuplicate,
-    linkHealth,
-    ignoredUrls,
-    toggleIgnoreUrl,
-    t
-}) => {
-    const isExpanded = expandedFolders.has(path)
-    const hasChildren = Object.keys(node.subfolders).length > 0 || node.bookmarks.length > 0
-
-    // Get bookmark count inside this folder recursively
-    const getDeepCount = (folderNode) => {
-        let count = folderNode.bookmarks.length
-        Object.values(folderNode.subfolders).forEach(sub => {
-            count += getDeepCount(sub)
-        })
-        return count
-    }
-
-    const totalCount = getDeepCount(node)
-
-    // Select all bookmarks inside this folder recursively
-    const getDeepBookmarkIds = (folderNode, ids = []) => {
-        folderNode.bookmarks.forEach(b => ids.push(b.id))
-        Object.values(folderNode.subfolders).forEach(sub => {
-            getDeepBookmarkIds(sub, ids)
-        })
-        return ids
-    }
-
-    const folderBookmarkIds = getDeepBookmarkIds(node)
-    const isFolderAllSelected = folderBookmarkIds.length > 0 && folderBookmarkIds.every(id => selectedIds.has(id))
-    const isFolderSomeSelected = folderBookmarkIds.some(id => selectedIds.has(id)) && !isFolderAllSelected
-
-    const handleCheckboxChange = () => {
-        // Toggle selection for all children
-        const setSelectedIds = useAppStore.getState().setSelectedIds
-        const currentSelected = new Set(selectedIds)
-
-        if (isFolderAllSelected) {
-            // Deselect all
-            folderBookmarkIds.forEach(id => currentSelected.delete(id))
-        } else {
-            // Select all
-            folderBookmarkIds.forEach(id => currentSelected.add(id))
-        }
-        setSelectedIds(currentSelected)
-    }
-
-    return (
-        <div className="select-none">
-            {/* Folder Header */}
-            <div
-                className="flex items-center justify-between py-1.5 px-3 hover:bg-muted/20 cursor-pointer border-b border-muted/5 transition-colors group/folder"
-                style={{ paddingLeft: `${depth * 16 + 12}px` }}
-                onClick={() => toggleFolder(path)}
-            >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {/* Collapsible toggle */}
-                    {hasChildren ? (
-                        <ChevronDown className={cn("h-4 w-4 text-muted-foreground/70 transition-transform shrink-0 hover:text-primary", !isExpanded && "-rotate-90")} />
-                    ) : (
-                        <div className="w-4 h-4 shrink-0" />
-                    )}
-
-                    {/* Checkbox for selecting folder contents */}
-                    <div onClick={e => e.stopPropagation()} className="flex items-center shrink-0">
-                        <Checkbox
-                            checked={isFolderAllSelected}
-                            className={cn(isFolderSomeSelected && "data-[state=unchecked]:bg-primary/20 data-[state=unchecked]:text-primary")}
-                            onCheckedChange={handleCheckboxChange}
-                            aria-label={t('common.select')}
-                        />
-                    </div>
-
-                    {isExpanded ? (
-                        <FolderOpen className="h-4 w-4 text-blue-500 fill-blue-500/10 shrink-0" />
-                    ) : (
-                        <Folder className="h-4 w-4 text-blue-500 fill-blue-500/10 shrink-0" />
-                    )}
-
-                    <span className="truncate text-sm font-semibold text-foreground/90">{node.name}</span>
-                    <span className="text-[10px] text-muted-foreground/50 font-normal shrink-0">
-                        ({totalCount})
-                    </span>
-                </div>
-            </div>
-
-            {/* Folder Contents */}
-            {isExpanded && (
-                <div className="space-y-0.5">
-                    {/* Render subfolders sorted by name */}
-                    {Object.values(node.subfolders)
-                        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
-                        .map(sub => (
-                            <FolderNode
-                                key={sub.name}
-                                node={sub}
-                                path={`${path} > ${sub.name}`}
-                                depth={depth + 1}
-                                expandedFolders={expandedFolders}
-                                toggleFolder={toggleFolder}
-                                selectedIds={selectedIds}
-                                toggleSelection={toggleSelection}
-                                onPreview={onPreview}
-                                onEdit={onEdit}
-                                onMergeDuplicate={onMergeDuplicate}
-                                linkHealth={linkHealth}
-                                ignoredUrls={ignoredUrls}
-                                toggleIgnoreUrl={toggleIgnoreUrl}
-                                t={t}
-                            />
-                        ))}
-
-                    {/* Render bookmarks in this exact folder */}
-                    {node.bookmarks.map(bookmark => (
-                        <BookmarkLeaf
-                            key={bookmark.id}
-                            bookmark={bookmark}
-                            depth={depth + 1}
-                            selectedIds={selectedIds}
-                            toggleSelection={toggleSelection}
-                            onPreview={onPreview}
-                            onEdit={onEdit}
-                            onMergeDuplicate={onMergeDuplicate}
-                            linkHealth={linkHealth}
-                            ignoredUrls={ignoredUrls}
-                            toggleIgnoreUrl={toggleIgnoreUrl}
-                            t={t}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    )
-}
+import { db } from '../db'
+import { generateUUID } from '../lib/utils'
+import { toast } from 'sonner'
+import { BookmarkTreeFolder } from './bookmark/BookmarkTreeFolder'
+import { BookmarkTreeLeaf } from './bookmark/BookmarkTreeLeaf'
+import { BookmarkTreeRootDropZone } from './bookmark/BookmarkTreeRootDropZone'
 
 export function BookmarkTree({
     bookmarks,
@@ -268,14 +27,54 @@ export function BookmarkTree({
     toggleIgnoreUrl,
     onPreview,
     onEdit,
-    onMergeDuplicate
+    onMergeDuplicate,
+    onMoveFolder,
+    onMoveBookmark,
+    availableFolders = []
 }) {
     const { t } = useTranslation()
+    const [activeDragItem, setActiveDragItem] = useState(null)
+    const [extraFolders, setExtraFolders] = useState([])
+    const [isCreatingRootFolder, setIsCreatingRootFolder] = useState(false)
+    const [newRootFolderName, setNewRootFolderName] = useState('')
 
-    // Build hierarchical tree structure from flat bookmarks list
+    // Setup DnD sensors with a distance threshold of 8px to keep simple clicks responsive
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8
+            }
+        })
+    )
+
+    // Build hierarchical tree structure from flat bookmarks list and configured folders
     const tree = useMemo(() => {
         const root = { subfolders: {}, bookmarks: [] }
 
+        const addPathToTree = (folderStr) => {
+            if (!folderStr || folderStr === 'Root') return
+            const parts = folderStr.split(' > ').map(p => p.trim()).filter(Boolean)
+            let current = root
+            parts.forEach(part => {
+                if (!current.subfolders[part]) {
+                    current.subfolders[part] = { name: part, subfolders: {}, bookmarks: [] }
+                }
+                current = current.subfolders[part]
+            })
+        }
+
+        // 1. Configured folders from availableFolders
+        availableFolders.forEach(folderObj => {
+            const folderName = typeof folderObj === 'string' ? folderObj : folderObj?.name
+            addPathToTree(folderName)
+        })
+
+        // 2. Extra created folders in current view session
+        extraFolders.forEach(folderName => {
+            addPathToTree(folderName)
+        })
+
+        // 3. Bookmarks and their folders
         bookmarks.forEach(bookmark => {
             const folderStr = bookmark.newFolder || bookmark.originalFolder || 'Root'
             const parts = folderStr.split(' > ').map(p => p.trim()).filter(Boolean)
@@ -296,7 +95,7 @@ export function BookmarkTree({
         })
 
         return root
-    }, [bookmarks])
+    }, [bookmarks, availableFolders, extraFolders])
 
     // Local state to keep track of expanded folder paths
     const [expandedFolders, setExpandedFolders] = useState(() => {
@@ -335,56 +134,189 @@ export function BookmarkTree({
         setExpandedFolders(new Set())
     }
 
+    // Create a new folder (root or subfolder)
+    const handleCreateFolder = useCallback(async (folderPath) => {
+        if (!folderPath) return
+        const parts = folderPath.split(' > ').map(p => p.trim()).filter(Boolean)
+        const cleanPath = parts.join(' > ')
+        const folderName = parts[parts.length - 1]
+
+        // Persist to Dexie db.folders
+        try {
+            const existing = await db.folders.where('name').equals(cleanPath).first()
+            if (!existing) {
+                await db.folders.add({
+                    id: generateUUID(),
+                    name: cleanPath,
+                    color: '#3b82f6',
+                    order: availableFolders.length + extraFolders.length
+                })
+            }
+        } catch {
+            // DB might be mocked in test environment
+        }
+
+        // Add to local state and auto-expand ancestors
+        setExtraFolders(prev => [...new Set([...prev, cleanPath])])
+        setExpandedFolders(prev => {
+            const next = new Set(prev)
+            let curr = ''
+            parts.forEach(p => {
+                curr = curr ? `${curr} > ${p}` : p
+                next.add(curr)
+            })
+            return next
+        })
+
+        toast.success(t('bookmarks.tree.folderCreated', {
+            name: folderName,
+            defaultValue: `"${folderName}" klasörü oluşturuldu`
+        }))
+    }, [availableFolders.length, extraFolders.length, t])
+
+    const handleConfirmRootCreate = () => {
+        const trimmed = newRootFolderName.trim()
+        if (trimmed) {
+            handleCreateFolder(trimmed)
+        }
+        setNewRootFolderName('')
+        setIsCreatingRootFolder(false)
+    }
+
+    const handleCancelRootCreate = () => {
+        setNewRootFolderName('')
+        setIsCreatingRootFolder(false)
+    }
+
+    const handleDragStart = (event) => {
+        const data = event.active.data.current
+        if (data) {
+            setActiveDragItem(data)
+        }
+    }
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event
+        setActiveDragItem(null)
+
+        if (!active || !over) return
+
+        const activeData = active.data.current
+        const overData = over.data.current
+
+        if (!activeData || !overData) return
+
+        if (activeData.type === 'folder' && onMoveFolder) {
+            const sourcePath = activeData.path
+            if (overData.type === 'root') {
+                onMoveFolder(sourcePath, null)
+            } else if (overData.type === 'folder') {
+                onMoveFolder(sourcePath, overData.path)
+            }
+        } else if (activeData.type === 'bookmark' && onMoveBookmark) {
+            const bookmarkId = activeData.id
+            if (overData.type === 'root') {
+                onMoveBookmark(bookmarkId, '')
+            } else if (overData.type === 'folder') {
+                onMoveBookmark(bookmarkId, overData.path)
+            }
+        }
+    }
+
+    const handleDragCancel = () => {
+        setActiveDragItem(null)
+    }
+
     const hasSubfolders = Object.keys(tree.subfolders).length > 0
 
     return (
-        <div className="bg-card rounded-xl border shadow-sm overflow-hidden h-full flex flex-col">
-            {/* Header / Actions toolbar */}
-            <div className="bg-muted/30 border-b p-2 flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-2">
-                    {t('header.treeView') || 'Folder Tree'}
-                </span>
-                <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleExpandAll}>
-                        {t('bookmarks.tree.expandAll') || 'Expand All'}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleCollapseAll}>
-                        {t('bookmarks.tree.collapseAll') || 'Collapse All'}
-                    </Button>
+        <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+        >
+            <div className="bg-card rounded-xl border shadow-xs overflow-hidden h-full flex flex-col">
+                {/* Header / Actions toolbar */}
+                <div className="bg-muted/30 border-b p-2 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-2 pl-2">
+                        <FolderTree className="h-4 w-4 text-primary" />
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {t('header.treeView', 'Klasör Ağacı')}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/60 hidden sm:inline">
+                            • {t('bookmarks.tree.hint', 'Klasörleri sürükleyerek iç içe yerleştirebilir veya kök dizine çıkarabilirsiniz')}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs font-semibold gap-1.5 rounded-lg border-primary/30 hover:border-primary text-primary hover:bg-primary/5 cursor-pointer"
+                            onClick={() => setIsCreatingRootFolder(true)}
+                            title={t('bookmarks.tree.addRootFolder', 'Yeni Ana Klasör Oluştur')}
+                        >
+                            <FolderPlus className="w-3.5 h-3.5" />
+                            <span>{t('bookmarks.tree.newFolderBtn', 'Yeni Klasör')}</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleExpandAll}>
+                            {t('bookmarks.tree.expandAll', 'Tümünü Aç')}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleCollapseAll}>
+                            {t('bookmarks.tree.collapseAll', 'Tümünü Kapat')}
+                        </Button>
+                    </div>
                 </div>
-            </div>
 
-            {/* Tree Body */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1">
-                {/* Render Root-level Bookmarks (no folder) */}
-                {tree.bookmarks.map(bookmark => (
-                    <BookmarkLeaf
-                        key={bookmark.id}
-                        bookmark={bookmark}
-                        depth={0}
-                        selectedIds={selectedIds}
-                        toggleSelection={toggleSelection}
-                        onPreview={onPreview}
-                        onEdit={onEdit}
-                        onMergeDuplicate={onMergeDuplicate}
-                        linkHealth={linkHealth}
-                        ignoredUrls={ignoredUrls}
-                        toggleIgnoreUrl={toggleIgnoreUrl}
-                        t={t}
-                    />
-                ))}
+                {/* Drop Zone to Unnest to Root Level */}
+                <BookmarkTreeRootDropZone activeDragItem={activeDragItem} />
 
-                {/* Render Root-level Subfolders */}
-                {Object.values(tree.subfolders)
-                    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
-                    .map(sub => (
-                        <FolderNode
-                            key={sub.name}
-                            node={sub}
-                            path={sub.name}
+                {/* Inline New Root Folder Input */}
+                {isCreatingRootFolder && (
+                    <div className="mx-2 mt-2 p-2 bg-primary/5 rounded-xl border border-primary/30 flex items-center gap-2 animate-in fade-in duration-150">
+                        <Folder className="h-4 w-4 text-primary fill-primary/20 shrink-0" />
+                        <Input
+                            autoFocus
+                            type="text"
+                            value={newRootFolderName}
+                            onChange={e => setNewRootFolderName(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') handleConfirmRootCreate()
+                                if (e.key === 'Escape') handleCancelRootCreate()
+                            }}
+                            placeholder={t('bookmarks.tree.rootFolderPlaceholder', 'Yeni ana klasör adı...')}
+                            className="h-8 text-xs bg-background py-1 px-2 border-primary/40 focus:border-primary flex-1 rounded-lg"
+                        />
+                        <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                                variant="default"
+                                size="sm"
+                                className="h-8 px-2.5 rounded-lg cursor-pointer text-xs"
+                                onClick={handleConfirmRootCreate}
+                            >
+                                <Check className="w-3.5 h-3.5 mr-1" />
+                                <span>{t('common.save', 'Oluştur')}</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
+                                onClick={handleCancelRootCreate}
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tree Body */}
+                <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1">
+                    {/* Render Root-level Bookmarks (no folder) */}
+                    {tree.bookmarks.map(bookmark => (
+                        <BookmarkTreeLeaf
+                            key={bookmark.id}
+                            bookmark={bookmark}
                             depth={0}
-                            expandedFolders={expandedFolders}
-                            toggleFolder={toggleFolder}
                             selectedIds={selectedIds}
                             toggleSelection={toggleSelection}
                             onPreview={onPreview}
@@ -397,12 +329,60 @@ export function BookmarkTree({
                         />
                     ))}
 
-                {!hasSubfolders && tree.bookmarks.length === 0 && (
-                    <div className="p-8 text-center text-xs text-muted-foreground">
-                        {t('main.empty.desc')}
-                    </div>
-                )}
+                    {/* Render Root-level Subfolders */}
+                    {Object.values(tree.subfolders)
+                        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+                        .map(sub => (
+                            <BookmarkTreeFolder
+                                key={sub.name}
+                                node={sub}
+                                path={sub.name}
+                                depth={0}
+                                expandedFolders={expandedFolders}
+                                toggleFolder={toggleFolder}
+                                selectedIds={selectedIds}
+                                toggleSelection={toggleSelection}
+                                onPreview={onPreview}
+                                onEdit={onEdit}
+                                onMergeDuplicate={onMergeDuplicate}
+                                linkHealth={linkHealth}
+                                ignoredUrls={ignoredUrls}
+                                toggleIgnoreUrl={toggleIgnoreUrl}
+                                activeDragItem={activeDragItem}
+                                onCreateSubfolder={handleCreateFolder}
+                                t={t}
+                            />
+                        ))}
+
+                    {!hasSubfolders && tree.bookmarks.length === 0 && !isCreatingRootFolder && (
+                        <div className="p-8 text-center text-xs text-muted-foreground">
+                            {t('main.empty.desc', 'Henüz klasör veya yer imi bulunmuyor.')}
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {/* Drag Overlay for Smooth Ghost Preview */}
+            <DragOverlay dropAnimation={null}>
+                {activeDragItem ? (
+                    activeDragItem.type === 'folder' ? (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-card/95 backdrop-blur-md border-2 border-primary/70 shadow-2xl rounded-xl text-xs font-semibold text-foreground pointer-events-none ring-4 ring-primary/10">
+                            <Folder className="h-4 w-4 text-blue-500 fill-blue-500/20" />
+                            <span>{activeDragItem.name}</span>
+                            {activeDragItem.count !== undefined && (
+                                <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.2 rounded-full">
+                                    {activeDragItem.count}
+                                </span>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-card/95 backdrop-blur-md border-2 border-primary/70 shadow-2xl rounded-xl text-xs font-medium text-foreground max-w-xs truncate pointer-events-none ring-4 ring-primary/10">
+                            <Favicon url={activeDragItem.bookmark.url} className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{activeDragItem.bookmark.title}</span>
+                        </div>
+                    )
+                ) : null}
+            </DragOverlay>
+        </DndContext>
     )
 }

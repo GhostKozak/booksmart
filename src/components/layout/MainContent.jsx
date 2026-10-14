@@ -62,6 +62,8 @@ export function MainContent({
     // Edit / Actions
     onEditBookmark,
     onMergeDuplicate,
+    onMoveFolder,
+    onMoveBookmark,
     // Onboarding
     loadDemoData
 }) {
@@ -473,7 +475,9 @@ export function MainContent({
                                     availableTags,
                                     allCollections,
                                     onRemoveFromCollection,
-                                    onMergeDuplicate
+                                    onMergeDuplicate,
+                                    onMoveFolder,
+                                    onMoveBookmark
                                 }
                                 if (viewMode === 'list') {
                                     return <BookmarkList {...commonProps} compact={false} />

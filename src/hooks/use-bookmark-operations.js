@@ -525,6 +525,152 @@ export function useBookmarkOperations({
         }
     }
 
+    const moveFolder = useCallback(async (sourceFolderPath, targetParentPath) => {
+        if (!sourceFolderPath) return false
+
+        const folderName = sourceFolderPath.split(' > ').pop().trim()
+
+        let newFolderPath
+        if (!targetParentPath || targetParentPath === '__ROOT__') {
+            newFolderPath = folderName
+        } else {
+            if (targetParentPath === sourceFolderPath) {
+                return false
+            }
+            if (targetParentPath.startsWith(sourceFolderPath + ' > ')) {
+                toast.error(t('bookmarks.tree.cannotMoveIntoChild', 'Bir klasör kendi alt klasörünün içine taşınamaz'))
+                return false
+            }
+            newFolderPath = `${targetParentPath} > ${folderName}`
+        }
+
+        if (newFolderPath === sourceFolderPath) {
+            return false
+        }
+
+        const allBookmarks = await db.bookmarks.toArray()
+        const prefix = sourceFolderPath + ' > '
+        const affected = allBookmarks.filter(b => {
+            const folder = b.newFolder || b.originalFolder || ''
+            return folder === sourceFolderPath || folder.startsWith(prefix)
+        })
+
+        const originalBookmarkStates = affected.map(b => ({
+            id: b.id,
+            originalFolder: b.originalFolder,
+            newFolder: b.newFolder
+        }))
+
+        const updates = affected.map(b => {
+            const folder = b.newFolder || b.originalFolder || ''
+            let updatedFolder
+            if (folder === sourceFolderPath) {
+                updatedFolder = newFolderPath
+            } else {
+                updatedFolder = newFolderPath + folder.slice(sourceFolderPath.length)
+            }
+            return {
+                id: b.id,
+                originalFolder: updatedFolder,
+                newFolder: updatedFolder
+            }
+        })
+
+        const allDbFolders = await db.folders.toArray()
+        const affectedDbFolders = allDbFolders.filter(f => f.name === sourceFolderPath || f.name.startsWith(prefix))
+        const originalDbFolderStates = affectedDbFolders.map(f => ({ id: f.id, name: f.name }))
+        const folderUpdates = affectedDbFolders.map(f => {
+            let updatedName
+            if (f.name === sourceFolderPath) {
+                updatedName = newFolderPath
+            } else {
+                updatedName = newFolderPath + f.name.slice(sourceFolderPath.length)
+            }
+            return { id: f.id, name: updatedName }
+        })
+
+        await db.transaction('rw', [db.bookmarks, db.folders], async () => {
+            for (const u of updates) {
+                await db.bookmarks.update(u.id, { originalFolder: u.originalFolder, newFolder: u.newFolder })
+            }
+            for (const fu of folderUpdates) {
+                await db.folders.update(fu.id, { name: fu.name })
+            }
+        })
+
+        if (addCommand) {
+            addCommand({
+                undo: () => db.transaction('rw', [db.bookmarks, db.folders], async () => {
+                    for (const s of originalBookmarkStates) {
+                        await db.bookmarks.update(s.id, { originalFolder: s.originalFolder, newFolder: s.newFolder })
+                    }
+                    for (const fs of originalDbFolderStates) {
+                        await db.folders.update(fs.id, { name: fs.name })
+                    }
+                }),
+                redo: () => db.transaction('rw', [db.bookmarks, db.folders], async () => {
+                    for (const u of updates) {
+                        await db.bookmarks.update(u.id, { originalFolder: u.originalFolder, newFolder: u.newFolder })
+                    }
+                    for (const fu of folderUpdates) {
+                        await db.folders.update(fu.id, { name: fu.name })
+                    }
+                }),
+                description: `Move folder "${folderName}" to "${newFolderPath}"`
+            })
+        }
+
+        toast.success(t('bookmarks.tree.folderMoved', {
+            folder: folderName,
+            target: newFolderPath,
+            defaultValue: `"${folderName}" klasörü taşındı`
+        }))
+        return true
+    }, [addCommand, t])
+
+    const moveBookmark = useCallback(async (bookmarkId, targetFolderPath) => {
+        if (!bookmarkId) return false
+        const bookmark = await db.bookmarks.get(bookmarkId)
+        if (!bookmark) return false
+
+        const currentFolder = bookmark.newFolder || bookmark.originalFolder || ''
+        const normalizedTarget = (!targetFolderPath || targetFolderPath === '__ROOT__') ? '' : targetFolderPath
+
+        if (currentFolder === normalizedTarget) return false
+
+        const originalState = {
+            id: bookmark.id,
+            originalFolder: bookmark.originalFolder,
+            newFolder: bookmark.newFolder
+        }
+
+        await db.bookmarks.update(bookmark.id, {
+            originalFolder: normalizedTarget,
+            newFolder: normalizedTarget
+        })
+
+        if (addCommand) {
+            addCommand({
+                undo: () => db.bookmarks.update(bookmark.id, {
+                    originalFolder: originalState.originalFolder,
+                    newFolder: originalState.newFolder
+                }),
+                redo: () => db.bookmarks.update(bookmark.id, {
+                    originalFolder: normalizedTarget,
+                    newFolder: normalizedTarget
+                }),
+                description: `Move bookmark "${bookmark.title}" to "${normalizedTarget || 'Root'}"`
+            })
+        }
+
+        toast.success(t('bookmarks.tree.bookmarkMoved', {
+            title: bookmark.title,
+            folder: normalizedTarget || 'Root',
+            defaultValue: `Yer imi "${normalizedTarget || 'Kök Dizin'}" klasörüne taşındı`
+        }))
+        return true
+    }, [addCommand, t])
+
     return {
         cleanableCount,
         removeDuplicates,
@@ -536,6 +682,8 @@ export function useBookmarkOperations({
         handleBatchMove,
         handleBatchMoveDocs,
         handleStatusOverride,
-        handleBatchAddTags
+        handleBatchAddTags,
+        moveFolder,
+        moveBookmark
     }
 }

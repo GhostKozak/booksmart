@@ -430,6 +430,8 @@ function App() {
           handlePreview={handlePreview}
           onEditBookmark={handleEdit}
           onMergeDuplicate={operations.mergeDuplicateGroup}
+          onMoveFolder={operations.moveFolder}
+          onMoveBookmark={operations.moveBookmark}
         />
 
         <FloatingActionBar
