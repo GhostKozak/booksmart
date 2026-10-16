@@ -117,4 +117,33 @@ describe('ExtensionGuideModal', () => {
         expect(screen.getByText('/extension-firefox/manifest.json')).toBeInTheDocument()
         expect(screen.getByText(/Important: Do not select \/extension\/manifest\.json/i)).toBeInTheDocument()
     })
+
+    it('renders download ZIP and GitHub links for active browser', () => {
+        render(
+            <ExtensionGuideModal
+                isOpen={true}
+                onClose={vi.fn()}
+                isConnected={false}
+            />
+        )
+
+        const downloadLink = screen.getByRole('link', { name: /Download Extension \(\.zip\)/i })
+        expect(downloadLink).toHaveAttribute('href', '/downloads/booksmart-companion-chrome.zip')
+        expect(downloadLink).toHaveAttribute('download', 'booksmart-companion-chrome.zip')
+
+        const githubRawLink = screen.getByRole('link', { name: /GitHub Raw/i })
+        expect(githubRawLink).toHaveAttribute('href', expect.stringContaining('booksmart-companion-chrome.zip'))
+
+        const releasesLink = screen.getByTitle('GitHub Releases')
+        expect(releasesLink).toHaveAttribute('href', 'https://github.com/GhostKozak/booksmart/releases')
+
+        // Switch to Firefox tab
+        const firefoxTab = screen.getByRole('button', { name: /Firefox/i })
+        fireEvent.click(firefoxTab)
+
+        expect(screen.getByRole('link', { name: /Download Extension \(\.zip\)/i })).toHaveAttribute(
+            'href',
+            '/downloads/booksmart-companion-firefox.zip'
+        )
+    })
 })

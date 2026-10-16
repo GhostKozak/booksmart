@@ -358,6 +358,7 @@ function flattenBookmarkTree(nodes, currentPath = '') {
             results.push({
                 id: generateBookmarkId(),
                 browserId: node.id,
+                parentId: node.parentId,
                 title: node.title || node.url,
                 url: trimmedUrl,
                 addDate,
@@ -509,7 +510,118 @@ async function pushBookmarksToBrowser(bookmarks, { targetFolderName = 'BookSmart
 }
 
 /**
+ * Scans the browser bookmark tree and maps existing folder paths to their node IDs.
+ * Also returns the Bookmarks Bar / Toolbar root ID.
+ */
+async function buildBrowserFolderMap() {
+    const folderMap = new Map();
+    let barId = '1';
+
+    if (!chrome.bookmarks || !chrome.bookmarks.getTree) {
+        folderMap.set('Root', barId);
+        folderMap.set('__ROOT__', barId);
+        folderMap.set('', barId);
+        return { folderMap, barId };
+    }
+
+    try {
+        const tree = await chrome.bookmarks.getTree();
+        const root = tree[0] || {};
+        const bar = root.children?.find(c => c.id === '1' || c.id === 'toolbar_____') || root.children?.[0] || root;
+        barId = bar.id || '1';
+
+        folderMap.set('Root', barId);
+        folderMap.set('__ROOT__', barId);
+        folderMap.set('', barId);
+
+        function scan(node, currentPath) {
+            if (node.children) {
+                let folderName = (node.title || '').trim();
+                let nextPath = currentPath;
+                if (!SYSTEM_ROOT_FOLDER_IDS.has(node.id) && folderName) {
+                    nextPath = currentPath ? `${currentPath} > ${folderName}` : folderName;
+                    folderMap.set(nextPath, node.id);
+                    if (!folderMap.has(folderName)) {
+                        folderMap.set(folderName, node.id);
+                    }
+                }
+                for (const child of node.children) {
+                    scan(child, nextPath);
+                }
+            }
+        }
+
+        for (const child of (tree || [])) {
+            scan(child, '');
+        }
+    } catch (err) {
+        console.warn('Failed to build browser folder map:', err);
+    }
+
+    return { folderMap, barId };
+}
+
+/**
+ * Resolves or creates a nested folder path in the browser under Bookmarks Bar.
+ */
+async function ensureBrowserFolderPath(path, folderMap, barId) {
+    if (!path || path === 'Root' || path === '__ROOT__') return barId;
+    if (folderMap && folderMap.has(path)) return folderMap.get(path);
+
+    const segments = path.split(' > ').map(s => s.trim()).filter(Boolean);
+    let currentParent = barId;
+    let cumulative = '';
+
+    for (const segment of segments) {
+        cumulative = cumulative ? `${cumulative} > ${segment}` : segment;
+        if (folderMap && folderMap.has(cumulative)) {
+            currentParent = folderMap.get(cumulative);
+            continue;
+        }
+
+        let foundId = null;
+        if (chrome.bookmarks?.getChildren) {
+            try {
+                const children = await chrome.bookmarks.getChildren(currentParent);
+                const found = children?.find(c => c.title === segment && !c.url);
+                if (found) {
+                    foundId = found.id;
+                }
+            } catch {
+                // Ignore
+            }
+        }
+
+        if (foundId) {
+            currentParent = foundId;
+        } else if (chrome.bookmarks?.create) {
+            try {
+                const created = await chrome.bookmarks.create({
+                    parentId: currentParent,
+                    title: segment
+                });
+                currentParent = created.id;
+            } catch (err) {
+                console.warn('Failed to create browser folder:', segment, err);
+                break;
+            }
+        }
+        if (folderMap) {
+            folderMap.set(cumulative, currentParent);
+            if (!folderMap.has(segment)) {
+                folderMap.set(segment, currentParent);
+            }
+        }
+    }
+    return currentParent;
+}
+
+/**
  * Performs bidirectional synchronization between BookSmart and Browser.
+ * - Imports bookmarks new to BookSmart
+ * - Exports bookmarks new to Browser
+ * - Moves existing browser bookmarks to matching folders if modified in BookSmart
+ * - Updates existing browser bookmark titles if renamed in BookSmart
  */
 async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
     if (!chrome.bookmarks) {
@@ -517,6 +629,8 @@ async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
     }
 
     const browserBookmarks = await getBrowserBookmarks();
+    const { folderMap, barId } = await buildBrowserFolderMap();
+
     const appUrlMap = new Map();
     for (const b of appBookmarks) {
         const norm = normalizeBookmarkUrl(b.url);
@@ -524,9 +638,11 @@ async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
     }
 
     const browserUrlMap = new Map();
+    const browserIdMap = new Map();
     for (const b of browserBookmarks) {
         const norm = normalizeBookmarkUrl(b.url);
         if (norm) browserUrlMap.set(norm, b);
+        if (b.browserId) browserIdMap.set(String(b.browserId), b);
     }
 
     // 1. Missing in App (present in Browser, missing in App)
@@ -556,10 +672,76 @@ async function syncBrowserBookmarks(appBookmarks = [], options = {}) {
         exportedCount = pushResult.count;
     }
 
+    // 3. Present in Both: Synchronize folder moves and title changes to Browser
+    let updatedCount = 0;
+    for (const appBm of appBookmarks) {
+        if (!appBm || !appBm.url) continue;
+        const norm = normalizeBookmarkUrl(appBm.url);
+        if (!norm) continue;
+
+        const browserBm = (appBm.browserId && browserIdMap.get(String(appBm.browserId))) || browserUrlMap.get(norm);
+        if (!browserBm || !browserBm.browserId) continue;
+
+        const appFolder = (appBm.newFolder || appBm.originalFolder || '').trim();
+        const targetPath = (!appFolder || appFolder === '__ROOT__' || appFolder.toLowerCase() === 'root') ? 'Root' : appFolder;
+
+        const browserFolder = (browserBm.originalFolder || browserBm.newFolder || '').trim();
+        const currentPath = (!browserFolder || browserFolder === '__ROOT__' || browserFolder.toLowerCase() === 'root') ? 'Root' : browserFolder;
+
+        const appTitle = (appBm.title || '').trim();
+        const browserTitle = (browserBm.title || '').trim();
+
+        let modified = false;
+
+        // Folder move check
+        if (targetPath !== currentPath) {
+            try {
+                let targetFolderId = null;
+                if (folderMap.has(targetPath)) {
+                    targetFolderId = folderMap.get(targetPath);
+                } else if (folderMap.has(`BookSmart > ${targetPath}`)) {
+                    targetFolderId = folderMap.get(`BookSmart > ${targetPath}`);
+                } else {
+                    targetFolderId = await ensureBrowserFolderPath(targetPath, folderMap, barId);
+                }
+
+                if (targetFolderId && browserBm.parentId !== targetFolderId) {
+                    if (chrome.bookmarks.move) {
+                        await chrome.bookmarks.move(browserBm.browserId, { parentId: targetFolderId });
+                        browserBm.parentId = targetFolderId;
+                        browserBm.originalFolder = targetPath;
+                        browserBm.newFolder = targetPath;
+                        modified = true;
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to move browser bookmark:', appBm.url, err);
+            }
+        }
+
+        // Title update check
+        if (appTitle && browserTitle && appTitle !== browserTitle) {
+            try {
+                if (chrome.bookmarks.update) {
+                    await chrome.bookmarks.update(browserBm.browserId, { title: appTitle });
+                    browserBm.title = appTitle;
+                    modified = true;
+                }
+            } catch (err) {
+                console.warn('Failed to update browser bookmark title:', appBm.url, err);
+            }
+        }
+
+        if (modified) {
+            updatedCount++;
+        }
+    }
+
     return {
         success: true,
         importedBookmarks,
         exportedCount,
+        updatedCount,
         totalInBrowser: browserBookmarks.length + exportedCount,
         totalInApp: appBookmarks.length + importedBookmarks.length
     };
@@ -1356,6 +1538,8 @@ if (typeof module !== 'undefined' && module.exports) {
         normalizeBookmarkUrl,
         generateBookmarkId,
         flattenBookmarkTree,
+        buildBrowserFolderMap,
+        ensureBrowserFolderPath,
         getOrCreateTargetFolder,
         pushBookmarksToBrowser,
         syncBrowserBookmarks,

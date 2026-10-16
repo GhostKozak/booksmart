@@ -256,6 +256,7 @@ describe('extension-client', () => {
                             success: true,
                             importedBookmarks: [{ title: 'New', url: 'https://new.com' }],
                             exportedCount: 2,
+                            updatedCount: 3,
                             totalInBrowser: 10,
                             totalInApp: 12
                         }
@@ -267,6 +268,7 @@ describe('extension-client', () => {
         const result = await syncBrowserBookmarks([], {}, 500)
         expect(result.importedBookmarks).toHaveLength(1)
         expect(result.exportedCount).toBe(2)
+        expect(result.updatedCount).toBe(3)
         expect(result.totalInApp).toBe(12)
         postMessageSpy.mockRestore()
     })

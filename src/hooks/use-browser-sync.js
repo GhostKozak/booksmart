@@ -190,11 +190,21 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
 
             setLastSyncResult(result)
 
-            toast.success(t('notifications.browserSyncedSuccess', {
-                imported: imported.length,
-                exported: result.exportedCount || 0,
-                defaultValue: `Synced: ${imported.length} imported, ${result.exportedCount || 0} exported to browser`
-            }))
+            const updatedCount = result.updatedCount || 0
+            if (updatedCount > 0) {
+                toast.success(t('notifications.browserSyncedWithUpdates', {
+                    imported: imported.length,
+                    exported: result.exportedCount || 0,
+                    updated: updatedCount,
+                    defaultValue: `Synced: ${imported.length} imported, ${result.exportedCount || 0} exported, ${updatedCount} updated/moved in browser`
+                }))
+            } else {
+                toast.success(t('notifications.browserSyncedSuccess', {
+                    imported: imported.length,
+                    exported: result.exportedCount || 0,
+                    defaultValue: `Synced: ${imported.length} imported, ${result.exportedCount || 0} exported to browser`
+                }))
+            }
 
             return { success: true, ...result, importedBookmarks: imported }
         } catch (err) {

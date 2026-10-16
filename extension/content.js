@@ -308,6 +308,7 @@
                         success: !err && response?.success,
                         importedBookmarks: response?.importedBookmarks || [],
                         exportedCount: response?.exportedCount || 0,
+                        updatedCount: response?.updatedCount || 0,
                         totalInBrowser: response?.totalInBrowser || 0,
                         totalInApp: response?.totalInApp || 0,
                         error: err?.message || response?.error

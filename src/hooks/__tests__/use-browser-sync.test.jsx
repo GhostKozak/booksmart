@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useBrowserSync } from '../use-browser-sync'
 import { db } from '../../db'
 import * as extensionClient from '../../lib/extension-client'
+import { toast } from 'sonner'
 
 vi.mock('../../db', () => ({
     db: {
@@ -133,6 +134,31 @@ describe('useBrowserSync', () => {
             expect.arrayContaining([expect.objectContaining({ url: 'https://browser.com' })])
         )
         expect(addCommand).toHaveBeenCalled()
+    })
+
+    it('twoWaySync handles updated bookmarks and calls toast with updated count', async () => {
+        vi.spyOn(extensionClient, 'isExtensionConnected').mockReturnValue(true)
+        vi.spyOn(extensionClient, 'syncBrowserBookmarks').mockResolvedValue({
+            importedBookmarks: [],
+            exportedCount: 0,
+            updatedCount: 2,
+            totalInBrowser: 10,
+            totalInApp: 10
+        })
+
+        const rawBookmarks = [{ id: '1', title: 'Local', url: 'https://local.com' }]
+        const { result } = renderHook(() => useBrowserSync({ rawBookmarks, addCommand }))
+
+        let res
+        await act(async () => {
+            res = await result.current.twoWaySync()
+        })
+
+        expect(res.success).toBe(true)
+        expect(res.updatedCount).toBe(2)
+        expect(toast.success).toHaveBeenCalledWith(
+            expect.stringContaining('2 updated/moved in browser')
+        )
     })
 
     it('importFromBrowser deduplicates internally even when rawBookmarks is empty', async () => {

@@ -356,6 +356,7 @@ function sanitizeBookmarksList(bookmarks) {
         .filter(b => b && typeof b === 'object' && !isDomEvent(b))
         .map(b => ({
             id: b.id != null ? String(b.id) : undefined,
+            browserId: b.browserId != null ? String(b.browserId) : undefined,
             title: b.title != null ? String(b.title) : '',
             url: b.url != null ? String(b.url) : '',
             originalFolder: b.originalFolder != null ? String(b.originalFolder) : '',
@@ -475,6 +476,7 @@ export function syncBrowserBookmarks(bookmarks, options = {}, timeoutMs = 25000)
                     resolve({
                         importedBookmarks: event.data.importedBookmarks || [],
                         exportedCount: event.data.exportedCount || 0,
+                        updatedCount: event.data.updatedCount || 0,
                         totalInBrowser: event.data.totalInBrowser || 0,
                         totalInApp: event.data.totalInApp || 0
                     });

@@ -69,6 +69,33 @@ This project was developed entirely using Artificial Intelligence within the Ant
 6.  **Clean** up duplicates and broken links with the built-in tools.
 7.  **Export** the organized list back to your browser when done.
 
+## 🧩 Browser Companion Extension
+
+BookSmart includes an optional companion browser extension for **Chromium** (Chrome, Brave, Edge, Opera, Arc) and **Firefox** that unlocks:
+- **⚡ 1-Click 2-Way Sync**: Instant bidirectional synchronization with browser bookmarks via the native Bookmarks API (import missing bookmarks, push library, and automatically move folders/update titles in the browser).
+- **🛡️ CORS-Free Link Health Checks**: Serverless, accurate link verification without browser CORS blocks.
+- **📌 Toolbar Quick Capture**: Save and categorize bookmarks directly from your browser toolbar.
+
+### 📥 Download Extension
+
+| Browser | Direct ZIP Download | Alternate / Source |
+| :--- | :--- | :--- |
+| **Chrome / Brave / Edge / Opera** | [📥 **Download Chrome Extension (.zip)**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) | [GitHub Releases](https://github.com/GhostKozak/booksmart/releases) · [`/extension`](./extension) |
+| **Firefox** | [📥 **Download Firefox Extension (.zip)**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) | [GitHub Releases](https://github.com/GhostKozak/booksmart/releases) · [`/extension-firefox`](./extension-firefox) |
+
+### 🛠️ Quick Installation Guide
+
+#### For Chrome / Brave / Edge / Opera (Chromium):
+1. **Download & Extract**: Download [booksmart-companion-chrome.zip](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) and extract the archive to a folder.
+2. **Open Extensions**: Navigate to `chrome://extensions` in your browser.
+3. **Enable Developer Mode**: Turn on the **Developer mode** toggle in the top-right corner.
+4. **Load Extension**: Click **Load unpacked** (Paketlenmemiş öğe yükle) and select the extracted folder (or the `/extension` directory if cloned locally).
+
+#### For Firefox:
+1. **Download & Extract**: Download [booksmart-companion-firefox.zip](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) and extract the archive to a folder.
+2. **Open Debugging**: Navigate to `about:debugging#/runtime/this-firefox` in Firefox.
+3. **Load Add-on**: Click **Load Temporary Add-on...** and select the `manifest.json` file inside the extracted folder (or `/extension-firefox/manifest.json` if cloned locally).
+
 ### For Developers
 
 **Prerequisites:** Node.js >= 20

@@ -35,7 +35,9 @@ describe('Extension background script helpers', () => {
                 getChildren: vi.fn(),
                 getSubTree: vi.fn(),
                 create: vi.fn().mockImplementation(async (data) => ({ id: 'mock_' + Math.random().toString(36).slice(2, 6), ...data })),
-                removeTree: vi.fn()
+                removeTree: vi.fn(),
+                move: vi.fn().mockImplementation(async (id, destination) => ({ id, ...destination })),
+                update: vi.fn().mockImplementation(async (id, changes) => ({ id, ...changes }))
             },
             tabs: {
                 query: vi.fn(),
@@ -250,6 +252,80 @@ describe('Extension background script helpers', () => {
             expect(res.importedBookmarks).toHaveLength(1)
             expect(res.importedBookmarks[0].url).toBe('https://browser-only.com')
             expect(res.exportedCount).toBe(1)
+        })
+
+        it('moves browser bookmark to matching folder when moved in BookSmart', async () => {
+            const mockTree = [
+                {
+                    id: '0',
+                    children: [{
+                        id: '1',
+                        title: 'Bookmarks bar',
+                        children: [
+                            { id: 'b_gh', parentId: '1', title: 'GitHub', url: 'https://github.com' }
+                        ]
+                    }]
+                }
+            ]
+            chrome.bookmarks.getTree.mockResolvedValue(mockTree)
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            const appBookmarks = [
+                {
+                    id: 'app_gh',
+                    browserId: 'b_gh',
+                    title: 'GitHub',
+                    url: 'https://github.com',
+                    originalFolder: 'Root',
+                    newFolder: 'Dev Tools'
+                }
+            ]
+
+            const res = await syncBrowserBookmarks(appBookmarks)
+
+            expect(res.success).toBe(true)
+            expect(res.updatedCount).toBe(1)
+            expect(chrome.bookmarks.move).toHaveBeenCalledWith(
+                'b_gh',
+                expect.objectContaining({ parentId: expect.any(String) })
+            )
+        })
+
+        it('updates browser bookmark title when renamed in BookSmart', async () => {
+            const mockTree = [
+                {
+                    id: '0',
+                    children: [{
+                        id: '1',
+                        title: 'Bookmarks bar',
+                        children: [
+                            { id: 'b_react', parentId: '1', title: 'Old React Title', url: 'https://react.dev' }
+                        ]
+                    }]
+                }
+            ]
+            chrome.bookmarks.getTree.mockResolvedValue(mockTree)
+            chrome.bookmarks.getChildren.mockResolvedValue([])
+
+            const appBookmarks = [
+                {
+                    id: 'app_react',
+                    browserId: 'b_react',
+                    title: 'React Documentation',
+                    url: 'https://react.dev',
+                    originalFolder: 'Root',
+                    newFolder: 'Root'
+                }
+            ]
+
+            const res = await syncBrowserBookmarks(appBookmarks)
+
+            expect(res.success).toBe(true)
+            expect(res.updatedCount).toBe(1)
+            expect(chrome.bookmarks.update).toHaveBeenCalledWith(
+                'b_react',
+                { title: 'React Documentation' }
+            )
         })
     })
 

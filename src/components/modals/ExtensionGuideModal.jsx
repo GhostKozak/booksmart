@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Globe, Layers, Terminal } from 'lucide-react'
+import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Globe, Terminal, Download, Github, ExternalLink } from 'lucide-react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
@@ -113,10 +113,74 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                     </button>
                 </div>
 
+                {/* Download & GitHub Links */}
+                <div className="p-3 rounded-xl border border-border/70 bg-muted/30 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-foreground flex items-center gap-1.5">
+                            <Download className="h-3.5 w-3.5 text-primary" />
+                            {activeBrowser === 'chromium'
+                                ? t('modals.extensionGuide.downloadChromeTitle', 'Chrome / Edge Extension (ZIP)')
+                                : t('modals.extensionGuide.downloadFirefoxTitle', 'Firefox Extension (ZIP)')}
+                        </span>
+                        <a
+                            href={
+                                activeBrowser === 'chromium'
+                                    ? 'https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip'
+                                    : 'https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip'
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
+                        >
+                            <Github className="h-3 w-3" />
+                            <span>GitHub Raw</span>
+                            <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <a
+                            href={
+                                activeBrowser === 'chromium'
+                                    ? '/downloads/booksmart-companion-chrome.zip'
+                                    : '/downloads/booksmart-companion-firefox.zip'
+                            }
+                            download={
+                                activeBrowser === 'chromium'
+                                    ? 'booksmart-companion-chrome.zip'
+                                    : 'booksmart-companion-firefox.zip'
+                            }
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-all"
+                        >
+                            <Download className="h-3.5 w-3.5" />
+                            {t('modals.extensionGuide.downloadZipBtn', 'Download Extension (.zip)')}
+                        </a>
+                        <a
+                            href="https://github.com/GhostKozak/booksmart/releases"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border bg-background hover:bg-accent hover:text-accent-foreground transition-all shrink-0"
+                            title="GitHub Releases"
+                        >
+                            <Github className="h-3.5 w-3.5" />
+                            <span>{t('modals.extensionGuide.githubReleases', 'Releases')}</span>
+                            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </a>
+                    </div>
+                </div>
+
                 {/* Step by Step Guide */}
                 <div className="space-y-2">
                     {activeBrowser === 'chromium' ? (
                         <ol className="text-xs space-y-2 text-muted-foreground list-decimal list-inside pl-1">
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.step0', 'Download & Extract')}
+                                </span>
+                                <span className="block text-[11px]">
+                                    {t('modals.extensionGuide.step0Desc', 'Click the button above to download the ZIP file and extract it to a folder.')}
+                                </span>
+                            </li>
                             <li className="leading-relaxed">
                                 <span className="font-medium text-foreground">
                                     {t('modals.extensionGuide.step1', 'Open Extensions page')}
@@ -140,7 +204,7 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                             </li>
                             <li className="leading-relaxed">
                                 <span className="font-medium text-foreground">
-                                    {t('modals.extensionGuide.step4', 'Select the extension folder')}
+                                    {t('modals.extensionGuide.step4', 'Select the extracted extension folder')}
                                 </span>
                                 <div className="text-[11px] mt-0.5 flex items-center gap-1 font-mono bg-muted/60 px-2 py-0.5 rounded text-foreground">
                                     <Terminal className="h-3 w-3 shrink-0 text-muted-foreground" />
@@ -150,6 +214,14 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                         </ol>
                     ) : (
                         <ol className="text-xs space-y-2 text-muted-foreground list-decimal list-inside pl-1">
+                            <li className="leading-relaxed">
+                                <span className="font-medium text-foreground">
+                                    {t('modals.extensionGuide.firefoxStep0', 'Download & Extract')}
+                                </span>
+                                <span className="block text-[11px]">
+                                    {t('modals.extensionGuide.firefoxStep0Desc', 'Click the button above to download the ZIP file and extract it to a folder.')}
+                                </span>
+                            </li>
                             <li className="leading-relaxed">
                                 <span className="font-medium text-foreground">
                                     {t('modals.extensionGuide.firefoxStep1', 'Open Debugging page')}
