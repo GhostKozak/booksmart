@@ -1,11 +1,13 @@
 import React from 'react'
-import { Settings, Plus, Pencil, Trash2, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react'
+import { Settings, Plus, Pencil, Trash2, ArrowRight, ChevronRight, ChevronDown, Sparkles } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../../store/useAppStore'
 
 export function RulesPanel({
     rules = [],
+    suggestedRules = [],
+    onOpenSuggestions,
     startEditing,
     deleteRule,
     openNewRuleModal,
@@ -40,35 +42,75 @@ export function RulesPanel({
                     <Settings className="h-4 w-4 text-slate-500" />
                     <span>{t('sidebar.rules.title')}</span>
                     <span className="text-xs text-muted-foreground font-normal">({rules.length})</span>
+                    {suggestedRules.length > 0 && (
+                        <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.2 rounded-full" title={t('sidebar.rules.suggestionsAvailable', 'Önerilen kurallar var')}>
+                            {suggestedRules.length}
+                        </span>
+                    )}
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        openNewRuleModal?.()
-                    }}
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
-                    title={t('sidebar.rules.addRule')}
-                >
-                    <Plus className="h-3.5 w-3.5" />
-                </Button>
+                <div className="flex items-center gap-0.5">
+                    {onOpenSuggestions && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onOpenSuggestions?.()
+                            }}
+                            className={`h-6 w-6 transition-all ${
+                                suggestedRules.length > 0
+                                    ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 opacity-100'
+                                    : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground'
+                            }`}
+                            title={t('sidebar.rules.suggestRules', 'Kural Önerileri')}
+                        >
+                            <Sparkles className="h-3.5 w-3.5" />
+                        </Button>
+                    )}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            openNewRuleModal?.()
+                        }}
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
+                        title={t('sidebar.rules.addRule')}
+                    >
+                        <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                </div>
             </div>
 
             {!collapsed && (
                 <div className="space-y-1 pl-2 pt-0.5 animate-in fade-in slide-in-from-top-1 duration-200">
                     {rules.length === 0 ? (
-                        <div className="text-center py-4 border border-dashed rounded-lg bg-muted/20 my-1">
+                        <div className="text-center py-4 px-2 border border-dashed rounded-lg bg-muted/20 my-1 space-y-1.5">
                             <Settings className="h-6 w-6 mx-auto text-muted-foreground/40 mb-1" />
                             <p className="text-xs text-muted-foreground">{t('sidebar.rules.noRules')}</p>
-                            <Button
-                                variant="link"
-                                size="sm"
-                                className="mt-0.5 text-xs h-6 p-0 font-medium"
-                                onClick={openNewRuleModal}
-                            >
-                                <Plus className="h-3 w-3 mr-1" /> {t('sidebar.rules.createFirst')}
-                            </Button>
+                            <div className="flex items-center justify-center gap-2 flex-wrap pt-0.5">
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    className="text-xs h-6 p-0 font-medium"
+                                    onClick={openNewRuleModal}
+                                >
+                                    <Plus className="h-3 w-3 mr-1" /> {t('sidebar.rules.createFirst')}
+                                </Button>
+                                {suggestedRules.length > 0 && onOpenSuggestions && (
+                                    <>
+                                        <span className="text-muted-foreground/40 text-xs">•</span>
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="text-xs h-6 p-0 font-medium text-amber-500 hover:text-amber-600"
+                                            onClick={onOpenSuggestions}
+                                        >
+                                            <Sparkles className="h-3 w-3 mr-1" /> {t('sidebar.rules.viewSuggestions', 'Önerileri Gör ({{count}})', { count: suggestedRules.length })}
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         filteredRules.map(rule => (

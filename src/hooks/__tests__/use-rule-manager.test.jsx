@@ -177,4 +177,45 @@ describe('useRuleManager', () => {
         expect(db.rules.delete).not.toHaveBeenCalled();
         expect(mockAddCommand).not.toHaveBeenCalled();
     });
+
+    it('generates suggested rules from rawBookmarks and allows applying a suggestion', async () => {
+        const rawBookmarks = [
+            { id: 'b1', url: 'https://gitlab.com/repo1', title: 'GitLab Repo 1', originalFolder: 'GitLab Projects' },
+            { id: 'b2', url: 'https://gitlab.com/repo2', title: 'GitLab Repo 2', originalFolder: 'GitLab Projects' },
+        ];
+
+        const { result } = renderHook(() => useRuleManager({ rules: defaultRules, rawBookmarks, addCommand: mockAddCommand }));
+
+        expect(result.current.suggestedRules.length).toBeGreaterThan(0);
+        const suggestion = result.current.suggestedRules[0];
+        expect(suggestion.value).toBe('gitlab.com');
+        expect(suggestion.targetFolder).toBe('GitLab Projects');
+
+        await act(async () => {
+            await result.current.applySuggestion(suggestion);
+        });
+
+        expect(db.rules.add).toHaveBeenCalledWith(expect.objectContaining({
+            type: 'domain',
+            value: 'gitlab.com',
+            targetFolder: 'GitLab Projects'
+        }));
+        expect(mockAddCommand).toHaveBeenCalled();
+    });
+
+    it('allows dismissing a suggestion', () => {
+        const rawBookmarks = [
+            { id: 'b1', url: 'https://gitlab.com/repo1', title: 'GitLab Repo 1', originalFolder: 'GitLab Projects' },
+            { id: 'b2', url: 'https://gitlab.com/repo2', title: 'GitLab Repo 2', originalFolder: 'GitLab Projects' },
+        ];
+
+        const { result } = renderHook(() => useRuleManager({ rules: defaultRules, rawBookmarks, addCommand: mockAddCommand }));
+        const suggestion = result.current.suggestedRules[0];
+
+        act(() => {
+            result.current.dismissSuggestion(suggestion.id);
+        });
+
+        expect(result.current.suggestedRules.find(s => s.id === suggestion.id)).toBeUndefined();
+    });
 });

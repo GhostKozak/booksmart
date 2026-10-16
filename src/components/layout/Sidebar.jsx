@@ -39,6 +39,8 @@ export function Sidebar({
     deadLinkCount = 0,
     // Rules
     rules = [],
+    suggestedRules = [],
+    onOpenSuggestions,
     startEditing,
     deleteRule,
     openNewRuleModal,
@@ -350,6 +352,8 @@ export function Sidebar({
                 {/* 5. Automation Rules */}
                 <RulesPanel
                     rules={rules}
+                    suggestedRules={suggestedRules}
+                    onOpenSuggestions={onOpenSuggestions}
                     startEditing={startEditing}
                     deleteRule={deleteRule}
                     openNewRuleModal={openNewRuleModal}

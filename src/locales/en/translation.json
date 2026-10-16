@@ -119,6 +119,9 @@
         "rules": {
             "title": "Rules",
             "addRule": "Add Rule",
+            "suggestRules": "Rule Suggestions",
+            "suggestionsAvailable": "Suggestions available",
+            "viewSuggestions": "View Suggestions ({{count}})",
             "noRules": "No rules defined yet.",
             "createFirst": "Create your first rule",
             "edit": "Edit Rule",
@@ -294,6 +297,18 @@
                 "tags": "Enter tags separated by commas..."
             },
             "forNested": "for nested structure."
+        },
+        "ruleSuggestions": {
+            "title": "Smart Rule Suggestions",
+            "description": "Your bookmark organizing habits were analyzed and consistent patterns were converted into automated rule suggestions.",
+            "analyzeAI": "Deep AI Analysis",
+            "emptyTitle": "No strong rule patterns detected yet",
+            "emptyDesc": "As you continue organizing bookmarks into folders, BookSmart will suggest automated rules here.",
+            "match": "match",
+            "samples": "Samples",
+            "acceptBtn": "Create Rule",
+            "acceptAllBtn": "Accept All Suggestions ({{count}})",
+            "noAiRules": "No new rule patterns discovered by AI."
         },
         "ruleConflict": {
             "title": "Rule Conflict Detected",

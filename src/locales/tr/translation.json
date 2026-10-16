@@ -119,6 +119,9 @@
         "rules": {
             "title": "Kurallar",
             "addRule": "Kural Ekle",
+            "suggestRules": "Kural Önerileri",
+            "suggestionsAvailable": "Önerilen kurallar var",
+            "viewSuggestions": "Önerileri Gör ({{count}})",
             "noRules": "Henüz kural tanımlanmadı.",
             "createFirst": "İlk kuralınızı oluşturun",
             "edit": "Kuralı Düzenle",
@@ -294,6 +297,18 @@
                 "tags": "Virgülle ayırarak etiketleri girin..."
             },
             "forNested": "iç içe yapı için."
+        },
+        "ruleSuggestions": {
+            "title": "Akıllı Kural Önerileri",
+            "description": "Yer imlerinizi kaydettiğiniz klasörler incelendi ve sık tekrarlanan alışkanlıklarınıza göre otomatik kurallar tespit edildi.",
+            "analyzeAI": "AI ile Derin Analiz",
+            "emptyTitle": "Henüz belirgin bir kural kalıbı bulunamadı",
+            "emptyDesc": "Yer imlerinizi belirli klasörlere düzenli olarak kaydettikçe BookSmart burada otomatik kurallar önerecektir.",
+            "match": "eşleşme",
+            "samples": "Örnekler",
+            "acceptBtn": "Kuralı Oluştur",
+            "acceptAllBtn": "Tüm Önerileri Kabul Et ({{count}})",
+            "noAiRules": "AI tarafından yeni bir kural kalıbı bulunamadı."
         },
         "ruleConflict": {
             "title": "Kural Çakışması Tespit Edildi",

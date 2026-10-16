@@ -177,7 +177,7 @@ function App() {
     setSmartFilter: useAppStore.getState().setSmartFilter
   })
 
-  const ruleManager = useRuleManager({ rules, addCommand })
+  const ruleManager = useRuleManager({ rules, rawBookmarks, addCommand })
   const fileUpload = useFileUpload()
   const collectionsHook = useCollections({ addCommand })
   const browserSync = useBrowserSync({ rawBookmarks, bookmarks: worker.bookmarks, addCommand })
@@ -393,7 +393,10 @@ function App() {
             availableFolders={taxonomy.availableFolders} uniqueFolders={worker.uniqueFolders}
             discoveredFolders={taxonomy.discoveredFolders} bookmarks={worker.bookmarks}
             smartCounts={worker.smartCounts} deadLinkCount={worker.deadLinkCount}
-            rules={rules} startEditing={ruleManager.startEditing}
+            rules={rules}
+            suggestedRules={ruleManager.suggestedRules}
+            onOpenSuggestions={ruleManager.openSuggestionsModal}
+            startEditing={ruleManager.startEditing}
             deleteRule={ruleManager.deleteRule} openNewRuleModal={ruleManager.openNewRuleModal}
             saveToTaxonomy={taxonomy.saveToTaxonomy}
             collections={collectionsHook.collections}

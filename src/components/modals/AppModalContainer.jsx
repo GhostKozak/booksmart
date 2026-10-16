@@ -21,6 +21,7 @@ const QrCodeModal = lazy(() => import('./QrCodeModal').then(m => ({ default: m.Q
 const ReminderModal = lazy(() => import('./ReminderModal').then(m => ({ default: m.ReminderModal })));
 const ShareCollectionModal = lazy(() => import('./ShareCollectionModal').then(m => ({ default: m.ShareCollectionModal })));
 const SnapshotViewerModal = lazy(() => import('./SnapshotViewerModal').then(m => ({ default: m.SnapshotViewerModal })));
+const RuleSuggestionsModal = lazy(() => import('./RuleSuggestionsModal').then(m => ({ default: m.RuleSuggestionsModal })));
 
 export function AppModalContainer({
     taxonomy,
@@ -223,6 +224,21 @@ export function AppModalContainer({
                     availableTags={taxonomy.availableTags}
                     discoveredFolders={taxonomy.discoveredFolders}
                     saveToTaxonomy={taxonomy.saveToTaxonomy}
+                />
+            )}
+
+            {/* Rule Suggestions Modal */}
+            {ruleManager.isSuggestionsModalOpen && (
+                <RuleSuggestionsModal
+                    isOpen={ruleManager.isSuggestionsModalOpen}
+                    onClose={() => ruleManager.setIsSuggestionsModalOpen(false)}
+                    suggestions={ruleManager.suggestedRules}
+                    onApplyRule={ruleManager.applySuggestion}
+                    onApplyAll={ruleManager.applyAllSuggestions}
+                    onDismiss={ruleManager.dismissSuggestion}
+                    onAnalyzeWithAI={ruleManager.analyzeWithAI}
+                    isAnalyzingAI={ruleManager.isAnalyzingAI}
+                    hasAIConfigured={true}
                 />
             )}
 
