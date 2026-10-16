@@ -21,10 +21,7 @@
         }
     }
 
-    // Only run on BookSmart origins (including localhost on any port)
-    if (!isOriginAllowed()) {
-        return;
-    }
+    function initBooksmartBridge() {
 
     // Broadcast readiness to the page
     function announceReady() {
@@ -497,4 +494,412 @@
             }
         }
     });
+    } // end initBooksmartBridge
+
+    // ── Web Highlighter & Sticky Notes Engine (Runs on all URLs) ──
+    const HIGHLIGHT_COLORS = {
+        yellow: { hex: '#fef08a', bg: 'rgba(254, 240, 138, 0.7)', text: '#1e293b' },
+        green: { hex: '#bbf7d0', bg: 'rgba(187, 247, 208, 0.7)', text: '#1e293b' },
+        blue: { hex: '#bae6fd', bg: 'rgba(186, 230, 253, 0.7)', text: '#1e293b' },
+        purple: { hex: '#e9d5ff', bg: 'rgba(233, 213, 255, 0.7)', text: '#1e293b' }
+    };
+
+    function cleanPageUrl(url) {
+        try {
+            const parsed = new URL(url || window.location.href);
+            parsed.hash = '';
+            let norm = parsed.href;
+            if (norm.endsWith('/')) norm = norm.slice(0, -1);
+            return norm;
+        } catch {
+            return (url || window.location.href).split('#')[0].replace(/\/+$/, '');
+        }
+    }
+
+    function getStorageKey(url) {
+        return 'highlights:' + cleanPageUrl(url);
+    }
+
+    function injectHighlighterStyles() {
+        if (typeof document === 'undefined' || document.getElementById('booksmart-highlighter-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'booksmart-highlighter-styles';
+        style.textContent = `
+            .bs-highlight {
+                display: inline;
+                border-radius: 3px;
+                padding: 1px 2px;
+                cursor: pointer;
+                transition: filter 0.15s ease, background-color 0.15s ease;
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+            }
+            .bs-hl-yellow { background-color: #fef08a !important; color: #1e293b !important; }
+            .bs-hl-green { background-color: #bbf7d0 !important; color: #1e293b !important; }
+            .bs-hl-blue { background-color: #bae6fd !important; color: #1e293b !important; }
+            .bs-hl-purple { background-color: #e9d5ff !important; color: #1e293b !important; }
+            .bs-highlight:hover {
+                filter: brightness(0.92);
+                outline: 1px dashed rgba(0,0,0,0.3);
+            }
+            .bs-highlight[data-has-note="true"]::after {
+                content: " 📝";
+                font-size: 11px;
+                vertical-align: super;
+            }
+            .bs-highlighter-popover {
+                position: absolute;
+                z-index: 2147483647;
+                background: #ffffff;
+                color: #0f172a;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2), 0 8px 10px -6px rgba(0,0,0,0.1);
+                padding: 12px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-size: 13px;
+                width: 280px;
+                line-height: 1.4;
+            }
+            .bs-hl-dark .bs-highlighter-popover {
+                background: #1e293b;
+                color: #f8fafc;
+                border-color: #334155;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    async function getStoredHighlights(url) {
+        if (typeof chrome === 'undefined' || !chrome.storage?.local) return [];
+        const key = getStorageKey(url);
+        try {
+            const data = await chrome.storage.local.get([key]);
+            return data[key] || [];
+        } catch {
+            return [];
+        }
+    }
+
+    async function saveStoredHighlights(url, highlights) {
+        if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
+        const key = getStorageKey(url);
+        try {
+            await chrome.storage.local.set({ [key]: highlights });
+        } catch (err) {
+            console.warn('Failed to save highlights:', err);
+        }
+    }
+
+    function createHighlightElement(id, color, hasNote = false) {
+        const mark = document.createElement('mark');
+        mark.className = `bs-highlight bs-hl-${color}`;
+        mark.dataset.bsId = id;
+        mark.dataset.color = color;
+        if (hasNote) mark.dataset.hasNote = 'true';
+        return mark;
+    }
+
+    let activePopover = null;
+
+    function closeActivePopover() {
+        if (activePopover) {
+            activePopover.remove();
+            activePopover = null;
+        }
+    }
+
+    function showHighlightPopover(markEl, highlightRecord) {
+        closeActivePopover();
+        if (!markEl || !highlightRecord) return;
+
+        const popover = document.createElement('div');
+        popover.className = 'bs-highlighter-popover';
+
+        const rect = markEl.getBoundingClientRect();
+        const top = window.scrollY + rect.bottom + 6;
+        const left = Math.max(10, Math.min(window.scrollX + rect.left, window.innerWidth - 300));
+        popover.style.top = `${top}px`;
+        popover.style.left = `${left}px`;
+
+        popover.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <div style="font-weight: 600; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">BookSmart Vurgusu</div>
+                <button type="button" class="bs-popover-close" style="background: none; border: none; font-size: 16px; cursor: pointer; color: #94a3b8; padding: 0 4px;">&times;</button>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                <button type="button" class="bs-color-btn" data-color="yellow" style="width: 22px; height: 22px; border-radius: 50%; background: #fef08a; border: 2px solid ${highlightRecord.color === 'yellow' ? '#ca8a04' : 'transparent'}; cursor: pointer;"></button>
+                <button type="button" class="bs-color-btn" data-color="green" style="width: 22px; height: 22px; border-radius: 50%; background: #bbf7d0; border: 2px solid ${highlightRecord.color === 'green' ? '#16a34a' : 'transparent'}; cursor: pointer;"></button>
+                <button type="button" class="bs-color-btn" data-color="blue" style="width: 22px; height: 22px; border-radius: 50%; background: #bae6fd; border: 2px solid ${highlightRecord.color === 'blue' ? '#0284c7' : 'transparent'}; cursor: pointer;"></button>
+                <button type="button" class="bs-color-btn" data-color="purple" style="width: 22px; height: 22px; border-radius: 50%; background: #e9d5ff; border: 2px solid ${highlightRecord.color === 'purple' ? '#9333ea' : 'transparent'}; cursor: pointer;"></button>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <textarea class="bs-popover-note" placeholder="Yapışkan not ekle..." style="width: 100%; box-sizing: border-box; height: 60px; padding: 6px 8px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; resize: none; font-family: inherit;">${highlightRecord.note || ''}</textarea>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button type="button" class="bs-popover-delete" style="background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 4px 0; font-weight: 500;">🗑️ Vurguyu Sil</button>
+                <button type="button" class="bs-popover-save" style="background: #0284c7; color: #fff; border: none; border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 500; cursor: pointer;">Kaydet</button>
+            </div>
+        `;
+
+        document.body.appendChild(popover);
+        activePopover = popover;
+
+        // Close button
+        popover.querySelector('.bs-popover-close').addEventListener('click', closeActivePopover);
+
+        // Color buttons
+        popover.querySelectorAll('.bs-color-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const newColor = btn.dataset.color;
+                highlightRecord.color = newColor;
+                markEl.className = `bs-highlight bs-hl-${newColor}`;
+                markEl.dataset.color = newColor;
+
+                // Update border on color buttons
+                popover.querySelectorAll('.bs-color-btn').forEach(b => {
+                    b.style.border = b.dataset.color === newColor ? '2px solid #000' : '2px solid transparent';
+                });
+
+                const list = await getStoredHighlights(highlightRecord.url);
+                const updated = list.map(h => h.id === highlightRecord.id ? { ...h, color: newColor } : h);
+                await saveStoredHighlights(highlightRecord.url, updated);
+            });
+        });
+
+        // Save note
+        popover.querySelector('.bs-popover-save').addEventListener('click', async () => {
+            const noteText = popover.querySelector('.bs-popover-note').value.trim();
+            highlightRecord.note = noteText;
+            if (noteText) {
+                markEl.dataset.hasNote = 'true';
+            } else {
+                delete markEl.dataset.hasNote;
+            }
+
+            const list = await getStoredHighlights(highlightRecord.url);
+            const updated = list.map(h => h.id === highlightRecord.id ? { ...h, note: noteText } : h);
+            await saveStoredHighlights(highlightRecord.url, updated);
+            closeActivePopover();
+        });
+
+        // Delete highlight
+        popover.querySelector('.bs-popover-delete').addEventListener('click', async () => {
+            await removeHighlight(highlightRecord.id, markEl);
+            closeActivePopover();
+        });
+    }
+
+    async function removeHighlight(id, markEl) {
+        if (markEl && markEl.parentNode) {
+            const parent = markEl.parentNode;
+            while (markEl.firstChild) {
+                parent.insertBefore(markEl.firstChild, markEl);
+            }
+            parent.removeChild(markEl);
+            parent.normalize();
+        }
+
+        const url = cleanPageUrl(window.location.href);
+        const list = await getStoredHighlights(url);
+        const filtered = list.filter(h => h.id !== id);
+        await saveStoredHighlights(url, filtered);
+    }
+
+    async function clearAllPageHighlights() {
+        closeActivePopover();
+        const marks = document.querySelectorAll('.bs-highlight');
+        marks.forEach(mark => {
+            const parent = mark.parentNode;
+            if (parent) {
+                while (mark.firstChild) {
+                    parent.insertBefore(mark.firstChild, mark);
+                }
+                parent.removeChild(mark);
+                parent.normalize();
+            }
+        });
+
+        const url = cleanPageUrl(window.location.href);
+        const key = getStorageKey(url);
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+            try {
+                await chrome.storage.local.remove([key]);
+            } catch {
+                // Ignore
+            }
+        }
+    }
+
+    async function applySelectionHighlight(color = 'yellow', promptNote = false) {
+        injectHighlighterStyles();
+
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const selectedText = selection.toString().trim();
+        if (!selectedText) return;
+
+        const id = 'hl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const url = cleanPageUrl(window.location.href);
+
+        const highlightRecord = {
+            id,
+            url,
+            text: selectedText,
+            color,
+            note: '',
+            createdAt: Date.now()
+        };
+
+        try {
+            const mark = createHighlightElement(id, color, false);
+            const contents = range.extractContents();
+            mark.appendChild(contents);
+            range.insertNode(mark);
+            selection.removeAllRanges();
+
+            mark.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showHighlightPopover(mark, highlightRecord);
+            });
+
+            // Save to chrome.storage.local
+            const existing = await getStoredHighlights(url);
+            existing.push(highlightRecord);
+            await saveStoredHighlights(url, existing);
+
+            if (promptNote) {
+                showHighlightPopover(mark, highlightRecord);
+            }
+        } catch (err) {
+            console.warn('Failed to wrap selection highlight:', err);
+        }
+    }
+
+    async function restorePageHighlights() {
+        injectHighlighterStyles();
+        const url = cleanPageUrl(window.location.href);
+        const highlights = await getStoredHighlights(url);
+        if (!highlights || highlights.length === 0) return;
+
+        const treeWalker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                    const parentTag = node.parentElement?.tagName?.toLowerCase();
+                    if (['script', 'style', 'textarea', 'noscript', 'mark'].includes(parentTag)) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
+        );
+
+        const textNodes = [];
+        let currNode;
+        while ((currNode = treeWalker.nextNode())) {
+            textNodes.push(currNode);
+        }
+
+        for (const hl of highlights) {
+            // Already applied?
+            if (document.querySelector(`[data-bs-id="${hl.id}"]`)) continue;
+
+            for (const textNode of textNodes) {
+                const nodeText = textNode.nodeValue;
+                const idx = nodeText.indexOf(hl.text);
+                if (idx !== -1) {
+                    try {
+                        const mark = createHighlightElement(hl.id, hl.color, Boolean(hl.note));
+                        const targetRange = document.createRange();
+                        targetRange.setStart(textNode, idx);
+                        targetRange.setEnd(textNode, idx + hl.text.length);
+
+                        const contents = targetRange.extractContents();
+                        mark.appendChild(contents);
+                        targetRange.insertNode(mark);
+
+                        mark.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showHighlightPopover(mark, hl);
+                        });
+                        break;
+                    } catch {
+                        // Node structure changed, skip
+                    }
+                }
+            }
+        }
+    }
+
+    function initWebHighlighter() {
+        if (typeof document === 'undefined') return;
+
+        injectHighlighterStyles();
+
+        // Restore on initial load & DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', restorePageHighlights);
+        } else {
+            restorePageHighlights();
+        }
+        window.addEventListener('load', restorePageHighlights);
+
+        // Close popover when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            if (activePopover && !activePopover.contains(e.target)) {
+                closeActivePopover();
+            }
+        });
+
+        // Listen for messages from background script
+        if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                if (request.action === 'APPLY_PAGE_HIGHLIGHT') {
+                    applySelectionHighlight(request.color, request.promptNote);
+                    sendResponse({ success: true });
+                    return true;
+                }
+                if (request.action === 'CLEAR_PAGE_HIGHLIGHTS') {
+                    clearAllPageHighlights();
+                    sendResponse({ success: true });
+                    return true;
+                }
+                if (request.action === 'GET_PAGE_HIGHLIGHTS') {
+                    getStoredHighlights(window.location.href).then(list => {
+                        sendResponse({ success: true, highlights: list });
+                    });
+                    return true;
+                }
+            });
+        }
+    }
+
+    // ── Bootstrap ──
+    if (isOriginAllowed()) {
+        initBooksmartBridge();
+    }
+    initWebHighlighter();
+
+    // Export helpers for testing
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = {
+            cleanPageUrl,
+            getStorageKey,
+            HIGHLIGHT_COLORS,
+            createHighlightElement,
+            getStoredHighlights,
+            saveStoredHighlights,
+            applySelectionHighlight,
+            removeHighlight,
+            clearAllPageHighlights,
+            restorePageHighlights
+        };
+    }
 })();
+

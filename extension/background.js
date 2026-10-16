@@ -1235,6 +1235,55 @@ function setupContextMenus() {
                 title: "Açık Sekmeleri Koleksiyon Yap (OneTab)",
                 contexts: ['page']
             }, () => void chrome.runtime?.lastError);
+
+            // 4. On-page Web Highlighter Submenu (active on selection)
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_root',
+                title: "Metni Vurgula (Highlighter)",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_yellow',
+                parentId: 'booksmart_highlight_root',
+                title: "🟡 Sarı Vurgu",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_green',
+                parentId: 'booksmart_highlight_root',
+                title: "🟢 Yeşil Vurgu",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_blue',
+                parentId: 'booksmart_highlight_root',
+                title: "🔵 Mavi Vurgu",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_pink',
+                parentId: 'booksmart_highlight_root',
+                title: "🟣 Mor / Pembe Vurgu",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_note',
+                parentId: 'booksmart_highlight_root',
+                title: "📝 Not Ekle & Vurgula",
+                contexts: ['selection']
+            }, () => void chrome.runtime?.lastError);
+
+            // 5. Clear highlights on current page (active on page)
+            chrome.contextMenus.create({
+                id: 'booksmart_highlight_clear',
+                title: "🗑️ Bu Sayfadaki Vurguları Temizle",
+                contexts: ['page']
+            }, () => void chrome.runtime?.lastError);
         });
     } catch {
         // Ignored
@@ -1243,6 +1292,48 @@ function setupContextMenus() {
 
 async function handleContextMenuClick(info, tab) {
     if (!info) return;
+
+    // Handle Web Highlighter actions
+    if (typeof info.menuItemId === 'string' && info.menuItemId.startsWith('booksmart_highlight_')) {
+        const activeTabId = tab?.id;
+        if (!activeTabId) return;
+
+        if (info.menuItemId === 'booksmart_highlight_clear') {
+            try {
+                chrome.tabs.sendMessage(activeTabId, {
+                    action: 'CLEAR_PAGE_HIGHLIGHTS'
+                });
+                showBadge('✓', '#10b981', 2000);
+            } catch {
+                // Tab not ready
+            }
+            return;
+        }
+
+        const colorMap = {
+            'booksmart_highlight_yellow': 'yellow',
+            'booksmart_highlight_green': 'green',
+            'booksmart_highlight_blue': 'blue',
+            'booksmart_highlight_pink': 'purple',
+            'booksmart_highlight_note': 'yellow'
+        };
+
+        const color = colorMap[info.menuItemId] || 'yellow';
+        const promptNote = info.menuItemId === 'booksmart_highlight_note';
+
+        try {
+            chrome.tabs.sendMessage(activeTabId, {
+                action: 'APPLY_PAGE_HIGHLIGHT',
+                color,
+                promptNote,
+                selectionText: (info.selectionText || '').trim()
+            });
+            showBadge('✓', '#10b981', 2000);
+        } catch {
+            // Tab not ready
+        }
+        return;
+    }
 
     if (info.menuItemId === 'booksmart_save_all_tabs_session') {
         try {
