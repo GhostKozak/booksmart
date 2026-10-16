@@ -22,6 +22,7 @@ const ReminderModal = lazy(() => import('./ReminderModal').then(m => ({ default:
 const ShareCollectionModal = lazy(() => import('./ShareCollectionModal').then(m => ({ default: m.ShareCollectionModal })));
 const SnapshotViewerModal = lazy(() => import('./SnapshotViewerModal').then(m => ({ default: m.SnapshotViewerModal })));
 const RuleSuggestionsModal = lazy(() => import('./RuleSuggestionsModal').then(m => ({ default: m.RuleSuggestionsModal })));
+const BulkMetadataEnricherModal = lazy(() => import('./BulkMetadataEnricherModal').then(m => ({ default: m.BulkMetadataEnricherModal })));
 
 export function AppModalContainer({
     taxonomy,
@@ -43,7 +44,8 @@ export function AppModalContainer({
     handleMagicSort,
     handleEditSave,
     loadDemoData,
-    handleEnrichPreviews
+    handleEnrichPreviews,
+    metadataEnricher
 }) {
     const {
         settingsTab,
@@ -345,6 +347,27 @@ export function AppModalContainer({
                     isOpen={!!snapshotModalBookmark}
                     bookmark={snapshotModalBookmark}
                     onClose={closeSnapshotViewer}
+                />
+            )}
+
+            {/* Bulk Metadata & Favicon Enricher Modal */}
+            {metadataEnricher?.isModalOpen && (
+                <BulkMetadataEnricherModal
+                    isOpen={metadataEnricher.isModalOpen}
+                    onClose={metadataEnricher.closeModal}
+                    status={metadataEnricher.status}
+                    progress={metadataEnricher.progress}
+                    currentBookmark={metadataEnricher.currentBookmark}
+                    recentLogs={metadataEnricher.recentLogs}
+                    options={metadataEnricher.options}
+                    updateOptions={metadataEnricher.updateOptions}
+                    analysis={metadataEnricher.analysis}
+                    selectedCount={selectedIds?.size || 0}
+                    onStart={metadataEnricher.startEnrichment}
+                    onPause={metadataEnricher.pauseEnrichment}
+                    onResume={metadataEnricher.resumeEnrichment}
+                    onCancel={metadataEnricher.cancelEnrichment}
+                    onReset={metadataEnricher.resetEnrichment}
                 />
             )}
         </Suspense>

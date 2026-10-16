@@ -46,6 +46,7 @@ import { useTranslation } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
 import { getEffectiveApiKey, getStoredProvider, isVaultUnlocked, hasVault } from './lib/key-vault'
 import { batchEnrichBookmarks } from './lib/metadata-fetcher'
+import { useMetadataEnricher } from './hooks/use-metadata-enricher'
 
 const EMPTY_ARRAY = []
 
@@ -301,30 +302,13 @@ function App() {
     return () => clearTimeout(timer)
   }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
-  // ── Batch OpenGraph & Favicon Enricher ──
-  const [isEnrichingPreviews, setIsEnrichingPreviews] = useState(false)
+  // ── Bulk Favicon & Metadata Enricher ──
+  const metadataEnricher = useMetadataEnricher(rawBookmarks, selectedIds)
+  const isEnrichingPreviews = metadataEnricher.status === 'running'
 
-  const handleEnrichPreviews = useCallback(async () => {
-    const selectedBookmarks = rawBookmarks.filter(b => selectedIds.has(b.id))
-    if (selectedBookmarks.length === 0) return
-
-    setIsEnrichingPreviews(true)
-    const toastId = toast.loading(t('actionbar.enrichingProgress', { current: 0, total: selectedBookmarks.length }))
-
-    try {
-      const result = await batchEnrichBookmarks(selectedBookmarks, {
-        concurrency: 4,
-        onProgress: ({ processed, total }) => {
-          toast.loading(t('actionbar.enrichingProgress', { current: processed, total }), { id: toastId })
-        }
-      })
-      toast.success(t('actionbar.enrichSuccess', { count: result.processed }), { id: toastId })
-    } catch {
-      toast.error(t('actionbar.enrichError'), { id: toastId })
-    } finally {
-      setIsEnrichingPreviews(false)
-    }
-  }, [rawBookmarks, selectedIds, t])
+  const handleEnrichPreviews = useCallback(() => {
+    metadataEnricher.openModal()
+  }, [metadataEnricher])
 
   const hasFileLoaded = rawBookmarks.length > 0
   const isOnboardingActive = !hasFileLoaded && showOnboarding
@@ -489,6 +473,7 @@ function App() {
           handleEditSave={handleEditSave}
           loadDemoData={loadDemoData}
           handleEnrichPreviews={handleEnrichPreviews}
+          metadataEnricher={metadataEnricher}
         />
 
         {/* Non-intrusive conflict notification */}
