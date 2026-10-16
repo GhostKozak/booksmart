@@ -22,7 +22,11 @@ const {
     showInPageToast,
     CONTEXT_MENU_FOLDERS,
     setupContextMenus,
-    handleContextMenuClick
+    handleContextMenuClick,
+    escapeOmniboxXml,
+    searchOmniboxBookmarks,
+    formatOmniboxSuggestion,
+    handleOmniboxInputEntered
 } = await import('../../../extension/background.js')
 
 describe('Extension background script helpers', () => {
@@ -34,10 +38,16 @@ describe('Extension background script helpers', () => {
                 getTree: vi.fn(),
                 getChildren: vi.fn(),
                 getSubTree: vi.fn(),
+                search: vi.fn().mockResolvedValue([]),
                 create: vi.fn().mockImplementation(async (data) => ({ id: 'mock_' + Math.random().toString(36).slice(2, 6), ...data })),
                 removeTree: vi.fn(),
                 move: vi.fn().mockImplementation(async (id, destination) => ({ id, ...destination })),
                 update: vi.fn().mockImplementation(async (id, changes) => ({ id, ...changes }))
+            },
+            omnibox: {
+                setDefaultSuggestion: vi.fn(),
+                onInputChanged: { addListener: vi.fn() },
+                onInputEntered: { addListener: vi.fn() }
             },
             tabs: {
                 query: vi.fn(),
@@ -666,6 +676,51 @@ describe('Extension background script helpers', () => {
             const res = await fetchFeedXml('https://example.com/rss.xml')
             expect(res.success).toBe(true)
             expect(res.xml).toBe(mockXml)
+        })
+    })
+
+    describe('Omnibox Quick Search helpers', () => {
+        it('escapeOmniboxXml escapes &, <, >, ", and \'', () => {
+            const raw = 'Search <React & "Redux"> \'Tips\''
+            const escaped = escapeOmniboxXml(raw)
+            expect(escaped).toBe('Search &lt;React &amp; &quot;Redux&quot;&gt; &apos;Tips&apos;')
+        })
+
+        it('searchOmniboxBookmarks searches cached BookSmart bookmarks and ranks matches', async () => {
+            chrome.storage.local.get.mockResolvedValue({
+                booksmart_cached_bookmarks: [
+                    { title: 'React Documentation', url: 'https://react.dev', tags: 'javascript, frontend', note: 'Official docs' },
+                    { title: 'GitHub Repository', url: 'https://github.com', tags: 'code, git', note: 'Version control' },
+                    { title: 'Vue.js Guide', url: 'https://vuejs.org', tags: 'javascript', note: 'Vue framework' }
+                ]
+            })
+
+            const results = await searchOmniboxBookmarks('react')
+            expect(results.length).toBeGreaterThanOrEqual(1)
+            expect(results[0].content).toBe('https://react.dev')
+            expect(results[0].description).toContain('<match>React Documentation</match>')
+        })
+
+        it('searchOmniboxBookmarks matches tags and notes', async () => {
+            chrome.storage.local.get.mockResolvedValue({
+                booksmart_cached_bookmarks: [
+                    { title: 'Frontend Tips', url: 'https://tips.dev', tags: 'web, css', note: 'Cool flexbox tricks' }
+                ]
+            })
+
+            const tagResults = await searchOmniboxBookmarks('css')
+            expect(tagResults.length).toBe(1)
+            expect(tagResults[0].content).toBe('https://tips.dev')
+
+            const noteResults = await searchOmniboxBookmarks('flexbox')
+            expect(noteResults.length).toBe(1)
+            expect(noteResults[0].content).toBe('https://tips.dev')
+        })
+
+        it('handleOmniboxInputEntered navigates to url directly or finds match', async () => {
+            chrome.tabs.update = vi.fn()
+            await handleOmniboxInputEntered('https://myurl.com', 'currentTab')
+            expect(chrome.tabs.update).toHaveBeenCalledWith({ url: 'https://myurl.com' })
         })
     })
 })

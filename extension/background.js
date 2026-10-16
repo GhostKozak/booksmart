@@ -1344,6 +1344,197 @@ async function handleContextMenuClick(info, tab) {
     }
 }
 
+/**
+ * Escapes special XML characters for Chrome Omnibox API description field.
+ */
+function escapeOmniboxXml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+/**
+ * Searches bookmarks from cache and browser bookmarks API for Omnibox suggestions.
+ */
+async function searchOmniboxBookmarks(query) {
+    const cleanQuery = (query || '').trim().toLowerCase();
+    if (!cleanQuery) return [];
+
+    const candidatesMap = new Map();
+
+    // 1. Check cached BookSmart bookmarks from chrome.storage.local
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        try {
+            const data = await chrome.storage.local.get(['booksmart_cached_bookmarks']);
+            const cachedList = data?.booksmart_cached_bookmarks || [];
+            for (const bm of cachedList) {
+                if (bm.url) {
+                    candidatesMap.set(bm.url, {
+                        url: bm.url,
+                        title: bm.title || bm.url,
+                        folder: bm.newFolder || bm.originalFolder || '',
+                        tags: Array.isArray(bm.tags) ? bm.tags.join(', ') : (bm.tags || ''),
+                        note: bm.note || bm.notes || bm.description || '',
+                        source: 'booksmart'
+                    });
+                }
+            }
+        } catch {
+            // Ignore storage access error
+        }
+    }
+
+    // 2. Query browser bookmarks via chrome.bookmarks.search
+    if (typeof chrome !== 'undefined' && chrome.bookmarks?.search) {
+        try {
+            const browserResults = await chrome.bookmarks.search(cleanQuery);
+            for (const b of (browserResults || [])) {
+                if (b.url && !candidatesMap.has(b.url)) {
+                    candidatesMap.set(b.url, {
+                        url: b.url,
+                        title: b.title || b.url,
+                        folder: '',
+                        tags: '',
+                        note: '',
+                        source: 'browser'
+                    });
+                }
+            }
+        } catch {
+            // Ignore bookmark search error
+        }
+    }
+
+    // 3. Filter and score matches
+    const scored = [];
+    const queryTokens = cleanQuery.split(/\s+/).filter(Boolean);
+
+    for (const item of candidatesMap.values()) {
+        const titleLower = item.title.toLowerCase();
+        const urlLower = item.url.toLowerCase();
+        const tagsLower = item.tags.toLowerCase();
+        const noteLower = item.note.toLowerCase();
+        const folderLower = item.folder.toLowerCase();
+
+        let score = 0;
+
+        if (titleLower === cleanQuery) score += 100;
+        else if (titleLower.startsWith(cleanQuery)) score += 80;
+        else if (titleLower.includes(cleanQuery)) score += 60;
+
+        if (tagsLower.includes(cleanQuery)) score += 50;
+        if (folderLower.includes(cleanQuery)) score += 40;
+        if (noteLower.includes(cleanQuery)) score += 30;
+        if (urlLower.includes(cleanQuery)) score += 20;
+
+        // Check token matches
+        if (score === 0) {
+            const allMatch = queryTokens.every(tok =>
+                titleLower.includes(tok) ||
+                tagsLower.includes(tok) ||
+                noteLower.includes(tok) ||
+                folderLower.includes(tok) ||
+                urlLower.includes(tok)
+            );
+            if (allMatch) score += 40;
+        }
+
+        if (score > 0) {
+            scored.push({ item, score });
+        }
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+
+    return scored.slice(0, 6).map(({ item }) => formatOmniboxSuggestion(item, cleanQuery));
+}
+
+/**
+ * Formats a single bookmark into Omnibox SuggestResult format.
+ */
+function formatOmniboxSuggestion(item, query) {
+    const escapedTitle = escapeOmniboxXml(item.title || item.url);
+    const escapedUrl = escapeOmniboxXml(item.url);
+    const metaParts = [];
+
+    if (item.folder) metaParts.push(escapeOmniboxXml(item.folder));
+    if (item.tags) metaParts.push(`#${escapeOmniboxXml(item.tags)}`);
+    if (item.note) {
+        const snippet = item.note.slice(0, 30);
+        metaParts.push(escapeOmniboxXml(snippet) + (item.note.length > 30 ? '...' : ''));
+    }
+
+    const metaStr = metaParts.length > 0 ? ` <dim>[${metaParts.join(' | ')}]</dim>` : '';
+
+    return {
+        content: item.url,
+        description: `<match>${escapedTitle}</match>${metaStr} <url>${escapedUrl}</url>`
+    };
+}
+
+/**
+ * Handles user entering text into the address bar omnibox.
+ */
+async function handleOmniboxInputEntered(text, disposition = 'currentTab') {
+    if (!text) return;
+    const cleanText = text.trim();
+
+    let targetUrl = '';
+
+    if (/^https?:\/\//i.test(cleanText)) {
+        targetUrl = cleanText;
+    } else {
+        // Try searching for top matching bookmark
+        const suggestions = await searchOmniboxBookmarks(cleanText);
+        if (suggestions.length > 0 && suggestions[0].content) {
+            targetUrl = suggestions[0].content;
+        } else {
+            // Fallback to BookSmart web app search
+            targetUrl = `https://booksmart.app/?search=${encodeURIComponent(cleanText)}`;
+        }
+    }
+
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+        if (disposition === 'currentTab' && chrome.tabs.update) {
+            chrome.tabs.update({ url: targetUrl });
+        } else if (chrome.tabs.create) {
+            chrome.tabs.create({ url: targetUrl, active: disposition !== 'newBackgroundTab' });
+        }
+    }
+}
+
+/**
+ * Sets up Chrome Omnibox event listeners.
+ */
+function setupOmnibox() {
+    if (typeof chrome === 'undefined' || !chrome.omnibox) return;
+
+    try {
+        chrome.omnibox.setDefaultSuggestion({
+            description: 'BookSmart: <match>%s</match> için yer imlerinde, etiket ve notlarda ara...'
+        });
+
+        chrome.omnibox.onInputChanged.addListener(async (text, suggest) => {
+            try {
+                const results = await searchOmniboxBookmarks(text);
+                suggest(results);
+            } catch (err) {
+                console.warn('Omnibox search error:', err);
+            }
+        });
+
+        chrome.omnibox.onInputEntered.addListener((text, disposition) => {
+            handleOmniboxInputEntered(text, disposition);
+        });
+    } catch (err) {
+        console.warn('Failed to setup omnibox:', err);
+    }
+}
+
 if (typeof chrome !== 'undefined') {
     if (chrome.contextMenus?.onClicked) {
         chrome.contextMenus.onClicked.addListener(handleContextMenuClick);
@@ -1351,10 +1542,14 @@ if (typeof chrome !== 'undefined') {
     if (chrome.runtime?.onInstalled) {
         chrome.runtime.onInstalled.addListener(() => {
             setupContextMenus();
+            setupOmnibox();
         });
     }
     if (chrome.contextMenus) {
         setupContextMenus();
+    }
+    if (chrome.omnibox) {
+        setupOmnibox();
     }
 }
 
@@ -1477,6 +1672,25 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             sendResponse({ success: true });
             return true;
         }
+
+        if (request.action === 'CACHE_BOOKMARKS') {
+            if (typeof chrome !== 'undefined' && chrome.storage?.local && Array.isArray(request.bookmarks)) {
+                const slimBookmarks = request.bookmarks.map(b => ({
+                    url: b.url,
+                    title: b.title || b.url,
+                    originalFolder: b.originalFolder || '',
+                    newFolder: b.newFolder || '',
+                    tags: Array.isArray(b.tags) ? b.tags.join(', ') : (b.tags || ''),
+                    note: b.note || b.notes || b.description || ''
+                }));
+                chrome.storage.local.set({ booksmart_cached_bookmarks: slimBookmarks })
+                    .then(() => sendResponse({ success: true, count: slimBookmarks.length }))
+                    .catch(err => sendResponse({ success: false, error: err.message }));
+                return true;
+            }
+            sendResponse({ success: false, error: 'Invalid payload' });
+            return true;
+        }
     });
 }
 
@@ -1559,6 +1773,11 @@ if (typeof module !== 'undefined' && module.exports) {
         showInPageToast,
         CONTEXT_MENU_FOLDERS,
         setupContextMenus,
-        handleContextMenuClick
+        handleContextMenuClick,
+        escapeOmniboxXml,
+        searchOmniboxBookmarks,
+        formatOmniboxSuggestion,
+        handleOmniboxInputEntered,
+        setupOmnibox
     };
 }

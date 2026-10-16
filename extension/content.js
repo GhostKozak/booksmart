@@ -449,7 +449,18 @@
                     };
                 }
                 if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-                    chrome.storage.local.set({ appBookmarksCache: cache });
+                    const slimList = bookmarks.map(b => ({
+                        url: b.url,
+                        title: b.title || b.url,
+                        originalFolder: b.originalFolder || '',
+                        newFolder: b.newFolder || '',
+                        tags: Array.isArray(b.tags) ? b.tags.join(', ') : (b.tags || ''),
+                        note: b.note || b.notes || b.description || ''
+                    }));
+                    chrome.storage.local.set({
+                        appBookmarksCache: cache,
+                        booksmart_cached_bookmarks: slimList
+                    });
                 }
             } catch {
                 // Ignored
