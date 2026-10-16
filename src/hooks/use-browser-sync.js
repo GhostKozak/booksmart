@@ -52,15 +52,20 @@ function isDomEvent(obj) {
     );
 }
 
-export function useBrowserSync({ rawBookmarks = [], addCommand }) {
+export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }) {
     const { t } = useTranslation()
     const [isSyncing, setIsSyncing] = useState(false)
     const [lastSyncResult, setLastSyncResult] = useState(null)
     const rawBookmarksRef = useRef(rawBookmarks)
+    const activeBookmarksRef = useRef(bookmarks && bookmarks.length > 0 ? bookmarks : rawBookmarks)
 
     useEffect(() => {
         rawBookmarksRef.current = rawBookmarks
     }, [rawBookmarks])
+
+    useEffect(() => {
+        activeBookmarksRef.current = bookmarks && bookmarks.length > 0 ? bookmarks : rawBookmarks
+    }, [bookmarks, rawBookmarks])
 
     /**
      * Imports bookmarks from the browser into BookSmart with strict deduplication.
@@ -79,7 +84,7 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
                 return { success: true, count: 0 }
             }
 
-            const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
+            const currentBookmarks = await getEffectiveBookmarks(activeBookmarksRef.current)
             const existingUrls = new Set(currentBookmarks.map(b => normalizeUrl(b.url)).filter(Boolean))
             const newBookmarks = deduplicateBookmarks(browserBookmarks, existingUrls)
 
@@ -126,7 +131,7 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
         const safeBookmarksInput = isDomEvent(bookmarksToPush) ? undefined : bookmarksToPush
         const safeOptions = isDomEvent(options) ? {} : (isDomEvent(bookmarksToPush) ? {} : options)
 
-        const targetBookmarks = await getEffectiveBookmarks(safeBookmarksInput || rawBookmarksRef.current)
+        const targetBookmarks = await getEffectiveBookmarks(safeBookmarksInput || activeBookmarksRef.current)
         if (!targetBookmarks || targetBookmarks.length === 0) {
             toast.info(t('notifications.noBookmarksToExport', 'No bookmarks to push.'))
             return { success: false, count: 0 }
@@ -169,7 +174,7 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
 
         setIsSyncing(true)
         try {
-            const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
+            const currentBookmarks = await getEffectiveBookmarks(activeBookmarksRef.current)
             const result = await syncBrowserBookmarks(currentBookmarks, safeOptions)
             const rawImported = result.importedBookmarks || []
             const existingUrls = new Set(currentBookmarks.map(b => normalizeUrl(b.url)).filter(Boolean))
@@ -244,21 +249,22 @@ export function useBrowserSync({ rawBookmarks = [], addCommand }) {
 
     // Cache library bookmarks in extension storage for instant duplicate detection
     useEffect(() => {
-        if (typeof window === 'undefined' || !rawBookmarks || rawBookmarks.length === 0) return
+        const sourceList = (bookmarks && bookmarks.length > 0) ? bookmarks : rawBookmarks
+        if (typeof window === 'undefined' || !sourceList || sourceList.length === 0) return
         window.postMessage({
             source: 'BOOKSMART_PAGE',
             type: 'BOOKSMART_CACHE_BOOKMARKS',
             payload: {
-                bookmarks: rawBookmarks.map(b => ({
+                bookmarks: sourceList.map(b => ({
                     id: b.id,
                     title: b.title,
                     url: b.url,
-                    newFolder: b.newFolder,
+                    newFolder: b.newFolder || b.originalFolder,
                     originalFolder: b.originalFolder
                 }))
             }
         }, '*')
-    }, [rawBookmarks])
+    }, [bookmarks, rawBookmarks])
 
     // Listen for extension events (e.g. popup sync trigger, active tab capture, session save)
     useEffect(() => {

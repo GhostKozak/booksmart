@@ -184,7 +184,10 @@ const processData = ({
     // Therefore, this step filters based on "already moved/persisted" folders, not "matching rules".
     // To persist rule actions, the user must explicitly apply the rules (saving them to DB via bulkPut).
     if (activeFolder) {
-        filtered = filtered.filter(b => (b.newFolder || b.originalFolder) === activeFolder)
+        filtered = filtered.filter(b => {
+            const f = b.newFolder || b.originalFolder;
+            return f === activeFolder || (f && f.startsWith(activeFolder + ' > '));
+        });
     }
 
     // 5. Smart Filters
@@ -328,13 +331,13 @@ const processData = ({
         const hasMatch = matchedRules.length > 0;
 
         let finalStatus = hasMatch ? (isConflict ? 'conflict' : 'matched') : 'unchanged';
-        let finalNewFolder = hasMatch ? newFolder : b.originalFolder;
+        let finalNewFolder = hasMatch ? newFolder : (b.newFolder !== undefined ? b.newFolder : b.originalFolder);
         let finalRuleTags = ruleTags;
 
         // Preserve AI suggestion state if present in DB
         if (b.status === 'suggested' || b.status === 'ai-suggested') {
             finalStatus = b.status;
-            finalNewFolder = b.newFolder || b.suggestedFolder || b.originalFolder;
+            finalNewFolder = b.newFolder !== undefined ? b.newFolder : (b.suggestedFolder || b.originalFolder);
             finalRuleTags = b.ruleTags && b.ruleTags.length > 0 ? b.ruleTags : ruleTags;
         }
 

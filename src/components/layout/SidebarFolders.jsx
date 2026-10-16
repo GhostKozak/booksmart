@@ -72,7 +72,10 @@ export function SidebarFolders({
                     )}
 
                     {filteredAvailable.map(folder => {
-                        const count = bookmarks.filter(b => (b.newFolder || b.originalFolder) === folder.name).length
+                        const count = bookmarks.filter(b => {
+                            const f = b.newFolder || b.originalFolder
+                            return f === folder.name || (f && f.startsWith(folder.name + ' > '))
+                        }).length
                         const isActive = activeFolder === folder.name
                         return (
                             <button
@@ -112,7 +115,10 @@ export function SidebarFolders({
                                 </div>
                             </div>
                             {filteredDiscovered.map(folder => {
-                                const folderInfo = uniqueFolders.find(uf => uf.name === folder.name)
+                                const count = bookmarks.filter(b => {
+                                    const f = b.newFolder || b.originalFolder
+                                    return f === folder.name || (f && f.startsWith(folder.name + ' > '))
+                                }).length
                                 const isActive = activeFolder === folder.name
                                 return (
                                     <div key={`discovered-${folder.name}`} className="flex items-center gap-1 group/item">
@@ -130,7 +136,7 @@ export function SidebarFolders({
                                                 <span className="truncate">{folder.name}</span>
                                             </div>
                                             <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.2 rounded-full font-medium">
-                                                {folderInfo?.count || 0}
+                                                {count}
                                             </span>
                                         </button>
                                         <Button

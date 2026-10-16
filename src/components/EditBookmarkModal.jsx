@@ -102,7 +102,7 @@ export function EditBookmarkModal({ isOpen, onClose, bookmark, onSave, available
                 title: title.trim() || bookmark.title,
                 url: url.trim() || bookmark.url,
                 note: note.trim(),
-                folder: folder || bookmark.originalFolder || '',
+                folder: (folder || '').trim(),
                 tags,
             })
             onClose()

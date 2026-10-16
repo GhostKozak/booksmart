@@ -53,24 +53,54 @@ export function useTaxonomy({ workerUniqueTags, workerUniqueFolders }) {
         return workerUniqueFolders.filter(f => !existingNames.has(f.name))
     }, [workerUniqueFolders, availableFolders])
 
+    const allFolders = useMemo(() => {
+        const seen = new Set()
+        const result = []
+        for (const f of [...availableFolders, ...discoveredFolders]) {
+            const name = typeof f === 'string' ? f : f?.name
+            if (name && !seen.has(name)) {
+                seen.add(name)
+                result.push(f)
+            }
+        }
+        return result
+    }, [availableFolders, discoveredFolders])
+
+    const allTags = useMemo(() => {
+        const seen = new Set()
+        const result = []
+        for (const t of [...availableTags, ...discoveredTags]) {
+            const name = typeof t === 'string' ? t : t?.name
+            if (name && !seen.has(name)) {
+                seen.add(name)
+                result.push(t)
+            }
+        }
+        return result
+    }, [availableTags, discoveredTags])
+
     // CRUD
     const setAvailableFolders = async (newFolders) => {
+        const resolved = typeof newFolders === 'function' ? newFolders(availableFolders) : newFolders
+        if (!Array.isArray(resolved)) return
         await db.transaction('rw', db.folders, async () => {
             const existingIds = new Set((await db.folders.toArray()).map(f => f.id))
-            const newIds = new Set(newFolders.map(f => f.id))
+            const newIds = new Set(resolved.map(f => f.id))
             const toDelete = [...existingIds].filter(id => !newIds.has(id))
             if (toDelete.length > 0) await db.folders.bulkDelete(toDelete)
-            await db.folders.bulkPut(newFolders)
+            await db.folders.bulkPut(resolved)
         })
     }
 
     const setAvailableTags = async (newTags) => {
+        const resolved = typeof newTags === 'function' ? newTags(availableTags) : newTags
+        if (!Array.isArray(resolved)) return
         await db.transaction('rw', db.tags, async () => {
-            const existingIds = new Set((await db.tags.toArray()).map(f => f.id))
-            const newIds = new Set(newTags.map(f => f.id))
+            const existingIds = new Set((await db.tags.toArray()).map(t => t.id))
+            const newIds = new Set(resolved.map(t => t.id))
             const toDelete = [...existingIds].filter(id => !newIds.has(id))
             if (toDelete.length > 0) await db.tags.bulkDelete(toDelete)
-            await db.tags.bulkPut(newTags)
+            await db.tags.bulkPut(resolved)
         })
     }
 
@@ -85,6 +115,7 @@ export function useTaxonomy({ workerUniqueTags, workerUniqueFolders }) {
     return {
         availableFolders, setAvailableFolders,
         availableTags, setAvailableTags,
+        allFolders, allTags,
         ignoredUrlsList, ignoredUrls, toggleIgnoreUrl,
         discoveredTags, discoveredFolders,
         saveToTaxonomy,

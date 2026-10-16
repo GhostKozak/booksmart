@@ -164,7 +164,7 @@ export function ExportModal({
                                         </div>
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             <span className="text-[10px] px-1.5 py-0.5 bg-secondary rounded text-muted-foreground truncate max-w-[100px]">
-                                                {item.newFolder || 'Root'}
+                                                {item.newFolder || item.originalFolder || 'Root'}
                                             </span>
                                             {item.tags && item.tags.length > 0 && (
                                                 <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate max-w-[80px]">

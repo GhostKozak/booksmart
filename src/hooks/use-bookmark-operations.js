@@ -4,6 +4,7 @@ import { generateUUID, pickTagColor, normalizeUrl } from '../lib/utils'
 import { cleanUrl, countCleanableUrls } from '../lib/url-cleaner'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { useAppStore } from '../store/useAppStore'
 
 export function useBookmarkOperations({
     rawBookmarks,
@@ -598,6 +599,19 @@ export function useBookmarkOperations({
             }
         })
 
+        try {
+            const store = useAppStore.getState?.()
+            if (store) {
+                if (store.activeFolder === sourceFolderPath) {
+                    store.setActiveFolder(newFolderPath)
+                } else if (store.activeFolder && store.activeFolder.startsWith(prefix)) {
+                    store.setActiveFolder(newFolderPath + store.activeFolder.slice(sourceFolderPath.length))
+                }
+            }
+        } catch {
+            // Ignore if store is not available
+        }
+
         if (addCommand) {
             addCommand({
                 undo: () => db.transaction('rw', [db.bookmarks, db.folders], async () => {
@@ -607,6 +621,16 @@ export function useBookmarkOperations({
                     for (const fs of originalDbFolderStates) {
                         await db.folders.update(fs.id, { name: fs.name })
                     }
+                    try {
+                        const store = useAppStore.getState?.()
+                        if (store) {
+                            if (store.activeFolder === newFolderPath) {
+                                store.setActiveFolder(sourceFolderPath)
+                            } else if (store.activeFolder && store.activeFolder.startsWith(newFolderPath + ' > ')) {
+                                store.setActiveFolder(sourceFolderPath + store.activeFolder.slice(newFolderPath.length))
+                            }
+                        }
+                    } catch {}
                 }),
                 redo: () => db.transaction('rw', [db.bookmarks, db.folders], async () => {
                     for (const u of updates) {
@@ -615,6 +639,16 @@ export function useBookmarkOperations({
                     for (const fu of folderUpdates) {
                         await db.folders.update(fu.id, { name: fu.name })
                     }
+                    try {
+                        const store = useAppStore.getState?.()
+                        if (store) {
+                            if (store.activeFolder === sourceFolderPath) {
+                                store.setActiveFolder(newFolderPath)
+                            } else if (store.activeFolder && store.activeFolder.startsWith(prefix)) {
+                                store.setActiveFolder(newFolderPath + store.activeFolder.slice(sourceFolderPath.length))
+                            }
+                        }
+                    } catch {}
                 }),
                 description: `Move folder "${folderName}" to "${newFolderPath}"`
             })

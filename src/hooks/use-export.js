@@ -27,7 +27,7 @@ export function useExport({ bookmarks, selectedIds, setSelectedIds }) {
             list = list.filter(b => selectedIds.has(b.id))
         } else if (selectedFolder && selectedFolder !== 'all') {
             list = list.filter(b => {
-                const folder = b.newFolder || 'Root'
+                const folder = b.newFolder || b.originalFolder || 'Root'
                 return folder === selectedFolder || folder.startsWith(selectedFolder + ' > ')
             })
         }

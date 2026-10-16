@@ -171,7 +171,7 @@ function App() {
     addCommand,
     selectedIds,
     setSelectedIds,
-    availableFolders: taxonomy.availableFolders,
+    availableFolders: taxonomy.allFolders,
     linkHealth: worker.linkHealth,
     setLinkHealth: worker.setLinkHealth,
     setSmartFilter: useAppStore.getState().setSmartFilter
@@ -180,7 +180,7 @@ function App() {
   const ruleManager = useRuleManager({ rules, addCommand })
   const fileUpload = useFileUpload()
   const collectionsHook = useCollections({ addCommand })
-  const browserSync = useBrowserSync({ rawBookmarks, addCommand })
+  const browserSync = useBrowserSync({ rawBookmarks, bookmarks: worker.bookmarks, addCommand })
 
   const loadDemoData = useCallback(async () => {
     await db.transaction('rw', db.bookmarks, async () => {
@@ -274,7 +274,10 @@ function App() {
   const handleEditSave = useCallback(async ({ id, title, url, note, folder, tags }) => {
     const previous = await db.bookmarks.get(id)
     const updates = { title, url, note }
-    if (folder !== undefined) updates.newFolder = folder
+    if (folder !== undefined) {
+      updates.newFolder = folder
+      updates.originalFolder = folder
+    }
     if (tags !== undefined) updates.tags = tags
     await db.bookmarks.update(id, updates)
     addCommand({
@@ -437,8 +440,8 @@ function App() {
         <FloatingActionBar
           onDelete={operations.handleBatchDelete}
           onMove={operations.handleBatchMove}
-          allFolders={taxonomy.availableFolders}
-          allTags={taxonomy.availableTags}
+          allFolders={taxonomy.allFolders}
+          allTags={taxonomy.allTags}
           onOverrideStatus={operations.handleStatusOverride}
           onAddTags={operations.handleBatchAddTags}
           onExportSelected={() => actions.guardedExport(exporter.openExportSelectedModal)}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Globe, Terminal, Download, Github, ExternalLink } from 'lucide-react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
@@ -9,12 +9,21 @@ import { toast } from 'sonner'
 export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChange }) {
     const { t } = useTranslation()
     const [isPinging, setIsPinging] = useState(false)
+    const [localOverride, setLocalOverride] = useState(null)
+
+    useEffect(() => {
+        setLocalOverride(null)
+    }, [isOpen, isConnected])
+
+    const effectiveConnected = localOverride !== null ? localOverride : Boolean(isConnected)
 
     const handleCheckConnection = async () => {
         setIsPinging(true)
         try {
             const status = await pingExtension(1500)
-            if (status.available) {
+            const available = Boolean(status?.available)
+            setLocalOverride(available)
+            if (available) {
                 toast.success(t('settings.network.extensionDetectedToast', 'Companion extension connected successfully!'))
                 onStatusChange?.(true)
             } else {
@@ -38,24 +47,24 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
             <div className="space-y-4 text-sm">
                 {/* Status Banner */}
                 <div className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 ${
-                    isConnected
+                    effectiveConnected
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
                         : 'bg-muted/40 border-border/80 text-foreground'
                 }`}>
                     <div className="flex items-center gap-2.5">
-                        {isConnected ? (
+                        {effectiveConnected ? (
                             <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
                         ) : (
                             <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0" />
                         )}
                         <div>
                             <div className="font-semibold text-xs">
-                                {isConnected
+                                {effectiveConnected
                                     ? t('settings.network.extensionConnected', 'Extension Connected (CORS-Free)')
                                     : t('settings.network.extensionNotDetected', 'Extension Not Detected')}
                             </div>
                             <div className="text-[11px] text-muted-foreground">
-                                {isConnected
+                                {effectiveConnected
                                     ? t('modals.extensionGuide.statusActive', 'Active in background')
                                     : t('modals.extensionGuide.statusInactive', 'Load unpacked extension to activate')}
                             </div>

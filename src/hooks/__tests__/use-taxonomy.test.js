@@ -139,6 +139,32 @@ describe('useTaxonomy hook', () => {
         expect(count).toBe(2);
     });
 
+    it('sets available folders using functional updater', async () => {
+        const { result } = renderHook(() => useTaxonomy({ workerUniqueTags: [], workerUniqueFolders: [] }));
+
+        await act(async () => {
+            await result.current.setAvailableFolders(() => [
+                { id: 'fn-1', name: 'Functional Folder', order: 0 }
+            ]);
+        });
+
+        const count = await db.folders.count();
+        expect(count).toBe(1);
+    });
+
+    it('provides allFolders and allTags combining available and discovered', () => {
+        const workerUniqueFolders = [{ name: 'Discovered F', count: 3 }];
+        const workerUniqueTags = [{ name: 'discovered-t', count: 2 }];
+        const { result } = renderHook(() => useTaxonomy({ workerUniqueTags, workerUniqueFolders }));
+
+        expect(result.current.allFolders).toEqual(expect.arrayContaining([
+            expect.objectContaining({ name: 'Discovered F' })
+        ]));
+        expect(result.current.allTags).toEqual(expect.arrayContaining([
+            expect.objectContaining({ name: 'discovered-t' })
+        ]));
+    });
+
     it('saves a single item to taxonomy', async () => {
         const { result } = renderHook(() => useTaxonomy({ workerUniqueTags: [], workerUniqueFolders: [] }));
 

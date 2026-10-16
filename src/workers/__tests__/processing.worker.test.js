@@ -68,6 +68,18 @@ describe('processing.worker', () => {
             expect(result.payload.processedBookmarks[0].id).toBe('2');
         });
 
+        it('should include hierarchical subfolders when activeFolder is selected', async () => {
+            const nestedBookmarks = [
+                { id: 'parent1', url: 'https://p.com', title: 'P', originalFolder: 'Tech' },
+                { id: 'child1', url: 'https://c.com', title: 'C', originalFolder: 'Tech > Web' },
+                { id: 'grandchild1', url: 'https://gc.com', title: 'GC', originalFolder: 'Tech > Web > React' },
+                { id: 'other1', url: 'https://o.com', title: 'O', originalFolder: 'Music' },
+            ];
+            const result = process({ bookmarks: nestedBookmarks, activeFolder: 'Tech' });
+            expect(result.payload.processedBookmarks).toHaveLength(3);
+            expect(result.payload.processedBookmarks.map(b => b.id)).toEqual(['parent1', 'child1', 'grandchild1']);
+        });
+
         it('should apply tag filter successfully', async () => {
             const result = process({ activeTag: 'backend' });
             expect(result.payload.processedBookmarks).toHaveLength(1);

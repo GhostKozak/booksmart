@@ -134,6 +134,20 @@ describe('exporter', () => {
             expect(payload.bytes).toBeGreaterThan(0); // html skeleton
             expect(payload.content).toContain('<H1>Bookmarks</H1>');
         });
+
+        it('should fallback to originalFolder if newFolder is not defined', () => {
+            const bookmarksWithoutNewFolder = [
+                { title: 'Doc', url: 'https://doc.com', originalFolder: 'ImportedDocs', tags: [] }
+            ];
+            const html = exportBookmarks(bookmarksWithoutNewFolder);
+            expect(html).toContain('ImportedDocs</H3>');
+
+            const csv = exportToCsv(bookmarksWithoutNewFolder);
+            expect(csv).toContain('"ImportedDocs"');
+
+            const md = exportToMarkdown(bookmarksWithoutNewFolder);
+            expect(md).toContain('## ImportedDocs');
+        });
     });
 });
 

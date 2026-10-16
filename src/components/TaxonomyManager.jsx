@@ -80,13 +80,13 @@ export function TaxonomyManager({
 
         if (active && over && active.id !== over.id) {
             const setFn = activeTab === 'folders' ? setFolders : setTags;
-
-            setFn((items) => {
-                const oldIndex = items.findIndex(i => i.id === active.id);
-                const newIndex = items.findIndex(i => i.id === over.id);
+            const items = activeTab === 'folders' ? folders : tags;
+            const oldIndex = items.findIndex(i => i.id === active.id);
+            const newIndex = items.findIndex(i => i.id === over.id);
+            if (oldIndex !== -1 && newIndex !== -1) {
                 const newItems = arrayMove(items, oldIndex, newIndex);
-                return newItems.map((item, idx) => ({ ...item, order: idx }));
-            });
+                setFn(newItems.map((item, idx) => ({ ...item, order: idx })));
+            }
         }
     };
 

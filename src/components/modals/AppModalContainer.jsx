@@ -114,8 +114,8 @@ export function AppModalContainer({
                     onClose={() => setEditingBookmark(null)}
                     bookmark={editingBookmark}
                     onSave={handleEditSave}
-                    availableFolders={taxonomy.availableFolders}
-                    availableTags={taxonomy.availableTags}
+                    availableFolders={taxonomy.allFolders}
+                    availableTags={taxonomy.allTags}
                 />
             )}
 
@@ -203,7 +203,7 @@ export function AppModalContainer({
                     selectedCount={selectedIds.size}
                     selectedFolder={exporter.selectedFolder}
                     setSelectedFolder={exporter.setSelectedFolder}
-                    availableFolders={taxonomy.availableFolders}
+                    availableFolders={taxonomy.allFolders}
                     dataToExport={exporter.dataToExport}
                     exportPayload={exporter.exportPayload}
                     onExport={exporter.performExport}

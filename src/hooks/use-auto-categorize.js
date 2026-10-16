@@ -1,8 +1,11 @@
 import { useState, useCallback } from 'react'
 import { db } from '../db'
 import { autoCategorizeLocal } from '../services/auto-categorizer'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, onSortPreview }) {
+    const { t } = useTranslation()
     const [isProcessingLocal, setIsProcessingLocal] = useState(false)
 
     const handleAutoCategorize = useCallback(async () => {
@@ -66,19 +69,17 @@ export function useAutoCategorize({ selectedIds, setSelectedIds, rawBookmarks, o
                     await db.bookmarks.bulkPut(updates)
                     setSelectedIds(new Set())
                 }
-
-                // We rely on the app's TaxonomyManager to pick these up, 
-                // but we can also lazily add them if they don't exist in the 'available' definition
-                // The current app architecture seems to handle "Discovered" items automatically via the worker.
+            } else {
+                toast.info(t('modals.sortConf.noUpdates', 'Güncellenecek yeni bir kategori veya etiket bulunamadı.'))
             }
 
         } catch (error) {
             console.error("Auto Categorization Failed:", error)
-            // Optional: alert user?
+            toast.error(t('common.error', 'Bir hata oluştu') + ': ' + (error?.message || error))
         } finally {
             setIsProcessingLocal(false)
         }
-    }, [selectedIds, setSelectedIds, rawBookmarks, onSortPreview])
+    }, [selectedIds, setSelectedIds, rawBookmarks, onSortPreview, t])
 
     return { handleAutoCategorize, isProcessingLocal }
 }

@@ -27,15 +27,28 @@ export function useAppActions({
         }
 
         const previousState = await db.bookmarks.bulkGet(finalUpdates.map(u => u.id))
+        const previousMap = new Map((previousState || []).filter(Boolean).map(p => [p.id, p]))
 
-        const updatesToApply = finalUpdates.map(u => ({
-            ...u,
-            originalFolder: u.originalFolder,
-            newFolder: u.newFolder || u.suggestedFolder,
-            tags: [...new Set([...(u.tags || []), ...(u.ruleTags || [])])],
-            ruleTags: u.ruleTags || [],
-            status: 'ai-suggested',
-        }))
+        const updatesToApply = finalUpdates.map(u => {
+            const prev = previousMap.get(u.id) || {}
+            const hasFolderUpdate = Boolean(u.newFolder && u.newFolder !== (u.originalFolder || prev.originalFolder))
+            const effectiveNewFolder = u.newFolder !== undefined
+                ? u.newFolder
+                : (u.suggestedFolder || prev.newFolder || prev.originalFolder || '')
+            const effectiveOriginalFolder = u.originalFolder !== undefined
+                ? u.originalFolder
+                : (prev.originalFolder || '')
+
+            return {
+                ...prev,
+                ...u,
+                originalFolder: effectiveOriginalFolder,
+                newFolder: effectiveNewFolder,
+                tags: [...new Set([...(u.tags || prev.tags || []), ...(u.ruleTags || [])])],
+                ruleTags: u.ruleTags || prev.ruleTags || [],
+                status: u.status || (hasFolderUpdate ? 'ai-suggested' : (prev.status || 'unchanged')),
+            }
+        })
 
         const execute = async () => {
             await db.bookmarks.bulkPut(updatesToApply)

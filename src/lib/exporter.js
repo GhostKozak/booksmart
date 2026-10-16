@@ -29,13 +29,14 @@ export const exportBookmarks = (bookmarks) => {
 
     // 2. Build Tree Structure
     bookmarks.forEach(b => {
+        const folder = b.newFolder || b.originalFolder;
         // Handle explicit Root items or missing folder
-        if (!b.newFolder || b.newFolder === 'Root') {
+        if (!folder || folder === 'Root') {
             root.__bookmarks__.push(b);
             return;
         }
 
-        const folderPath = b.newFolder.split(' > ');
+        const folderPath = folder.split(' > ');
         let currentLevel = root;
 
         folderPath.forEach((folder, index) => {
@@ -140,7 +141,7 @@ export const exportToCsv = (bookmarks) => {
     const rows = bookmarks.map(b => {
         const title = sanitizeCsvCell(b.title);
         const url = sanitizeCsvCell(b.url);
-        const folder = sanitizeCsvCell(b.newFolder || 'Root');
+        const folder = sanitizeCsvCell(b.newFolder || b.originalFolder || 'Root');
         const tags = sanitizeCsvCell((b.tags || []).join(','));
         const rawDate = parseInt(b.addDate, 10);
         let date = '';
@@ -171,7 +172,7 @@ export const exportToMarkdown = (bookmarks) => {
     const folders = {};
 
     bookmarks.forEach(b => {
-        const folder = b.newFolder || 'Root';
+        const folder = b.newFolder || b.originalFolder || 'Root';
         if (!folders[folder]) {
             folders[folder] = [];
         }

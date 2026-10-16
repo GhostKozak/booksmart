@@ -208,6 +208,20 @@ export function BookmarkTree({
 
         if (activeData.type === 'folder' && onMoveFolder) {
             const sourcePath = activeData.path
+            const targetParent = overData.type === 'root' ? null : (overData.type === 'folder' ? overData.path : null)
+            const leafName = sourcePath.split(' > ').pop()
+            const newPath = targetParent ? `${targetParent} > ${leafName}` : leafName
+
+            if (sourcePath !== newPath) {
+                setExtraFolders(prev => prev.map(f => {
+                    if (f === sourcePath) return newPath
+                    if (f.startsWith(sourcePath + ' > ')) {
+                        return newPath + f.slice(sourcePath.length)
+                    }
+                    return f
+                }))
+            }
+
             if (overData.type === 'root') {
                 onMoveFolder(sourcePath, null)
             } else if (overData.type === 'folder') {
