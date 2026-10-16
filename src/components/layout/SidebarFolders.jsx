@@ -81,22 +81,23 @@ export function SidebarFolders({
                             <button
                                 key={folder.id}
                                 onClick={() => handleFolderClick(folder.name)}
+                                title={folder.name}
                                 className={cn(
-                                    "flex items-center justify-between w-full px-2.5 py-1.5 text-xs rounded-md transition-all group text-left",
+                                    "flex items-center justify-between w-full min-w-0 px-2.5 py-1.5 text-xs rounded-md transition-all group text-left overflow-hidden",
                                     isActive
                                         ? "bg-primary/10 text-primary font-semibold shadow-xs"
                                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                                 )}
                             >
-                                <div className="flex items-center gap-2 min-w-0 truncate group-hover:translate-x-0.5 transition-transform duration-150">
+                                <div className="flex items-center gap-2 min-w-0 flex-1 mr-1.5 overflow-hidden group-hover:translate-x-0.5 transition-transform duration-150">
                                     <Folder
                                         className="h-3.5 w-3.5 shrink-0"
                                         style={{ color: folder.color || '#f59e0b' }}
                                     />
-                                    <span className="truncate">{folder.name}</span>
+                                    <span className="truncate block">{folder.name}</span>
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] px-1.5 py-0.2 rounded-full shrink-0 font-medium",
+                                    "text-[10px] px-1.5 py-0.2 rounded-full shrink-0 font-medium ml-auto",
                                     isActive ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                                 )}>
                                     {count}
@@ -121,21 +122,22 @@ export function SidebarFolders({
                                 }).length
                                 const isActive = activeFolder === folder.name
                                 return (
-                                    <div key={`discovered-${folder.name}`} className="flex items-center gap-1 group/item">
+                                    <div key={`discovered-${folder.name}`} className="flex items-center gap-1 group/item min-w-0 w-full overflow-hidden">
                                         <button
                                             onClick={() => handleFolderClick(folder.name)}
+                                            title={folder.name}
                                             className={cn(
-                                                "flex items-center justify-between flex-1 px-2.5 py-1.5 text-xs rounded-md transition-all italic text-left",
+                                                "flex items-center justify-between flex-1 min-w-0 px-2.5 py-1.5 text-xs rounded-md transition-all italic text-left overflow-hidden",
                                                 isActive
                                                     ? "bg-primary/10 text-primary font-semibold"
                                                     : "text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground"
                                             )}
                                         >
-                                            <div className="flex items-center gap-2 min-w-0 truncate group-hover/item:translate-x-0.5 transition-transform duration-150">
+                                            <div className="flex items-center gap-2 min-w-0 flex-1 mr-1.5 overflow-hidden group-hover/item:translate-x-0.5 transition-transform duration-150">
                                                 <Folder className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                                                <span className="truncate">{folder.name}</span>
+                                                <span className="truncate block">{folder.name}</span>
                                             </div>
-                                            <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.2 rounded-full font-medium">
+                                            <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.2 rounded-full font-medium shrink-0 ml-auto">
                                                 {count}
                                             </span>
                                         </button>

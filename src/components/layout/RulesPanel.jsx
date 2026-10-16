@@ -116,7 +116,7 @@ export function RulesPanel({
                         filteredRules.map(rule => (
                             <div
                                 key={rule.id}
-                                className="flex items-start justify-between p-2.5 rounded-lg bg-muted/40 hover:bg-muted/80 border border-border/50 transition-colors group gap-2 text-xs"
+                                className="flex items-start justify-between p-2.5 rounded-lg bg-muted/40 hover:bg-muted/80 border border-border/50 transition-colors group gap-2 text-xs min-w-0 w-full overflow-hidden"
                             >
                                 <div className="flex flex-col min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5 mb-1">

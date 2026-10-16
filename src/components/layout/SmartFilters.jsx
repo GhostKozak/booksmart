@@ -111,19 +111,20 @@ export function SmartFilters({
                             <button
                                 key={filter.key}
                                 onClick={() => handleFilterClick(filter.key)}
+                                title={filter.label}
                                 className={cn(
-                                    "flex items-center justify-between w-full px-2.5 py-1.5 text-xs rounded-md transition-all text-left",
+                                    "flex items-center justify-between w-full min-w-0 px-2.5 py-1.5 text-xs rounded-md transition-all text-left overflow-hidden",
                                     isActive
                                         ? cn(colors.active, "shadow-xs")
                                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                                 )}
                             >
-                                <div className="flex items-center gap-2 min-w-0 truncate group-hover:translate-x-0.5 transition-transform duration-150">
+                                <div className="flex items-center gap-2 min-w-0 flex-1 mr-1.5 overflow-hidden group-hover:translate-x-0.5 transition-transform duration-150">
                                     <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
-                                    <span className="truncate">{filter.label}</span>
+                                    <span className="truncate block">{filter.label}</span>
                                 </div>
                                 <span className={cn(
-                                    "text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0",
+                                    "text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0 ml-auto",
                                     isActive ? "bg-background/80" : "bg-muted text-muted-foreground"
                                 )}>
                                     {filter.count}

@@ -369,7 +369,7 @@ function App() {
           />
         )}
         <div
-          className={`sidebar-slide relative z-30 ${isOnboardingActive ? '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden' : 'translate-x-0 opacity-100'}`}
+          className={`sidebar-slide relative z-30 shrink-0 min-w-0 overflow-hidden ${isOnboardingActive ? '-translate-x-full opacity-0 pointer-events-none w-0 overflow-hidden' : 'translate-x-0 opacity-100'}`}
         >
           <Sidebar
             uniqueTags={worker.uniqueTags} availableTags={taxonomy.availableTags}

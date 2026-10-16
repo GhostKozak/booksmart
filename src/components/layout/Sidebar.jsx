@@ -137,7 +137,7 @@ export function Sidebar({
     return (
         <aside
             className={cn(
-                "bg-card/95 backdrop-blur-md border-r flex flex-col transition-all duration-300 ease-in-out z-40 h-full",
+                "bg-card/95 backdrop-blur-md border-r flex flex-col transition-all duration-300 ease-in-out z-40 h-full overflow-x-hidden min-w-0 max-w-full",
                 // Mobile layout
                 "fixed inset-y-0 left-0 w-80 max-w-[85vw] shadow-2xl lg:shadow-none",
                 // Desktop layout
@@ -207,18 +207,18 @@ export function Sidebar({
                         handleItemSelect()
                     }}
                     className={cn(
-                        "flex items-center justify-between w-full px-2.5 py-2 text-xs rounded-lg transition-all text-left font-medium select-none cursor-pointer",
+                        "flex items-center justify-between w-full min-w-0 px-2.5 py-2 text-xs rounded-lg transition-all text-left font-medium select-none cursor-pointer overflow-hidden",
                         !hasActiveFilter
                             ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                 >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate mr-1.5">
                         <LayoutGrid className="h-4 w-4 shrink-0" />
-                        <span>{t('sidebar.allBookmarks', 'Tüm Yer İmleri')}</span>
+                        <span className="truncate">{t('sidebar.allBookmarks', 'Tüm Yer İmleri')}</span>
                     </div>
                     <span className={cn(
-                        "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
+                        "text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ml-auto",
                         !hasActiveFilter ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
                     )}>
                         {totalBookmarks}
@@ -236,17 +236,17 @@ export function Sidebar({
                         handleItemSelect()
                     }}
                     className={cn(
-                        "flex items-center justify-between w-full px-2.5 py-1.5 text-xs rounded-lg transition-all text-left select-none cursor-pointer",
+                        "flex items-center justify-between w-full min-w-0 px-2.5 py-1.5 text-xs rounded-lg transition-all text-left select-none cursor-pointer overflow-hidden",
                         activeFolder === 'Uncategorized'
                             ? "bg-primary/10 text-primary font-semibold"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                 >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1 truncate mr-1.5">
                         <Inbox className="h-4 w-4 shrink-0 text-slate-500" />
-                        <span>{t('sidebar.uncategorized', 'Kategorisiz')}</span>
+                        <span className="truncate">{t('sidebar.uncategorized', 'Kategorisiz')}</span>
                     </div>
-                    <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.2 rounded-full font-medium">
+                    <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.2 rounded-full font-medium shrink-0 ml-auto">
                         {uncategorizedCount}
                     </span>
                 </button>
@@ -300,7 +300,7 @@ export function Sidebar({
             </div>
 
             {/* Unified Smooth Scroll Container for All Sections */}
-            <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin px-3 py-1 space-y-3">
+            <div className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin px-3 py-1 space-y-3">
                 {/* 1. Collections */}
                 <SidebarCollections
                     collections={collections}

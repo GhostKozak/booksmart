@@ -99,10 +99,10 @@ export function SidebarCollections({
                             const isActive = activeCollection === collection.id
                             const count = collectionCounts[collection.id] || 0
                             return (
-                                <div key={collection.id} className="group/item relative">
+                                <div key={collection.id} className="group/item relative min-w-0 w-full overflow-hidden">
                                     <div
                                         className={cn(
-                                            "flex items-center justify-between w-full px-2.5 py-1.5 text-xs rounded-md transition-all text-left",
+                                            "flex items-center justify-between w-full min-w-0 px-2.5 py-1.5 text-xs rounded-md transition-all text-left overflow-hidden",
                                             isActive
                                                 ? "bg-primary/10 text-primary font-semibold shadow-xs"
                                                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -111,7 +111,8 @@ export function SidebarCollections({
                                         <button
                                             type="button"
                                             onClick={() => handleCollectionClick(collection.id)}
-                                            className="flex items-center gap-2 min-w-0 flex-1 truncate text-left cursor-pointer"
+                                            title={collection.name}
+                                            className="flex items-center gap-2 min-w-0 flex-1 mr-1.5 overflow-hidden text-left cursor-pointer"
                                         >
                                             <span
                                                 className="text-sm shrink-0 w-5 h-5 flex items-center justify-center rounded"
@@ -119,7 +120,7 @@ export function SidebarCollections({
                                             >
                                                 {collection.icon || '📁'}
                                             </span>
-                                            <span className="truncate">{collection.name}</span>
+                                            <span className="truncate block">{collection.name}</span>
                                         </button>
                                         <div className="flex items-center gap-1 shrink-0 ml-1">
                                             <span className={cn(
