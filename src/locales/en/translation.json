@@ -32,6 +32,7 @@
         "removeDuplicates": "Remove {{count}} Duplicates",
         "mergeDuplicates": "Merge {{count}} Duplicates",
         "cleanUrls": "Clean {{count}} URLs",
+        "enrichMetadata": "Enrich Missing Titles & Icons",
         "listView": "List View",
         "compactView": "Compact",
         "gridView": "Grid View",
@@ -1047,6 +1048,45 @@
         "offlineReady": "Offline Ready",
         "savedAt": "Saved At",
         "fileSize": "Size"
+    },
+    "modals": {
+        "extensionGuide": {
+            "title": "BookSmart Companion Extension"
+        },
+        "ruleSuggestions": {
+            "title": "Smart Rule Suggestions",
+            "description": "Your bookmark folders have been analyzed, and automatic organization rules have been detected based on your habits.",
+            "analyzeAI": "Deep AI Analysis",
+            "analyzingAI": "Analyzing habits with AI...",
+            "applyAll": "Apply All Suggestions ({{count}})",
+            "apply": "Apply",
+            "applied": "Applied",
+            "dismiss": "Dismiss Suggestion",
+            "emptyTitle": "No Suggestions Found",
+            "emptyDesc": "No distinct folder pattern detected yet in your library. As you add more bookmarks, smart suggestions will appear here.",
+            "sourcePattern": "Source Pattern",
+            "targetFolder": "Target Folder",
+            "addTags": "Tags"
+        },
+        "metadataEnricher": {
+            "title": "Bulk Favicon & Metadata Enricher",
+            "candidatesBadge": "missing",
+            "description": "Queue and enrich bookmarks with missing titles, descriptions, or broken icons in the background.",
+            "scope": "Scope",
+            "scopeNeeding": "Only Incomplete Bookmarks",
+            "scopeAll": "Enrich Entire Library",
+            "scopeSelected": "Selected Only ({{count}})",
+            "updateTitle": "Fetch Page Title",
+            "updateNotes": "Add Meta Description to Notes",
+            "updateIcon": "Refresh Favicon & Icon",
+            "start": "Start Enrichment",
+            "pause": "Pause",
+            "resume": "Resume",
+            "cancel": "Cancel",
+            "reset": "Reset",
+            "progress": "Progress: {{processed}} / {{total}}",
+            "completed": "Enrichment completed!"
+        }
     }
 }
 

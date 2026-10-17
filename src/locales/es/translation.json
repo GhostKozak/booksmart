@@ -32,6 +32,7 @@
         "removeDuplicates": "Eliminar {{count}} duplicados",
         "mergeDuplicates": "Fusionar {{count}} duplicados",
         "cleanUrls": "Limpiar {{count}} URLs",
+        "enrichMetadata": "Completar Títulos e Iconos Faltantes",
         "listView": "Vista de lista",
         "compactView": "Compacto",
         "gridView": "Vista de cuadrícula",
@@ -998,5 +999,44 @@
         "offlineReady": "Offline Ready",
         "savedAt": "Saved At",
         "fileSize": "Size"
+    },
+    "modals": {
+        "extensionGuide": {
+            "title": "Extensión Complementaria BookSmart"
+        },
+        "ruleSuggestions": {
+            "title": "Sugerencias de Reglas Inteligentes",
+            "description": "Se analizaron las carpetas de sus marcadores y se detectaron reglas automáticas basadas en sus hábitos frecuentes.",
+            "analyzeAI": "Análisis Profundo con IA",
+            "analyzingAI": "Analizando hábitos con IA...",
+            "applyAll": "Aplicar Todas las Sugerencias ({{count}})",
+            "apply": "Aplicar",
+            "applied": "Aplicado",
+            "dismiss": "Descartar Sugerencia",
+            "emptyTitle": "No se Encontraron Sugerencias",
+            "emptyDesc": "Aún no se ha detectado un patrón claro de carpetas en su biblioteca. A medida que añada más marcadores, aparecerán sugerencias aquí.",
+            "sourcePattern": "Patrón de Origen",
+            "targetFolder": "Carpeta de Destino",
+            "addTags": "Etiquetas"
+        },
+        "metadataEnricher": {
+            "title": "Enriquecedor Masivo de Favicons y Metadatos",
+            "candidatesBadge": "faltante",
+            "description": "Ponga en cola y enriquezca en segundo plano los marcadores con títulos faltantes, sin descripción o con iconos rotos.",
+            "scope": "Alcance",
+            "scopeNeeding": "Solo Marcadores Incompletos",
+            "scopeAll": "Enriquecer Toda la Biblioteca",
+            "scopeSelected": "Solo Seleccionados ({{count}})",
+            "updateTitle": "Obtener Título de Página",
+            "updateNotes": "Añadir Meta Descripción a Notas",
+            "updateIcon": "Actualizar Favicon e Icono",
+            "start": "Iniciar Enriquecimiento",
+            "pause": "Pausar",
+            "resume": "Reanudar",
+            "cancel": "Cancelar",
+            "reset": "Restablecer",
+            "progress": "Progreso: {{processed}} / {{total}}",
+            "completed": "¡Enriquecimiento completado!"
+        }
     }
 }

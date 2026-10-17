@@ -32,6 +32,7 @@
         "removeDuplicates": "{{count}} Duplikate entfernen",
         "mergeDuplicates": "{{count}} Duplikate zusammenführen",
         "cleanUrls": "{{count}} URLs bereinigen",
+        "enrichMetadata": "Fehlende Titel & Icons ergänzen",
         "listView": "Listenansicht",
         "compactView": "Kompakt",
         "gridView": "Rasteransicht",
@@ -998,5 +999,44 @@
         "offlineReady": "Offline Ready",
         "savedAt": "Saved At",
         "fileSize": "Size"
+    },
+    "modals": {
+        "extensionGuide": {
+            "title": "BookSmart Begleiter-Erweiterung"
+        },
+        "ruleSuggestions": {
+            "title": "Intelligente Regel-Vorschläge",
+            "description": "Ihre Lesezeichen-Ordner wurden analysiert und automatische Regeln basierend auf Ihren Gewohnheiten erkannt.",
+            "analyzeAI": "Tiefenanalyse mit KI",
+            "analyzingAI": "Gewohnheiten werden mit KI analysiert...",
+            "applyAll": "Alle Vorschläge anwenden ({{count}})",
+            "apply": "Anwenden",
+            "applied": "Angewendet",
+            "dismiss": "Vorschlag verwerfen",
+            "emptyTitle": "Keine Vorschläge gefunden",
+            "emptyDesc": "Noch kein eindeutiges Ordnermuster in Ihrer Bibliothek erkannt. Sobald Sie mehr Lesezeichen hinzufügen, erscheinen Vorschläge hier.",
+            "sourcePattern": "Quellmuster",
+            "targetFolder": "Zielordner",
+            "addTags": "Tags"
+        },
+        "metadataEnricher": {
+            "title": "Massen-Favicon- und Metadaten-Anreicherung",
+            "candidatesBadge": "fehlend",
+            "description": "Reichern Sie Lesezeichen mit fehlenden Titeln, Beschreibungen oder defekten Symbolen im Hintergrund an.",
+            "scope": "Umfang",
+            "scopeNeeding": "Nur unvollständige Lesezeichen",
+            "scopeAll": "Gesamte Bibliothek anreichern",
+            "scopeSelected": "Nur Ausgewählte ({{count}})",
+            "updateTitle": "Seitentitel abrufen",
+            "updateNotes": "Meta-Beschreibung zu Notizen hinzufügen",
+            "updateIcon": "Favicon & Symbol aktualisieren",
+            "start": "Anreicherung starten",
+            "pause": "Pausieren",
+            "resume": "Fortsetzen",
+            "cancel": "Abbrechen",
+            "reset": "Zurücksetzen",
+            "progress": "Fortschritt: {{processed}} / {{total}}",
+            "completed": "Anreicherung abgeschlossen!"
+        }
     }
 }

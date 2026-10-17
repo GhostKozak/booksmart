@@ -5,7 +5,8 @@ import {
     pushBookmarksToBrowser,
     syncBrowserBookmarks,
     isExtensionConnected,
-    pingExtension
+    pingExtension,
+    getAllExtensionHighlights
 } from '../lib/extension-client'
 import { normalizeUrl } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
@@ -193,6 +194,46 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
                 })
             }
 
+            // Also sync web highlights created via companion extension on external pages
+            try {
+                const extHighlights = await getAllExtensionHighlights(3000);
+                if (extHighlights && extHighlights.length > 0 && db.highlights) {
+                    const existingDbHighlights = await db.highlights.toArray();
+                    const existingKeySet = new Set(existingDbHighlights.map(h => `${normalizeUrl(h.url)}|${h.text}`));
+
+                    const toAdd = [];
+                    for (const hl of extHighlights) {
+                        const norm = normalizeUrl(hl.url);
+                        if (!norm || !hl.text) continue;
+                        const key = `${norm}|${hl.text}`;
+                        if (!existingKeySet.has(key)) {
+                            existingKeySet.add(key);
+                            const matchingBookmark = currentBookmarks.find(b => normalizeUrl(b.url) === norm);
+                            toAdd.push({
+                                bookmarkId: matchingBookmark ? matchingBookmark.id : null,
+                                url: hl.url,
+                                text: hl.text,
+                                color: hl.color || 'yellow',
+                                note: hl.note || '',
+                                createdAt: hl.createdAt || Date.now()
+                            });
+                        }
+                    }
+
+                    if (toAdd.length > 0) {
+                        await db.highlights.bulkAdd(toAdd);
+                        for (const b of currentBookmarks) {
+                            const count = await db.highlights.where('bookmarkId').equals(b.id).count();
+                            if (count > 0 && count !== b.highlightsCount) {
+                                await db.bookmarks.update(b.id, { highlightsCount: count });
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed syncing extension highlights:', err);
+            }
+
             setLastSyncResult(result)
 
             const updatedCount = result.updatedCount || 0
@@ -247,24 +288,25 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
         }
     }, [twoWaySync])
 
-    // Cache library bookmarks in extension storage for instant duplicate detection
+    // Cache library bookmarks in extension storage for instant duplicate detection and Omnibox search
     useEffect(() => {
-        const sourceList = (bookmarks && bookmarks.length > 0) ? bookmarks : rawBookmarks
-        if (typeof window === 'undefined' || !sourceList || sourceList.length === 0) return
+        if (typeof window === 'undefined' || !Array.isArray(rawBookmarks)) return
         window.postMessage({
             source: 'BOOKSMART_PAGE',
             type: 'BOOKSMART_CACHE_BOOKMARKS',
             payload: {
-                bookmarks: sourceList.map(b => ({
+                bookmarks: rawBookmarks.map(b => ({
                     id: b.id,
                     title: b.title,
                     url: b.url,
                     newFolder: b.newFolder || b.originalFolder,
-                    originalFolder: b.originalFolder
+                    originalFolder: b.originalFolder,
+                    tags: Array.isArray(b.tags) ? b.tags.join(', ') : (b.tags || ''),
+                    note: b.note || b.notes || b.description || ''
                 }))
             }
         }, '*')
-    }, [bookmarks, rawBookmarks])
+    }, [rawBookmarks])
 
     // Listen for extension events (e.g. popup sync trigger, active tab capture, session save)
     useEffect(() => {

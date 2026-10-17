@@ -676,4 +676,57 @@ export function fetchFeedXmlWithExtension(url, timeoutMs = 10000) {
     });
 }
 
+/**
+ * Fetches all highlights created in the companion extension across web pages.
+ * @param {number} [timeoutMs=8000]
+ * @returns {Promise<Array<Object>>}
+ */
+export function getAllExtensionHighlights(timeoutMs = 8000) {
+    if (typeof window === 'undefined') {
+        return Promise.resolve([]);
+    }
+
+    return new Promise((resolve) => {
+        const requestId = 'hl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                cleanup();
+                resolve([]);
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_GET_ALL_HIGHLIGHTS_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                if (event.data.success && Array.isArray(event.data.highlights)) {
+                    resolve(event.data.highlights);
+                } else {
+                    resolve([]);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_GET_ALL_HIGHLIGHTS',
+            requestId
+        }, '*');
+    });
+}
+
+
 

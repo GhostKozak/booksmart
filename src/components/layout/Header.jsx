@@ -53,7 +53,9 @@ export function Header({
     hasFileLoaded = false,
     closeFile,
     clearAll,
-    searchInputRef
+    searchInputRef,
+    openMetadataEnricher,
+    isEnrichingPreviews = false
 }) {
     const { t } = useTranslation()
     const [isMobileSearchActive, setIsMobileSearchActive] = useState(false)
@@ -392,6 +394,8 @@ export function Header({
                     openExportModal={openExportModal}
                     closeFile={closeFile}
                     clearAll={clearAll}
+                    openMetadataEnricher={openMetadataEnricher}
+                    isEnrichingPreviews={isEnrichingPreviews}
                 />
             </div>
         </header>

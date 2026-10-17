@@ -126,13 +126,15 @@ const processData = ({
                     const bTags = Array.isArray(b.tags) ? b.tags : (typeof b.tags === 'string' ? b.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
                     return regex.test(b.title || '') ||
                         regex.test(b.url || '') ||
+                        regex.test(b.note || '') ||
                         bTags.some(t => regex.test(t));
                 });
             } else {
                 // Fallback to simple contains for invalid regex
                 filtered = filtered.filter(b =>
                     (b.title || '').toLowerCase().includes(query) ||
-                    (b.url || '').toLowerCase().includes(query)
+                    (b.url || '').toLowerCase().includes(query) ||
+                    (b.note || '').toLowerCase().includes(query)
                 );
             }
         } else if (searchMode === 'semantic') {
@@ -143,6 +145,7 @@ const processData = ({
                 const bTags = Array.isArray(b.tags) ? b.tags : (typeof b.tags === 'string' ? b.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
                 return (b.title || '').toLowerCase().includes(query) ||
                     (b.url || '').toLowerCase().includes(query) ||
+                    (b.note || '').toLowerCase().includes(query) ||
                     bTags.some(t => t.toLowerCase().includes(query));
             });
         }

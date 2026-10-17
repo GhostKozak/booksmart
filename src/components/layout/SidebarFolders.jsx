@@ -7,7 +7,6 @@ import { useAppStore } from '../../store/useAppStore'
 
 export function SidebarFolders({
     availableFolders = [],
-    uniqueFolders = [],
     discoveredFolders = [],
     bookmarks = [],
     saveToTaxonomy,

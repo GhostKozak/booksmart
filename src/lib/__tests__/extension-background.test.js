@@ -722,5 +722,20 @@ describe('Extension background script helpers', () => {
             await handleOmniboxInputEntered('https://myurl.com', 'currentTab')
             expect(chrome.tabs.update).toHaveBeenCalledWith({ url: 'https://myurl.com' })
         })
+
+        it('formatOmniboxSuggestion formats item correctly', () => {
+            const item = {
+                title: 'BookSmart Web',
+                url: 'https://booksmart.app',
+                folder: 'Tools',
+                tags: 'pwa',
+                note: 'Smart bookmark manager'
+            }
+            const suggestion = formatOmniboxSuggestion(item)
+            expect(suggestion.content).toBe('https://booksmart.app')
+            expect(suggestion.description).toContain('<match>BookSmart Web</match>')
+            expect(suggestion.description).toContain('Tools')
+            expect(suggestion.description).toContain('#pwa')
+        })
     })
 })

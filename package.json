@@ -27,7 +27,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-extension.js && vite build",
+    "build": "node scripts/build-extension.js && vite build && node scripts/build-extension.js",
     "build:extension": "node scripts/build-extension.js",
     "package:extension": "node scripts/build-extension.js",
     "lint": "eslint .",

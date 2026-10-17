@@ -45,7 +45,6 @@ import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 import { useTranslation } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
 import { getEffectiveApiKey, getStoredProvider, isVaultUnlocked, hasVault } from './lib/key-vault'
-import { batchEnrichBookmarks } from './lib/metadata-fetcher'
 import { useMetadataEnricher } from './hooks/use-metadata-enricher'
 
 const EMPTY_ARRAY = []
@@ -73,6 +72,27 @@ function App() {
   // Selection
   const selectedIds = useAppStore(state => state.selectedIds)
   const setSelectedIds = useAppStore(state => state.setSelectedIds)
+
+  // ── URL Search Param Handler (?search=...) ──
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlQuery = params.get('search');
+      if (urlQuery && urlQuery.trim()) {
+        const setSearchQuery = useAppStore.getState().setSearchQuery;
+        if (setSearchQuery) {
+          setSearchQuery(urlQuery.trim());
+        }
+        params.delete('search');
+        const newSearch = params.toString() ? `?${params.toString()}` : '';
+        const newUrl = `${window.location.pathname}${newSearch}${window.location.hash}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    } catch {
+      // Ignored
+    }
+  }, []);
 
   // ── Initialization & Migration ──
   useEffect(() => {
@@ -137,7 +157,7 @@ function App() {
 
   // ── Fuse options for search ──
   const fuseOptions = useMemo(() => ({
-    keys: ['title', 'url', 'tags', 'originalFolder'],
+    keys: ['title', 'url', 'tags', 'note', 'originalFolder'],
     threshold: 0.4,
     ignoreLocation: true
   }), [])
@@ -300,7 +320,7 @@ function App() {
       }
     }, 2000)
     return () => clearTimeout(timer)
-  }, [rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
+  }, [rawBookmarks, rules, taxonomy.availableFolders, taxonomy.availableTags, taxonomy.ignoredUrlsList, collectionsHook.collections])
 
   // ── Bulk Favicon & Metadata Enricher ──
   const metadataEnricher = useMetadataEnricher(rawBookmarks, selectedIds)
@@ -356,6 +376,8 @@ function App() {
           hasFileLoaded={hasFileLoaded} closeFile={actions.closeFile}
           clearAll={actions.clearAll}
           searchInputRef={searchInputRef}
+          openMetadataEnricher={handleEnrichPreviews}
+          isEnrichingPreviews={isEnrichingPreviews}
         />
       </div>
 

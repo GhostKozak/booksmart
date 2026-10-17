@@ -1541,13 +1541,13 @@ async function searchOmniboxBookmarks(query) {
 
     scored.sort((a, b) => b.score - a.score);
 
-    return scored.slice(0, 6).map(({ item }) => formatOmniboxSuggestion(item, cleanQuery));
+    return scored.slice(0, 6).map(({ item }) => formatOmniboxSuggestion(item));
 }
 
 /**
  * Formats a single bookmark into Omnibox SuggestResult format.
  */
-function formatOmniboxSuggestion(item, query) {
+function formatOmniboxSuggestion(item) {
     const escapedTitle = escapeOmniboxXml(item.title || item.url);
     const escapedUrl = escapeOmniboxXml(item.url);
     const metaParts = [];
@@ -1584,8 +1584,20 @@ async function handleOmniboxInputEntered(text, disposition = 'currentTab') {
         if (suggestions.length > 0 && suggestions[0].content) {
             targetUrl = suggestions[0].content;
         } else {
-            // Fallback to BookSmart web app search
-            targetUrl = `https://booksmart.app/?search=${encodeURIComponent(cleanText)}`;
+            // Fallback to BookSmart web app search, preferring last used deployment URL
+            let baseAppUrl = 'https://booksmart.app/';
+            try {
+                if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                    const stored = await chrome.storage.local.get(['lastBooksmartUrl']);
+                    if (stored?.lastBooksmartUrl) {
+                        baseAppUrl = stored.lastBooksmartUrl.split('?')[0].split('#')[0];
+                    }
+                }
+            } catch {
+                // Fallback to default
+            }
+            const delimiter = baseAppUrl.includes('?') ? '&' : '?';
+            targetUrl = `${baseAppUrl}${delimiter}search=${encodeURIComponent(cleanText)}`;
         }
     }
 

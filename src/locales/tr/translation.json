@@ -32,6 +32,7 @@
         "removeDuplicates": "{{count}} Yinelemeyi Kaldır",
         "mergeDuplicates": "{{count}} Yinelemeyi Birleştir",
         "cleanUrls": "{{count}} URL'yi Temizle",
+        "enrichMetadata": "Eksik Başlık & İkonları Tamamla",
         "listView": "Liste Görünümü",
         "compactView": "Kompakt Liste",
         "gridView": "Izgara Görünümü",
@@ -1047,6 +1048,45 @@
         "offlineReady": "Çevrimdışı Hazır",
         "savedAt": "Kayıt Tarihi",
         "fileSize": "Boyut"
+    },
+    "modals": {
+        "extensionGuide": {
+            "title": "BookSmart Companion Eklentisi"
+        },
+        "ruleSuggestions": {
+            "title": "Akıllı Kural Önerileri",
+            "description": "Yer imlerinizi kaydettiğiniz klasörler incelendi ve sık tekrarlanan alışkanlıklarınıza göre otomatik kurallar tespit edildi.",
+            "analyzeAI": "AI ile Derin Analiz",
+            "analyzingAI": "Alışkanlıklar AI ile analiz ediliyor...",
+            "applyAll": "Tüm Önerileri Uygula ({{count}})",
+            "apply": "Uygula",
+            "applied": "Uygulandı",
+            "dismiss": "Öneriyi Yoksay",
+            "emptyTitle": "Öneri Bulunamadı",
+            "emptyDesc": "Yer imi kütüphanenizde henüz belirgin bir klasörleme deseni tespit edilmedi. Daha fazla yer imi ekledikçe akıllı öneriler burada görünecektir.",
+            "sourcePattern": "Kaynak Kalıbı",
+            "targetFolder": "Hedef Klasör",
+            "addTags": "Etiketler"
+        },
+        "metadataEnricher": {
+            "title": "Toplu Favicon ve Meta Veri Yenileyici",
+            "candidatesBadge": "eksik",
+            "description": "Kütüphanenizdeki eksik başlıklı, açıklamasız veya kırık ikonlu yer imlerini arka planda sıraya alıp zenginleştirin.",
+            "scope": "Kapsam",
+            "scopeNeeding": "Yalnızca Eksikleri Tamamla",
+            "scopeAll": "Tüm Kütüphaneyi Yenile",
+            "scopeSelected": "Yalnızca Seçilenler ({{count}})",
+            "updateTitle": "Sayfa Başlığını Getir",
+            "updateNotes": "Meta Açıklamasını Notlara Ekle",
+            "updateIcon": "Favicon & Logoyu Yenile",
+            "start": "Zenginleştirmeyi Başlat",
+            "pause": "Duraklat",
+            "resume": "Devam Et",
+            "cancel": "Durdur",
+            "reset": "Sıfırla",
+            "progress": "İlerleme: {{processed}} / {{total}}",
+            "completed": "İşlem tamamlandı!"
+        }
     }
 }
 

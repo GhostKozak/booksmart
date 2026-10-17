@@ -630,7 +630,9 @@ export function useBookmarkOperations({
                                 store.setActiveFolder(sourceFolderPath + store.activeFolder.slice(newFolderPath.length))
                             }
                         }
-                    } catch {}
+                    } catch {
+                        // ignore store update error
+                    }
                 }),
                 redo: () => db.transaction('rw', [db.bookmarks, db.folders], async () => {
                     for (const u of updates) {
@@ -648,7 +650,9 @@ export function useBookmarkOperations({
                                 store.setActiveFolder(newFolderPath + store.activeFolder.slice(sourceFolderPath.length))
                             }
                         }
-                    } catch {}
+                    } catch {
+                        // ignore store update error
+                    }
                 }),
                 description: `Move folder "${folderName}" to "${newFolderPath}"`
             })

@@ -493,6 +493,47 @@
                 }, '*');
             }
         }
+
+        // 11. Get all highlights across all pages to sync with BookSmart app
+        if (type === 'BOOKSMART_GET_ALL_HIGHLIGHTS') {
+            try {
+                if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                    chrome.storage.local.get(null, (items) => {
+                        const err = chrome.runtime?.lastError;
+                        const allHighlights = [];
+                        for (const [key, val] of Object.entries(items || {})) {
+                            if (key.startsWith('highlights:') && Array.isArray(val)) {
+                                allHighlights.push(...val);
+                            }
+                        }
+                        window.postMessage({
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_GET_ALL_HIGHLIGHTS_RESULT',
+                            requestId,
+                            success: !err,
+                            highlights: allHighlights,
+                            error: err?.message
+                        }, '*');
+                    });
+                } else {
+                    window.postMessage({
+                        source: 'BOOKSMART_EXTENSION',
+                        type: 'BOOKSMART_GET_ALL_HIGHLIGHTS_RESULT',
+                        requestId,
+                        success: false,
+                        error: 'Storage unavailable'
+                    }, '*');
+                }
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_GET_ALL_HIGHLIGHTS_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+        }
     });
     } // end initBooksmartBridge
 
@@ -635,7 +676,7 @@
                 <button type="button" class="bs-color-btn" data-color="purple" style="width: 22px; height: 22px; border-radius: 50%; background: #e9d5ff; border: 2px solid ${highlightRecord.color === 'purple' ? '#9333ea' : 'transparent'}; cursor: pointer;"></button>
             </div>
             <div style="margin-bottom: 8px;">
-                <textarea class="bs-popover-note" placeholder="Yapışkan not ekle..." style="width: 100%; box-sizing: border-box; height: 60px; padding: 6px 8px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; resize: none; font-family: inherit;">${highlightRecord.note || ''}</textarea>
+                <textarea class="bs-popover-note" placeholder="Yapışkan not ekle..." style="width: 100%; box-sizing: border-box; height: 60px; padding: 6px 8px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; resize: none; font-family: inherit;"></textarea>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <button type="button" class="bs-popover-delete" style="background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 4px 0; font-weight: 500;">🗑️ Vurguyu Sil</button>
@@ -645,6 +686,12 @@
 
         document.body.appendChild(popover);
         activePopover = popover;
+
+        // Safely set note text value to avoid DOM XSS
+        const noteArea = popover.querySelector('.bs-popover-note');
+        if (noteArea) {
+            noteArea.value = highlightRecord.note || '';
+        }
 
         // Close button
         popover.querySelector('.bs-popover-close').addEventListener('click', closeActivePopover);

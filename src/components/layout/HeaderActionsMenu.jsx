@@ -37,7 +37,9 @@ export function HeaderActionsMenu({
     hasFileLoaded = false,
     openExportModal,
     closeFile,
-    clearAll
+    clearAll,
+    openMetadataEnricher,
+    isEnrichingPreviews = false
 }) {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
@@ -206,6 +208,8 @@ export function HeaderActionsMenu({
                         setIsShortcutsOpen={setIsShortcutsOpen}
                         setIsRssReaderOpen={setIsRssReaderOpen}
                         totalUnreadRss={totalUnreadRss}
+                        openMetadataEnricher={openMetadataEnricher}
+                        isEnrichingPreviews={isEnrichingPreviews}
                         onActionClick={handleActionClick}
                     />
                 )}

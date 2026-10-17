@@ -25,6 +25,8 @@ export function HeaderMenuActionsTab({
     setIsShortcutsOpen,
     setIsRssReaderOpen,
     totalUnreadRss = 0,
+    openMetadataEnricher,
+    isEnrichingPreviews = false,
     onActionClick
 }) {
     const { t } = useTranslation();
@@ -196,6 +198,24 @@ export function HeaderMenuActionsTab({
                     </span>
                 )}
             </Button>
+
+            {/* Metadata & Favicon Enricher Quick Action */}
+            {openMetadataEnricher && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onActionClick(openMetadataEnricher)}
+                    disabled={isEnrichingPreviews}
+                    className="w-full h-9 justify-center font-medium text-xs border border-violet-500/30 bg-violet-500/5 hover:bg-violet-500/10 text-violet-700 dark:text-violet-300 cursor-pointer"
+                >
+                    {isEnrichingPreviews ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin text-violet-600 dark:text-violet-400" />
+                    ) : (
+                        <Sparkles className="h-4 w-4 mr-2 text-violet-600 dark:text-violet-400" />
+                    )}
+                    <span>{isEnrichingPreviews ? t('metadataEnricher.running', 'Zenginleştiriliyor...') : t('header.enrichMetadata', 'Eksik Başlık & İkonları Tamamla')}</span>
+                </Button>
+            )}
 
             {/* Productivity Tools (Command Palette & Shortcuts) */}
             <div className="grid grid-cols-2 gap-1.5">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ShieldCheck, CheckCircle2, AlertCircle, RefreshCw, Chrome, Globe, Terminal, Download, Github, ExternalLink } from 'lucide-react'
 import { SimpleModal } from '../ui/SimpleModal'
 import { Button } from '../ui/button'
@@ -10,10 +10,12 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
     const { t } = useTranslation()
     const [isPinging, setIsPinging] = useState(false)
     const [localOverride, setLocalOverride] = useState(null)
+    const [prevOpen, setPrevOpen] = useState(isOpen)
 
-    useEffect(() => {
+    if (isOpen !== prevOpen) {
+        setPrevOpen(isOpen)
         setLocalOverride(null)
-    }, [isOpen, isConnected])
+    }
 
     const effectiveConnected = localOverride !== null ? localOverride : Boolean(isConnected)
 

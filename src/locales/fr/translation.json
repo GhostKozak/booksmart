@@ -32,6 +32,7 @@
         "removeDuplicates": "Supprimer {{count}} doublons",
         "mergeDuplicates": "Fusionner {{count}} doublons",
         "cleanUrls": "Nettoyer {{count}} URLs",
+        "enrichMetadata": "Compléter les titres & icônes manquants",
         "listView": "Vue en liste",
         "compactView": "Compact",
         "gridView": "Vue en grille",
@@ -998,5 +999,44 @@
         "offlineReady": "Offline Ready",
         "savedAt": "Saved At",
         "fileSize": "Size"
+    },
+    "modals": {
+        "extensionGuide": {
+            "title": "Extension Compagnon BookSmart"
+        },
+        "ruleSuggestions": {
+            "title": "Suggestions de Règles Intelligentes",
+            "description": "Vos dossiers de favoris ont été analysés et des règles automatiques ont été détectées en fonction de vos habitudes.",
+            "analyzeAI": "Analyse Approfondie par IA",
+            "analyzingAI": "Analyse des habitudes par l'IA...",
+            "applyAll": "Appliquer Toutes les Suggestions ({{count}})",
+            "apply": "Appliquer",
+            "applied": "Appliqué",
+            "dismiss": "Ignorer la Suggestion",
+            "emptyTitle": "Aucune Suggestion Trouvée",
+            "emptyDesc": "Aucun modèle de dossier distinct n'a encore été détecté dans votre bibliothèque. À mesure que vous ajouterez des favoris, des suggestions apparaîtront ici.",
+            "sourcePattern": "Motif Source",
+            "targetFolder": "Dossier Cible",
+            "addTags": "Étiquettes"
+        },
+        "metadataEnricher": {
+            "title": "Enrichissement Massif des Favicons et Métadonnées",
+            "candidatesBadge": "manquant",
+            "description": "Mettez en file d'attente et enrichissez en arrière-plan les favoris aux titres manquants, sans description ou aux icônes cassées.",
+            "scope": "Portée",
+            "scopeNeeding": "Seulement les Incomplets",
+            "scopeAll": "Enrichir Toute la Bibliothèque",
+            "scopeSelected": "Sélectionnés Uniquement ({{count}})",
+            "updateTitle": "Récupérer le Titre de la Page",
+            "updateNotes": "Ajouter la Métadescription aux Notes",
+            "updateIcon": "Actualiser le Favicon & l'Icône",
+            "start": "Démarrer l'Enrichissement",
+            "pause": "Suspendre",
+            "resume": "Reprendre",
+            "cancel": "Annuler",
+            "reset": "Réinitialiser",
+            "progress": "Progression : {{processed}} / {{total}}",
+            "completed": "Enrichissement terminé !"
+        }
     }
 }
