@@ -1,164 +1,133 @@
 # BookSmart 📚
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
+[![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D20.19-green.svg)](https://nodejs.org/)
+[![Version](https://img.shields.io/badge/version-1.3.0-indigo.svg)](https://github.com/GhostKozak/booksmart)
+[![PWA Ready](https://img.shields.io/badge/PWA-Offline%20Ready-emerald.svg)](https://github.com/GhostKozak/booksmart)
 
-A modern, privacy-focused bookmark manager that runs entirely in your browser. Organize, clean up, and analyze your bookmarks with ease using advanced tools and analytics.
+**BookSmart** is a privacy-first, local-first smart bookmark manager, read-it-later client, and research companion that runs entirely in your browser. Organize thousands of bookmarks with Local or Cloud AI, read articles distraction-free, highlight web pages, follow RSS feeds, and keep your browser bookmarks synchronized in real time.
 
 ![BookSmart Screenshot](/images/homepage_screenshot.png)
 
-## 🤖 AI-Native Development
+---
 
-This project was developed entirely using Artificial Intelligence within the AntiGravity IDE.
+## ✨ Core Features
 
-## ✨ Features
+### 🧠 AI-Powered Organization & Automation
+- **Local & Cloud AI Support**: Run 100% private local models via **Ollama**, or connect **OpenAI**, **Google Gemini**, or **Anthropic Claude**.
+- **Magic Sort & Semantic Deduplication**: Categorize unorganized bookmarks into folders, fix messy/broken page titles, generate one-sentence summaries, and detect semantic duplicates with AI.
+- **AI Cost & Token Estimator**: Preview token usage and estimated cost before running batch AI operations.
+- **Smart Rule Engine & Habit Suggester**: Automate categorization with regex/keyword/domain rules. BookSmart automatically analyzes your existing folder habits to suggest new rules (*"You always move `github.com` links to `Dev > Open Source` — create a rule?"*).
+- **Bulk Favicon & Metadata Enricher**: Queue bookmarks in the background with pause/resume and concurrency controls to automatically repair missing titles, fetch OpenGraph descriptions, and refresh broken favicons.
 
-- **📂 Privacy First**: 100% local processing. No data ever leaves your browser unless you choose so.
-- **🪄 True Local AI & Cloud AI**: Use **Ollama** for completely private, local AI processing, or connect your favorite cloud providers (OpenAI, Google Gemini, Anthropic).
-- **✨ Magic Sort & Auto Sort**: Automatically categorize bookmarks via AI (Magic Sort) or use our rapid, rule-based matching (Auto Sort).
-- **🧹 Duplicate Cleaner**: Find, merge, or delete duplicate bookmarks with a single click.
-- **📊 Analytics Dashboard**: Visualize your collection habits, top domains, and folder statistics.
-- **🔗 Dead Link Checker**: Automatically identifies broken links (404s) and timeouts to keep your library clean.
-- **🏷️ Smart Rules**: "If this, then that" automation to organize bookmarks by URL patterns or keywords.
-- **⚡ Advanced Search**: Fuzzy search (typo-tolerant), Regex support, and date range filters.
-- **🌍 Internationalization**: Fully localized interface in English, Turkish (Türkçe), German, French, and Spanish.
-- **🌗 Theme System**: Sleek light, dark, and system theme support.
-- **🚀 Onboarding Wizard**: A smooth step-by-step onboarding experience.
-- **✨ Premium Animations**: Smooth, fluid micro-interactions for a premium feel.
-- **🤏 Drag & Drop**: Easily move bookmarks between folders and collections.
-- **🛡️ Data Safety**: Automatic local backups for settings and full JSON export capability.
-- **↩️ Version History**: Robust Undo/Redo system ensures mistake-proof organization.
-- **📱 PWA Support**: Install as a native app on desktop and mobile devices.
-- **🔋 Resilient Architecture**: Uninterrupted offline usage with Offline Indicators and graceful Error Boundaries.
+### 📖 Reading, Archiving & Web Highlighting
+- **Distraction-Free Reader Mode**: Extract clean article content with customizable typography, font sizing, reading time estimates, and Light / Sepia / Dark themes.
+- **Live Web Highlighter & Sticky Notes**: Highlight text in 4 colors (Yellow, Green, Blue, Purple) and attach sticky notes—both inside Reader Mode and directly on live websites via the companion extension's context menu. Export all highlights as Markdown.
+- **Offline HTML Snapshots & Wayback Machine**: Save full offline HTML snapshots of important pages into local `IndexedDB` storage or look up / archive dead links directly on the Internet Archive.
+- **Reading Reminders**: Schedule "Read Later" desktop notifications with quick presets (*Tomorrow, This Weekend, Next Week*) or custom date/time alarms.
 
-## 📝 Roadmap
+### 📰 Built-in RSS & Newsletter Reader
+- **Serverless Feed Aggregator**: Subscribe to RSS, Atom, and JSON feeds with automatic feed discovery from website URLs.
+- **Background Polling & OPML Support**: Automatically checks for new articles in the background, supports OPML import/export, unread filtering, and 1-click saving to bookmarks.
 
-- [x] **AI Integration**: Auto-categorization and tagging via local (Ollama) and cloud APIs.
-- [x] **PWA Support**: Install as a native app on desktop and mobile.
-- [x] **Keyboard Shortcuts**: Navigate and manage bookmarks with keyboard.
-- [x] **Undo/Redo**: Mistake-proof management.
-- [x] **Internationalization**: English, Turkish, Spanish, French, German support.
-- [x] **Drag & Drop**: Native drag and drop support.
-- [x] **Browser Extension**: Capture bookmarks directly from toolbar & bidirectional sync with browser bookmarks API.
-- [ ] **Sync Server**: Optional self-hosted sync server.
-- [ ] **Archivebox Integration**: Auto-archive content for offline access.
+### ⚡ Search, Sharing & Productivity
+- **Multi-Mode Search**: Instant search across titles, URLs, tags, folders, and personal notes using **Simple**, **Fuzzy** (typo-tolerant), **Regex**, or **Local Semantic** search modes.
+- **Command Palette (`⌘K` / `Ctrl+K`)**: Trigger any action, switch views, filter collections, or run AI tools without lifting your hands from the keyboard.
+- **Public Collection Hub (Bento / Linktree Generator)**: Export any collection as a standalone, responsive `index.html` portfolio page (Bento Grid, Minimal List, or Magazine Cards) ready for free hosting on GitHub Pages.
+- **QR Code Sharing**: Instantly generate downloadable QR codes to send links to mobile devices.
+- **6 Flexible Views & Analytics**: Switch between List, Compact, Grid, Visual Cards, Table, and Folder Tree views, or explore library health and domain trends in the Analytics Dashboard.
 
-## 🛠️ Tech Stack
+### 🔒 Privacy & Data Safety
+- **100% Local-First (`IndexedDB`)**: Your bookmarks, notes, snapshots, and rules live strictly in your browser. Zero telemetry or external servers.
+- **AES-GCM 256-Bit Key Vault**: Protect your stored API keys with an optional master password (`PBKDF2` + `AES-GCM`).
+- **Multi-Format Import & Export**: Import and export HTML (Netscape/Browser), JSON (BookSmart, Raindrop, Pinboard), CSV, and Markdown, complete with automatic local backups and full Undo/Redo history.
 
-- **Core**: React 19, Vite
-- **State/Database**: Dexie.js (IndexedDB), Zustand
-- **Styling & Animations**: TailwindCSS v4, Tailwindcss-animate, clsx, tailwind-merge
-- **Drag & Drop & Uploads**: @dnd-kit, react-dropzone
-- **Search**: Fuse.js
-- **Performance**: Web Workers, React Virtuoso (Virtualization)
-- **Time/Date**: date-fns
-- **AI Integration**: Internal API clients for OpenAI, Anthropic, Gemini, and Ollama
-- **Internationalization**: i18next
-- **Icons & UI**: Lucide React, Sonner (Toasts)
-- **Charts**: Recharts
-
-## 🚀 Getting Started
-
-### For Users
-
-1.  **Export** your bookmarks from your browser (Chrome, Firefox, Edge, etc.) as an HTML file.
-2.  **Open** BookSmart and follow the Onboarding Wizard to get started, or drag & drop your bookmarks file.
-3.  **Setup AI (Optional)**: Head to Settings and configure your preferred AI provider (Ollama, OpenAI, Gemini, or Anthropic) to enable Magic Sort.
-4.  **Analyze** your collection using the Dashboard to understand your habits.
-5.  **Organize** by using AI Magic Sort, fast code-based Auto Sort, creating Rules, or filtering manually.
-6.  **Clean** up duplicates and broken links with the built-in tools.
-7.  **Export** the organized list back to your browser when done.
+---
 
 ## 🧩 Browser Companion Extension
 
-BookSmart includes an optional companion browser extension for **Chromium** (Chrome, Brave, Edge, Opera, Arc) and **Firefox** that unlocks:
-- **⚡ 1-Click 2-Way Sync**: Instant bidirectional synchronization with browser bookmarks via the native Bookmarks API (import missing bookmarks, push library, and automatically move folders/update titles in the browser).
-- **🛡️ CORS-Free Link Health Checks**: Serverless, accurate link verification without browser CORS blocks.
-- **📌 Toolbar Quick Capture**: Save and categorize bookmarks directly from your browser toolbar.
+BookSmart includes a lightweight Manifest V3 companion extension for **Chromium** (Chrome, Brave, Edge, Opera, Arc) and **Firefox** that bridges the web app with native browser APIs:
 
-### 📥 Download Extension
+- **🔄 1-Click 2-Way Browser Sync**: Bidirectional synchronization between BookSmart and your native browser bookmarks bar/folders.
+- **🔍 Omnibox Address Bar Search (`bs <query>`)**: Type `bs` followed by a keyword in your browser's address bar to search BookSmart bookmarks, tags, folders, and notes with instant navigation.
+- **🖍️ On-Page Web Highlighter**: Select text on any webpage and right-click to highlight or attach a sticky note. Highlights persist across page reloads and sync directly into BookSmart's *Highlights & Notes* view.
+- **🗂️ Research Session Saver**: Save all open tabs in your current window as a dedicated BookSmart Collection and Folder in a single click.
+- **🛡️ CORS-Free Link Health, Metadata & RSS Fetching**: Perform accurate HTTP status checks (`200`, `404`, `500`), OpenGraph scraping, and RSS XML fetching without browser CORS restrictions.
+- **🔔 Duplicate Detection Badge**: Automatically displays a `✓` badge on the extension icon when visiting a URL already saved in your library.
 
-| Browser | Direct ZIP Download | Alternate / Source |
+### 📥 Download & Install Extension
+
+| Browser | Direct ZIP Download | Source Directory |
 | :--- | :--- | :--- |
-| **Chrome / Brave / Edge / Opera** | [📥 **Download Chrome Extension (.zip)**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) | [GitHub Releases](https://github.com/GhostKozak/booksmart/releases) · [`/extension`](./extension) |
-| **Firefox** | [📥 **Download Firefox Extension (.zip)**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) | [GitHub Releases](https://github.com/GhostKozak/booksmart/releases) · [`/extension-firefox`](./extension-firefox) |
+| **Chrome / Brave / Edge / Opera** | [📥 **booksmart-companion-chrome.zip**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) | [`/extension`](./extension) |
+| **Firefox** | [📥 **booksmart-companion-firefox.zip**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) | [`/extension-firefox`](./extension-firefox) |
 
-### 🛠️ Quick Installation Guide
+1. **Chromium**: Download and extract `booksmart-companion-chrome.zip` → Open `chrome://extensions` → Enable **Developer mode** → Click **Load unpacked** and select the extracted folder.
+2. **Firefox**: Download and extract `booksmart-companion-firefox.zip` → Open `about:debugging#/runtime/this-firefox` → Click **Load Temporary Add-on...** and select `manifest.json` inside the folder.
 
-#### For Chrome / Brave / Edge / Opera (Chromium):
-1. **Download & Extract**: Download [booksmart-companion-chrome.zip](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) and extract the archive to a folder.
-2. **Open Extensions**: Navigate to `chrome://extensions` in your browser.
-3. **Enable Developer Mode**: Turn on the **Developer mode** toggle in the top-right corner.
-4. **Load Extension**: Click **Load unpacked** (Paketlenmemiş öğe yükle) and select the extracted folder (or the `/extension` directory if cloned locally).
+---
 
-#### For Firefox:
-1. **Download & Extract**: Download [booksmart-companion-firefox.zip](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) and extract the archive to a folder.
-2. **Open Debugging**: Navigate to `about:debugging#/runtime/this-firefox` in Firefox.
-3. **Load Add-on**: Click **Load Temporary Add-on...** and select the `manifest.json` file inside the extracted folder (or `/extension-firefox/manifest.json` if cloned locally).
+## 🛠️ Tech Stack
 
-### For Developers
+- **Frontend**: React 19, Vite 7, Tailwind CSS v4
+- **Storage & State**: Dexie.js (IndexedDB), Zustand
+- **Performance**: Web Workers (background filtering, sorting, and link checking), React Virtuoso (virtualized rendering for 10k+ items)
+- **Search & UI**: Fuse.js, `@dnd-kit` (drag & drop), Recharts, Lucide Icons, Sonner
+- **Localization**: `i18next` (English, Turkish, German, French, Spanish)
+- **Testing & Quality**: Vitest, React Testing Library, ESLint 9
 
-**Prerequisites:** Node.js >= 20
+---
 
-To run the project locally:
+## 🚀 Development & Build
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/GhostKozak/booksmart.git
-    cd booksmart
-    ```
+**Prerequisites:** Node.js `>= 20.19` and `pnpm` (or `npm`).
 
-2.  **Install dependencies**:
-    ```bash
-    pnpm install
-    ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/GhostKozak/booksmart.git
+cd booksmart
 
-3.  **Start the development server**:
-    ```bash
-    pnpm dev
-    ```
+# 2. Install dependencies
+pnpm install
 
-4.  **Build for production**:
-    ```bash
-    pnpm build
-    ```
+# 3. Start development server (includes local RSS CORS dev proxy)
+pnpm dev
+
+# 4. Run test suite (61 test suites / 600+ unit & integration tests)
+pnpm test -- --run
+
+# 5. Run linter
+pnpm lint
+
+# 6. Build production PWA & package browser extensions (.zip)
+pnpm build
+```
+
+---
 
 ## 📂 Project Structure
 
+```text
+booksmart/
+├── extension/            # Chromium Manifest V3 Companion Extension
+├── extension-firefox/    # Firefox Companion Extension build
+├── public/downloads/     # Packaged extension .zip archives served by the app
+├── scripts/              # Build & packaging scripts (build-extension.js)
+└── src/
+    ├── components/       # UI components, views, layout, and modals
+    ├── db/               # Dexie IndexedDB schema, migrations, and seeders
+    ├── hooks/            # Custom React hooks (sync, worker, AI, undo/redo, enricher)
+    ├── lib/              # Core services (parsers, exporter, highlighter, RSS, vault, rules)
+    ├── locales/          # i18n translations (en, tr, de, fr, es)
+    ├── services/ai/      # Multi-provider AI clients (Ollama, OpenAI, Gemini, Anthropic)
+    ├── store/            # Zustand global UI & filter state
+    └── workers/          # Background Web Worker for heavy dataset processing
 ```
-src/
-├── components/     # Reusable UI components
-├── db/             # Dexie database configuration
-├── hooks/          # Custom React hooks
-├── locales/        # i18n translation files
-├── store/          # Zustand state management stores
-├── utils/          # Helper functions and utilities
-└── workers/        # Web Workers for background processing
-```
 
-## ⚠️ Known Issues
+---
 
--   **Large Files**: Importing massive bookmark files (>10k items) may cause a momentary freeze during initial indexing.
--   **CORS**: The "Dead Link Checker" is limited by browser CORS policies. Some sites may appear as "Unknown" or "Dead" if they block cross-origin requests. Use the "Open" button to verify manually.
+## 🤝 Contributing & License
 
-## 💡 FAQ
+Contributions are welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a Pull Request.
 
-**Q: Is my data safe?**
-A: Yes! Everything runs locally in your browser's IndexedDB. We do not track you or send data to any server.
-
-**Q: Does the AI feature send my bookmarks to the cloud?**
-A: By default, no. If you use Local AI via Ollama, everything remains on your machine. If you securely configure cloud providers like OpenAI or Gemini in your settings, only the specific bookmarks you select for "Magic Sort" will be sent to those APIs for processing. Your API keys are saved locally.
-
-**Q: Which browsers are supported?**
-A: Chrome, Firefox, Edge, Safari (latest versions).
-
-**Q: How do I backup my rules and tags?**
-A: Go to Settings > Backup & Data to download a full configuration snapshot.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
-
-## 📄 License
-
-This project is licensed under the GNU General Public License v3.0 or later - see the [LICENSE](LICENSE) file for details.
+Licensed under the **GNU General Public License v3.0 or later** — see [LICENSE](LICENSE) for details.
