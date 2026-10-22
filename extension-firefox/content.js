@@ -564,6 +564,9 @@
     function injectHighlighterStyles() {
         if (typeof document === 'undefined' || document.getElementById('booksmart-highlighter-styles')) return;
 
+        const target = document.head || document.documentElement;
+        if (!target) return;
+
         const style = document.createElement('style');
         style.id = 'booksmart-highlighter-styles';
         style.textContent = `
@@ -609,7 +612,11 @@
                 border-color: #334155;
             }
         `;
-        document.head.appendChild(style);
+        try {
+            target.appendChild(style);
+        } catch {
+            // Ignore if unable to attach (e.g. XML/SVG documents)
+        }
     }
 
     async function getStoredHighlights(url) {
@@ -684,7 +691,9 @@
             </div>
         `;
 
-        document.body.appendChild(popover);
+        const container = document.body || document.documentElement;
+        if (!container) return;
+        container.appendChild(popover);
         activePopover = popover;
 
         // Safely set note text value to avoid DOM XSS
@@ -827,6 +836,7 @@
     }
 
     async function restorePageHighlights() {
+        if (typeof document === 'undefined' || !document.body) return;
         injectHighlighterStyles();
         const url = cleanPageUrl(window.location.href);
         const highlights = await getStoredHighlights(url);
@@ -891,11 +901,17 @@
 
         // Restore on initial load & DOM ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', restorePageHighlights);
+            document.addEventListener('DOMContentLoaded', () => {
+                injectHighlighterStyles();
+                restorePageHighlights();
+            });
         } else {
             restorePageHighlights();
         }
-        window.addEventListener('load', restorePageHighlights);
+        window.addEventListener('load', () => {
+            injectHighlighterStyles();
+            restorePageHighlights();
+        });
 
         // Close popover when clicking elsewhere
         document.addEventListener('click', (e) => {

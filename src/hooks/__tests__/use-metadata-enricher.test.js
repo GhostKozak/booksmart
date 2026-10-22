@@ -2,17 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useMetadataEnricher } from '../use-metadata-enricher';
 
-vi.mock('../../lib/metadata-enricher', async (importOriginal) => {
-    const actual = await importOriginal();
-    return {
-        ...actual,
-        enrichSingleBookmark: vi.fn(async (bm) => ({
-            success: true,
-            updatedFields: ['title', 'icon'],
-            metadata: { title: 'New ' + bm.url, favicon: 'icon.ico' }
-        }))
-    };
-});
+vi.mock('../../lib/metadata-fetcher', () => ({
+    fetchMetadataForUrl: vi.fn(async (url) => ({
+        title: 'New ' + url,
+        description: 'Desc ' + url,
+        favicon: 'icon.ico',
+        image: null
+    })),
+    normalizeUrlForPreview: (url) => url
+}));
+
+vi.mock('../../db', () => ({
+    db: {
+        bookmarks: {
+            update: vi.fn().mockResolvedValue(1)
+        }
+    }
+}));
 
 describe('useMetadataEnricher hook', () => {
     beforeEach(() => {
