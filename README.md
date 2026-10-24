@@ -59,8 +59,8 @@ BookSmart includes a lightweight Manifest V3 companion extension for **Chromium*
 
 | Browser | Direct ZIP Download | Source Directory |
 | :--- | :--- | :--- |
-| **Chrome / Brave / Edge / Opera** | [📥 **booksmart-companion-chrome.zip**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip) | [`/extension`](./extension) |
-| **Firefox** | [📥 **booksmart-companion-firefox.zip**](https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip) | [`/extension-firefox`](./extension-firefox) |
+| **Chrome / Brave / Edge / Opera** | [📥 **booksmart-companion-chrome.zip**](https://github.com/GhostKozak/booksmart/releases/latest/download/booksmart-companion-chrome.zip) | [`/extension`](./extension) |
+| **Firefox** | [📥 **booksmart-companion-firefox.zip**](https://github.com/GhostKozak/booksmart/releases/latest/download/booksmart-companion-firefox.zip) | [Built from `/extension`](./extension) |
 
 1. **Chromium**: Download and extract `booksmart-companion-chrome.zip` → Open `chrome://extensions` → Enable **Developer mode** → Click **Load unpacked** and select the extracted folder.
 2. **Firefox**: Download and extract `booksmart-companion-firefox.zip` → Open `about:debugging#/runtime/this-firefox` → Click **Load Temporary Add-on...** and select `manifest.json` inside the folder.

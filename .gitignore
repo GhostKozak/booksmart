@@ -37,3 +37,8 @@ dev-dist
 # Auto-generated Firefox extension directory (built from /extension via scripts/build-extension.js)
 extension-firefox/
 
+# Extension archive builds (distributable binaries)
+downloads/
+public/downloads/*.zip
+
+

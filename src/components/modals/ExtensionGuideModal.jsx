@@ -136,8 +136,8 @@ export function ExtensionGuideModal({ isOpen, onClose, isConnected, onStatusChan
                         <a
                             href={
                                 activeBrowser === 'chromium'
-                                    ? 'https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-chrome.zip'
-                                    : 'https://github.com/GhostKozak/booksmart/raw/main/public/downloads/booksmart-companion-firefox.zip'
+                                    ? 'https://github.com/GhostKozak/booksmart/releases/latest/download/booksmart-companion-chrome.zip'
+                                    : 'https://github.com/GhostKozak/booksmart/releases/latest/download/booksmart-companion-firefox.zip'
                             }
                             target="_blank"
                             rel="noopener noreferrer"
