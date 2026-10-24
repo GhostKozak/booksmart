@@ -23,6 +23,7 @@ const ShareCollectionModal = lazy(() => import('./ShareCollectionModal').then(m 
 const SnapshotViewerModal = lazy(() => import('./SnapshotViewerModal').then(m => ({ default: m.SnapshotViewerModal })));
 const RuleSuggestionsModal = lazy(() => import('./RuleSuggestionsModal').then(m => ({ default: m.RuleSuggestionsModal })));
 const BulkMetadataEnricherModal = lazy(() => import('./BulkMetadataEnricherModal').then(m => ({ default: m.BulkMetadataEnricherModal })));
+const HighlightsModal = lazy(() => import('./HighlightsModal').then(m => ({ default: m.HighlightsModal })));
 
 export function AppModalContainer({
     taxonomy,
@@ -80,7 +81,9 @@ export function AppModalContainer({
         shareHubCollection,
         closeShareHub,
         snapshotModalBookmark,
-        closeSnapshotViewer
+        closeSnapshotViewer,
+        isHighlightsModalOpen,
+        closeHighlightsModal
     } = useAppStore();
 
     const { undo, redo, canUndo, canRedo } = undoRedo;
@@ -368,6 +371,14 @@ export function AppModalContainer({
                     onResume={metadataEnricher.resumeEnrichment}
                     onCancel={metadataEnricher.cancelEnrichment}
                     onReset={metadataEnricher.resetEnrichment}
+                />
+            )}
+
+            {/* Highlights & Sticky Notes Hub Modal */}
+            {isHighlightsModalOpen && (
+                <HighlightsModal
+                    isOpen={isHighlightsModalOpen}
+                    onClose={closeHighlightsModal}
                 />
             )}
         </Suspense>

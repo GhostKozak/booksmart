@@ -28,10 +28,12 @@ import {
     Pencil,
     RefreshCw,
     CloudDownload,
-    CloudUpload
+    CloudUpload,
+    Highlighter
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { getStoredShortcuts } from '../../lib/shortcuts'
+import { useAppStore } from '../../store/useAppStore'
 
 export function CommandPalette({
     isOpen,
@@ -208,6 +210,13 @@ export function CommandPalette({
                 title: t('header.export', 'Export Bookmarks'),
                 icon: Download,
                 action: () => openExportModal?.()
+            },
+            {
+                id: 'action-highlights',
+                category: t('commandPalette.categories.actions', 'Actions'),
+                title: t('highlights.modalTitle', 'Vurgular & Yapışkan Notlar (Obsidian)'),
+                icon: Highlighter,
+                action: () => useAppStore.getState().openHighlightsModal()
             },
             {
                 id: 'action-enrich-previews',

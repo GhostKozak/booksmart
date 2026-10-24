@@ -120,6 +120,18 @@ export const useAppStore = create((set, get) => ({
     openSnapshotViewer: (bookmark) => set({ snapshotModalBookmark: bookmark }),
     closeSnapshotViewer: () => set({ snapshotModalBookmark: null }),
 
+    // --- Highlights & Sticky Notes Hub Slice ---
+    isHighlightsModalOpen: false,
+    setIsHighlightsModalOpen: (isOpen) => set({ isHighlightsModalOpen: isOpen }),
+    openHighlightsModal: () => set({ isHighlightsModalOpen: true }),
+    closeHighlightsModal: () => set({ isHighlightsModalOpen: false }),
+
+    // --- Similar / Content Duplicate Merge Slice ---
+    isSimilarDuplicatesModalOpen: false,
+    setIsSimilarDuplicatesModalOpen: (isOpen) => set({ isSimilarDuplicatesModalOpen: isOpen }),
+    openSimilarDuplicatesModal: () => set({ isSimilarDuplicatesModalOpen: true }),
+    closeSimilarDuplicatesModal: () => set({ isSimilarDuplicatesModalOpen: false }),
+
 
     // --- Theme Slice ---
     theme: localStorage.getItem("theme") || "system",

@@ -6,9 +6,18 @@ import {
     updateHighlight,
     deleteHighlight,
     exportHighlightsToMarkdown,
-    applyHighlightsToHtml
+    applyHighlightsToHtml,
+    getAllHighlights,
+    syncExtensionHighlightsToDb,
+    exportHighlightsToObsidianMarkdown,
+    downloadMarkdownFile
 } from '../highlight-service';
 import { db } from '../../db/schema';
+import * as extensionClient from '../extension-client';
+
+vi.mock('../extension-client', () => ({
+    getAllExtensionHighlights: vi.fn()
+}));
 
 vi.mock('../../db/schema', () => ({
     db: {
@@ -16,10 +25,13 @@ vi.mock('../../db/schema', () => ({
             where: vi.fn(),
             add: vi.fn(),
             update: vi.fn(),
-            delete: vi.fn()
+            delete: vi.fn(),
+            toArray: vi.fn().mockResolvedValue([]),
+            bulkAdd: vi.fn().mockResolvedValue()
         },
         bookmarks: {
-            update: vi.fn()
+            update: vi.fn(),
+            toArray: vi.fn().mockResolvedValue([])
         }
     }
 }));
@@ -128,5 +140,88 @@ describe('highlight-service.js', () => {
         expect(modified).toContain('<mark data-highlight-id="1"');
         expect(modified).toContain('class="booksmart-highlight booksmart-highlight-yellow"');
         expect(modified).toContain('<strong>article about React</strong>');
+    });
+
+    it('getAllHighlights returns highlights ordered by createdAt desc', async () => {
+        db.highlights.toArray.mockResolvedValue([
+            { id: 1, text: 'old', createdAt: 100 },
+            { id: 2, text: 'new', createdAt: 500 }
+        ]);
+
+        const list = await getAllHighlights();
+        expect(list.length).toBe(2);
+        expect(list[0].id).toBe(2);
+        expect(list[1].id).toBe(1);
+    });
+
+    it('syncExtensionHighlightsToDb imports new highlights from extension', async () => {
+        extensionClient.getAllExtensionHighlights.mockResolvedValue([
+            { url: 'https://example.com', text: 'Important web quote', color: 'purple', note: 'Saved from chrome' },
+            { url: 'https://example.com', text: 'Already present quote', color: 'yellow' }
+        ]);
+
+        db.highlights.toArray.mockResolvedValue([
+            { id: 99, url: 'https://example.com', text: 'Already present quote' }
+        ]);
+
+        db.bookmarks.toArray.mockResolvedValue([
+            { id: 7, url: 'https://example.com', title: 'Example Page' }
+        ]);
+
+        const res = await syncExtensionHighlightsToDb();
+        expect(res.imported).toBe(1);
+        expect(res.total).toBe(2);
+        expect(db.highlights.bulkAdd).toHaveBeenCalledWith([
+            expect.objectContaining({
+                bookmarkId: 7,
+                pageTitle: 'Example Page',
+                text: 'Important web quote',
+                color: 'purple',
+                note: 'Saved from chrome'
+            })
+        ]);
+    });
+
+    it('exportHighlightsToObsidianMarkdown formats callouts and YAML frontmatter', () => {
+        const highlights = [
+            {
+                url: 'https://github.com',
+                pageTitle: 'GitHub Home',
+                text: 'Where the world builds software',
+                color: 'purple',
+                note: 'Key slogan to remember'
+            }
+        ];
+
+        const md = exportHighlightsToObsidianMarkdown(highlights, {
+            title: 'My Research Highlights',
+            includeCallouts: true
+        });
+
+        expect(md).toContain('---');
+        expect(md).toContain('title: "My Research Highlights"');
+        expect(md).toContain('tags:');
+        expect(md).toContain('# 📖 My Research Highlights');
+        expect(md).toContain('## [GitHub Home](https://github.com)');
+        expect(md).toContain('> [!quote] Where the world builds software');
+        expect(md).toContain('> [!note] 📝 Yapışkan Not');
+        expect(md).toContain('> Key slogan to remember');
+    });
+
+    it('downloadMarkdownFile creates and triggers a download link', () => {
+        const createElementSpy = vi.spyOn(document, 'createElement');
+        const appendChildSpy = vi.spyOn(document.body, 'appendChild');
+        const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+
+        // Mock URL.createObjectURL and revokeObjectURL
+        globalThis.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+        globalThis.URL.revokeObjectURL = vi.fn();
+
+        downloadMarkdownFile('# Test Markdown', 'test.md');
+
+        expect(createElementSpy).toHaveBeenCalledWith('a');
+        expect(appendChildSpy).toHaveBeenCalled();
+        expect(removeChildSpy).toHaveBeenCalled();
+        expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
     });
 });

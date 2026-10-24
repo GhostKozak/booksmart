@@ -1,10 +1,11 @@
 import {
     Sparkles, RefreshCw, CloudDownload, CloudUpload,
     HelpCircle, Layers, GitMerge, Activity,
-    Loader2, Search, Rss
+    Loader2, Search, Rss, Highlighter
 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { useTranslation } from 'react-i18next';
+import { useAppStore } from '../../../store/useAppStore';
 
 export function HeaderMenuActionsTab({
     isExtensionConnected = false,
@@ -176,6 +177,23 @@ export function HeaderMenuActionsTab({
                         {totalUnreadRss} yeni
                     </span>
                 )}
+            </button>
+
+            {/* Highlights & Sticky Notes Hub Quick Action */}
+            <button
+                type="button"
+                onClick={() => onActionClick(() => useAppStore.getState().openHighlightsModal())}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/10 text-foreground transition-all cursor-pointer group"
+            >
+                <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform">
+                        <Highlighter className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                        <div className="text-xs font-semibold">{t('highlights.menuTitle', 'Vurgular & Yapışkan Notlar')}</div>
+                        <div className="text-[10px] text-muted-foreground">{t('highlights.menuSubtitle', 'Web alıntıları ve Obsidian (.md) aktarımı')}</div>
+                    </div>
+                </div>
             </button>
 
             {/* Health Check Button */}
