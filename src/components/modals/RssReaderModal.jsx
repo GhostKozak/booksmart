@@ -5,23 +5,13 @@ import {
     Rss,
     RefreshCw,
     CheckCheck,
-    BookmarkPlus,
-    Trash2,
-    ExternalLink,
-    Plus,
-    Loader2,
     Eye,
-    EyeOff,
-    Search,
-    BookOpen,
-    Upload,
-    Download
+    Search
 } from 'lucide-react';
 import { SimpleModal } from '../ui/SimpleModal';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Favicon } from '../Favicon';
-import { cn, getRelativeTime } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../store/useAppStore';
 import {
@@ -35,18 +25,8 @@ import {
     importFeedsFromOpml
 } from '../../lib/rss-service';
 import { toast } from 'sonner';
-
-/**
- * Safely extracts hostname from a URL without throwing on malformed or relative inputs.
- */
-function getSafeHostname(url) {
-    if (!url || typeof url !== 'string') return '';
-    try {
-        return new URL(url).hostname.replace(/^www\./, '');
-    } catch {
-        return '';
-    }
-}
+import { RssSidebar } from './rss/RssSidebar';
+import { RssArticleCard } from './rss/RssArticleCard';
 
 export function RssReaderModal({ isOpen, onClose }) {
     const { t } = useTranslation();
@@ -243,133 +223,20 @@ export function RssReaderModal({ isOpen, onClose }) {
         >
             <div className="flex flex-col md:flex-row flex-1 min-h-[500px] h-[72vh] overflow-hidden divide-y md:divide-y-0 md:divide-x divide-border">
                 {/* ── Left Sidebar: Feeds List ── */}
-                <div className="w-full md:w-72 bg-muted/20 flex flex-col shrink-0">
-                    {/* Add Feed Input */}
-                    <form onSubmit={handleAddFeed} className="p-3 border-b border-border/80 flex gap-1.5">
-                        <Input
-                            placeholder={t('rss.addInputPlaceholder', 'URL veya Blog adresi...')}
-                            value={newFeedUrl}
-                            onChange={(e) => setNewFeedUrl(e.target.value)}
-                            disabled={isAddingFeed}
-                            className="h-8 text-xs bg-background"
-                        />
-                        <Button
-                            type="submit"
-                            size="sm"
-                            disabled={isAddingFeed || !newFeedUrl.trim()}
-                            className="h-8 px-2.5 bg-amber-500 hover:bg-amber-600 text-white shrink-0 cursor-pointer"
-                            title={t('rss.addFeedBtn', 'Akış Ekle')}
-                        >
-                            {isAddingFeed ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                        </Button>
-                    </form>
-
-                    {/* All Feeds Toggle & OPML Tools */}
-                    <div className="p-2 border-b border-border/50 flex items-center justify-between gap-1">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedFeedUrl(null)}
-                            className={cn(
-                                "flex-1 flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors text-left cursor-pointer",
-                                !selectedFeedUrl
-                                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                            )}
-                        >
-                            <div className="flex items-center gap-2 truncate">
-                                <Rss className="w-3.5 h-3.5 shrink-0 text-amber-500" />
-                                <span className="truncate">{t('rss.allFeeds', 'Tüm Akışlar')}</span>
-                            </div>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted font-normal text-muted-foreground">
-                                {totalUnreadCount}
-                            </span>
-                        </button>
-
-                        <div className="flex items-center gap-0.5 shrink-0">
-                            <input
-                                type="file"
-                                ref={opmlInputRef}
-                                onChange={handleImportOpml}
-                                accept=".opml,.xml"
-                                className="hidden"
-                            />
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                                onClick={() => opmlInputRef.current?.click()}
-                                title={t('rss.importOpml', 'OPML İçe Aktar')}
-                                disabled={isAddingFeed}
-                            >
-                                <Upload className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                                onClick={handleExportOpml}
-                                title={t('rss.exportOpml', 'OPML Dışa Aktar')}
-                                disabled={feeds.length === 0}
-                            >
-                                <Download className="w-3.5 h-3.5" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Subscribed Feeds Scrollable */}
-                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                        {feeds.length === 0 ? (
-                            <div className="p-4 text-center text-xs text-muted-foreground">
-                                <p className="mb-2">{t('rss.noFeedsYet', 'Henüz kayıtlı RSS akışı yok.')}</p>
-                                <p className="text-[11px] opacity-75">
-                                    {t('rss.noFeedsHelp', 'Favori sitenizin adresini yukarıya yapıştırıp "+" ile ekleyin.')}
-                                </p>
-                            </div>
-                        ) : (
-                            feeds.map((feed) => {
-                                const isSelected = selectedFeedUrl === feed.feedUrl;
-                                return (
-                                    <div
-                                        key={feed.feedUrl}
-                                        className={cn(
-                                            "group flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer",
-                                            isSelected
-                                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold"
-                                                : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                                        )}
-                                        onClick={() => setSelectedFeedUrl(feed.feedUrl)}
-                                    >
-                                        <div className="flex items-center gap-2 min-w-0 flex-1 pr-1">
-                                            <Favicon url={feed.siteUrl || feed.feedUrl} className="w-3.5 h-3.5 shrink-0" />
-                                            <span className="truncate" title={feed.title}>
-                                                {feed.title}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            {(feed.unreadCount || 0) > 0 && (
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-medium">
-                                                    {feed.unreadCount}
-                                                </span>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleUnsubscribe(feed.feedUrl, feed.title);
-                                                }}
-                                                className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive text-muted-foreground transition-opacity"
-                                                title={t('rss.unsubscribe', 'Abonelikten Çık')}
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
+                <RssSidebar
+                    feeds={feeds}
+                    selectedFeedUrl={selectedFeedUrl}
+                    setSelectedFeedUrl={setSelectedFeedUrl}
+                    totalUnreadCount={totalUnreadCount}
+                    newFeedUrl={newFeedUrl}
+                    setNewFeedUrl={setNewFeedUrl}
+                    isAddingFeed={isAddingFeed}
+                    handleAddFeed={handleAddFeed}
+                    handleUnsubscribe={handleUnsubscribe}
+                    handleExportOpml={handleExportOpml}
+                    handleImportOpml={handleImportOpml}
+                    opmlInputRef={opmlInputRef}
+                />
 
                 {/* ── Right Content: Articles Feed ── */}
                 <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
@@ -446,104 +313,14 @@ export function RssReaderModal({ isOpen, onClose }) {
                                 </p>
                             </div>
                         ) : (
-                            filteredItems.map((item) => {
-                                const isRead = !!item.read;
-                                return (
-                                    <div
-                                        key={item.id || item.link}
-                                        className={cn(
-                                            "p-3.5 rounded-xl border transition-all hover:border-primary/40 flex flex-col gap-2 group",
-                                            isRead
-                                                ? "bg-card/40 opacity-75 border-border/60"
-                                                : "bg-card border-border shadow-2xs font-normal"
-                                        )}
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1">
-                                                    <Favicon url={item.link} className="w-3.5 h-3.5 shrink-0" />
-                                                    <span className="font-medium truncate max-w-[160px]">
-                                                        {item.author || getSafeHostname(item.link) || 'Web'}
-                                                    </span>
-                                                    <span>•</span>
-                                                    <span>{getRelativeTime(Math.floor(item.pubDate / 1000), t)}</span>
-                                                    {!isRead && (
-                                                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 ml-1" />
-                                                    )}
-                                                </div>
-
-                                                <a
-                                                    href={item.link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    onClick={() => {
-                                                        if (!isRead && item.id) {
-                                                            markFeedItemRead(item.id, 1);
-                                                        }
-                                                    }}
-                                                    className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block line-clamp-2 leading-snug"
-                                                >
-                                                    {item.title}
-                                                </a>
-                                            </div>
-
-                                            {/* Action Buttons */}
-                                            <div className="flex items-center gap-1 shrink-0">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 text-muted-foreground hover:text-foreground cursor-pointer"
-                                                    onClick={() => markFeedItemRead(item.id, isRead ? 0 : 1)}
-                                                    title={isRead ? t('rss.markUnread', 'Okunmadı Yap') : t('rss.markRead', 'Okundu Yap')}
-                                                >
-                                                    {isRead ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                                </Button>
-
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 text-primary/80 hover:text-primary hover:bg-primary/10 cursor-pointer"
-                                                    onClick={() => {
-                                                        if (!isRead && item.id) {
-                                                            markFeedItemRead(item.id, 1);
-                                                        }
-                                                        useAppStore.getState().openReaderMode({ id: item.id, title: item.title, url: item.link });
-                                                    }}
-                                                    title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
-                                                >
-                                                    <BookOpen className="w-3.5 h-3.5" />
-                                                </Button>
-
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-7 w-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 cursor-pointer"
-                                                    onClick={() => handleSaveToBookmarks(item)}
-                                                    title={t('rss.addToBookmarks', 'BookSmart Yer İmlerine Ekle')}
-                                                >
-                                                    <BookmarkPlus className="w-3.5 h-3.5" />
-                                                </Button>
-
-                                                <a
-                                                    href={item.link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center h-7 w-7 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                                                    title={t('common.openInNewTab', 'Yeni Sekmede Aç')}
-                                                >
-                                                    <ExternalLink className="w-3.5 h-3.5" />
-                                                </a>
-                                            </div>
-                                        </div>
-
-                                        {item.summary && (
-                                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                                {item.summary}
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            })
+                            filteredItems.map((item) => (
+                                <RssArticleCard
+                                    key={item.id || item.link}
+                                    item={item}
+                                    onMarkRead={markFeedItemRead}
+                                    onSaveToBookmarks={handleSaveToBookmarks}
+                                />
+                            ))
                         )}
                     </div>
                 </div>
