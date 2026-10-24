@@ -33,3 +33,7 @@ dev-dist
 *.pem
 *.key
 *.cert
+
+# Auto-generated Firefox extension directory (built from /extension via scripts/build-extension.js)
+extension-firefox/
+

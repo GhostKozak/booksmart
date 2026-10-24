@@ -16,6 +16,9 @@
     "http://*/*",
     "https://*/*"
   ],
+  "omnibox": {
+    "keyword": "bs"
+  },
   "background": {
     "scripts": [
       "background.js"

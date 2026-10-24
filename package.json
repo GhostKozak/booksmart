@@ -26,6 +26,7 @@
     "node": ">=20.19"
   },
   "scripts": {
+    "predev": "node scripts/build-extension.js",
     "dev": "vite",
     "build": "node scripts/build-extension.js && vite build && node scripts/build-extension.js",
     "build:extension": "node scripts/build-extension.js",
