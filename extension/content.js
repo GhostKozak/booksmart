@@ -963,7 +963,9 @@
             applySelectionHighlight,
             removeHighlight,
             clearAllPageHighlights,
-            restorePageHighlights
+            restorePageHighlights,
+            isHtmlDocument,
+            injectHighlighterStyles
         };
     }
 })();

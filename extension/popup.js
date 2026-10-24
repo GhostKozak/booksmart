@@ -219,3 +219,13 @@ document.getElementById('open-app-btn')?.addEventListener('click', () => {
         }
     });
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        showStatus,
+        triggerNotification,
+        getAppUrl,
+        updateTabCountBadge,
+        BOOKSMART_URL_PATTERNS
+    };
+}

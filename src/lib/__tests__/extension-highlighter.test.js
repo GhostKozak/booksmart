@@ -126,4 +126,60 @@ describe('Web Highlighter content script helpers', () => {
             container.remove();
         });
     });
+
+    describe('Document scope & Lazy style injection', () => {
+        it('isHtmlDocument validates HTML context and rejects non-HTML content types', () => {
+            const { isHtmlDocument } = highlighterModule;
+            expect(isHtmlDocument()).toBe(true);
+
+            // Mock non-HTML contentType
+            const originalType = document.contentType;
+            Object.defineProperty(document, 'contentType', { value: 'application/json', configurable: true });
+            expect(isHtmlDocument()).toBe(false);
+
+            Object.defineProperty(document, 'contentType', { value: originalType || 'text/html', configurable: true });
+        });
+
+        it('restorePageHighlights does not inject styles when no highlights exist', async () => {
+            const { restorePageHighlights } = highlighterModule;
+            const existingStyle = document.getElementById('booksmart-highlighter-styles');
+            if (existingStyle) existingStyle.remove();
+
+            chrome.storage.local.get.mockResolvedValue({});
+            await restorePageHighlights();
+
+            expect(document.getElementById('booksmart-highlighter-styles')).toBeNull();
+        });
+
+        it('restorePageHighlights injects styles and restores marks when highlights exist', async () => {
+            const { restorePageHighlights, cleanPageUrl } = highlighterModule;
+            const existingStyle = document.getElementById('booksmart-highlighter-styles');
+            if (existingStyle) existingStyle.remove();
+
+            const p = document.createElement('p');
+            p.textContent = 'This is an important note on the page';
+            document.body.appendChild(p);
+
+            const storageKey = 'highlights:' + cleanPageUrl(window.location.href);
+            chrome.storage.local.get.mockResolvedValue({
+                [storageKey]: [
+                    { id: 'hl_test', text: 'important note', color: 'green', note: 'Remember this' }
+                ]
+            });
+
+            await restorePageHighlights();
+
+            // Style must now be lazily injected
+            expect(document.getElementById('booksmart-highlighter-styles')).not.toBeNull();
+            // Mark element must be rendered
+            const mark = document.querySelector('[data-bs-id="hl_test"]');
+            expect(mark).not.toBeNull();
+            expect(mark?.textContent).toBe('important note');
+            expect(mark?.classList.contains('bs-hl-green')).toBe(true);
+
+            p.remove();
+            const s = document.getElementById('booksmart-highlighter-styles');
+            if (s) s.remove();
+        });
+    });
 });
