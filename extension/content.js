@@ -835,12 +835,23 @@
         }
     }
 
+    function isHtmlDocument() {
+        if (typeof document === 'undefined') return false;
+        if (document.contentType && !document.contentType.includes('html') && !document.contentType.includes('xhtml')) {
+            return false;
+        }
+        if (!document.documentElement) return false;
+        return true;
+    }
+
     async function restorePageHighlights() {
-        if (typeof document === 'undefined' || !document.body) return;
-        injectHighlighterStyles();
+        if (!isHtmlDocument() || !document.body) return;
         const url = cleanPageUrl(window.location.href);
         const highlights = await getStoredHighlights(url);
         if (!highlights || highlights.length === 0) return;
+
+        // Lazy injection: only attach highlighter CSS if this page actually has saved highlights
+        injectHighlighterStyles();
 
         const treeWalker = document.createTreeWalker(
             document.body,
@@ -895,23 +906,14 @@
     }
 
     function initWebHighlighter() {
-        if (typeof document === 'undefined') return;
+        if (!isHtmlDocument()) return;
 
-        injectHighlighterStyles();
-
-        // Restore on initial load & DOM ready
+        // Restore highlights once DOM is parsed
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                injectHighlighterStyles();
-                restorePageHighlights();
-            });
+            document.addEventListener('DOMContentLoaded', restorePageHighlights, { once: true });
         } else {
             restorePageHighlights();
         }
-        window.addEventListener('load', () => {
-            injectHighlighterStyles();
-            restorePageHighlights();
-        });
 
         // Close popover when clicking elsewhere
         document.addEventListener('click', (e) => {
