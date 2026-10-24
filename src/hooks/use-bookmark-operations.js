@@ -284,6 +284,93 @@ export function useBookmarkOperations({
         })
     }
 
+    const mergeSimilarClusters = async (clusters = []) => {
+        if (!Array.isArray(clusters) || clusters.length === 0) return 0;
+
+        const primaryUpdates = [];
+        const toDeleteIds = [];
+        const bookmarksToDelete = [];
+        const allNewTags = new Set();
+
+        for (const cluster of clusters) {
+            const { primary, secondaries, mergedPreview } = cluster;
+            if (!primary || !secondaries || secondaries.length === 0) continue;
+
+            const updated = {
+                tags: mergedPreview?.tags || primary.tags || [],
+                note: mergedPreview?.note || primary.note || '',
+                description: mergedPreview?.description || primary.description || '',
+                collections: mergedPreview?.collections || primary.collections || []
+            };
+
+            primaryUpdates.push({
+                id: primary.id,
+                original: { ...primary },
+                updated
+            });
+
+            (mergedPreview?.tags || []).forEach(t => allNewTags.add(t));
+
+            secondaries.forEach(d => {
+                toDeleteIds.push(d.id);
+                bookmarksToDelete.push({ ...d });
+            });
+        }
+
+        if (toDeleteIds.length === 0) return 0;
+
+        await db.transaction('rw', [db.bookmarks, db.tags], async () => {
+            for (const { id, updated } of primaryUpdates) {
+                await db.bookmarks.update(id, updated);
+            }
+            await db.bookmarks.bulkDelete(toDeleteIds);
+
+            if (allNewTags.size > 0 && db.tags) {
+                const existingTags = await db.tags.toArray();
+                const existingTagNames = new Set((existingTags || []).map(t => t.name?.toLowerCase()));
+                const tagsToAdd = [];
+                for (const tagName of allNewTags) {
+                    if (!existingTagNames.has(tagName.toLowerCase())) {
+                        tagsToAdd.push({ id: generateUUID(), name: tagName, color: pickTagColor() });
+                        existingTagNames.add(tagName.toLowerCase());
+                    }
+                }
+                if (tagsToAdd.length > 0) {
+                    await db.tags.bulkAdd(tagsToAdd);
+                }
+            }
+        });
+
+        toast.success(t('notifications.duplicatesMerged', { count: toDeleteIds.length }) || `Merged ${toDeleteIds.length} duplicate bookmarks`);
+
+        addCommand({
+            undo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    for (const { id, original } of primaryUpdates) {
+                        await db.bookmarks.update(id, {
+                            tags: original.tags,
+                            note: original.note,
+                            description: original.description,
+                            collections: original.collections
+                        });
+                    }
+                    await db.bookmarks.bulkAdd(bookmarksToDelete);
+                });
+            },
+            redo: async () => {
+                await db.transaction('rw', db.bookmarks, async () => {
+                    for (const { id, updated } of primaryUpdates) {
+                        await db.bookmarks.update(id, updated);
+                    }
+                    await db.bookmarks.bulkDelete(toDeleteIds);
+                });
+            },
+            description: `Merge ${clusters.length} Similar Clusters`
+        });
+
+        return toDeleteIds.length;
+    };
+
     const cleanAllUrls = async () => {
         const updates = []
         const originalStates = []
@@ -714,6 +801,7 @@ export function useBookmarkOperations({
         removeDuplicates,
         mergeDuplicates,
         mergeDuplicateGroup,
+        mergeSimilarClusters,
         cleanAllUrls,
         cleanSelectedUrls,
         handleBatchDelete,

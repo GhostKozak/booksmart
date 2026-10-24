@@ -24,6 +24,7 @@ const SnapshotViewerModal = lazy(() => import('./SnapshotViewerModal').then(m =>
 const RuleSuggestionsModal = lazy(() => import('./RuleSuggestionsModal').then(m => ({ default: m.RuleSuggestionsModal })));
 const BulkMetadataEnricherModal = lazy(() => import('./BulkMetadataEnricherModal').then(m => ({ default: m.BulkMetadataEnricherModal })));
 const HighlightsModal = lazy(() => import('./HighlightsModal').then(m => ({ default: m.HighlightsModal })));
+const SimilarDuplicatesModal = lazy(() => import('./SimilarDuplicatesModal').then(m => ({ default: m.SimilarDuplicatesModal })));
 
 export function AppModalContainer({
     taxonomy,
@@ -83,7 +84,9 @@ export function AppModalContainer({
         snapshotModalBookmark,
         closeSnapshotViewer,
         isHighlightsModalOpen,
-        closeHighlightsModal
+        closeHighlightsModal,
+        isSimilarDuplicatesModalOpen,
+        closeSimilarDuplicatesModal
     } = useAppStore();
 
     const { undo, redo, canUndo, canRedo } = undoRedo;
@@ -379,6 +382,16 @@ export function AppModalContainer({
                 <HighlightsModal
                     isOpen={isHighlightsModalOpen}
                     onClose={closeHighlightsModal}
+                />
+            )}
+
+            {/* Similar & Content Duplicate Consolidation Modal */}
+            {isSimilarDuplicatesModalOpen && (
+                <SimilarDuplicatesModal
+                    isOpen={isSimilarDuplicatesModalOpen}
+                    onClose={closeSimilarDuplicatesModal}
+                    bookmarks={worker.bookmarks || []}
+                    onBatchMerge={operations.mergeSimilarClusters}
                 />
             )}
         </Suspense>

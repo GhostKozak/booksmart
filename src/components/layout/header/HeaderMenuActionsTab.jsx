@@ -154,6 +154,16 @@ export function HeaderMenuActionsTab({
                             <span>{t('header.cleanUrls', { count: cleanableCount, defaultValue: `${cleanableCount} URL'yi Temizle` })}</span>
                         </Button>
                     )}
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onActionClick(() => useAppStore.getState().openSimilarDuplicatesModal())}
+                        className="w-full h-8 text-xs font-medium text-primary hover:bg-primary/10 border-primary/20 bg-background/60 cursor-pointer justify-center"
+                    >
+                        <GitMerge className="h-3.5 w-3.5 mr-1.5 shrink-0" />
+                        <span>{t('similarDuplicates.menuBtn', 'Benzer & Yinelenenleri İncele ve Birleştir')}</span>
+                    </Button>
                 </div>
             )}
 

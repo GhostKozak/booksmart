@@ -181,6 +181,13 @@ export function CommandPalette({
                 action: () => mergeDuplicates?.()
             },
             {
+                id: 'action-similar-duplicates',
+                category: t('commandPalette.categories.actions', 'Actions'),
+                title: t('similarDuplicates.modalTitle', 'Yinelenen ve Benzer İçerikleri Birleştir'),
+                icon: GitMerge,
+                action: () => useAppStore.getState().openSimilarDuplicatesModal()
+            },
+            {
                 id: 'action-remove-duplicates',
                 category: t('commandPalette.categories.actions', 'Actions'),
                 title: t('header.removeDuplicates', { count: duplicateCount || 0 }),
