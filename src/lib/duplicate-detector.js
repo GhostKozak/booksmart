@@ -10,7 +10,7 @@ export function cleanTitleForComparison(title = '') {
     let cleaned = title.trim().toLowerCase();
 
     // Remove common branding suffixes: e.g. "Article Title | GitHub", "Tutorial - YouTube"
-    cleaned = cleaned.replace(/\s*[-|–—•·:]\s*(github|youtube|medium|wikipedia|reddit|twitter|x|dev\.to|stackoverflow|npm|notion|substack|docs|official site|home|blog|guide|documentation|overview|api).*$/i, '');
+    cleaned = cleaned.replace(/\s*[-|–—•·:]\s*(github|youtube|medium|wikipedia|reddit|twitter|x|dev\.to|stackoverflow|npm|notion|substack|docs|official site|home|blog|guide|documentation|overview|api)\s*$/i, '');
 
     // Remove special punctuation and symbols
     cleaned = cleaned.replace(/[^\p{L}\p{N}\s]/gu, ' ');
@@ -231,7 +231,7 @@ export function findSimilarBookmarkGroups(bookmarks = [], {
 
     // 2. Pass: Same Domain & High Title/Content Similarity
     // Group remaining unassigned bookmarks by base domain
-    const remainingBookmarks = bookmarks.filter(b => b && b.id && !assignedIds.has(b.id));
+    const remainingBookmarks = bookmarks.filter(b => b && (b.id !== undefined && b.id !== null) && !assignedIds.has(b.id));
     const domainGroups = new Map();
 
     remainingBookmarks.forEach(bm => {

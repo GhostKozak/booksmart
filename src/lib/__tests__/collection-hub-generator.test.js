@@ -58,6 +58,11 @@ describe('collection-hub-generator.js', () => {
         expect(html).not.toContain('<b>Attacker</b>');
         expect(html).toContain('&lt;b&gt;Attacker&lt;/b&gt;');
         expect(html).not.toContain('<script>alert(1)</script>');
+
+        const jsXssBookmark = [{ id: 99, title: 'Click me', url: 'javascript:alert(1)' }];
+        const xssHtml = generateCollectionHubHtml(mockCollection, jsXssBookmark);
+        expect(xssHtml).not.toContain('href="javascript:');
+        expect(xssHtml).toContain('href="#"');
     });
 
     it('supports bento layout styling by default', () => {

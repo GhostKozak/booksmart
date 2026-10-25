@@ -186,14 +186,16 @@ export const exportToMarkdown = (bookmarks) => {
     sortedFolders.forEach(folder => {
         md += `## ${folder}\n\n`;
         folders[folder].forEach(b => {
-            md += `- [${b.title}](${b.url})`;
+            const safeTitle = (b.title || b.url || 'Untitled').replace(/[[\]]/g, '\\$&').replace(/[\r\n]+/g, ' ');
+            const safeUrl = (b.url || '').replace(/\(/g, '%28').replace(/\)/g, '%29');
+            md += `- [${safeTitle}](${safeUrl})`;
             if (b.tags && b.tags.length > 0) {
                 const tagStr = b.tags.map(t => '`#' + t + '`').join(' ');
                 md += ` ${tagStr}`;
             }
             md += '\n';
             if (b.note) {
-                md += `  > ${b.note}\n`;
+                md += `  > ${b.note.replace(/\r?\n/g, '\n  > ')}\n`;
             }
         });
         md += '\n';

@@ -14,6 +14,15 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
+function sanitizeHref(url) {
+    if (!url || typeof url !== 'string') return '#';
+    const trimmed = url.trim();
+    if (/^(https?:\/\/|mailto:)/i.test(trimmed)) {
+        return escapeHtml(trimmed);
+    }
+    return '#';
+}
+
 function getDomain(url) {
     try {
         const u = new URL(url);
@@ -518,7 +527,7 @@ export function generateCollectionHubHtml(collection, bookmarks = [], options = 
     <main class="links-grid layout-${layout}" data-layout="${layout}" id="links-container">
       ${bookmarks.map(b => {
         const title = escapeHtml(b.title || b.url);
-        const url = escapeHtml(b.url);
+        const url = sanitizeHref(b.url);
         const domain = escapeHtml(getDomain(b.url));
         const note = escapeHtml(b.note || '');
         const tags = Array.isArray(b.tags) ? b.tags : [];

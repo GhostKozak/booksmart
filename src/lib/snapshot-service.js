@@ -135,9 +135,9 @@ export function formatByteSize(bytes) {
 }
 
 /**
- * Downloads snapshot as a self-contained offline HTML file.
+ * Escapes HTML entities to prevent XSS.
  */
-function escapeHtml(str) {
+export function escapeHtml(str) {
     if (!str || typeof str !== 'string') return '';
     return str
         .replace(/&/g, '&amp;')

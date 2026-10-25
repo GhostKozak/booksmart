@@ -19,6 +19,15 @@ export function AICostModal({
     const [selectedModel, setSelectedModel] = useState(() => currentModel || DEFAULT_MODEL)
     const [dontAskAgain, setDontAskAgain] = useState(false)
 
+    // Sync model whenever modal opens or currentModel changes (pattern recommended by React for prop-based state adjustment)
+    const [prevSync, setPrevSync] = useState({ isOpen, currentModel })
+    if (prevSync.isOpen !== isOpen || prevSync.currentModel !== currentModel) {
+        setPrevSync({ isOpen, currentModel })
+        if (isOpen) {
+            setSelectedModel(currentModel || DEFAULT_MODEL)
+        }
+    }
+
     // Calculate estimations based on currently selected model and bookmarks
     const estimation = useMemo(() => {
         return estimateBatchOperation(operation, bookmarks, selectedModel)

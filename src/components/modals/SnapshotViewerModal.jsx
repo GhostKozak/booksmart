@@ -15,7 +15,8 @@ import {
     deleteSnapshot,
     downloadSnapshotFile,
     formatByteSize,
-    getWaybackMachineUrl
+    getWaybackMachineUrl,
+    escapeHtml
 } from '../../lib/snapshot-service';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -154,7 +155,7 @@ export function SnapshotViewerModal({ isOpen, onClose, bookmark, onSnapshotDelet
                     ) : snapshot ? (
                         <iframe
                             title="Offline Snapshot"
-                            srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{max-width:760px;margin:32px auto;padding:0 20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.65;color:#1f2937;background:#fff;}@media(prefers-color-scheme:dark){body{background:#111;color:#e5e7eb;}}img{max-width:100%;height:auto;border-radius:8px;}</style></head><body><h1>${snapshot.title || ''}</h1>${snapshot.html}</body></html>`}
+                            srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{max-width:760px;margin:32px auto;padding:0 20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.65;color:#1f2937;background:#fff;}@media(prefers-color-scheme:dark){body{background:#111;color:#e5e7eb;}}img{max-width:100%;height:auto;border-radius:8px;}</style></head><body><h1>${escapeHtml(snapshot.title || '')}</h1>${snapshot.html}</body></html>`}
                             className="w-full h-full border-0"
                             sandbox="allow-same-origin"
                         />

@@ -96,6 +96,20 @@ describe('exporter', () => {
             expect(md).toContain('  > Note 1');
             expect(md).toContain('- [Root Link](https://root.com) `#t2`');
         });
+
+        it('should safely format markdown with bracketed titles, URLs with parens, and multiline notes', () => {
+            const tricky = [
+                {
+                    title: '[Awesome] React (Framework)',
+                    url: 'https://en.wikipedia.org/wiki/React_(software)',
+                    newFolder: 'Dev',
+                    note: 'First line\nSecond line'
+                }
+            ];
+            const md = exportToMarkdown(tricky);
+            expect(md).toContain('- [\\[Awesome\\] React (Framework)](https://en.wikipedia.org/wiki/React_%28software%29)');
+            expect(md).toContain('  > First line\n  > Second line');
+        });
     });
 
     describe('getExportPayload', () => {

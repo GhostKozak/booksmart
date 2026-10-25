@@ -40,12 +40,12 @@ export function analyzeRulePatterns(bookmarks = [], existingRules = [], options 
     const validRules = Array.isArray(existingRules) ? existingRules : []
     const existingRuleDomains = new Set(
         validRules
-            .filter(r => r.type === 'domain' && r.value)
+            .filter(r => r.type === 'domain' && typeof r.value === 'string' && r.value)
             .map(r => r.value.toLowerCase().trim())
     )
     const existingRuleKeywords = new Set(
         validRules
-            .filter(r => r.type === 'keyword' && r.value)
+            .filter(r => r.type === 'keyword' && typeof r.value === 'string' && r.value)
             .flatMap(r => r.value.toLowerCase().split(',').map(k => k.trim()))
             .filter(Boolean)
     )

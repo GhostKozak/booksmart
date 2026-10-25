@@ -105,10 +105,21 @@ export function useTaxonomy({ workerUniqueTags, workerUniqueFolders }) {
     }
 
     const saveToTaxonomy = async (name, type) => {
+        if (!name || typeof name !== 'string') return
+        const trimmed = name.trim()
+        if (!trimmed) return
+        const lower = trimmed.toLowerCase()
+
         if (type === 'tag') {
-            await db.tags.add({ id: generateUUID(), name, color: pickTagColor(name), order: availableTags.length })
+            const exists = availableTags.some(t => (t.name || '').toLowerCase().trim() === lower)
+            if (!exists) {
+                await db.tags.add({ id: generateUUID(), name: trimmed, color: pickTagColor(trimmed), order: availableTags.length })
+            }
         } else {
-            await db.folders.add({ id: generateUUID(), name, color: '#3b82f6', order: availableFolders.length })
+            const exists = availableFolders.some(f => (f.name || '').toLowerCase().trim() === lower)
+            if (!exists) {
+                await db.folders.add({ id: generateUUID(), name: trimmed, color: '#3b82f6', order: availableFolders.length })
+            }
         }
     }
 
