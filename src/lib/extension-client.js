@@ -778,6 +778,55 @@ export function syncRulesToExtension(rules, timeoutMs = 4000) {
     });
 }
 
+/**
+ * Requests the companion extension to capture an offline snapshot (HTML + text)
+ * of the currently active browser tab.
+ * @param {number} [timeoutMs=10000]
+ * @returns {Promise<{ success: boolean, snapshot?: Object, error?: string }>}
+ */
+export function captureTabSnapshotWithExtension(timeoutMs = 10000) {
+    if (typeof window === 'undefined') return Promise.resolve({ success: false });
+
+    return new Promise((resolve) => {
+        const requestId = 'req_snap_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                cleanup();
+                resolve({ success: false, error: 'timeout' });
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_CAPTURE_SNAPSHOT_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                resolve({ success: !!event.data.success, snapshot: event.data.snapshot, error: event.data.error });
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_CAPTURE_SNAPSHOT',
+            requestId
+        }, '*');
+    });
+}
+
+
 
 
 

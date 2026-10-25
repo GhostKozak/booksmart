@@ -9,6 +9,7 @@ import {
     getAllExtensionHighlights
 } from '../lib/extension-client'
 import { normalizeUrl } from '../lib/utils'
+import { saveSnapshot } from '../lib/snapshot-service'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -439,6 +440,33 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
                     } catch (err) {
                         console.error('Failed to save session bookmarks:', err)
                     }
+                }
+            }
+
+            if (event.data.type === 'BOOKSMART_SNAPSHOT_CAPTURED' && event.data.snapshot) {
+                const snap = event.data.snapshot
+                try {
+                    const norm = normalizeUrl(snap.url)
+                    const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
+                    const match = currentBookmarks.find(item => normalizeUrl(item.url) === norm)
+                    const bookmarkId = match ? match.id : null
+
+                    const saved = await saveSnapshot({
+                        bookmarkId,
+                        url: snap.url,
+                        title: snap.title,
+                        html: snap.html,
+                        textContent: snap.textContent
+                    })
+
+                    if (saved) {
+                        toast.success(t('notifications.snapshotSavedSuccess', {
+                            title: (snap.title || snap.url).slice(0, 30),
+                            defaultValue: `Çevrimdışı sayfa arşivi kaydedildi: ${(snap.title || snap.url).slice(0, 30)}`
+                        }))
+                    }
+                } catch (err) {
+                    console.error('Failed to handle incoming snapshot:', err)
                 }
             }
         }

@@ -8,6 +8,7 @@ const {
     pushBookmarksToBrowser,
     syncBrowserBookmarks,
     captureCurrentTab,
+    captureTabSnapshot,
     isSenderAuthorized,
     fetchOgMetadata,
     fetchFeedXml,
@@ -617,6 +618,42 @@ describe('Extension background script helpers', () => {
             expect(bookmark.title).toBe('Vite Next Gen')
             expect(bookmark.note).toBe('Build tool note')
             expect(bookmark.newFolder).toBe('Yazılım')
+        })
+
+        it('captures tab snapshot by querying content script and broadcasts to BookSmart tabs', async () => {
+            chrome.tabs.query.mockImplementation(async (query) => {
+                if (query.active) {
+                    return [{ id: 42, url: 'https://example.com/article', title: 'Example Article' }]
+                }
+                return [{ id: 99, url: 'http://localhost:5173' }]
+            })
+
+            chrome.tabs.sendMessage.mockImplementation(async (tabId, msg) => {
+                if (msg.action === 'GET_PAGE_SNAPSHOT') {
+                    return {
+                        success: true,
+                        snapshot: {
+                            url: 'https://example.com/article',
+                            title: 'Example Article',
+                            html: '<html><body>Clean content</body></html>',
+                            textContent: 'Clean content',
+                            capturedAt: 123456789
+                        }
+                    }
+                }
+                return { success: true }
+            })
+
+            const snap = await captureTabSnapshot()
+            expect(snap.url).toBe('https://example.com/article')
+            expect(snap.html).toContain('Clean content')
+            expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(
+                99,
+                expect.objectContaining({
+                    action: 'BOOKSMART_SNAPSHOT_CAPTURED',
+                    snapshot: expect.objectContaining({ url: 'https://example.com/article' })
+                })
+            )
         })
     })
 

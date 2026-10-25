@@ -890,6 +890,97 @@ async function captureCurrentTab(options = {}) {
 }
 
 /**
+ * Captures an offline page snapshot (cleaned HTML and text content) for the specified or active tab.
+ * Broadcasts the snapshot data to open BookSmart tabs so snapshot-service can persist it in IndexedDB.
+ */
+async function captureTabSnapshot(tabId, options = {}) {
+    let targetTabId = tabId;
+    if (!targetTabId) {
+        if (!chrome.tabs || !chrome.tabs.query) {
+            throw new Error('Tabs API not available');
+        }
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tabs || tabs.length === 0) {
+            throw new Error('No active tab found');
+        }
+        targetTabId = tabs[0].id;
+    }
+
+    let snapshotData = null;
+
+    // 1. Ask content script for sanitized page snapshot
+    try {
+        const response = await chrome.tabs.sendMessage(targetTabId, { action: 'GET_PAGE_SNAPSHOT' });
+        if (response && response.success && response.snapshot) {
+            snapshotData = response.snapshot;
+        }
+    } catch {
+        // Content script might not be injected or ready
+    }
+
+    // 2. Fallback to scripting.executeScript if available
+    if (!snapshotData && chrome.scripting && chrome.scripting.executeScript) {
+        try {
+            const results = await chrome.scripting.executeScript({
+                target: { tabId: targetTabId },
+                func: () => {
+                    const clone = document.documentElement.cloneNode(true);
+                    const removeTags = clone.querySelectorAll('script, noscript, iframe, object, embed');
+                    removeTags.forEach(el => el.remove());
+                    return {
+                        url: window.location.href,
+                        title: document.title || window.location.href,
+                        html: '<!DOCTYPE html>\n' + clone.outerHTML.slice(0, 3000000),
+                        textContent: document.body ? document.body.innerText.slice(0, 50000) : '',
+                        capturedAt: Date.now()
+                    };
+                }
+            });
+            if (results && results[0] && results[0].result) {
+                snapshotData = results[0].result;
+            }
+        } catch (err) {
+            console.error('ExecuteScript snapshot capture error:', err);
+        }
+    }
+
+    if (!snapshotData) {
+        throw new Error('Sayfa içeriği okunamadı (arşiv alınamadı)');
+    }
+
+    // 3. Broadcast snapshot to all open BookSmart tabs
+    try {
+        const BOOKSMART_TAB_PATTERNS = [
+            '*://localhost/*',
+            '*://127.0.0.1/*',
+            '*://booksmart.app/*',
+            '*://*.booksmart.app/*',
+            '*://ghostkozak.github.io/booksmart/*'
+        ];
+        const openTabs = await chrome.tabs.query({ url: BOOKSMART_TAB_PATTERNS });
+        if (openTabs && openTabs.length > 0) {
+            for (const t of openTabs) {
+                try {
+                    const sendPromise = chrome.tabs.sendMessage(t.id, {
+                        action: 'BOOKSMART_SNAPSHOT_CAPTURED',
+                        snapshot: snapshotData
+                    });
+                    if (sendPromise && typeof sendPromise.catch === 'function') {
+                        sendPromise.catch(() => {});
+                    }
+                } catch {
+                    // Ignored
+                }
+            }
+        }
+    } catch {
+        // Ignored
+    }
+
+    return snapshotData;
+}
+
+/**
  * Recursively searches bookmark tree nodes to find matching URL.
  */
 function findBookmarkInTree(nodes, normUrl, parentTitle = 'Root') {
@@ -1744,7 +1835,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             'PUSH_BROWSER_BOOKMARKS',
             'SYNC_BROWSER_BOOKMARKS',
             'CAPTURE_CURRENT_TAB',
-            'SAVE_SESSION_TABS'
+            'SAVE_SESSION_TABS',
+            'CAPTURE_ACTIVE_TAB_SNAPSHOT'
         ];
 
         if (SENSITIVE_ACTIONS.includes(request.action) && !isSenderAuthorized(sender)) {
@@ -1783,6 +1875,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
         if (request.action === 'SAVE_SESSION_TABS') {
             saveActiveTabsSession(request.options)
                 .then(result => sendResponse(result))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+
+        if (request.action === 'CAPTURE_ACTIVE_TAB_SNAPSHOT') {
+            captureTabSnapshot(request.tabId, request.options)
+                .then(snapshot => sendResponse({ success: true, snapshot }))
                 .catch(err => sendResponse({ success: false, error: err.message }));
             return true;
         }
@@ -1925,6 +2024,7 @@ if (typeof module !== 'undefined' && module.exports) {
         pushBookmarksToBrowser,
         syncBrowserBookmarks,
         captureCurrentTab,
+        captureTabSnapshot,
         fetchOgMetadata,
         fetchFeedXml,
         decodeHtmlEntities,

@@ -123,6 +123,13 @@
     .btn-already-saved {
       background: linear-gradient(135deg, #d97706, #b45309);
     }
+    .btn-snapshot {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #ffffff;
+    }
+    .btn-snapshot:hover {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
     .session-card {
       background-color: #1e293b;
       border: 1px solid #334155;
@@ -323,6 +330,14 @@
 
     <button id="save-tab-btn" class="btn btn-save">
       <span>⭐️ Save Current Tab</span>
+    </button>
+    <label class="checkbox-label" style="margin: -2px 0 2px 2px;">
+      <input type="checkbox" id="include-snapshot-checkbox">
+      <span>Sayfa kopyasını (snapshot) da arşivle</span>
+    </label>
+
+    <button id="save-snapshot-btn" class="btn btn-snapshot">
+      <span>📸 Sayfa Arşivi (Snapshot) Al</span>
     </button>
 
     <!-- Session Saver (OneTab style) -->

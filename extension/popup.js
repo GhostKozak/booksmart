@@ -144,12 +144,16 @@ document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
     const folderName = folderInput?.value?.trim() || 'BookSmart';
     const rawTags = tagsInput?.value || '';
     const tags = rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    const includeSnapshot = Boolean(document.getElementById('include-snapshot-checkbox')?.checked);
 
     try {
         chrome.runtime.sendMessage({
             action: 'CAPTURE_CURRENT_TAB',
             options: { folderName, tags }
         }, (res) => {
+            if (includeSnapshot && res?.success) {
+                chrome.runtime.sendMessage({ action: 'CAPTURE_ACTIVE_TAB_SNAPSHOT' }, () => {});
+            }
             if (chrome.runtime.lastError || !res?.success) {
                 const errMsg = res?.error || 'Geçerli sayfa kaydedilemedi';
                 showStatus(errMsg, 'error', 4000);
@@ -179,6 +183,30 @@ document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
                 triggerNotification(
                     'BookSmart - Kaydedildi',
                     `"${title}" "${folderName}" klasörüne başarıyla eklendi.`,
+                    false
+                );
+            }
+        });
+    } catch (err) {
+        showStatus(err.message, 'error', 4000);
+    }
+});
+
+// 1.b. Save Page Snapshot (Offline archive)
+document.getElementById('save-snapshot-btn')?.addEventListener('click', () => {
+    showStatus('Sayfa arşivi (snapshot) alınıyor...', 'info', 0);
+    try {
+        chrome.runtime.sendMessage({ action: 'CAPTURE_ACTIVE_TAB_SNAPSHOT' }, (res) => {
+            if (chrome.runtime.lastError || !res?.success) {
+                const errMsg = res?.error || 'Sayfa arşivi alınamadı';
+                showStatus(errMsg, 'error', 4000);
+                triggerNotification('BookSmart - Hata', errMsg, true);
+            } else {
+                const title = (res.snapshot?.title || 'Sayfa').slice(0, 35);
+                showStatus(`✓ "${title}" için sayfa arşivi BookSmart'a aktarıldı!`, 'success', 4000);
+                triggerNotification(
+                    'BookSmart - Sayfa Arşivlendi',
+                    `"${title}" çevrimdışı arşiv olarak kütüphanenize kaydedildi.`,
                     false
                 );
             }

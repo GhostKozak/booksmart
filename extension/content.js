@@ -85,6 +85,39 @@
                 sendResponse({ success: true });
                 return true;
             }
+            if (msg.action === 'BOOKSMART_SNAPSHOT_CAPTURED') {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_SNAPSHOT_CAPTURED',
+                    snapshot: msg.snapshot
+                }, '*');
+                sendResponse({ success: true });
+                return true;
+            }
+            if (msg.action === 'GET_PAGE_SNAPSHOT') {
+                try {
+                    const clone = document.documentElement.cloneNode(true);
+                    const removeTags = clone.querySelectorAll('script, noscript, iframe, object, embed');
+                    removeTags.forEach(el => el.remove());
+
+                    const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+                    const textContent = document.body ? document.body.innerText.slice(0, 50000) : '';
+
+                    sendResponse({
+                        success: true,
+                        snapshot: {
+                            url: window.location.href,
+                            title: document.title || window.location.href,
+                            html: html.slice(0, 3000000),
+                            textContent,
+                            capturedAt: Date.now()
+                        }
+                    });
+                } catch (err) {
+                    sendResponse({ success: false, error: err.message });
+                }
+                return true;
+            }
         });
     } catch {
         // Ignored if runtime not available
@@ -562,6 +595,35 @@
             }
             return;
         }
+
+        // 14. Programmatic snapshot trigger from BookSmart web app
+        if (type === 'BOOKSMART_CAPTURE_SNAPSHOT') {
+            try {
+                if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+                    chrome.runtime.sendMessage({
+                        action: 'CAPTURE_ACTIVE_TAB_SNAPSHOT',
+                        options: payload?.options || {}
+                    }, (res) => {
+                        window.postMessage({
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_CAPTURE_SNAPSHOT_RESULT',
+                            requestId,
+                            success: !!res?.success,
+                            snapshot: res?.snapshot,
+                            error: res?.error || chrome.runtime?.lastError?.message
+                        }, '*');
+                    });
+                }
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_CAPTURE_SNAPSHOT_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+            return;
         }
     });
     } // end initBooksmartBridge
