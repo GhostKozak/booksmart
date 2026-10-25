@@ -728,5 +728,56 @@ export function getAllExtensionHighlights(timeoutMs = 8000) {
     });
 }
 
+/**
+ * Synchronizes user classification rules to the extension storage so the extension
+ * can auto-classify bookmarks upon one-click save.
+ * @param {Array} rules
+ * @param {number} [timeoutMs=4000]
+ * @returns {Promise<{ success: boolean, count?: number, error?: string }>}
+ */
+export function syncRulesToExtension(rules, timeoutMs = 4000) {
+    if (typeof window === 'undefined') return Promise.resolve({ success: false });
+
+    return new Promise((resolve) => {
+        const requestId = 'req_rules_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        let resolved = false;
+
+        const cleanup = () => {
+            window.removeEventListener('message', handleMessage);
+        };
+
+        const timer = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                cleanup();
+                resolve({ success: false, error: 'timeout' });
+            }
+        }, timeoutMs);
+
+        const handleMessage = (event) => {
+            if (!event.data || event.data.source !== 'BOOKSMART_EXTENSION') return;
+            if (event.source && event.source !== window) return;
+            if (event.data.requestId !== requestId) return;
+
+            if (event.data.type === 'BOOKSMART_SYNC_RULES_RESULT') {
+                resolved = true;
+                clearTimeout(timer);
+                cleanup();
+                resolve({ success: !!event.data.success, count: event.data.count });
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        window.postMessage({
+            source: 'BOOKSMART_PAGE',
+            type: 'BOOKSMART_SYNC_RULES',
+            requestId,
+            payload: { rules: Array.isArray(rules) ? rules : [] }
+        }, '*');
+    });
+}
+
+
 
 

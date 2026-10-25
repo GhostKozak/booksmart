@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { db } from '../db'
 import { generateUUID } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { analyzeRulePatterns, suggestRulesWithAI } from '../lib/rule-suggester'
 import { getEffectiveApiKey, getStoredProvider, getStoredModel, isLocalAIProvider } from '../lib/key-vault'
+import { syncRulesToExtension } from '../lib/extension-client'
 
 export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
     const [newRule, setNewRule] = useState({
@@ -31,6 +32,13 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
         const combined = [...patternSuggestions, ...aiSuggestions]
         return combined.filter(s => !dismissedSuggestionIds.has(s.id))
     }, [patternSuggestions, aiSuggestions, dismissedSuggestionIds])
+
+    // Automatically sync rules to companion extension
+    useEffect(() => {
+        if (Array.isArray(rules) && rules.length > 0) {
+            syncRulesToExtension(rules).catch(() => {});
+        }
+    }, [rules]);
 
     const addRule = async () => {
         if (newRule.value && (newRule.targetFolder || newRule.tags)) {

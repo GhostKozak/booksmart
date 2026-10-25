@@ -68,11 +68,44 @@ function updateTabCountBadge() {
     });
 }
 
-// 0. Initial load: Duplicate checking & Tab Count
+// 0. Initial load: Duplicate checking, Rule Classification & Tab Count
 if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs && tabs[0]?.url) {
             const activeTab = tabs[0];
+
+            // 0.a. Auto-classify with rules
+            try {
+                chrome.runtime.sendMessage({
+                    action: 'CLASSIFY_TAB',
+                    url: activeTab.url,
+                    title: activeTab.title
+                }, (res) => {
+                    if (chrome.runtime.lastError) return;
+                    if (res && res.success && res.classification) {
+                        const c = res.classification;
+                        const folderInput = document.getElementById('target-folder-input');
+                        const tagsInput = document.getElementById('tags-input');
+                        const ruleBadge = document.getElementById('rule-badge');
+
+                        if (folderInput && c.folder) {
+                            folderInput.value = c.folder;
+                        }
+                        if (tagsInput && Array.isArray(c.tags) && c.tags.length > 0) {
+                            tagsInput.value = c.tags.join(', ');
+                        }
+                        if (ruleBadge && c.matchedRule) {
+                            ruleBadge.textContent = c.matchedRule;
+                            ruleBadge.style.display = 'inline-block';
+                            ruleBadge.title = c.matchedRule;
+                        }
+                    }
+                });
+            } catch {
+                // Fallback if message fails
+            }
+
+            // 0.b. Duplicate check
             chrome.runtime.sendMessage({
                 action: 'CHECK_URL_DUPLICATE',
                 url: activeTab.url
@@ -102,11 +135,21 @@ if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
     updateTabCountBadge();
 }
 
-// 1. Save Current Tab
+// 1. Save Current Tab with suggested or custom folder & tags
 document.getElementById('save-tab-btn')?.addEventListener('click', async () => {
     showStatus('Kaydediliyor...', 'info', 0);
+    const folderInput = document.getElementById('target-folder-input');
+    const tagsInput = document.getElementById('tags-input');
+
+    const folderName = folderInput?.value?.trim() || 'BookSmart';
+    const rawTags = tagsInput?.value || '';
+    const tags = rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+
     try {
-        chrome.runtime.sendMessage({ action: 'CAPTURE_CURRENT_TAB' }, (res) => {
+        chrome.runtime.sendMessage({
+            action: 'CAPTURE_CURRENT_TAB',
+            options: { folderName, tags }
+        }, (res) => {
             if (chrome.runtime.lastError || !res?.success) {
                 const errMsg = res?.error || 'Geçerli sayfa kaydedilemedi';
                 showStatus(errMsg, 'error', 4000);

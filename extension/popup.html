@@ -207,6 +207,70 @@
       border: 1px solid rgba(56, 189, 248, 0.3);
       color: #38bdf8;
     }
+    .classification-card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 9px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      box-sizing: border-box;
+    }
+    .classification-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .classification-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .rule-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+    }
+    .classification-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .classification-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .classification-field label {
+      min-width: 65px;
+      font-weight: 500;
+    }
+    .field-input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f8fafc;
+      font-size: 11px;
+      padding: 4px 8px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .field-input:focus {
+      border-color: #3b82f6;
+    }
     .footer {
       margin-top: 14px;
       padding-top: 10px;
@@ -239,6 +303,24 @@
   </div>
 
   <div class="actions">
+    <!-- Auto Classification Card -->
+    <div id="classification-card" class="classification-card">
+      <div class="classification-header">
+        <span class="classification-title">⚡ Otomatik Sınıflandırma</span>
+        <span id="rule-badge" class="rule-badge" style="display: none;">Kural</span>
+      </div>
+      <div class="classification-fields">
+        <div class="classification-field">
+          <label for="target-folder-input">📁 Klasör:</label>
+          <input type="text" id="target-folder-input" class="field-input" placeholder="BookSmart" value="BookSmart">
+        </div>
+        <div class="classification-field">
+          <label for="tags-input">🏷️ Etiketler:</label>
+          <input type="text" id="tags-input" class="field-input" placeholder="virgülle ayırın (örn. dev, reading)">
+        </div>
+      </div>
+    </div>
+
     <button id="save-tab-btn" class="btn btn-save">
       <span>⭐️ Save Current Tab</span>
     </button>
@@ -270,6 +352,7 @@
 
   <div class="footer">v1.1.0 · 100% Private & Serverless</div>
 
+  <script src="rule-classifier.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

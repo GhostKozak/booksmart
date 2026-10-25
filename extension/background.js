@@ -1,6 +1,18 @@
 // BookSmart Companion - Background Service Worker
 // Enables serverless, 100% CORS-free bookmark health checks
 
+let classifyUrlWithRules;
+try {
+    if (typeof importScripts === 'function') {
+        importScripts('rule-classifier.js');
+    } else if (typeof require === 'function') {
+        const rc = require('./rule-classifier.js');
+        classifyUrlWithRules = rc.classifyUrlWithRules;
+    }
+} catch {
+    // Firefox or test runner fallback
+}
+
 const DEFAULT_TIMEOUT_MS = 8000;
 const BATCH_SIZE = 6;
 
@@ -773,9 +785,31 @@ async function captureCurrentTab(options = {}) {
         throw new Error('Cannot bookmark non-web page (e.g. browser internal page)');
     }
 
-    const folderName = options.folderName || 'BookSmart';
+    let resolvedFolder = options.folderName ? options.folderName.trim() : null;
+    let resolvedTags = Array.isArray(options.tags) ? options.tags : [];
+
+    if (!resolvedFolder || resolvedTags.length === 0) {
+        let storedRules = [];
+        try {
+            if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                const storageData = await chrome.storage.local.get(['booksmart_rules']);
+                storedRules = storageData?.booksmart_rules || [];
+            }
+        } catch {
+            // fallback
+        }
+        if (typeof classifyUrlWithRules === 'function') {
+            const classification = classifyUrlWithRules(targetUrl, targetTitle, storedRules);
+            if (!resolvedFolder) resolvedFolder = classification.folder;
+            if (resolvedTags.length === 0 && classification.tags?.length) {
+                resolvedTags = classification.tags;
+            }
+        }
+    }
+    resolvedFolder = resolvedFolder || 'BookSmart';
+
     const note = (options.note || '').trim();
-    const { folderId } = await getOrCreateTargetFolder(folderName);
+    const { folderId } = await getOrCreateTargetFolder(resolvedFolder);
 
     const norm = normalizeBookmarkUrl(targetUrl);
     const existingChildren = await chrome.bookmarks.getChildren(folderId);
@@ -784,17 +818,17 @@ async function captureCurrentTab(options = {}) {
 
     let bookmarkResult;
     if (existing || dupCheck.isDuplicate) {
-        const resolvedFolder = (dupCheck.isDuplicate ? dupCheck.folder : null) || folderName;
+        const finalFolder = (dupCheck.isDuplicate ? dupCheck.folder : null) || resolvedFolder;
         bookmarkResult = {
             id: generateBookmarkId(),
             browserId: existing?.id,
             title: existing?.title || dupCheck.title || targetTitle || targetUrl,
             url: targetUrl,
             addDate: Math.floor(Date.now() / 1000),
-            originalFolder: resolvedFolder,
-            newFolder: resolvedFolder,
-            folder: resolvedFolder,
-            tags: [],
+            originalFolder: finalFolder,
+            newFolder: finalFolder,
+            folder: finalFolder,
+            tags: resolvedTags,
             note: note,
             status: 'unchanged',
             alreadyExisted: true
@@ -812,10 +846,10 @@ async function captureCurrentTab(options = {}) {
             title: created.title,
             url: created.url,
             addDate: Math.floor(Date.now() / 1000),
-            originalFolder: folderName,
-            newFolder: folderName,
-            folder: folderName,
-            tags: [],
+            originalFolder: resolvedFolder,
+            newFolder: resolvedFolder,
+            folder: resolvedFolder,
+            tags: resolvedTags,
             note: note,
             status: 'unchanged',
             alreadyExisted: false
@@ -1750,6 +1784,36 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
             saveActiveTabsSession(request.options)
                 .then(result => sendResponse(result))
                 .catch(err => sendResponse({ success: false, error: err.message }));
+            return true;
+        }
+
+        if (request.action === 'CLASSIFY_TAB') {
+            (async () => {
+                let customRules = [];
+                try {
+                    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                        const data = await chrome.storage.local.get(['booksmart_rules']);
+                        customRules = data?.booksmart_rules || [];
+                    }
+                } catch {
+                    // Ignored
+                }
+                const classification = (typeof classifyUrlWithRules === 'function')
+                    ? classifyUrlWithRules(request.url, request.title, customRules)
+                    : { folder: 'BookSmart', tags: [], matchedRule: null };
+                sendResponse({ success: true, classification });
+            })();
+            return true;
+        }
+
+        if (request.action === 'SYNC_RULES') {
+            if (typeof chrome !== 'undefined' && chrome.storage?.local && Array.isArray(request.rules)) {
+                chrome.storage.local.set({ booksmart_rules: request.rules }, () => {
+                    sendResponse({ success: true, count: request.rules.length });
+                });
+            } else {
+                sendResponse({ success: false, error: 'Invalid rules array' });
+            }
             return true;
         }
 

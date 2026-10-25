@@ -533,6 +533,35 @@
                     error: err.message
                 }, '*');
             }
+            return;
+        }
+
+        // 13. Sync categorization rules from BookSmart to Extension storage
+        if (type === 'BOOKSMART_SYNC_RULES') {
+            try {
+                const rules = payload?.rules || [];
+                if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+                    chrome.storage.local.set({ booksmart_rules: rules }, () => {
+                        window.postMessage({
+                            source: 'BOOKSMART_EXTENSION',
+                            type: 'BOOKSMART_SYNC_RULES_RESULT',
+                            requestId,
+                            success: true,
+                            count: rules.length
+                        }, '*');
+                    });
+                }
+            } catch (err) {
+                window.postMessage({
+                    source: 'BOOKSMART_EXTENSION',
+                    type: 'BOOKSMART_SYNC_RULES_RESULT',
+                    requestId,
+                    success: false,
+                    error: err.message
+                }, '*');
+            }
+            return;
+        }
         }
     });
     } // end initBooksmartBridge

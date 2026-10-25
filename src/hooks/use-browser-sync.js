@@ -325,18 +325,35 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
                 const currentBookmarks = await getEffectiveBookmarks(rawBookmarksRef.current)
                 const exists = currentBookmarks.some(item => normalizeUrl(item.url) === norm)
                 if (!exists) {
-                    if (b.newFolder && b.newFolder !== 'BookSmart' && b.newFolder !== 'Root') {
+                    const targetFolder = b.newFolder || b.folder
+                    if (targetFolder && targetFolder !== 'BookSmart' && targetFolder !== 'Root') {
                         try {
-                            const folderExists = await db.folders?.where('name').equalsIgnoreCase(b.newFolder).first()
+                            const folderExists = await db.folders?.where('name').equalsIgnoreCase(targetFolder).first()
                             if (!folderExists && db.folders) {
                                 await db.folders.add({
                                     id: 'f_' + Date.now(),
-                                    name: b.newFolder,
+                                    name: targetFolder,
                                     order: Date.now()
                                 })
                             }
                         } catch {
                             // Ignored
+                        }
+                    }
+
+                    if (Array.isArray(b.tags) && b.tags.length > 0 && db.tags) {
+                        for (const tagName of b.tags) {
+                            try {
+                                const tagExists = await db.tags.where('name').equalsIgnoreCase(tagName).first()
+                                if (!tagExists) {
+                                    await db.tags.add({
+                                        id: 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+                                        name: tagName
+                                    })
+                                }
+                            } catch {
+                                // Ignored
+                            }
                         }
                     }
 
