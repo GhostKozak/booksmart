@@ -61,23 +61,48 @@ export function AITab({
     // Local AI states
     const [ollamaStatus, setOllamaStatus] = useState({ checking: false, success: null, message: '' })
     const [dynamicOllamaModels, setDynamicOllamaModels] = useState([])
-    const [browserAICapability, setBrowserAICapability] = useState({ checked: false, supported: false, status: '' })
+    const [browserAICapability, setBrowserAICapability] = useState({ checked: false, supported: false, status: '', needsDownload: false })
 
-    // Check browser AI capability on mount or when browser provider selected
+    // Auto-detect local AI (both Chrome Prompt API and Ollama) on mount
     useEffect(() => {
         let isMounted = true
+
+        // 1. Check in-browser Prompt API
         getBrowserAICapability().then((res) => {
             if (isMounted) {
                 setBrowserAICapability({
                     checked: true,
                     supported: !!res.supported,
                     status: res.status || 'unavailable',
+                    needsDownload: !!res.needsDownload,
                     message: res.message || ''
                 })
             }
-        })
+        }).catch(() => {})
+
+        // 2. Silently auto-check local Ollama availability
+        checkOllamaHealth(ollamaUrl, 2000).then(async (health) => {
+            if (!isMounted) return
+            if (health.ok) {
+                const models = await fetchOllamaModels(ollamaUrl, 2500)
+                if (!isMounted) return
+                if (models.length > 0) {
+                    setDynamicOllamaModels(models)
+                }
+                setOllamaStatus({
+                    checking: false,
+                    success: true,
+                    message: t('settings.ai.ollamaConnected', {
+                        count: models.length,
+                        version: health.version || 'active',
+                        defaultValue: `Connected successfully! Found ${models.length} local model(s) (v${health.version || 'active'}).`
+                    })
+                })
+            }
+        }).catch(() => {})
+
         return () => { isMounted = false }
-    }, [])
+    }, [ollamaUrl, t])
 
     const handleTestOllama = useCallback(async () => {
         setOllamaStatus({
@@ -130,7 +155,7 @@ export function AITab({
     // Merged Ollama models (pre-configured + dynamically fetched)
     const availableOllamaModels = dynamicOllamaModels.length > 0 ? dynamicOllamaModels : ollamaModels
 
-    const isLocalProvider = selectedProvider === 'ollama' || selectedProvider === 'browser'
+    const isLocalProvider = selectedProvider === 'ollama' || selectedProvider === 'browser' || availableOllamaModels.some(m => m.id === selectedModel)
 
     return (
         <div className="space-y-5 max-w-2xl">
@@ -278,7 +303,9 @@ export function AITab({
                         {browserAICapability.supported ? (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium">
                                 <CheckCircle2 className="w-3.5 h-3.5" />
-                                {t('settings.ai.browserReady', 'Ready to Use in Browser')}
+                                {browserAICapability.needsDownload
+                                    ? t('settings.ai.browserDownload', 'Available (Will download ~1.5GB Gemini Nano on first run)')
+                                    : t('settings.ai.browserReady', 'Ready to Use in Browser')}
                             </span>
                         ) : (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-medium">

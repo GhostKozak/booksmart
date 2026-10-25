@@ -1,38 +1,68 @@
 import { withRetry, cleanJsonString, sanitizeOllamaUrl } from '../ai-utils';
 
 /**
- * Checks connection health to a local Ollama server.
+ * Checks connection health to a local Ollama server with timeout.
+ * First checks /api/version, falls back to /api/tags if /api/version is not supported.
  * @param {string} [baseUrl]
- * @returns {Promise<{ ok: boolean, version?: string, error?: string }>}
+ * @param {number} [timeoutMs=2500]
+ * @returns {Promise<{ ok: boolean, version?: string, url?: string, error?: string }>}
  */
-export async function checkOllamaHealth(baseUrl) {
+export async function checkOllamaHealth(baseUrl, timeoutMs = 2500) {
     try {
         const cleanUrl = sanitizeOllamaUrl(baseUrl);
-        const res = await fetch(`${cleanUrl}/api/version`, {
-            method: 'GET'
-        });
-        if (!res.ok) {
-            return { ok: false, error: `HTTP ${res.status}` };
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            let res = await fetch(`${cleanUrl}/api/version`, {
+                method: 'GET',
+                signal: controller.signal
+            });
+
+            // If /api/version returned 404 (older Ollama releases), fall back to /api/tags
+            if (res && res.status === 404) {
+                res = await fetch(`${cleanUrl}/api/tags`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+            }
+
+            if (res && res.ok) {
+                const data = await res.json().catch(() => ({}));
+                return { ok: true, version: data.version || 'running', url: cleanUrl };
+            }
+            return { ok: false, error: res ? `HTTP ${res.status}` : 'No response from Ollama', url: cleanUrl };
+        } finally {
+            clearTimeout(timeoutId);
         }
-        const data = await res.json().catch(() => ({}));
-        return { ok: true, version: data.version || 'running' };
     } catch (err) {
-        return { ok: false, error: err.message || 'Could not connect to Ollama server' };
+        return {
+            ok: false,
+            error: err.name === 'AbortError' ? 'Connection timed out' : (err.message || 'Could not connect to Ollama server'),
+            url: baseUrl || 'http://localhost:11434'
+        };
     }
 }
 
 /**
  * Fetches all installed models from local Ollama instance (GET /api/tags).
  * @param {string} [baseUrl]
- * @returns {Promise<Array<{ id: string, name: string, provider: 'ollama', isLocal: boolean, size: number }>>}
+ * @param {number} [timeoutMs=3500]
+ * @returns {Promise<Array<{ id: string, name: string, provider: 'ollama', isLocal: boolean, size: number, details?: object }>>}
  */
-export async function fetchOllamaModels(baseUrl) {
+export async function fetchOllamaModels(baseUrl, timeoutMs = 3500) {
     try {
         const cleanUrl = sanitizeOllamaUrl(baseUrl);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
         const res = await fetch(`${cleanUrl}/api/tags`, {
             method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
+
         if (!res.ok) return [];
 
         const data = await res.json();
@@ -41,12 +71,14 @@ export async function fetchOllamaModels(baseUrl) {
             const rawSize = m.size || 0;
             const sizeGb = Math.round((rawSize / (1024 * 1024 * 1024)) * 10) / 10;
             const sizeLabel = sizeGb > 0 ? ` (${sizeGb} GB)` : '';
+            const paramSize = m.details?.parameter_size ? ` [${m.details.parameter_size}]` : '';
             return {
                 id: m.name,
-                name: `${m.name}${sizeLabel} [Yerel Ollama]`,
+                name: `${m.name}${paramSize}${sizeLabel}`,
                 provider: 'ollama',
                 isLocal: true,
-                size: rawSize
+                size: rawSize,
+                details: m.details || {}
             };
         });
     } catch {

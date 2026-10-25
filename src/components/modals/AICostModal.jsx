@@ -33,6 +33,17 @@ export function AICostModal({
         return estimateBatchOperation(operation, bookmarks, selectedModel)
     }, [operation, bookmarks, selectedModel])
 
+    // Ensure dynamically fetched models (e.g. from local Ollama) are included in the selector
+    const displayModels = useMemo(() => {
+        if (selectedModel && !AI_MODELS.some(m => m.id === selectedModel)) {
+            return [
+                { id: selectedModel, name: `${selectedModel} (Local Ollama)`, provider: 'ollama' },
+                ...AI_MODELS
+            ]
+        }
+        return AI_MODELS
+    }, [selectedModel])
+
     const operationConfig = useMemo(() => {
         switch (operation) {
             case 'fixTitles':
@@ -105,7 +116,7 @@ export function AICostModal({
                         onChange={(e) => setSelectedModel(e.target.value)}
                         className="w-full h-10 px-3 py-2 bg-background border border-input rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                     >
-                        {AI_MODELS.map(m => {
+                        {displayModels.map(m => {
                             const p = getModelPricing(m.id)
                             const priceTag = p.isLocal
                                 ? '(Free / Local)'

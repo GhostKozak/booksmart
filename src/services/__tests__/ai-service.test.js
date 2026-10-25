@@ -5,6 +5,7 @@ import {
     generateOneSentenceSummary,
     cleanOneSentenceSummary,
     resolveEffectiveModel,
+    resolveProviderForModel,
     MODEL_ALIASES,
     AI_MODELS
 } from '../ai-service';
@@ -157,11 +158,12 @@ describe('AI Service', () => {
     });
 
     describe('resolveEffectiveModel & Model Aliasing', () => {
-        it('maps deprecated Gemini models to modern Gemini 3.5 equivalents', () => {
-            expect(resolveEffectiveModel('gemini-2.5-flash-lite')).toBe('gemini-3.5-flash-lite');
-            expect(resolveEffectiveModel('gemini-2.0-flash-lite')).toBe('gemini-3.5-flash-lite');
-            expect(resolveEffectiveModel('gemini-1.5-flash')).toBe('gemini-3.5-flash');
-            expect(resolveEffectiveModel('gemini-1.5-pro')).toBe('gemini-3.5-pro');
+        it('maps deprecated or mistyped Gemini aliases to modern supported equivalents', () => {
+            expect(resolveEffectiveModel('gemini-3.5-flash-lite')).toBe('gemini-2.0-flash-lite');
+            expect(resolveEffectiveModel('gemini-3.5-flash')).toBe('gemini-2.5-flash');
+            expect(resolveEffectiveModel('gemini-3.5-pro')).toBe('gemini-2.5-pro');
+            expect(resolveEffectiveModel('gemini-2.5-flash-lite')).toBe('gemini-2.0-flash-lite');
+            expect(resolveEffectiveModel('gemini-1.5-flash-8b')).toBe('gemini-2.0-flash-lite');
         });
 
         it('maps legacy GPT-3.5 to GPT-4o Mini', () => {
@@ -169,7 +171,7 @@ describe('AI Service', () => {
         });
 
         it('retains modern supported models unchanged', () => {
-            expect(resolveEffectiveModel('gemini-3.5-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gemini-2.5-flash')).toBe('gemini-2.5-flash');
             expect(resolveEffectiveModel('gpt-4o-mini')).toBe('gpt-4o-mini');
             expect(resolveEffectiveModel('claude-3-7-sonnet-20250219')).toBe('claude-3-7-sonnet-20250219');
         });
@@ -180,7 +182,7 @@ describe('AI Service', () => {
             expect(resolveEffectiveModel(undefined)).toBe('gpt-4o-mini');
         });
 
-        it('routes legacy gemini-2.5-flash-lite to gemini-3.5-flash-lite when calling categorizeBookmarks', async () => {
+        it('routes legacy gemini-3.5-flash-lite to gemini-2.0-flash-lite when calling categorizeBookmarks', async () => {
             const bookmarks = [{ id: '1', title: 'Test', url: 'https://test.com' }];
             fetch.mockResolvedValueOnce({
                 ok: true,
@@ -189,13 +191,25 @@ describe('AI Service', () => {
                 })
             });
 
-            await categorizeBookmarks(bookmarks, 'gemini-key', 'gemini-2.5-flash-lite');
+            await categorizeBookmarks(bookmarks, 'gemini-key', 'gemini-3.5-flash-lite');
 
-            // Should have made call to Gemini endpoint using gemini-3.5-flash-lite
+            // Should have made call to Gemini endpoint using gemini-2.0-flash-lite
             expect(fetch).toHaveBeenCalledWith(
-                expect.stringContaining('gemini-3.5-flash-lite'),
+                expect.stringContaining('gemini-2.0-flash-lite'),
                 expect.any(Object)
             );
+        });
+
+        it('correctly resolves provider for standard, local, and dynamic models', () => {
+            expect(resolveProviderForModel('gpt-4o-mini')).toBe('openai');
+            expect(resolveProviderForModel('gemini-2.5-flash')).toBe('gemini');
+            expect(resolveProviderForModel('claude-3-7-sonnet-20250219')).toBe('anthropic');
+            expect(resolveProviderForModel('browser-builtin')).toBe('browser');
+            expect(resolveProviderForModel('llama3.2')).toBe('ollama');
+            expect(resolveProviderForModel('mistral:latest')).toBe('ollama');
+            expect(resolveProviderForModel('deepseek-r1:8b')).toBe('ollama');
+            expect(resolveProviderForModel('anthropic/claude-3.7-sonnet')).toBe('openrouter');
+            expect(resolveProviderForModel('unknown-model-xyz')).toBe('openai');
         });
     });
 });

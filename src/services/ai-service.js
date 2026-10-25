@@ -2,11 +2,13 @@ import { executeAIRequest } from './ai/provider-dispatcher';
 import { cleanJsonString, sanitizeLanguageCode, getProxiedUrl } from './ai/ai-utils';
 
 export const MODEL_ALIASES = {
-    'gemini-2.5-flash-lite': 'gemini-3.5-flash-lite',
-    'gemini-2.0-flash-lite': 'gemini-3.5-flash-lite',
-    'gemini-1.5-flash-8b': 'gemini-3.5-flash-lite',
-    'gemini-1.5-flash': 'gemini-3.5-flash',
-    'gemini-1.5-pro': 'gemini-3.5-pro',
+    // Deprecated or mistyped aliases mapped to modern stable models
+    'gemini-3.5-flash-lite': 'gemini-2.0-flash-lite',
+    'gemini-3.5-flash': 'gemini-2.5-flash',
+    'gemini-3.5-pro': 'gemini-2.5-pro',
+    'gemini-2.5-flash-lite': 'gemini-2.0-flash-lite',
+    'gemini-1.5-flash-8b': 'gemini-2.0-flash-lite',
+    'claude-sonnet-4-20250514': 'claude-3-7-sonnet-20250219',
     'gpt-3.5-turbo': 'gpt-4o-mini',
 };
 
@@ -18,27 +20,35 @@ export const AI_MODELS = [
     // --- Local & Privacy-First (No API Key Required) ---
     { id: 'browser-builtin', name: 'In-Browser AI (Chrome Gemini Nano - Local)', provider: 'browser' },
     { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
+    { id: 'llama3.3', name: 'Llama 3.3 70B (Ollama Local)', provider: 'ollama' },
+    { id: 'deepseek-r1', name: 'DeepSeek R1 (Ollama Local)', provider: 'ollama' },
     { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
-    { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
+    { id: 'mistral', name: 'Mistral 7B (Ollama Local)', provider: 'ollama' },
+    { id: 'phi4', name: 'Microsoft Phi-4 (Ollama Local)', provider: 'ollama' },
+    { id: 'gemma2', name: 'Google Gemma 2 (Ollama Local)', provider: 'ollama' },
 
     // --- OpenAI ---
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
-    { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
-    { id: 'o3-mini', name: 'o3-mini', provider: 'openai' },
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Cheap)', provider: 'openai' },
+    { id: 'gpt-4o', name: 'GPT-4o (Flagship Multimodal)', provider: 'openai' },
+    { id: 'gpt-4.5-preview', name: 'GPT-4.5 (Preview)', provider: 'openai' },
+    { id: 'o3-mini', name: 'o3-mini (Fast Reasoning)', provider: 'openai' },
+    { id: 'o1', name: 'o1 (Deep Reasoning)', provider: 'openai' },
+    { id: 'o1-mini', name: 'o1-mini', provider: 'openai' },
     { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Legacy)', provider: 'openai' },
 
-    // --- Google Gemini (Modern 3.5 & 2.5) ---
-    { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite (Recommended)', provider: 'gemini' },
-    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', provider: 'gemini' },
-    { id: 'gemini-3.5-pro', name: 'Gemini 3.5 Pro', provider: 'gemini' },
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'gemini' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'gemini' },
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'gemini' },
+    // --- Google Gemini (Modern 2.5 & 2.0) ---
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Recommended)', provider: 'gemini' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Deep Reasoning)', provider: 'gemini' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Stable)', provider: 'gemini' },
+    { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite (Fast & Low Cost)', provider: 'gemini' },
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (LTS)', provider: 'gemini' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (LTS)', provider: 'gemini' },
 
     // --- Anthropic (Direct) ---
-    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic' },
-    { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic' },
-    { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
+    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet (Hybrid Reasoning)', provider: 'anthropic' },
+    { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (v2)', provider: 'anthropic' },
+    { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', provider: 'anthropic' },
+    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'anthropic' },
 
     // --- OpenRouter ---
     { id: 'anthropic/claude-3.7-sonnet', name: 'Claude 3.7 Sonnet (via OpenRouter)', provider: 'openrouter' },
@@ -46,6 +56,9 @@ export const AI_MODELS = [
     { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1 (via OpenRouter)', provider: 'openrouter' },
     { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (via OpenRouter)', provider: 'openrouter' },
     { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B (via OpenRouter)', provider: 'openrouter' },
+    { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash (via OpenRouter)', provider: 'openrouter' },
+    { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash (via OpenRouter)', provider: 'openrouter' },
+    { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B (via OpenRouter)', provider: 'openrouter' },
 ];
 
 export const DEFAULT_MODEL = 'gpt-4o-mini';
@@ -58,6 +71,37 @@ export const DEFAULT_MODEL = 'gpt-4o-mini';
 export function resolveEffectiveModel(modelId) {
     if (!modelId) return DEFAULT_MODEL;
     return MODEL_ALIASES[modelId] || modelId;
+}
+
+/**
+ * Accurately determines the backend provider ('openai' | 'gemini' | 'anthropic' | 'openrouter' | 'ollama' | 'browser')
+ * for any given model ID, supporting both pre-configured static models and dynamically detected Ollama models.
+ * @param {string} [modelId]
+ * @param {string} [explicitProvider]
+ * @returns {string}
+ */
+export function resolveProviderForModel(modelId, explicitProvider = null) {
+    if (explicitProvider) return explicitProvider;
+    if (!modelId) return 'openai';
+
+    const effective = resolveEffectiveModel(modelId);
+    const staticInfo = AI_MODELS.find(m => m.id === effective || m.id === modelId);
+    if (staticInfo) return staticInfo.provider;
+
+    if (modelId === 'browser-builtin' || modelId.startsWith('browser')) return 'browser';
+    if (modelId.includes('/') || modelId.startsWith('anthropic/') || modelId.startsWith('deepseek/') || modelId.startsWith('meta-llama/') || modelId.startsWith('google/') || modelId.startsWith('qwen/')) return 'openrouter';
+    if (modelId.startsWith('claude-')) return 'anthropic';
+    if (modelId.startsWith('gemini-')) return 'gemini';
+    if (modelId.startsWith('gpt-') || modelId.startsWith('o1') || modelId.startsWith('o3')) return 'openai';
+
+    // Ollama patterns: contains colon tag (e.g. "mistral:latest") or known local family keyword
+    const localFamilies = ['llama', 'qwen', 'deepseek', 'mistral', 'phi', 'gemma', 'codellama', 'vicuna', 'llava', 'nomic', 'tinyllama'];
+    const lower = modelId.toLowerCase();
+    if (modelId.includes(':') || localFamilies.some(f => lower.includes(f))) {
+        return 'ollama';
+    }
+
+    return 'openai';
 }
 
 const CHUNK_SIZE = 20;
@@ -73,8 +117,7 @@ const MAX_CONCURRENCY = 3;
  */
 export async function categorizeBookmarks(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
     const effectiveModel = resolveEffectiveModel(modelId);
-    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
-    const provider = modelInfo.provider;
+    const provider = resolveProviderForModel(effectiveModel);
 
     const chunks = [];
     for (let i = 0; i < bookmarks.length; i += CHUNK_SIZE) {
@@ -145,8 +188,7 @@ async function fetchCategories(bookmarks, apiKey, provider, modelId, signal) {
 
 export async function summarizeContent(url, apiKey, modelId, { abortSignal, corsProxy } = {}) {
     const effectiveModel = resolveEffectiveModel(modelId);
-    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
-    const provider = modelInfo.provider;
+    const provider = resolveProviderForModel(effectiveModel);
 
     const systemPrompt = `You are a helpful assistant. Summarize the main content, topic, and purpose of the given URL or text in a short paragraph (2-3 sentences). Write the summary in the same language as the website content. Do not include introductory phrases.`;
 
@@ -233,8 +275,7 @@ export async function generateOneSentenceSummary(bookmark, apiKey, modelId, { ab
     }
 
     const effectiveModel = resolveEffectiveModel(modelId);
-    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
-    const provider = modelInfo.provider;
+    const provider = resolveProviderForModel(effectiveModel);
     const url = bookmark.url;
     const title = bookmark.title || previewMetadata?.title || '';
 
@@ -309,8 +350,7 @@ Rules:
 
 export async function fixTitles(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
     const effectiveModel = resolveEffectiveModel(modelId);
-    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
-    const provider = modelInfo.provider;
+    const provider = resolveProviderForModel(effectiveModel);
 
     const chunks = [];
     for (let i = 0; i < bookmarks.length; i += CHUNK_SIZE) {
@@ -372,8 +412,7 @@ Only return the IDs of the bookmarks you chose to fix. Do not return explanation
 
 export async function findSmartDuplicates(bookmarks, apiKey, modelId, onProgress, { abortSignal } = {}) {
     const effectiveModel = resolveEffectiveModel(modelId);
-    const modelInfo = AI_MODELS.find(m => m.id === effectiveModel) || AI_MODELS.find(m => m.id === modelId) || AI_MODELS[0];
-    const provider = modelInfo.provider;
+    const provider = resolveProviderForModel(effectiveModel);
 
     const DEDUPE_CHUNK_SIZE = 50;
     const chunks = [];

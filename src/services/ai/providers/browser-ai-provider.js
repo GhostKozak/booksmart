@@ -1,16 +1,34 @@
 import { cleanJsonString } from '../ai-utils';
 
 /**
+ * Resolves the underlying Chrome / browser language model API object across
+ * various Chrome versions and experimental contexts.
+ */
+function getLanguageModelApi() {
+    if (typeof window === 'undefined' && typeof globalThis === 'undefined') return null;
+    const globalObj = typeof window !== 'undefined' ? window : globalThis;
+    const aiObj = globalObj.ai || (typeof globalThis !== 'undefined' ? globalThis.ai : null);
+    
+    // Chrome 131+ W3C Prompt API / Chrome 128-130 / Early assistant API / Extension Origin Trial
+    return (
+        aiObj?.languageModel ||
+        aiObj?.assistant ||
+        (globalObj.chrome?.aiOriginTrial?.languageModel) ||
+        null
+    );
+}
+
+/**
  * Checks whether the browser has built-in Prompt API / Gemini Nano support.
- * @returns {Promise<{ supported: boolean, status: string, error?: string }>}
+ * @returns {Promise<{ supported: boolean, status: string, needsDownload?: boolean, message?: string, error?: string }>}
  */
 export async function getBrowserAICapability() {
     if (typeof window === 'undefined') {
         return { supported: false, status: 'unavailable', message: 'Environment not supported' };
     }
 
-    const aiObj = window.ai || (typeof globalThis !== 'undefined' ? globalThis.ai : null);
-    if (!aiObj?.languageModel) {
+    const lm = getLanguageModelApi();
+    if (!lm) {
         return {
             supported: false,
             status: 'unavailable',
@@ -19,21 +37,34 @@ export async function getBrowserAICapability() {
     }
 
     try {
-        if (typeof aiObj.languageModel.capabilities === 'function') {
-            const caps = await aiObj.languageModel.capabilities();
+        // Modern Prompt API spec (Chrome 131+)
+        if (typeof lm.availability === 'function') {
+            const availability = await lm.availability();
+            const isSupported = availability !== 'no' && availability !== 'none';
             return {
-                supported: caps.available !== 'no',
-                status: caps.available || 'readily'
+                supported: isSupported,
+                status: availability || (isSupported ? 'readily' : 'no'),
+                needsDownload: availability === 'after-download'
             };
         }
-        if (typeof aiObj.languageModel.availability === 'function') {
-            const availability = await aiObj.languageModel.availability();
+
+        // Capabilities API (Chrome 128-130)
+        if (typeof lm.capabilities === 'function') {
+            const caps = await lm.capabilities();
+            const available = caps?.available || 'readily';
             return {
-                supported: availability !== 'no' && availability !== 'none',
-                status: availability
+                supported: available !== 'no',
+                status: available,
+                needsDownload: available === 'after-download'
             };
         }
-        return { supported: true, status: 'readily' };
+
+        // Fallback if lm exists and has create
+        if (typeof lm.create === 'function') {
+            return { supported: true, status: 'readily', needsDownload: false };
+        }
+
+        return { supported: false, status: 'unavailable', message: 'Language model API incomplete' };
     } catch (err) {
         return { supported: false, status: 'error', error: err.message };
     }
@@ -44,8 +75,8 @@ export async function getBrowserAICapability() {
  * Completely private, offline, and requires no API keys.
  */
 export async function callBrowserAI({ messages, asJson = true, signal }) {
-    const aiObj = (typeof window !== 'undefined' && window.ai) || (typeof globalThis !== 'undefined' ? globalThis.ai : null);
-    if (!aiObj?.languageModel) {
+    const lm = getLanguageModelApi();
+    if (!lm || typeof lm.create !== 'function') {
         throw new Error('In-browser local AI (Chrome Prompt API) is not available in this browser. Please open chrome://flags/#prompt-api-for-gemini-nano in Chrome 128+ or use Ollama.');
     }
 
@@ -66,7 +97,7 @@ export async function callBrowserAI({ messages, asJson = true, signal }) {
     let session;
     try {
         const createOptions = systemPrompt.trim() ? { systemPrompt: systemPrompt.trim() } : undefined;
-        session = await aiObj.languageModel.create(createOptions);
+        session = await lm.create(createOptions);
     } catch (e) {
         throw new Error(`Failed to initialize in-browser model session: ${e.message}`);
     }

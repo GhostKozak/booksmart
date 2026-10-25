@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from './ui/button'
-import { AI_MODELS, DEFAULT_MODEL, resolveEffectiveModel } from '../services/ai-service'
+import { AI_MODELS, DEFAULT_MODEL, resolveEffectiveModel, resolveProviderForModel } from '../services/ai-service'
 import {
     unlockVault,
     lockVault,
@@ -239,7 +239,7 @@ export function SettingsModal({
     const openrouterModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'openrouter'), [])
     const ollamaModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'ollama'), [])
     const anthropicModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'anthropic'), [])
-    const selectedProvider = AI_MODELS.find((m) => m.id === selectedModel)?.provider || (selectedModel.startsWith('browser') ? 'browser' : (selectedModel.includes(':') ? 'ollama' : 'openai'))
+    const selectedProvider = resolveProviderForModel(selectedModel)
 
     const tabs = [
         {
