@@ -14,7 +14,8 @@ import {
     hasVault,
     getStoredCorsProxy,
     getAutoSummarizeEnabled,
-    setAutoSummarizeEnabled
+    setAutoSummarizeEnabled,
+    isLocalAIProvider
 } from '../lib/key-vault';
 import { useBookmarkPreview } from '../lib/metadata-fetcher';
 import { Favicon } from './Favicon';
@@ -134,7 +135,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
         const apiKey = await getEffectiveApiKey(provider);
         const modelId = getStoredModel();
 
-        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+        if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             if (!silent) {
                 toast.error(t('settings.ai.reqOpenAI') || 'API key required');
             }
@@ -211,7 +212,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
         const apiKey = await getEffectiveApiKey(provider);
         const modelId = getStoredModel();
 
-        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+        if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             toast.error(t('settings.ai.reqOpenAI') || 'API key required');
             return;
         }

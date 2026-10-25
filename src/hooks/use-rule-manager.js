@@ -4,7 +4,7 @@ import { generateUUID } from '../lib/utils'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { analyzeRulePatterns, suggestRulesWithAI } from '../lib/rule-suggester'
-import { getEffectiveApiKey, getStoredProvider, getStoredModel } from '../lib/key-vault'
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isLocalAIProvider } from '../lib/key-vault'
 
 export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
     const [newRule, setNewRule] = useState({
@@ -125,7 +125,7 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
         const model = getStoredModel()
         const apiKey = await getEffectiveApiKey(provider)
 
-        if (!apiKey && provider !== 'ollama') {
+        if (!apiKey && !isLocalAIProvider(provider)) {
             toast.error(t('settings.ai.reqApiKey', 'Lütfen Ayarlar > Yapay Zeka sekmesinden API anahtarınızı girin.'))
             return
         }

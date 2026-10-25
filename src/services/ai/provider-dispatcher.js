@@ -3,13 +3,15 @@ import { callGemini } from './providers/gemini-provider';
 import { callAnthropic } from './providers/anthropic-provider';
 import { callOpenRouter } from './providers/openrouter-provider';
 import { callOllama } from './providers/ollama-provider';
+import { callBrowserAI } from './providers/browser-ai-provider';
 
 const PROVIDER_STRATEGIES = {
     openai: callOpenAI,
     gemini: callGemini,
     anthropic: callAnthropic,
     openrouter: callOpenRouter,
-    ollama: callOllama
+    ollama: callOllama,
+    browser: callBrowserAI
 };
 
 /**

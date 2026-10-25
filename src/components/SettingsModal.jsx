@@ -208,9 +208,8 @@ export function SettingsModal({
         sessionStorage.setItem('bs_model', effectiveModel)
         sessionStorage.setItem('bs_ollama_url', ollamaUrl)
         const modelInfo = AI_MODELS.find((m) => m.id === effectiveModel)
-        if (modelInfo) {
-            sessionStorage.setItem('bs_provider', modelInfo.provider)
-        }
+        const effectiveProvider = modelInfo ? modelInfo.provider : selectedProvider
+        sessionStorage.setItem('bs_provider', effectiveProvider)
         saveStoredCorsProxy(corsProxy)
         setAutoSummarizeEnabled(autoSummarize)
 
@@ -234,12 +233,13 @@ export function SettingsModal({
     }
 
     // Models categorization
+    const browserModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'browser'), [])
     const openaiModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'openai'), [])
     const geminiModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'gemini'), [])
     const openrouterModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'openrouter'), [])
     const ollamaModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'ollama'), [])
     const anthropicModels = useMemo(() => AI_MODELS.filter((m) => m.provider === 'anthropic'), [])
-    const selectedProvider = AI_MODELS.find((m) => m.id === selectedModel)?.provider || 'openai'
+    const selectedProvider = AI_MODELS.find((m) => m.id === selectedModel)?.provider || (selectedModel.startsWith('browser') ? 'browser' : (selectedModel.includes(':') ? 'ollama' : 'openai'))
 
     const tabs = [
         {
@@ -470,6 +470,7 @@ export function SettingsModal({
                                 anthropicModels={anthropicModels}
                                 openrouterModels={openrouterModels}
                                 ollamaModels={ollamaModels}
+                                browserModels={browserModels}
                             />
                         )}
 

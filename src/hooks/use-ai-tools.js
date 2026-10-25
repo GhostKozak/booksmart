@@ -3,7 +3,7 @@ import { fixTitles, findSmartDuplicates, AI_MODELS } from '../services/ai-servic
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { db } from '../db';
-import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault';
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault, isLocalAIProvider } from '../lib/key-vault';
 
 export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview }) {
     const { t } = useTranslation();
@@ -24,7 +24,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
         const provider = modelInfo ? modelInfo.provider : getStoredProvider();
         const apiKey = await getEffectiveApiKey(provider);
 
-        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+        if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai');
             return;
         }
@@ -81,7 +81,7 @@ export function useAITools({ selectedIds, setSelectedIds, rawBookmarks, openSett
         const provider = modelInfo ? modelInfo.provider : getStoredProvider();
         const apiKey = await getEffectiveApiKey(provider);
 
-        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+        if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai');
             return;
         }

@@ -146,19 +146,23 @@ export function getStoredModel() {
     return resolveEffectiveModel(raw);
 }
 
+export function isLocalAIProvider(provider) {
+    return provider === 'ollama' || provider === 'browser';
+}
+
 export function getStoredOllamaUrl() {
-    return sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url');
+    return sessionStorage.getItem('bs_ollama_url') || localStorage.getItem('bs_ollama_url') || 'http://localhost:11434';
 }
 
 export async function getEffectiveApiKey(provider) {
+    if (isLocalAIProvider(provider)) {
+        return getStoredOllamaUrl() || 'local';
+    }
     if (isVaultUnlocked()) {
         const fromVault = await loadSecret();
         if (fromVault) return fromVault;
     }
     if (hasVault() && !isVaultUnlocked()) return null;
-    if (provider === 'ollama') {
-        return getStoredOllamaUrl();
-    }
     return sessionStorage.getItem('bs_api_key') || localStorage.getItem('bs_api_key');
 }
 

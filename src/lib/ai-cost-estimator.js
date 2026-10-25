@@ -11,7 +11,8 @@ export const MODEL_PRICING = {
     'o3-mini': { inputPerM: 1.10, outputPerM: 4.40, name: 'o3-mini', provider: 'openai' },
     'gpt-3.5-turbo': { inputPerM: 0.50, outputPerM: 1.50, name: 'GPT-3.5 Turbo', provider: 'openai' },
 
-    // --- Local Ollama (Free & Offline) ---
+    // --- Local & Browser AI (Free & Offline) ---
+    'browser-builtin': { inputPerM: 0, outputPerM: 0, isLocal: true, name: 'Tarayıcı İçi YZ (Gemini Nano)', provider: 'browser' },
     'llama3.2': { inputPerM: 0, outputPerM: 0, isLocal: true, name: 'Llama 3.2', provider: 'ollama' },
     'qwen2.5': { inputPerM: 0, outputPerM: 0, isLocal: true, name: 'Qwen 2.5', provider: 'ollama' },
     'deepseek-r1': { inputPerM: 0, outputPerM: 0, isLocal: true, name: 'DeepSeek-r1', provider: 'ollama' },
@@ -58,8 +59,8 @@ export function getModelPricing(modelId) {
     if (MODEL_PRICING[resolved]) return MODEL_PRICING[resolved];
 
     const modelInfo = AI_MODELS.find(m => m.id === modelId || m.id === resolved);
-    if (modelInfo && modelInfo.provider === 'ollama') {
-        return { inputPerM: 0, outputPerM: 0, isLocal: true, name: modelInfo.name, provider: 'ollama' };
+    if (modelInfo && (modelInfo.provider === 'ollama' || modelInfo.provider === 'browser')) {
+        return { inputPerM: 0, outputPerM: 0, isLocal: true, name: modelInfo.name, provider: modelInfo.provider };
     }
 
     return {

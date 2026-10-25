@@ -3,7 +3,7 @@ import { db } from '../db'
 import { categorizeBookmarks, AI_MODELS } from '../services/ai-service'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
-import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault } from '../lib/key-vault'
+import { getEffectiveApiKey, getStoredProvider, getStoredModel, isVaultUnlocked, hasVault, isLocalAIProvider } from '../lib/key-vault'
 
 export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSettings, onSortPreview }) {
     const { t } = useTranslation()
@@ -23,7 +23,7 @@ export function useMagicSort({ selectedIds, setSelectedIds, rawBookmarks, openSe
         const provider = modelInfo ? modelInfo.provider : getStoredProvider()
         const apiKey = await getEffectiveApiKey(provider)
 
-        if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+        if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
             openSettings('ai')
             return
         }

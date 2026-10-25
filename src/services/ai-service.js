@@ -10,17 +10,22 @@ export const MODEL_ALIASES = {
     'gpt-3.5-turbo': 'gpt-4o-mini',
 };
 
+export function isLocalAIProvider(provider) {
+    return provider === 'ollama' || provider === 'browser';
+}
+
 export const AI_MODELS = [
+    // --- Local & Privacy-First (No API Key Required) ---
+    { id: 'browser-builtin', name: 'Tarayıcı İçi YZ (Chrome Gemini Nano - Yerel)', provider: 'browser' },
+    { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
+    { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
+    { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
+
     // --- OpenAI ---
     { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
     { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
     { id: 'o3-mini', name: 'o3-mini', provider: 'openai' },
     { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Legacy)', provider: 'openai' },
-
-    // --- Local (Ollama) ---
-    { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
-    { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
-    { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },
 
     // --- Google Gemini (Modern 3.5 & 2.5) ---
     { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite (Recommended)', provider: 'gemini' },

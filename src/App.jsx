@@ -44,7 +44,7 @@ import PWAUpdatePrompt from './components/PWAUpdatePrompt'
 
 import { useTranslation } from 'react-i18next'
 import { Toaster, toast } from 'sonner'
-import { getEffectiveApiKey, getStoredProvider, isVaultUnlocked, hasVault } from './lib/key-vault'
+import { getEffectiveApiKey, getStoredProvider, isVaultUnlocked, hasVault, isLocalAIProvider } from './lib/key-vault'
 import { useMetadataEnricher } from './hooks/use-metadata-enricher'
 
 const EMPTY_ARRAY = []
@@ -255,7 +255,7 @@ function App() {
 
     const provider = getStoredProvider()
     const apiKey = await getEffectiveApiKey(provider)
-    if ((!apiKey && provider !== 'ollama') || (hasVault() && !isVaultUnlocked() && !apiKey)) {
+    if ((!apiKey && !isLocalAIProvider(provider)) || (hasVault() && !isVaultUnlocked() && !apiKey)) {
       useAppStore.getState().openSettings('ai')
       return
     }
