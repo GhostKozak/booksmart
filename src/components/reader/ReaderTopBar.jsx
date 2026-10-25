@@ -234,7 +234,7 @@ export function ReaderTopBar({
                         "h-8 w-8 cursor-pointer relative",
                         isSnapshotSaved ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10" : "text-muted-foreground hover:text-foreground"
                     )}
-                    title={isSnapshotSaved ? t('snapshots.savedBadge', 'Çevrimdışı Arşivlendi') : t('snapshots.saveOffline', 'Çevrimdışı Arşivle (Snapshot)')}
+                    title={isSnapshotSaved ? t('snapshots.savedBadge', 'Offline Archived') : t('snapshots.saveOffline', 'Save Offline (Snapshot)')}
                 >
                     <HardDrive className="w-3.5 h-3.5" />
                 </Button>

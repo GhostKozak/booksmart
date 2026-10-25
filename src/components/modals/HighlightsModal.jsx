@@ -97,15 +97,15 @@ export function HighlightsModal({ isOpen, onClose }) {
             if (res.imported > 0) {
                 toast.success(t('highlights.syncSuccess', {
                     count: res.imported,
-                    defaultValue: `Eklentiden ${res.imported} yeni vurgu başarıyla içe aktarıldı!`
+                    defaultValue: `Successfully imported ${res.imported} new highlights from extension!`
                 }));
             } else if (res.total > 0) {
-                toast.info(t('highlights.allSynced', 'Tüm eklenti vurguları zaten güncel.'));
+                toast.info(t('highlights.allSynced', 'All extension highlights are up to date.'));
             } else {
-                toast.info(t('highlights.noExtensionFound', 'Eklentide henüz kayıtlı vurgu bulunamadı.'));
+                toast.info(t('highlights.noExtensionFound', 'No saved highlights found in extension.'));
             }
         } catch {
-            toast.error(t('highlights.syncError', 'Eklentiden vurgular alınırken hata oluştu.'));
+            toast.error(t('highlights.syncError', 'Error while fetching highlights from extension.'));
         } finally {
             setIsSyncing(false);
         }

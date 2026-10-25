@@ -92,7 +92,7 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
 
         toast.success(t('toast.ruleCreatedFromSuggestion', {
             value: suggestion.value,
-            defaultValue: `"${suggestion.value}" için kural oluşturuldu`
+            defaultValue: `Created rule for "${suggestion.value}"`
         }))
     }, [addCommand, t])
 
@@ -120,7 +120,7 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
 
         toast.success(t('toast.rulesCreatedBatch', {
             count: rulesToAdd.length,
-            defaultValue: `${rulesToAdd.length} kural otomatik oluşturuldu`
+            defaultValue: `Automatically created ${rulesToAdd.length} rules`
         }))
     }, [addCommand, t])
 
@@ -134,7 +134,7 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
         const apiKey = await getEffectiveApiKey(provider)
 
         if (!apiKey && !isLocalAIProvider(provider)) {
-            toast.error(t('settings.ai.reqApiKey', 'Lütfen Ayarlar > Yapay Zeka sekmesinden API anahtarınızı girin.'))
+            toast.error(t('settings.ai.reqApiKey', 'Please enter your API key in Settings > AI.'))
             return
         }
 
@@ -152,10 +152,10 @@ export function useRuleManager({ rules = [], rawBookmarks = [], addCommand }) {
                 setAiSuggestions(aiRules)
                 toast.success(t('toast.aiRulesFound', {
                     count: aiRules.length,
-                    defaultValue: `AI ${aiRules.length} yeni kural önerisi buldu!`
+                    defaultValue: `AI found ${aiRules.length} new rule suggestion(s)!`
                 }))
             } else {
-                toast.info(t('modals.ruleSuggestions.noAiRules', 'AI tarafından yeni bir kural kalıbı bulunamadı.'))
+                toast.info(t('modals.ruleSuggestions.noAiRules', 'No new rule patterns discovered by AI.'))
             }
         } catch (err) {
             console.error('AI Rule Analysis error:', err)

@@ -23,7 +23,7 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
       'react-hooks/set-state-in-effect': 'warn',
     },
   },
@@ -57,6 +57,9 @@ export default defineConfig([
       globals: {
         ...globals.browser,
         ...globals.webextensions,
+        ...globals.serviceworker,
+        importScripts: 'readonly',
+        require: 'readonly',
         module: 'readonly',
       },
     },

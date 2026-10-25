@@ -748,7 +748,7 @@ export function useBookmarkOperations({
         toast.success(t('bookmarks.tree.folderMoved', {
             folder: folderName,
             target: newFolderPath,
-            defaultValue: `"${folderName}" klasörü taşındı`
+            defaultValue: `Moved folder "${folderName}"`
         }))
         return true
     }, [addCommand, t])
@@ -791,7 +791,7 @@ export function useBookmarkOperations({
         toast.success(t('bookmarks.tree.bookmarkMoved', {
             title: bookmark.title,
             folder: normalizedTarget || 'Root',
-            defaultValue: `Yer imi "${normalizedTarget || 'Kök Dizin'}" klasörüne taşındı`
+            defaultValue: `Moved bookmark to "${normalizedTarget || 'Root'}"`
         }))
         return true
     }, [addCommand, t])

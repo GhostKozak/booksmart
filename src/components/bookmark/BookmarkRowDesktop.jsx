@@ -60,16 +60,16 @@ export function BookmarkRowDesktop({
 
                         {/* Inline Badges */}
                         {bookmark.feedUrl && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 shrink-0" title={t('rss.connectedToFeed', 'Connected to RSS')}>
                                 <Rss className="w-2.5 h-2.5" />
                                 <span>RSS</span>
                             </span>
                         )}
 
                         {bookmark.readingTimeMinutes && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 shrink-0" title={t('reader.readingTimeEstimate', 'Estimated Reading Time')}>
                                 <BookOpen className="w-2.5 h-2.5" />
-                                <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
+                                <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'min')}</span>
                             </span>
                         )}
 

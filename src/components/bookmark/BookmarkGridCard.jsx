@@ -183,15 +183,15 @@ export const BookmarkGridCard = ({ bookmark, isSelected, folderColor, folderName
                                         {bookmark.title || t('common.untitled')}
                                     </h3>
                                     {bookmark.feedUrl && (
-                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'RSS Akışına Bağlı')}>
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0" title={t('rss.connectedToFeed', 'Connected to RSS')}>
                                             <Rss className="w-2.5 h-2.5" />
                                             <span>RSS</span>
                                         </span>
                                     )}
                                     {bookmark.readingTimeMinutes && (
-                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Tahmini Okuma Süresi')}>
+                                        <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0" title={t('reader.readingTimeEstimate', 'Estimated Reading Time')}>
                                             <BookOpen className="w-2.5 h-2.5" />
-                                            <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'dk')}</span>
+                                            <span>{bookmark.readingTimeMinutes} {t('reader.minShort', 'min')}</span>
                                         </span>
                                     )}
                                     {bookmark.reminderAt && (

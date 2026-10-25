@@ -70,7 +70,7 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
         return () => {
             isMounted = false;
         };
-    }, [isOpen, bookmark]);
+    }, [isOpen, bookmark, t]);
 
     const handleToggleSnapshot = async () => {
         if (!bookmark || !article) return;
@@ -191,11 +191,11 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
             setArticle(res);
         } catch (err) {
             console.error('Failed to load article:', err);
-            setError(err.message || 'Makale içeriği yüklenemedi');
+            setError(err.message || t('reader.articleLoadError', 'Makale içeriği yüklenemedi'));
         } finally {
             setIsLoading(false);
         }
-    }, [bookmark]);
+    }, [bookmark, t]);
 
     useEffect(() => {
         let isMounted = true;
@@ -214,7 +214,7 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
         }).catch(err => {
             if (isMounted) {
                 console.error('Failed to load article:', err);
-                setError(err.message || 'Makale içeriği yüklenemedi');
+                setError(err.message || t('reader.articleLoadError', 'Makale içeriği yüklenemedi'));
                 setIsLoading(false);
             }
         });
@@ -222,7 +222,7 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
         return () => {
             isMounted = false;
         };
-    }, [isOpen, bookmark]);
+    }, [isOpen, bookmark, t]);
 
     // Handle scroll progress
     const handleScroll = (e) => {
@@ -258,9 +258,10 @@ export function ReaderViewModal({ isOpen, onClose, bookmark }) {
     const handleAppendToNote = async () => {
         if (!bookmark?.id || !article) return;
         const summarySnippet = article.textContent.slice(0, 450) + '...';
+        const summaryLabel = t('reader.readingSummary', 'Okuma Özeti');
         const noteText = bookmark.note
-            ? `${bookmark.note}\n\n---\n**Okuma Özeti (${formatReadingTime(article.readingTimeMinutes, t)}):**\n${summarySnippet}`
-            : `**Okuma Özeti (${formatReadingTime(article.readingTimeMinutes, t)}):**\n${summarySnippet}`;
+            ? `${bookmark.note}\n\n---\n**${summaryLabel} (${formatReadingTime(article.readingTimeMinutes, t)}):**\n${summarySnippet}`
+            : `**${summaryLabel} (${formatReadingTime(article.readingTimeMinutes, t)}):**\n${summarySnippet}`;
 
         await db.bookmarks.update(bookmark.id, { note: noteText });
         toast.success(t('preview.appendedToNotes', 'Notlara eklendi'));

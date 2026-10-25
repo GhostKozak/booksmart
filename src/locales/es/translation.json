@@ -121,7 +121,10 @@
             "noRules": "Aún no hay reglas definidas.",
             "createFirst": "Crea tu primera regla",
             "edit": "Editar Regla",
-            "delete": "Eliminar Regla"
+            "delete": "Eliminar Regla",
+            "suggestRules": "Sugerencias de reglas",
+            "suggestionsAvailable": "Sugerencias disponibles",
+            "viewSuggestions": "Ver sugerencias ({{count}})"
         },
         "inbox": "Inbox",
         "activeFilter": "Active Filter",
@@ -183,7 +186,9 @@
             "browserGroupLabel": "🔒 In-Browser Local AI (Offline & Free)",
             "ollamaGroupLabel": "🔒 Local AI (Ollama - Offline)",
             "reqApiKey": "Please enter your API key in Settings > AI tab.",
-            "browserBuiltin": "IA en el navegador (Chrome Gemini Nano - Local)"
+            "browserBuiltin": "IA en el navegador (Chrome Gemini Nano - Local)",
+            "localBadge": "Compatible con local y nube",
+            "browserTitle": "IA local de Chrome (Prompt API / Gemini Nano)"
         },
         "network": {
             "extensionTitle": "Comprobación de Estado sin Servidor (Extensión)",
@@ -275,7 +280,10 @@
             "desc": "Navigate faster with convenient keyboard shortcuts.",
             "viewAll": "View All Shortcuts",
             "quickPreview": "Quick Preview",
-            "spaceKey": "Space"
+            "spaceKey": "Space",
+            "commandPalette": "Paleta de comandos",
+            "focusSearch": "Enfocar búsqueda",
+            "closeModals": "Cerrar cuadros de diálogo"
         }
     },
     "common": {
@@ -323,7 +331,13 @@
         "copyLink": "Copy Link",
         "saved": "Saved",
         "dismiss": "Dismiss",
-        "removeFailed": "Could not be removed"
+        "removeFailed": "Could not be removed",
+        "hide": "Ocultar",
+        "show": "Mostrar",
+        "clearSearch": "Borrar búsqueda",
+        "library": "Biblioteca",
+        "operationFailed": "Operación fallida",
+        "saveFailed": "No se pudo guardar"
     },
     "modals": {
         "rules": {
@@ -516,7 +530,12 @@
             "emptyDesc": "Aún no se ha detectado un patrón claro de carpetas en su biblioteca. A medida que añada más marcadores, aparecerán sugerencias aquí.",
             "sourcePattern": "Patrón de Origen",
             "targetFolder": "Carpeta de Destino",
-            "addTags": "Etiquetas"
+            "addTags": "Etiquetas",
+            "match": "coincidencia",
+            "samples": "Ejemplos",
+            "acceptBtn": "Crear regla",
+            "acceptAllBtn": "Aceptar todas las sugerencias ({{count}})",
+            "noAiRules": "No se descubrieron nuevos patrones de reglas con IA."
         },
         "metadataEnricher": {
             "title": "Enriquecedor Masivo de Favicons y Metadatos",
@@ -535,7 +554,32 @@
             "cancel": "Cancelar",
             "reset": "Restablecer",
             "progress": "Progreso: {{processed}} / {{total}}",
-            "completed": "¡Enriquecimiento completado!"
+            "completed": "¡Enriquecimiento completado!",
+            "stats": {
+                "missingTitles": "Título faltante",
+                "missingNotes": "Nota faltante",
+                "missingIcons": "Favicon faltante",
+                "candidates": "Por enriquecer"
+            },
+            "scopeTitle": "Alcance del análisis",
+            "optTitle": "Actualizar títulos faltantes o tipo URL",
+            "optIcon": "Completar favicons e iconos faltantes",
+            "optNotes": "Escribir descripción OpenGraph en notas vacías",
+            "optForce": "Omitir caché y forzar recarga",
+            "statusRunning": "Enriqueciendo en segundo plano...",
+            "statusPaused": "Pausado",
+            "statusCompleted": "¡Enriquecimiento completado!",
+            "statusCancelled": "Operación cancelada.",
+            "successCount": "Éxito",
+            "updatedCount": "Marcadores actualizados",
+            "errorCount": "Errores / Inaccesibles",
+            "recentActivity": "Actividad reciente",
+            "backgroundNotice": "Puedes cerrar este diálogo; el análisis continuará en segundo plano.",
+            "btnReset": "Restablecer",
+            "btnPause": "Pausar",
+            "btnResume": "Reanudar",
+            "btnCancel": "Cancelar",
+            "btnStart": "Iniciar enriquecimiento"
         }
     },
     "backup": {
@@ -862,7 +906,13 @@
             "copied": "{{count}} marcadores copiados al portapapeles",
             "empty": "Esta colección está vacía",
             "footer": "{{count}} marcadores compartidos a través de BookSmart",
-            "copiedMarkdown": "Markdown list copied to clipboard!"
+            "copiedMarkdown": "Markdown list copied to clipboard!",
+            "authorPlaceholder": "ej.: @usuario",
+            "guideStep1": "Haz clic arriba en \"Descargar HTML (index.html)\" para descargar el archivo.",
+            "guideStep2": "Crea un nuevo repositorio público en GitHub (ej.: \"links\").",
+            "guideStep3": "Arrastra y haz commit del archivo index.html en el repositorio.",
+            "guideStep4": "En Settings > Pages, selecciona \"Deploy from a branch\" y elige main.",
+            "guideStep5": "¡Tu centro de enlaces ya está en línea en https://<usuario>.github.io/<repo>/!"
         },
         "hub": {
             "modalTitle": "Public Link Hub & Bento Portfolio",
@@ -881,7 +931,8 @@
             "githubGuideTitle": "How to Host Free on GitHub Pages (1 Minute)",
             "shareAsHub": "Share as Bento / Linktree Hub",
             "menuItem": "Web Page (Bento / Hub)"
-        }
+        },
+        "actions": "Acciones de colección"
     },
     "onboarding": {
         "next": "Siguiente",
@@ -1054,7 +1105,9 @@
                 "blue": "Blue",
                 "purple": "Purple"
             }
-        }
+        },
+        "articleLoadError": "No se pudo cargar el contenido del artículo",
+        "readingSummary": "Resumen de lectura"
     },
     "qr": {
         "title": "Share via QR Code to Mobile",
@@ -1150,9 +1203,24 @@
         "cleanTitle": "Congratulations! No duplicate or similar content found.",
         "cleanHelp": "Your library is clean and well-organized. You can adjust the sensitivity slider above to search more broadly.",
         "mergeThisGroup": "Merge",
-        "choosePrimary": "Select primary bookmark to keep:"
+        "choosePrimary": "Select primary bookmark to keep:",
+        "primaryBadge": "✓ Marcador principal",
+        "duplicateBadge": "Duplicado",
+        "mergeResult": "Resultado de la fusión:",
+        "mergedNotes": "Notas fusionadas",
+        "mergedTags": "{{count}} etiquetas combinadas",
+        "copiesDeleted": "{{count}} copia(s) se eliminarán",
+        "tagsCount": "{{count}} etiquetas",
+        "hasNote": "Tiene nota",
+        "exactUrl": "Coincidencia exacta de URL",
+        "urlVariation": "Variación de parámetros / URL",
+        "similarTitle": "Título y contenido similar ({{percent}}% de similitud)",
+        "bookmarksCount": "{{count}} marcadores"
     },
     "metadataEnricher": {
         "running": "Enriching in background..."
+    },
+    "browserSync": {
+        "defaultSessionName": "Sesión de investigación"
     }
 }

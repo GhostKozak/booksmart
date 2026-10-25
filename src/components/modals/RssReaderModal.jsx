@@ -83,10 +83,10 @@ export function RssReaderModal({ isOpen, onClose }) {
             const res = await refreshAllFeeds({ silent: true });
             toast.success(t('rss.refreshedSuccess', {
                 count: res.newItemsTotal,
-                defaultValue: `Akışlar güncellendi. ${res.newItemsTotal} yeni yazı.`
+                defaultValue: `Feeds updated. ${res.newItemsTotal} new item(s).`
             }));
         } catch {
-            toast.error(t('rss.refreshError', { defaultValue: 'Akışlar güncellenirken hata oluştu.' }));
+            toast.error(t('rss.refreshError', { defaultValue: 'Failed to refresh feeds.' }));
         } finally {
             setIsRefreshing(false);
         }
@@ -101,18 +101,18 @@ export function RssReaderModal({ isOpen, onClose }) {
             const { feed, isExisting } = await subscribeToFeed(null, newFeedUrl.trim());
             if (isExisting) {
                 toast.info(t('rss.alreadySubscribed', {
-                    defaultValue: `"${feed.title}" akışı zaten kayıtlı.`
+                    defaultValue: `"${feed.title}" feed is already saved.`
                 }));
             } else {
                 toast.success(t('rss.subscribeSuccess', {
                     title: feed.title,
-                    defaultValue: `"${feed.title}" akışına abone olundu!`
+                    defaultValue: `Subscribed to "${feed.title}" feed!`
                 }));
             }
             setNewFeedUrl('');
             setSelectedFeedUrl(feed.feedUrl);
         } catch (err) {
-            toast.error(err.message || t('rss.subscribeError', { defaultValue: 'Akış bulunamadı veya eklenemedi.' }));
+            toast.error(err.message || t('rss.subscribeError', { defaultValue: 'Could not find or add feed.' }));
         } finally {
             setIsAddingFeed(false);
         }
@@ -121,7 +121,7 @@ export function RssReaderModal({ isOpen, onClose }) {
     const handleUnsubscribe = async (feedUrl, feedTitle) => {
         if (!confirm(t('rss.confirmUnsubscribe', {
             title: feedTitle,
-            defaultValue: `"${feedTitle}" akışını kaldırmak istediğinize emin misiniz?`
+            defaultValue: `Are you sure you want to remove "${feedTitle}" feed?`
         }))) {
             return;
         }
@@ -131,36 +131,36 @@ export function RssReaderModal({ isOpen, onClose }) {
             if (selectedFeedUrl === feedUrl) {
                 setSelectedFeedUrl(null);
             }
-            toast.success(t('rss.unsubscribeSuccess', { defaultValue: 'Akış kaldırıldı.' }));
+            toast.success(t('rss.unsubscribeSuccess', { defaultValue: 'Feed removed.' }));
         } catch {
-            toast.error(t('rss.unsubscribeError', { defaultValue: 'Kaldırılamadı.' }));
+            toast.error(t('rss.unsubscribeError', { defaultValue: 'Failed to remove feed.' }));
         }
     };
 
     const handleMarkAllRead = async () => {
         try {
             await markAllFeedItemsRead(selectedFeedUrl);
-            toast.success(t('rss.markedAllReadSuccess', { defaultValue: 'Tümü okundu olarak işaretlendi.' }));
+            toast.success(t('rss.markedAllReadSuccess', { defaultValue: 'All marked as read.' }));
         } catch {
-            toast.error('İşlem başarısız');
+            toast.error(t('common.operationFailed', 'Operation failed'));
         }
     };
 
     const handleSaveToBookmarks = async (item) => {
         try {
-            const res = await addFeedItemToBookmarks(item, 'Okuma Listesi');
+            const res = await addFeedItemToBookmarks(item, 'Reading List');
             if (res?.isExisting) {
                 toast.info(t('rss.alreadySaved', {
-                    defaultValue: `"${item.title.slice(0, 35)}" zaten kütüphanenizde kayıtlı.`
+                    defaultValue: `"${item.title.slice(0, 35)}" is already saved in your library.`
                 }));
             } else {
                 toast.success(t('rss.savedToBookmarks', {
                     title: item.title,
-                    defaultValue: `"${item.title.slice(0, 35)}" yer imlerine kaydedildi!`
+                    defaultValue: `Saved "${item.title.slice(0, 35)}" to bookmarks!`
                 }));
             }
         } catch {
-            toast.error('Kaydedilemedi');
+            toast.error(t('common.saveFailed', 'Could not be saved'));
         }
     };
 
@@ -174,9 +174,9 @@ export function RssReaderModal({ isOpen, onClose }) {
             a.download = `booksmart-feeds-${new Date().toISOString().slice(0, 10)}.opml`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success(t('rss.opmlExportSuccess', { defaultValue: 'OPML dosyası dışa aktarıldı.' }));
+            toast.success(t('rss.opmlExportSuccess', { defaultValue: 'Exported OPML file.' }));
         } catch {
-            toast.error(t('rss.opmlExportError', { defaultValue: 'OPML dışa aktarma başarısız.' }));
+            toast.error(t('rss.opmlExportError', { defaultValue: 'Failed to export OPML.' }));
         }
     };
 
@@ -190,10 +190,10 @@ export function RssReaderModal({ isOpen, onClose }) {
             const res = await importFeedsFromOpml(text);
             toast.success(t('rss.opmlImportSuccess', {
                 count: res.importedCount,
-                defaultValue: `${res.importedCount} akış başarıyla içe aktarıldı.`
+                defaultValue: `Successfully imported ${res.importedCount} feed(s).`
             }));
         } catch (err) {
-            toast.error(err.message || t('rss.opmlImportError', { defaultValue: 'OPML içe aktarma başarısız.' }));
+            toast.error(err.message || t('rss.opmlImportError', { defaultValue: 'Failed to import OPML.' }));
         } finally {
             setIsAddingFeed(false);
             if (opmlInputRef.current) {

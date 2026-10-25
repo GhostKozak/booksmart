@@ -171,9 +171,9 @@ export function buildMergedPreview(items) {
 
     return {
         primaryId: primary.id,
-        title: primary.title || items.find(i => i.title)?.title || 'Yer İmi',
+        title: primary.title || items.find(i => i.title)?.title || 'Untitled',
         url: primary.url || items[0].url,
-        folder: primary.newFolder || primary.originalFolder || 'Kütüphane',
+        folder: primary.newFolder || primary.originalFolder || '',
         tags: Array.from(allTags),
         collections: Array.from(allCollections),
         note: mergedNote,
@@ -220,7 +220,7 @@ export function findSimilarBookmarkGroups(bookmarks = [], {
             clusters.push({
                 id: 'cluster_url_' + Math.random().toString(36).slice(2, 9),
                 type: hasExactUrls ? 'exact_url' : 'url_variation',
-                label: hasExactUrls ? 'Birebir Aynı URL' : 'Farklı Parametre / Format Varyasyonu',
+                label: hasExactUrls ? 'Exact URL Match' : 'URL / Parameter Variation',
                 similarityScore: hasExactUrls ? 1.0 : 0.95,
                 deepUrl,
                 bookmarks: items,
@@ -284,7 +284,7 @@ export function findSimilarBookmarkGroups(bookmarks = [], {
                 clusters.push({
                     id: 'cluster_title_' + Math.random().toString(36).slice(2, 9),
                     type: 'similar_title',
-                    label: `Benzer Başlık & İçerik (${Math.round(score * 100)}% Benzerlik)`,
+                    label: `Similar Title & Content (${Math.round(score * 100)}% Similarity)`,
                     similarityScore: score,
                     bookmarks: similarGroup,
                     mergedPreview: buildMergedPreview(similarGroup)

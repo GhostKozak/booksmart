@@ -173,11 +173,11 @@ export function downloadSnapshotFile(snapshot) {
 </head>
 <body>
   <div class="archive-banner">
-    📦 <strong>BookSmart Çevrimdışı Arşiv Kopyası</strong><br>
-    Orijinal Bağlantı: <a href="${snapshot.url}" target="_blank" rel="noopener noreferrer">${snapshot.url}</a><br>
-    Arşivlenme Tarihi: ${new Date(snapshot.savedAt).toLocaleString()}
+    📦 <strong>BookSmart Offline Archive Copy</strong><br>
+    Original Link: <a href="${snapshot.url}" target="_blank" rel="noopener noreferrer">${snapshot.url}</a><br>
+    Archived Date: ${new Date(snapshot.savedAt).toLocaleString()}
   </div>
-  <h1>${snapshot.title || 'Başlıksız'}</h1>
+  <h1>${snapshot.title || 'Untitled'}</h1>
   ${snapshot.html}
 </body>
 </html>`;

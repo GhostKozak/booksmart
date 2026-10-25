@@ -202,7 +202,9 @@
             "browserGroupLabel": "🔒 Tarayıcı İçi Yerel YZ (Çevrimdışı & Ücretsiz)",
             "ollamaGroupLabel": "🔒 Yerel YZ (Ollama - Çevrimdışı)",
             "reqApiKey": "Lütfen Ayarlar > Yapay Zeka sekmesinden API anahtarınızı girin.",
-            "browserBuiltin": "Tarayıcı İçi YZ (Chrome Gemini Nano - Yerel)"
+            "browserBuiltin": "Tarayıcı İçi YZ (Chrome Gemini Nano - Yerel)",
+            "localBadge": "Yerel & Bulut Destekli",
+            "browserTitle": "Chrome Yerel Yapay Zeka (Prompt API / Gemini Nano)"
         },
         "network": {
             "extensionTitle": "Sunucusuz Sağlık Kontrolü (Companion Eklentisi)",
@@ -278,7 +280,10 @@
             "desc": "Hızlı klavye komutlarıyla daha verimli gezinin.",
             "viewAll": "Tüm Kısayolları Gör",
             "quickPreview": "Hızlı Önizleme",
-            "spaceKey": "Boşluk (Space)"
+            "spaceKey": "Boşluk (Space)",
+            "commandPalette": "Komut Paleti",
+            "focusSearch": "Aramaya Odaklan",
+            "closeModals": "Pencereleri Kapat"
         }
     },
     "common": {
@@ -326,7 +331,13 @@
         "copyLink": "Bağlantıyı Kopyala",
         "saved": "Eklendi",
         "dismiss": "Yoksay",
-        "removeFailed": "Kaldırılamadı"
+        "removeFailed": "Kaldırılamadı",
+        "hide": "Gizle",
+        "show": "Göster",
+        "clearSearch": "Aramayı Temizle",
+        "library": "Kütüphane",
+        "operationFailed": "İşlem başarısız",
+        "saveFailed": "Kaydedilemedi"
     },
     "modals": {
         "rules": {
@@ -895,7 +906,13 @@
             "copied": "{{count}} yer imi panoya kopyalandı",
             "copiedMarkdown": "Markdown listesi panoya kopyalandı!",
             "empty": "Bu koleksiyon boş",
-            "footer": "{{count}} yer imi BookSmart ile paylaşıldı"
+            "footer": "{{count}} yer imi BookSmart ile paylaşıldı",
+            "authorPlaceholder": "Örn: @ghostkozak",
+            "guideStep1": "Yukarıdaki \"HTML İndir (index.html)\" butonuna tıklayarak dosyayı indirin.",
+            "guideStep2": "github.com/new adresinde yeni bir genel (Public) repository oluşturun (örn: linkler).",
+            "guideStep3": "İndirdiğiniz index.html dosyasını repo içine sürükleyip Commit edin.",
+            "guideStep4": "Repo içinde Settings > Pages sekmesine gidin, Source kısmından Deploy from a branch ve main seçip kaydedin.",
+            "guideStep5": "Tebrikler! Sayfanız https://<kullanici-adiniz>.github.io/<repo>/ adresinde yayında!"
         },
         "hub": {
             "modalTitle": "Koleksiyon Paylaşım Sayfası (Public Link Hub / Bento)",
@@ -914,7 +931,8 @@
             "githubGuideTitle": "GitHub Pages ile Ücretsiz Nasıl Yayınlanır? (1 Dakika)",
             "shareAsHub": "Bento / Linktree Hub Olarak Paylaş",
             "menuItem": "Web Sayfası (Bento / Hub)"
-        }
+        },
+        "actions": "Koleksiyon İşlemleri"
     },
     "onboarding": {
         "next": "İleri",
@@ -1087,7 +1105,9 @@
                 "blue": "Mavi",
                 "purple": "Mor"
             }
-        }
+        },
+        "articleLoadError": "Makale içeriği yüklenemedi",
+        "readingSummary": "Okuma Özeti"
     },
     "qr": {
         "title": "QR Kod ile Telefona Aktar",
@@ -1183,9 +1203,24 @@
         "cleanTitle": "Tebrikler! Yinelenen veya benzer içerik bulunamadı.",
         "cleanHelp": "Kütüphanenizdeki yer imleri temiz ve düzenli görünüyor. Daha geniş aramak için yukarıdaki hassasiyeti kaydırabilirsiniz.",
         "mergeThisGroup": "Birleştir",
-        "choosePrimary": "Ana (korunacak) yer imini seçin:"
+        "choosePrimary": "Ana (korunacak) yer imini seçin:",
+        "primaryBadge": "✓ Ana Yer İmi",
+        "duplicateBadge": "Yinelenen",
+        "mergeResult": "Birleşme Sonucu:",
+        "mergedNotes": "Birleşik notlar",
+        "mergedTags": "{{count}} birleşik etiket",
+        "copiesDeleted": "{{count}} kopya silinecek",
+        "tagsCount": "{{count}} etiket",
+        "hasNote": "Not var",
+        "exactUrl": "Birebir Aynı URL",
+        "urlVariation": "Farklı Parametre / Format Varyasyonu",
+        "similarTitle": "Benzer Başlık & İçerik ({{percent}}% Benzerlik)",
+        "bookmarksCount": "{{count}} yer imi"
     },
     "metadataEnricher": {
         "running": "Zenginleştiriliyor..."
+    },
+    "browserSync": {
+        "defaultSessionName": "Araştırma Oturumu"
     }
 }

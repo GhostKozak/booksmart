@@ -375,7 +375,7 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
             }
 
             if (event.data.type === 'BOOKSMART_SESSION_SAVED') {
-                const sessionName = event.data.sessionName || 'Araştırma Oturumu'
+                const sessionName = event.data.sessionName || t('browserSync.defaultSessionName', 'Research Session')
                 const sessionBookmarks = event.data.bookmarks || []
                 if (sessionBookmarks.length > 0) {
                     try {
@@ -462,7 +462,7 @@ export function useBrowserSync({ rawBookmarks = [], bookmarks = [], addCommand }
                     if (saved) {
                         toast.success(t('notifications.snapshotSavedSuccess', {
                             title: (snap.title || snap.url).slice(0, 30),
-                            defaultValue: `Çevrimdışı sayfa arşivi kaydedildi: ${(snap.title || snap.url).slice(0, 30)}`
+                            defaultValue: `Saved offline page snapshot: ${(snap.title || snap.url).slice(0, 30)}`
                         }))
                     }
                 } catch (err) {

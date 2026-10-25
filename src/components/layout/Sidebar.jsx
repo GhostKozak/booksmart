@@ -291,7 +291,7 @@ export function Sidebar({
                             type="button"
                             onClick={() => setFilterSearch('')}
                             className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded cursor-pointer"
-                            aria-label="Aramayı Temizle"
+                            aria-label={t('common.clearSearch', 'Aramayı Temizle')}
                         >
                             <X className="h-3 w-3" />
                         </button>
@@ -379,7 +379,7 @@ export function Sidebar({
                         type="button"
                         onClick={() => setIsShortcutsOpen(true)}
                         className="hover:text-foreground transition-colors cursor-pointer text-[10px] text-muted-foreground/60"
-                        title="Klavye Kısayolları"
+                        title={t('settings.shortcuts.title', 'Klavye Kısayolları')}
                     >
                         {t('sidebar.shortcutsHint', 'Kısayollar')} (?)
                     </button>

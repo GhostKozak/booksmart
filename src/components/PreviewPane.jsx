@@ -88,7 +88,7 @@ export function PreviewPane({ bookmark, onClose, className }) {
             const { feed } = await subscribeToFeed(bookmark);
             toast.success(t('rss.subscribeSuccess', {
                 title: feed.title,
-                defaultValue: `"${feed.title}" akışına abone olundu!`
+                defaultValue: `Subscribed to "${feed.title}" feed!`
             }));
         } catch (err) {
             toast.error(err.message || t('rss.noFeedFound', { defaultValue: 'Bu site için RSS akışı bulunamadı.' }));

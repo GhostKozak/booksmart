@@ -226,10 +226,17 @@ export function SimilarDuplicatesModal({
                                                         : "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/25"
                                                 )}
                                             >
-                                                {cluster.label}
+                                                {cluster.type === 'exact_url'
+                                                    ? t('similarDuplicates.exactUrl', 'Birebir Aynı URL')
+                                                    : cluster.type === 'url_variation'
+                                                    ? t('similarDuplicates.urlVariation', 'Farklı Parametre / Format Varyasyonu')
+                                                    : t('similarDuplicates.similarTitle', {
+                                                        percent: Math.round((cluster.similarityScore || 0) * 100),
+                                                        defaultValue: `Benzer Başlık & İçerik (${Math.round((cluster.similarityScore || 0) * 100)}% Benzerlik)`
+                                                    })}
                                             </span>
                                             <span className="text-xs text-muted-foreground font-medium">
-                                                {cluster.bookmarks.length} yer imi
+                                                {t('similarDuplicates.bookmarksCount', { count: cluster.bookmarks.length, defaultValue: `${cluster.bookmarks.length} yer imi` })}
                                             </span>
                                         </div>
 
@@ -293,7 +300,7 @@ export function SimilarDuplicatesModal({
                                                                             : "bg-muted text-muted-foreground"
                                                                     )}
                                                                 >
-                                                                    {isPrimary ? '✓ Ana Yer İmi' : 'Yinelenen'}
+                                                                    {isPrimary ? t('similarDuplicates.primaryBadge', '✓ Ana Yer İmi') : t('similarDuplicates.duplicateBadge', 'Yinelenen')}
                                                                 </span>
                                                             </div>
 
@@ -312,20 +319,20 @@ export function SimilarDuplicatesModal({
                                                         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
                                                             <span className="inline-flex items-center gap-1">
                                                                 <Folder className="w-3 h-3" />
-                                                                <span className="truncate max-w-[90px]">{bm.newFolder || bm.originalFolder || 'Kütüphane'}</span>
+                                                                <span className="truncate max-w-[90px]">{bm.newFolder || bm.originalFolder || t('common.library', 'Kütüphane')}</span>
                                                             </span>
 
                                                             {bm.tags && bm.tags.length > 0 && (
                                                                 <span className="inline-flex items-center gap-0.5 bg-muted px-1 rounded">
                                                                     <Hash className="w-2.5 h-2.5" />
-                                                                    <span>{bm.tags.length} etiket</span>
+                                                                    <span>{t('similarDuplicates.tagsCount', { count: bm.tags.length, defaultValue: `${bm.tags.length} etiket` })}</span>
                                                                 </span>
                                                             )}
 
                                                             {bm.note && (
                                                                 <span className="inline-flex items-center gap-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1 rounded">
                                                                     <StickyNote className="w-2.5 h-2.5" />
-                                                                    <span>Not var</span>
+                                                                    <span>{t('similarDuplicates.hasNote', 'Not var')}</span>
                                                                 </span>
                                                             )}
 
@@ -344,25 +351,25 @@ export function SimilarDuplicatesModal({
                                     {/* Merge Outcome Summary Preview */}
                                     <div className="p-3 bg-muted/20 text-xs flex flex-wrap items-center justify-between gap-2">
                                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                            <span className="font-semibold text-foreground">Birleşme Sonucu:</span>
+                                            <span className="font-semibold text-foreground">{t('similarDuplicates.mergeResult', 'Birleşme Sonucu:')}</span>
 
                                             {cluster.mergedPreview.tags.length > 0 && (
                                                 <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                     <Hash className="w-3 h-3 text-primary" />
-                                                    <span>{cluster.mergedPreview.tags.length} birleşik etiket</span>
+                                                    <span>{t('similarDuplicates.mergedTags', { count: cluster.mergedPreview.tags.length, defaultValue: `${cluster.mergedPreview.tags.length} birleşik etiket` })}</span>
                                                 </span>
                                             )}
 
                                             {cluster.mergedPreview.note && (
                                                 <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                     <StickyNote className="w-3 h-3 text-amber-500" />
-                                                    <span>Birleşik notlar</span>
+                                                    <span>{t('similarDuplicates.mergedNotes', 'Birleşik notlar')}</span>
                                                 </span>
                                             )}
 
                                             <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                 <Trash2 className="w-3 h-3 text-rose-500" />
-                                                <span>{cluster.bookmarks.length - 1} kopya silinecek</span>
+                                                <span>{t('similarDuplicates.copiesDeleted', { count: cluster.bookmarks.length - 1, defaultValue: `${cluster.bookmarks.length - 1} kopya silinecek` })}</span>
                                             </span>
                                         </div>
                                     </div>

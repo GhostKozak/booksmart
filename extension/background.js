@@ -893,7 +893,7 @@ async function captureCurrentTab(options = {}) {
  * Captures an offline page snapshot (cleaned HTML and text content) for the specified or active tab.
  * Broadcasts the snapshot data to open BookSmart tabs so snapshot-service can persist it in IndexedDB.
  */
-async function captureTabSnapshot(tabId, options = {}) {
+async function captureTabSnapshot(tabId, _options = {}) {
     let targetTabId = tabId;
     if (!targetTabId) {
         if (!chrome.tabs || !chrome.tabs.query) {

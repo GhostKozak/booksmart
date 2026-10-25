@@ -43,7 +43,7 @@ export function RulesPanel({
                     <span>{t('sidebar.rules.title')}</span>
                     <span className="text-xs text-muted-foreground font-normal">({rules.length})</span>
                     {suggestedRules.length > 0 && (
-                        <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.2 rounded-full" title={t('sidebar.rules.suggestionsAvailable', 'Önerilen kurallar var')}>
+                        <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.2 rounded-full" title={t('sidebar.rules.suggestionsAvailable', 'Suggestions available')}>
                             {suggestedRules.length}
                         </span>
                     )}

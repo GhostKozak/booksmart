@@ -136,7 +136,7 @@ export function SidebarCollections({
                                                     e.stopPropagation()
                                                     setContextMenu(contextMenu === collection.id ? null : collection.id)
                                                 }}
-                                                aria-label="Koleksiyon İşlemleri"
+                                                aria-label={t('collections.actions', 'Koleksiyon İşlemleri')}
                                             >
                                                 <MoreHorizontal className="h-3 w-3" />
                                             </button>
