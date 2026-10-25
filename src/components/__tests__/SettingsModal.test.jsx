@@ -49,12 +49,12 @@ describe('SettingsModal', () => {
 
     it('loads settings from sessionStorage on open', () => {
         sessionStorageMock.setItem('bs_api_key', 'test-key');
-        sessionStorageMock.setItem('bs_model', 'gpt-4o');
+        sessionStorageMock.setItem('bs_model', 'gpt-6.1-sol');
 
         render(<SettingsModal {...defaultProps} />);
 
         expect(screen.getByLabelText('settings.ai.apiKey').value).toBe('test-key');
-        expect(screen.getByLabelText('settings.ai.model').value).toBe('gpt-4o');
+        expect(screen.getByLabelText('settings.ai.model').value).toBe('gpt-6.1-sol');
     });
 
     it('updates state when inputs change', () => {
@@ -64,22 +64,22 @@ describe('SettingsModal', () => {
         const modelSelect = screen.getByLabelText('settings.ai.model');
 
         fireEvent.change(keyInput, { target: { value: 'new-key' } });
-        fireEvent.change(modelSelect, { target: { value: 'gemini-2.0-flash' } });
+        fireEvent.change(modelSelect, { target: { value: 'gemini-3.6-flash' } });
 
         expect(keyInput.value).toBe('new-key');
-        expect(modelSelect.value).toBe('gemini-2.0-flash');
+        expect(modelSelect.value).toBe('gemini-3.6-flash');
     });
 
     it('saves settings and calls onSave and onClose', () => {
         render(<SettingsModal {...defaultProps} />);
 
         fireEvent.change(screen.getByLabelText('settings.ai.apiKey'), { target: { value: 'save-key' } });
-        fireEvent.change(screen.getByLabelText('settings.ai.model'), { target: { value: 'gpt-4o' } });
+        fireEvent.change(screen.getByLabelText('settings.ai.model'), { target: { value: 'gpt-6.1-sol' } });
 
         fireEvent.click(screen.getByText('modals.settings.saveContinue'));
 
         expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_api_key', 'save-key');
-        expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_model', 'gpt-4o');
+        expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_model', 'gpt-6.1-sol');
         expect(sessionStorageMock.setItem).toHaveBeenCalledWith('bs_provider', 'openai');
 
         expect(defaultProps.onSave).toHaveBeenCalled();

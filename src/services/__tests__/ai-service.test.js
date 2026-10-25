@@ -158,31 +158,35 @@ describe('AI Service', () => {
     });
 
     describe('resolveEffectiveModel & Model Aliasing', () => {
-        it('maps deprecated or mistyped Gemini aliases to modern supported equivalents', () => {
-            expect(resolveEffectiveModel('gemini-3.5-flash-lite')).toBe('gemini-2.0-flash-lite');
-            expect(resolveEffectiveModel('gemini-3.5-flash')).toBe('gemini-2.5-flash');
-            expect(resolveEffectiveModel('gemini-3.5-pro')).toBe('gemini-2.5-pro');
-            expect(resolveEffectiveModel('gemini-2.5-flash-lite')).toBe('gemini-2.0-flash-lite');
-            expect(resolveEffectiveModel('gemini-1.5-flash-8b')).toBe('gemini-2.0-flash-lite');
+        it('maps deprecated or legacy Gemini aliases to modern supported equivalents', () => {
+            expect(resolveEffectiveModel('gemini-2.5-flash')).toBe('gemini-3.6-flash');
+            expect(resolveEffectiveModel('gemini-2.5-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gemini-2.5-pro')).toBe('gemini-3.5-pro');
+            expect(resolveEffectiveModel('gemini-2.0-flash')).toBe('gemini-3.6-flash');
+            expect(resolveEffectiveModel('gemini-2.0-flash-lite')).toBe('gemini-3.5-flash-lite');
         });
 
-        it('maps legacy GPT-3.5 to GPT-4o Mini', () => {
-            expect(resolveEffectiveModel('gpt-3.5-turbo')).toBe('gpt-4o-mini');
+        it('maps legacy GPT-3.5 and GPT-4o to GPT-6 series', () => {
+            expect(resolveEffectiveModel('gpt-3.5-turbo')).toBe('gpt-6-luna');
+            expect(resolveEffectiveModel('gpt-4o-mini')).toBe('gpt-6.1-sol');
+            expect(resolveEffectiveModel('gpt-4o')).toBe('gpt-6-astra');
         });
 
         it('retains modern supported models unchanged', () => {
-            expect(resolveEffectiveModel('gemini-2.5-flash')).toBe('gemini-2.5-flash');
-            expect(resolveEffectiveModel('gpt-4o-mini')).toBe('gpt-4o-mini');
-            expect(resolveEffectiveModel('claude-3-7-sonnet-20250219')).toBe('claude-3-7-sonnet-20250219');
+            expect(resolveEffectiveModel('gemini-3.5-flash-lite')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('gemini-3.6-flash')).toBe('gemini-3.6-flash');
+            expect(resolveEffectiveModel('gemini-4-argon')).toBe('gemini-4-argon');
+            expect(resolveEffectiveModel('claude-sonnet-5-5')).toBe('claude-sonnet-5-5');
+            expect(resolveEffectiveModel('gpt-6.1-sol')).toBe('gpt-6.1-sol');
         });
 
         it('falls back to DEFAULT_MODEL when null or empty', () => {
-            expect(resolveEffectiveModel(null)).toBe('gpt-4o-mini');
-            expect(resolveEffectiveModel('')).toBe('gpt-4o-mini');
-            expect(resolveEffectiveModel(undefined)).toBe('gpt-4o-mini');
+            expect(resolveEffectiveModel(null)).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel('')).toBe('gemini-3.5-flash-lite');
+            expect(resolveEffectiveModel(undefined)).toBe('gemini-3.5-flash-lite');
         });
 
-        it('routes legacy gemini-3.5-flash-lite to gemini-2.0-flash-lite when calling categorizeBookmarks', async () => {
+        it('routes legacy gemini-2.5-flash to gemini-3.6-flash when calling categorizeBookmarks', async () => {
             const bookmarks = [{ id: '1', title: 'Test', url: 'https://test.com' }];
             fetch.mockResolvedValueOnce({
                 ok: true,
@@ -191,24 +195,25 @@ describe('AI Service', () => {
                 })
             });
 
-            await categorizeBookmarks(bookmarks, 'gemini-key', 'gemini-3.5-flash-lite');
+            await categorizeBookmarks(bookmarks, 'gemini-key', 'gemini-2.5-flash');
 
-            // Should have made call to Gemini endpoint using gemini-2.0-flash-lite
+            // Should have made call to Gemini endpoint using gemini-3.6-flash
             expect(fetch).toHaveBeenCalledWith(
-                expect.stringContaining('gemini-2.0-flash-lite'),
+                expect.stringContaining('gemini-3.6-flash'),
                 expect.any(Object)
             );
         });
 
         it('correctly resolves provider for standard, local, and dynamic models', () => {
-            expect(resolveProviderForModel('gpt-4o-mini')).toBe('openai');
-            expect(resolveProviderForModel('gemini-2.5-flash')).toBe('gemini');
-            expect(resolveProviderForModel('claude-3-7-sonnet-20250219')).toBe('anthropic');
+            expect(resolveProviderForModel('gpt-6.1-sol')).toBe('openai');
+            expect(resolveProviderForModel('gemini-3.6-flash')).toBe('gemini');
+            expect(resolveProviderForModel('claude-sonnet-5-5')).toBe('anthropic');
             expect(resolveProviderForModel('browser-builtin')).toBe('browser');
-            expect(resolveProviderForModel('llama3.2')).toBe('ollama');
+            expect(resolveProviderForModel('llama4')).toBe('ollama');
+            expect(resolveProviderForModel('llama3.1')).toBe('ollama');
             expect(resolveProviderForModel('mistral:latest')).toBe('ollama');
             expect(resolveProviderForModel('deepseek-r1:8b')).toBe('ollama');
-            expect(resolveProviderForModel('anthropic/claude-3.7-sonnet')).toBe('openrouter');
+            expect(resolveProviderForModel('anthropic/claude-sonnet-5-5')).toBe('openrouter');
             expect(resolveProviderForModel('unknown-model-xyz')).toBe('openai');
         });
     });

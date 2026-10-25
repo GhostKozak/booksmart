@@ -126,9 +126,9 @@ describe('ai-cost-estimator', () => {
 
     describe('getModelPricing', () => {
         it('should return pricing for known models', () => {
-            const pricing = getModelPricing('claude-3-5-haiku-20241022');
-            expect(pricing.inputPerM).toBe(0.80);
-            expect(pricing.outputPerM).toBe(4.00);
+            const pricing = getModelPricing('gemini-3.6-flash');
+            expect(pricing.inputPerM).toBe(0.075);
+            expect(pricing.outputPerM).toBe(0.30);
         });
 
         it('should return correct pricing for newly added models', () => {
@@ -136,13 +136,13 @@ describe('ai-cost-estimator', () => {
             expect(geminiPricing.inputPerM).toBe(0.0375);
             expect(geminiPricing.outputPerM).toBe(0.15);
 
-            const o3Pricing = getModelPricing('o3-mini');
-            expect(o3Pricing.inputPerM).toBe(1.10);
-            expect(o3Pricing.outputPerM).toBe(4.40);
+            const solPricing = getModelPricing('gpt-6.1-sol');
+            expect(solPricing.inputPerM).toBe(1.00);
+            expect(solPricing.outputPerM).toBe(4.00);
 
-            const claude37Pricing = getModelPricing('claude-3-7-sonnet-20250219');
-            expect(claude37Pricing.inputPerM).toBe(3.00);
-            expect(claude37Pricing.outputPerM).toBe(15.00);
+            const sonnetPricing = getModelPricing('claude-sonnet-5-5');
+            expect(sonnetPricing.inputPerM).toBe(2.00);
+            expect(sonnetPricing.outputPerM).toBe(10.00);
         });
 
         it('should resolve legacy models through aliases', () => {

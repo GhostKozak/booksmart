@@ -99,9 +99,9 @@ describe('AICostModal', () => {
         )
 
         const select = screen.getByLabelText(/AI Model/i)
-        fireEvent.change(select, { target: { value: 'gemini-2.5-pro' } })
+        fireEvent.change(select, { target: { value: 'gemini-3.5-pro' } })
 
-        expect(select.value).toBe('gemini-2.5-pro')
+        expect(select.value).toBe('gemini-3.5-pro')
     })
 
     it('calls onConfirm with selected model when clicking confirm button', () => {

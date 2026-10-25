@@ -2,14 +2,33 @@ import { executeAIRequest } from './ai/provider-dispatcher';
 import { cleanJsonString, sanitizeLanguageCode, getProxiedUrl } from './ai/ai-utils';
 
 export const MODEL_ALIASES = {
-    // Deprecated or mistyped aliases mapped to modern stable models
-    'gemini-3.5-flash-lite': 'gemini-2.0-flash-lite',
-    'gemini-3.5-flash': 'gemini-2.5-flash',
-    'gemini-3.5-pro': 'gemini-2.5-pro',
-    'gemini-2.5-flash-lite': 'gemini-2.0-flash-lite',
-    'gemini-1.5-flash-8b': 'gemini-2.0-flash-lite',
-    'claude-sonnet-4-20250514': 'claude-3-7-sonnet-20250219',
-    'gpt-3.5-turbo': 'gpt-4o-mini',
+    // Deprecated legacy models mapped to modern replacements
+    'gemini-2.5-flash': 'gemini-3.6-flash',
+    'gemini-2.5-pro': 'gemini-3.5-pro',
+    'gemini-2.5-flash-lite': 'gemini-3.5-flash-lite',
+    'gemini-2.0-flash': 'gemini-3.6-flash',
+    'gemini-2.0-flash-lite': 'gemini-3.5-flash-lite',
+    'gemini-1.5-flash': 'gemini-3.5-flash-lite',
+    'gemini-1.5-flash-8b': 'gemini-3.5-flash-lite',
+    'gemini-1.5-pro': 'gemini-3.5-pro',
+    'gemini-3.5-flash': 'gemini-3.6-flash',
+
+    'claude-3-7-sonnet-20250219': 'claude-sonnet-5-5',
+    'claude-3-5-sonnet-20241022': 'claude-sonnet-5-5',
+    'claude-3-5-haiku-20241022': 'claude-haiku-5-5',
+    'claude-3-opus-20240229': 'claude-opus-5-5',
+    'claude-sonnet-4-20250514': 'claude-sonnet-5-5',
+
+    'gpt-4o-mini': 'gpt-6.1-sol',
+    'gpt-4o': 'gpt-6-astra',
+    'gpt-4.5-preview': 'gpt-6-astra',
+    'gpt-3.5-turbo': 'gpt-6-luna',
+    'o1': 'gpt-6-astra',
+    'o1-mini': 'gpt-6.1-sol',
+    'o3-mini': 'gpt-6.1-sol',
+
+    'llama3.2': 'llama3.1',
+    'llama3.3': 'llama4',
 };
 
 export function isLocalAIProvider(provider) {
@@ -19,49 +38,42 @@ export function isLocalAIProvider(provider) {
 export const AI_MODELS = [
     // --- Local & Privacy-First (No API Key Required) ---
     { id: 'browser-builtin', name: 'In-Browser AI (Chrome Gemini Nano - Local)', provider: 'browser' },
-    { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
-    { id: 'llama3.3', name: 'Llama 3.3 70B (Ollama Local)', provider: 'ollama' },
+    { id: 'llama4', name: 'Llama 4 (Ollama Local)', provider: 'ollama' },
+    { id: 'llama3.1', name: 'Llama 3.1 (Ollama Local)', provider: 'ollama' },
     { id: 'deepseek-r1', name: 'DeepSeek R1 (Ollama Local)', provider: 'ollama' },
-    { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
-    { id: 'mistral', name: 'Mistral 7B (Ollama Local)', provider: 'ollama' },
-    { id: 'phi4', name: 'Microsoft Phi-4 (Ollama Local)', provider: 'ollama' },
-    { id: 'gemma2', name: 'Google Gemma 2 (Ollama Local)', provider: 'ollama' },
+    { id: 'qwen3.8', name: 'Qwen 3.8 (Ollama Local)', provider: 'ollama' },
+    { id: 'gpt-oss', name: 'GPT-OSS (Ollama Local)', provider: 'ollama' },
 
-    // --- OpenAI ---
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Cheap)', provider: 'openai' },
-    { id: 'gpt-4o', name: 'GPT-4o (Flagship Multimodal)', provider: 'openai' },
-    { id: 'gpt-4.5-preview', name: 'GPT-4.5 (Preview)', provider: 'openai' },
-    { id: 'o3-mini', name: 'o3-mini (Fast Reasoning)', provider: 'openai' },
-    { id: 'o1', name: 'o1 (Deep Reasoning)', provider: 'openai' },
-    { id: 'o1-mini', name: 'o1-mini', provider: 'openai' },
-    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Legacy)', provider: 'openai' },
+    // --- Google Gemini (Active 3.x & 4 Series) ---
+    { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite (Fastest & Cost-Efficient)', provider: 'gemini' },
+    { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash (Production Stable)', provider: 'gemini' },
+    { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (High Speed & Multimodal)', provider: 'gemini' },
+    { id: 'gemini-3.5-pro', name: 'Gemini 3.5 Pro (Deep Reasoning)', provider: 'gemini' },
+    { id: 'gemini-4-argon', name: 'Gemini 4 Argon (Flagship Autonomous)', provider: 'gemini' },
 
-    // --- Google Gemini (Modern 2.5 & 2.0) ---
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Recommended)', provider: 'gemini' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Deep Reasoning)', provider: 'gemini' },
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Stable)', provider: 'gemini' },
-    { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite (Fast & Low Cost)', provider: 'gemini' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (LTS)', provider: 'gemini' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (LTS)', provider: 'gemini' },
+    // --- OpenAI (GPT-6 Series) ---
+    { id: 'gpt-6.1-sol', name: 'GPT-6.1 Sol (Recommended)', provider: 'openai' },
+    { id: 'gpt-6-luna', name: 'GPT-6 Luna (Fast & Low Cost)', provider: 'openai' },
+    { id: 'gpt-6-astra', name: 'GPT-6 Astra (Flagship)', provider: 'openai' },
 
-    // --- Anthropic (Direct) ---
-    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet (Hybrid Reasoning)', provider: 'anthropic' },
-    { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (v2)', provider: 'anthropic' },
-    { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', provider: 'anthropic' },
-    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'anthropic' },
+    // --- Anthropic (Claude 5 Series) ---
+    { id: 'claude-sonnet-5-5', name: 'Claude Sonnet 5.5 (Balanced Workhorse)', provider: 'anthropic' },
+    { id: 'claude-haiku-5-5', name: 'Claude Haiku 5.5 (Fast & Lightweight)', provider: 'anthropic' },
+    { id: 'claude-opus-5-5', name: 'Claude Opus 5.5 (Advanced Agentic)', provider: 'anthropic' },
+    { id: 'claude-fable-5-1', name: 'Claude Fable 5.1 (High Reasoning & Research)', provider: 'anthropic' },
 
     // --- OpenRouter ---
-    { id: 'anthropic/claude-3.7-sonnet', name: 'Claude 3.7 Sonnet (via OpenRouter)', provider: 'openrouter' },
-    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (via OpenRouter)', provider: 'openrouter' },
+    { id: 'google/gemini-3.6-flash', name: 'Gemini 3.6 Flash (via OpenRouter)', provider: 'openrouter' },
+    { id: 'google/gemini-4-argon', name: 'Gemini 4 Argon (via OpenRouter)', provider: 'openrouter' },
+    { id: 'anthropic/claude-sonnet-5-5', name: 'Claude Sonnet 5.5 (via OpenRouter)', provider: 'openrouter' },
+    { id: 'anthropic/claude-haiku-5-5', name: 'Claude Haiku 5.5 (via OpenRouter)', provider: 'openrouter' },
+    { id: 'openai/gpt-6.1-sol', name: 'GPT-6.1 Sol (via OpenRouter)', provider: 'openrouter' },
     { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1 (via OpenRouter)', provider: 'openrouter' },
-    { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (via OpenRouter)', provider: 'openrouter' },
-    { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B (via OpenRouter)', provider: 'openrouter' },
-    { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash (via OpenRouter)', provider: 'openrouter' },
-    { id: 'google/gemini-2.0-flash-001', name: 'Gemini 2.0 Flash (via OpenRouter)', provider: 'openrouter' },
-    { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B (via OpenRouter)', provider: 'openrouter' },
+    { id: 'meta-llama/llama-4', name: 'Llama 4 (via OpenRouter)', provider: 'openrouter' },
+    { id: 'qwen/qwen-3.8', name: 'Qwen 3.8 (via OpenRouter)', provider: 'openrouter' },
 ];
 
-export const DEFAULT_MODEL = 'gpt-4o-mini';
+export const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 
 /**
  * Resolves any deprecated or legacy model ID to its modern supported replacement.
@@ -82,20 +94,20 @@ export function resolveEffectiveModel(modelId) {
  */
 export function resolveProviderForModel(modelId, explicitProvider = null) {
     if (explicitProvider) return explicitProvider;
-    if (!modelId) return 'openai';
+    if (!modelId) return 'gemini';
 
     const effective = resolveEffectiveModel(modelId);
     const staticInfo = AI_MODELS.find(m => m.id === effective || m.id === modelId);
     if (staticInfo) return staticInfo.provider;
 
     if (modelId === 'browser-builtin' || modelId.startsWith('browser')) return 'browser';
-    if (modelId.includes('/') || modelId.startsWith('anthropic/') || modelId.startsWith('deepseek/') || modelId.startsWith('meta-llama/') || modelId.startsWith('google/') || modelId.startsWith('qwen/')) return 'openrouter';
+    if (modelId.includes('/') || modelId.startsWith('anthropic/') || modelId.startsWith('deepseek/') || modelId.startsWith('meta-llama/') || modelId.startsWith('google/') || modelId.startsWith('qwen/') || modelId.startsWith('openai/')) return 'openrouter';
     if (modelId.startsWith('claude-')) return 'anthropic';
     if (modelId.startsWith('gemini-')) return 'gemini';
-    if (modelId.startsWith('gpt-') || modelId.startsWith('o1') || modelId.startsWith('o3')) return 'openai';
+    if (modelId.startsWith('gpt-')) return 'openai';
 
     // Ollama patterns: contains colon tag (e.g. "mistral:latest") or known local family keyword
-    const localFamilies = ['llama', 'qwen', 'deepseek', 'mistral', 'phi', 'gemma', 'codellama', 'vicuna', 'llava', 'nomic', 'tinyllama'];
+    const localFamilies = ['llama', 'qwen', 'deepseek', 'mistral', 'phi', 'gemma', 'codellama', 'vicuna', 'llava', 'nomic', 'tinyllama', 'oss'];
     const lower = modelId.toLowerCase();
     if (modelId.includes(':') || localFamilies.some(f => lower.includes(f))) {
         return 'ollama';
