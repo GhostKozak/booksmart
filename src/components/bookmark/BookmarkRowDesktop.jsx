@@ -47,10 +47,10 @@ export function BookmarkRowDesktop({
             {/* Col 2: Title, URL, Micro-badges & Metadata */}
             <div className={cn("flex flex-col min-w-0 overflow-hidden", compact ? "py-1.5" : "py-2.5")}>
                 <LinkTooltip bookmark={bookmark} className="w-full min-w-0 block">
-                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
                         <Favicon url={bookmark.url} className="w-4 h-4 shrink-0 rounded-xs shadow-2xs" />
                         <span className={cn(
-                            "font-medium truncate text-sm text-foreground hover:text-primary transition-colors",
+                            "font-medium truncate text-sm text-foreground hover:text-primary transition-colors min-w-0",
                             (bookmark.status === 'suggested' || bookmark.status === 'ai-suggested') && "text-purple-700 dark:text-purple-300 font-semibold",
                             (bookmark.status === 'matched' || bookmark.status === 'conflict') && "text-emerald-700 dark:text-emerald-300",
                             healthStatus === 'dead' && "text-red-600 dark:text-red-400 decoration-red-500/40 line-through decoration-2"
