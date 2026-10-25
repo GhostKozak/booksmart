@@ -170,7 +170,7 @@ export function BookmarkTree({
 
         toast.success(t('bookmarks.tree.folderCreated', {
             name: folderName,
-            defaultValue: `"${folderName}" klasörü oluşturuldu`
+            defaultValue: `Created folder "${folderName}"`
         }))
     }, [availableFolders.length, extraFolders.length, t])
 
@@ -256,10 +256,10 @@ export function BookmarkTree({
                     <div className="flex items-center gap-2 pl-2">
                         <FolderTree className="h-4 w-4 text-primary" />
                         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            {t('header.treeView', 'Klasör Ağacı')}
+                            {t('header.treeView', 'Folder Tree')}
                         </span>
                         <span className="text-[10px] text-muted-foreground/60 hidden sm:inline">
-                            • {t('bookmarks.tree.hint', 'Klasörleri sürükleyerek iç içe yerleştirebilir veya kök dizine çıkarabilirsiniz')}
+                            • {t('bookmarks.tree.hint', 'Drag folders to nest them or move to root level')}
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -268,16 +268,16 @@ export function BookmarkTree({
                             size="sm"
                             className="h-7 text-xs font-semibold gap-1.5 rounded-lg border-primary/30 hover:border-primary text-primary hover:bg-primary/5 cursor-pointer"
                             onClick={() => setIsCreatingRootFolder(true)}
-                            title={t('bookmarks.tree.addRootFolder', 'Yeni Ana Klasör Oluştur')}
+                            title={t('bookmarks.tree.addRootFolder', 'Create New Root Folder')}
                         >
                             <FolderPlus className="w-3.5 h-3.5" />
-                            <span>{t('bookmarks.tree.newFolderBtn', 'Yeni Klasör')}</span>
+                            <span>{t('bookmarks.tree.newFolderBtn', 'New Folder')}</span>
                         </Button>
                         <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleExpandAll}>
-                            {t('bookmarks.tree.expandAll', 'Tümünü Aç')}
+                            {t('bookmarks.tree.expandAll', 'Expand All')}
                         </Button>
                         <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={handleCollapseAll}>
-                            {t('bookmarks.tree.collapseAll', 'Tümünü Kapat')}
+                            {t('bookmarks.tree.collapseAll', 'Collapse All')}
                         </Button>
                     </div>
                 </div>
@@ -298,7 +298,7 @@ export function BookmarkTree({
                                 if (e.key === 'Enter') handleConfirmRootCreate()
                                 if (e.key === 'Escape') handleCancelRootCreate()
                             }}
-                            placeholder={t('bookmarks.tree.rootFolderPlaceholder', 'Yeni ana klasör adı...')}
+                            placeholder={t('bookmarks.tree.rootFolderPlaceholder', 'New root folder name...')}
                             className="h-8 text-xs bg-background py-1 px-2 border-primary/40 focus:border-primary flex-1 rounded-lg"
                         />
                         <div className="flex items-center gap-1 shrink-0">
@@ -309,7 +309,7 @@ export function BookmarkTree({
                                 onClick={handleConfirmRootCreate}
                             >
                                 <Check className="w-3.5 h-3.5 mr-1" />
-                                <span>{t('common.save', 'Oluştur')}</span>
+                                <span>{t('common.save', 'Create')}</span>
                             </Button>
                             <Button
                                 variant="ghost"
@@ -370,7 +370,7 @@ export function BookmarkTree({
 
                     {!hasSubfolders && tree.bookmarks.length === 0 && !isCreatingRootFolder && (
                         <div className="p-8 text-center text-xs text-muted-foreground">
-                            {t('main.empty.desc', 'Henüz klasör veya yer imi bulunmuyor.')}
+                            {t('main.empty.desc', 'No folders or bookmarks yet.')}
                         </div>
                     )}
                 </div>

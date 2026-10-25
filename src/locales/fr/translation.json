@@ -55,7 +55,8 @@
             "twoWay": "Synchronisation bidirectionnelle",
             "pull": "Importer du navigateur",
             "push": "Exporter vers le navigateur",
-            "syncBtn": "Sync Navigateur"
+            "syncBtn": "Sync Navigateur",
+            "title": "Companion Extension"
         },
         "extensionNotConnectedDesc": "Activez les vérifications sans CORS et la synchronisation bidirectionnelle avec votre navigateur.",
         "installExtensionBtn": "Installer l'extension compagnon",
@@ -78,7 +79,10 @@
             "desc": "Descending (Z→A, Newest first)"
         },
         "themeLabel": "Thème",
-        "semanticPlaceholder": "Semantic search (e.g. React optimization)..."
+        "semanticPlaceholder": "Semantic search (e.g. React optimization)...",
+        "toggleSidebar": "Toggle Sidebar",
+        "connected": "Connected",
+        "dataManagement": "Data & Session"
     },
     "sidebar": {
         "allBookmarks": "Tous les signets",
@@ -162,7 +166,24 @@
             "reqOllama": "Laissez vide pour utiliser http://localhost:11434 par défaut",
             "reqAnthropic": "Nécessite une clé API Anthropic",
             "autoSummarize": "Résumé Automatique dans les Détails",
-            "autoSummarizeDesc": "Génère automatiquement un résumé d'une phrase (\"De quoi parle cette page ?\") lors de l'ouverture des détails du signet."
+            "autoSummarizeDesc": "Génère automatiquement un résumé d'une phrase (\"De quoi parle cette page ?\") lors de l'ouverture des détails du signet.",
+            "desc": "AI models, encrypted key vault, and auto-summarization",
+            "privacyTitle": "100% Private & Local Mode (No API Key Required)",
+            "browserDesc": "In-browser model (Chrome Gemini Nano) runs completely local on your device. No data is sent to external servers, and it is 100% free.",
+            "ollamaDesc": "Ollama model runs on your local server. Your data never leaves your machine to third-party cloud providers.",
+            "browserReady": "Ready to Use in Browser",
+            "browserNotAvailable": "Prompt API Not Available Directly",
+            "browserHelp": "This feature uses Google Chrome's built-in Gemini Nano model. No API key required. If not enabled, open chrome://flags/#prompt-api-for-gemini-nano and set it to 'Enabled'.",
+            "ollamaTesting": "Connecting to Ollama server...",
+            "ollamaConnected": "Connected successfully! Found {{count}} local model(s) (v{{version}}).",
+            "ollamaConnectedEmpty": "Connected (v{{version}}), but no models downloaded yet. You can run e.g. 'ollama run llama3.2'.",
+            "ollamaError": "Failed to connect to Ollama. Make sure 'ollama serve' is running.",
+            "ollamaTestBtn": "Test Connection & Fetch Models",
+            "ollamaLocalLabel": "Local Ollama",
+            "browserGroupLabel": "🔒 In-Browser Local AI (Offline & Free)",
+            "ollamaGroupLabel": "🔒 Local AI (Ollama - Offline)",
+            "reqApiKey": "Please enter your API key in Settings > AI tab.",
+            "browserBuiltin": "IA dans le navigateur (Chrome Gemini Nano - Local)"
         },
         "network": {
             "extensionTitle": "Vérification Sans Serveur (Extension Compagnon)",
@@ -175,7 +196,8 @@
             "extensionDetectedToast": "Extension compagnon connectée avec succès !",
             "extensionNotFoundToast": "Extension non encore détectée.",
             "corsProxy": "URL du proxy CORS",
-            "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages."
+            "corsProxyDesc": "Proxy optionnel pour contourner les restrictions CORS pour la vérification des liens et le résumé des pages.",
+            "extensionDesc": "Enables serverless, CORS-free dead link checking and background sync."
         },
         "languages": {
             "en": "Anglais",
@@ -187,7 +209,12 @@
         "theme": {
             "light": "Thème clair",
             "dark": "Thème sombre",
-            "system": "Thème du système"
+            "system": "Thème du système",
+            "title": "Appearance & Theme",
+            "desc": "Customize the color theme of the user interface.",
+            "lightDesc": "Light colors",
+            "darkDesc": "Dark colors",
+            "systemDesc": "Follows system preferences"
         },
         "previewCache": {
             "title": "Cache OpenGraph et Favicon",
@@ -217,17 +244,38 @@
         },
         "about": {
             "title": "About BookSmart",
-            "desc": "Version info, local storage, and privacy guarantee",
+            "desc": "Privacy-first, local, and modern bookmark manager",
             "version": "Version",
-            "privacyTitle": "100% Local & Privacy-First",
-            "privacyDesc": "All your bookmarks, folders, tags, and encrypted API keys are stored solely in this browser's IndexedDB storage. Your data is never transmitted to external servers or cloud services.",
+            "privacyTitle": "100% Local & Privacy-Focused",
+            "privacyDesc": "All your bookmarks, folders, tags, and encrypted API keys are stored solely in this browser's IndexedDB. Your data is never sent to external servers or cloud.",
             "stats": "Local Database Statistics",
-            "totalBookmarks": "Total Bookmarks",
+            "totalBookmarks": "Bookmarks",
             "totalFolders": "Folders",
             "totalTags": "Tags",
             "totalSnapshots": "Offline Snapshots",
             "github": "GitHub Repository",
-            "license": "Open Source MIT License"
+            "license": "Open Source MIT License",
+            "totalCollections": "Collections",
+            "totalRules": "Automation Rules"
+        },
+        "general": {
+            "desc": "Appearance, language, companion extension, and system preferences"
+        },
+        "folders": {
+            "desc": "Bookmark folder hierarchy and color management"
+        },
+        "tags": {
+            "desc": "Tag taxonomy and auto-discovered tags"
+        },
+        "backup": {
+            "desc": "Database backup, export/import, and cache management"
+        },
+        "shortcuts": {
+            "title": "Keyboard Shortcuts",
+            "desc": "Navigate faster with convenient keyboard shortcuts.",
+            "viewAll": "View All Shortcuts",
+            "quickPreview": "Quick Preview",
+            "spaceKey": "Space"
         }
     },
     "common": {
@@ -268,7 +316,14 @@
         "remove": "Supprimer",
         "retry": "Réessayer",
         "search": "Rechercher...",
-        "openInNewTab": "Ouvrir dans un nouvel onglet"
+        "openInNewTab": "Ouvrir dans un nouvel onglet",
+        "all": "All",
+        "copy": "Copy",
+        "copied": "Copied",
+        "copyLink": "Copy Link",
+        "saved": "Saved",
+        "dismiss": "Dismiss",
+        "removeFailed": "Could not be removed"
     },
     "modals": {
         "rules": {
@@ -447,6 +502,40 @@
             "firefoxStep2": "Cliquer sur \"Charger un module temporaire...\"",
             "firefoxStep3": "Sélectionner le fichier manifest.json dans le dossier extrait",
             "firefoxNote": "Important : Ne sélectionnez pas /extension/manifest.json (Chrome). Firefox requiert les scripts d'arrière-plan de /extension-firefox."
+        },
+        "ruleSuggestions": {
+            "title": "Suggestions de Règles Intelligentes",
+            "description": "Vos dossiers de favoris ont été analysés et des règles automatiques ont été détectées en fonction de vos habitudes.",
+            "analyzeAI": "Analyse Approfondie par IA",
+            "analyzingAI": "Analyse des habitudes par l'IA...",
+            "applyAll": "Appliquer Toutes les Suggestions ({{count}})",
+            "apply": "Appliquer",
+            "applied": "Appliqué",
+            "dismiss": "Ignorer la Suggestion",
+            "emptyTitle": "Aucune Suggestion Trouvée",
+            "emptyDesc": "Aucun modèle de dossier distinct n'a encore été détecté dans votre bibliothèque. À mesure que vous ajouterez des favoris, des suggestions apparaîtront ici.",
+            "sourcePattern": "Motif Source",
+            "targetFolder": "Dossier Cible",
+            "addTags": "Étiquettes"
+        },
+        "metadataEnricher": {
+            "title": "Enrichissement Massif des Favicons et Métadonnées",
+            "candidatesBadge": "manquant",
+            "description": "Mettez en file d'attente et enrichissez en arrière-plan les favoris aux titres manquants, sans description ou aux icônes cassées.",
+            "scope": "Portée",
+            "scopeNeeding": "Seulement les Incomplets",
+            "scopeAll": "Enrichir Toute la Bibliothèque",
+            "scopeSelected": "Sélectionnés Uniquement ({{count}})",
+            "updateTitle": "Récupérer le Titre de la Page",
+            "updateNotes": "Ajouter la Métadescription aux Notes",
+            "updateIcon": "Actualiser le Favicon & l'Icône",
+            "start": "Démarrer l'Enrichissement",
+            "pause": "Suspendre",
+            "resume": "Reprendre",
+            "cancel": "Annuler",
+            "reset": "Réinitialiser",
+            "progress": "Progression : {{processed}} / {{total}}",
+            "completed": "Enrichissement terminé !"
         }
     },
     "backup": {
@@ -641,7 +730,23 @@
         },
         "tree": {
             "expandAll": "Tout développer",
-            "collapseAll": "Tout réduire"
+            "collapseAll": "Tout réduire",
+            "hint": "Drag folders to nest them or move to root level",
+            "addRootFolder": "Create New Root Folder",
+            "newFolderBtn": "New Folder",
+            "rootFolderPlaceholder": "New root folder name...",
+            "dragFolder": "Drag to move folder",
+            "nestInto": "Nest Into",
+            "addSubfolder": "Add Subfolder",
+            "newSubfolderPlaceholder": "Subfolder name...",
+            "dragToMove": "Drag to move bookmark",
+            "dropToRoot": "Move to Root Level",
+            "releaseToDrop": "Drop Here",
+            "rootLevel": "Root Directory",
+            "folderCreated": "Created folder \"{{name}}\"",
+            "cannotMoveIntoChild": "A folder cannot be moved into its own subfolder",
+            "folderMoved": "Moved folder \"{{name}}\"",
+            "bookmarkMoved": "Moved bookmark to \"{{folder}}\""
         },
         "editModal": {
             "title": "Modifier le marque-page",
@@ -723,7 +828,10 @@
         "removedFromCollection": "{{count}} signets retirés de \"{{name}}\"",
         "aiTitlesFixed": "Titres corrigés pour {{count}} marque-pages.",
         "aiDupesFound": "{{count}} groupes trouvés.",
-        "backupQuotaExceeded": "Échec de la sauvegarde automatique : quota de stockage dépassé."
+        "backupQuotaExceeded": "Échec de la sauvegarde automatique : quota de stockage dépassé.",
+        "ruleCreatedFromSuggestion": "Created rule from suggestion!",
+        "rulesCreatedBatch": "Applied {{count}} rule suggestions!",
+        "aiRulesFound": "Found {{count}} new rule patterns with AI!"
     },
     "collections": {
         "add": "Nouvelle Collection",
@@ -823,7 +931,8 @@
         "allBookmarksAlreadyImported": "Tous les signets du navigateur sont déjà dans votre bibliothèque",
         "noBookmarksToExport": "Aucun signet à exporter vers le navigateur",
         "tabCaptured": "Onglet actif enregistré : {{title}}",
-        "sessionSavedSuccess": "Collection \"{{name}}\" enregistrée ({{count}} onglets)"
+        "sessionSavedSuccess": "Collection \"{{name}}\" enregistrée ({{count}} onglets)",
+        "snapshotSavedSuccess": "Saved offline snapshot: {{title}}"
     },
     "commandPalette": {
         "title": "Palette de commandes",
@@ -897,7 +1006,8 @@
         "opmlExportSuccess": "OPML exporté avec succès.",
         "opmlExportError": "Échec de l'exportation OPML.",
         "opmlImportSuccess": "{{count}} flux importés avec succès.",
-        "opmlImportError": "Échec de l'importation OPML."
+        "opmlImportError": "Échec de l'importation OPML.",
+        "readerSubtitle": "Followed sites and latest articles"
     },
     "reader": {
         "modeTitle": "Mode Lecture",
@@ -1000,43 +1110,49 @@
         "savedAt": "Saved At",
         "fileSize": "Size"
     },
-    "modals": {
-        "extensionGuide": {
-            "title": "Extension Compagnon BookSmart"
-        },
-        "ruleSuggestions": {
-            "title": "Suggestions de Règles Intelligentes",
-            "description": "Vos dossiers de favoris ont été analysés et des règles automatiques ont été détectées en fonction de vos habitudes.",
-            "analyzeAI": "Analyse Approfondie par IA",
-            "analyzingAI": "Analyse des habitudes par l'IA...",
-            "applyAll": "Appliquer Toutes les Suggestions ({{count}})",
-            "apply": "Appliquer",
-            "applied": "Appliqué",
-            "dismiss": "Ignorer la Suggestion",
-            "emptyTitle": "Aucune Suggestion Trouvée",
-            "emptyDesc": "Aucun modèle de dossier distinct n'a encore été détecté dans votre bibliothèque. À mesure que vous ajouterez des favoris, des suggestions apparaîtront ici.",
-            "sourcePattern": "Motif Source",
-            "targetFolder": "Dossier Cible",
-            "addTags": "Étiquettes"
-        },
-        "metadataEnricher": {
-            "title": "Enrichissement Massif des Favicons et Métadonnées",
-            "candidatesBadge": "manquant",
-            "description": "Mettez en file d'attente et enrichissez en arrière-plan les favoris aux titres manquants, sans description ou aux icônes cassées.",
-            "scope": "Portée",
-            "scopeNeeding": "Seulement les Incomplets",
-            "scopeAll": "Enrichir Toute la Bibliothèque",
-            "scopeSelected": "Sélectionnés Uniquement ({{count}})",
-            "updateTitle": "Récupérer le Titre de la Page",
-            "updateNotes": "Ajouter la Métadescription aux Notes",
-            "updateIcon": "Actualiser le Favicon & l'Icône",
-            "start": "Démarrer l'Enrichissement",
-            "pause": "Suspendre",
-            "resume": "Reprendre",
-            "cancel": "Annuler",
-            "reset": "Réinitialiser",
-            "progress": "Progression : {{processed}} / {{total}}",
-            "completed": "Enrichissement terminé !"
-        }
+    "highlights": {
+        "menuTitle": "Highlights & Sticky Notes",
+        "menuSubtitle": "Web clippings and Obsidian (.md) export",
+        "modalTitle": "Highlights & Sticky Notes (Obsidian)",
+        "syncSuccess": "Successfully synced highlights from extension!",
+        "allSynced": "All extension highlights are up to date.",
+        "noExtensionFound": "No saved highlights found in the extension yet.",
+        "syncError": "Failed to fetch highlights from extension.",
+        "exportSuccess": "Obsidian Markdown file downloaded!",
+        "copySuccess": "Highlights copied to clipboard in Obsidian format!",
+        "copyError": "Failed to copy to clipboard.",
+        "deleted": "Highlight deleted.",
+        "noteUpdated": "Note updated.",
+        "searchPlaceholder": "Search highlights or notes...",
+        "onlyNotesTooltip": "Show only highlights with notes",
+        "withNotes": "With Notes",
+        "syncFromExtension": "Sync highlights from companion extension",
+        "syncBtn": "Sync from Extension",
+        "copyObsidian": "Copy to clipboard in Obsidian Markdown",
+        "exportObsidian": "Download as Obsidian Markdown (.md)",
+        "obsidianExportBtn": "Obsidian .md",
+        "emptyTitle": "No highlights yet",
+        "emptyHelp": "Select any text on any webpage and right-click to highlight or add sticky notes using the BookSmart Companion extension.",
+        "trySync": "Scan Extension & Sync",
+        "addNotePlaceholder": "Add or edit note...",
+        "clickToEditNote": "Click to edit note",
+        "addNote": "Add Note"
+    },
+    "similarDuplicates": {
+        "menuBtn": "Review & Consolidate Similar Bookmarks",
+        "modalTitle": "Consolidate Similar & Duplicate Bookmarks",
+        "mergedGroupSuccess": "Group merged successfully!",
+        "mergedAllSuccess": "All {{count}} groups consolidated!",
+        "urlVariants": "URL Variations",
+        "similarTitles": "Similar Titles",
+        "similarity": "Sensitivity:",
+        "mergeAllBtn": "Consolidate All ({{count}})",
+        "cleanTitle": "Congratulations! No duplicate or similar content found.",
+        "cleanHelp": "Your library is clean and well-organized. You can adjust the sensitivity slider above to search more broadly.",
+        "mergeThisGroup": "Merge",
+        "choosePrimary": "Select primary bookmark to keep:"
+    },
+    "metadataEnricher": {
+        "running": "Enriching in background..."
     }
 }

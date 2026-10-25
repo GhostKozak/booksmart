@@ -247,8 +247,8 @@ export function BookmarkTable({
                                             size="icon"
                                             className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                                             onClick={() => useAppStore.getState().openReaderMode(bookmark)}
-                                            title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
-                                            aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                                            title={t('reader.openReaderMode', 'Open Reader Mode')}
+                                            aria-label={t('reader.openReaderMode', 'Open Reader Mode')}
                                         >
                                             <BookOpen className="w-3.5 h-3.5" />
                                         </Button>

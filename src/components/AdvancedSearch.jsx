@@ -69,10 +69,10 @@ export function AdvancedSearch({
                                     ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700 shadow-sm"
                                     : "border-violet-500/30 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10"
                             )}
-                            title={t('header.advanced.modes.semanticTitle', 'Anlamsal arama: Başlıkta geçmese bile yakın anlamları bulur (Yerel AI)')}
+                            title={t('header.advanced.modes.semanticTitle', 'Semantic search: Finds conceptually related items even if keywords differ (Local AI)')}
                         >
                             <Sparkles className="h-3.5 w-3.5 mr-1.5 shrink-0 text-amber-300" />
-                            <span className="truncate">{t('header.advanced.modes.semantic', 'Anlamsal (AI)')}</span>
+                            <span className="truncate">{t('header.advanced.modes.semantic', 'Semantic (AI)')}</span>
                         </Button>
                     </div>
                 </div>

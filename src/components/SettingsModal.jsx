@@ -151,7 +151,7 @@ export function SettingsModal({
             setVaultPassword('')
             const storedModel = sessionStorage.getItem('bs_model') || localStorage.getItem('bs_model')
             if (storedModel) setSelectedModel(resolveEffectiveModel(storedModel))
-            toast.success(t('settings.vault.unlockedBadge', 'Kasa açıldı'))
+            toast.success(t('settings.vault.unlockedBadge', 'Vault unlocked'))
         } catch {
             setUnlockError(t('settings.vault.wrongPassword'))
         }
@@ -244,44 +244,44 @@ export function SettingsModal({
     const tabs = [
         {
             id: 'general',
-            label: t('settings.tabs.general', 'Genel'),
+            label: t('settings.tabs.general', 'General'),
             icon: SlidersHorizontal,
-            subtitle: t('settings.general.desc', 'Görünüm, dil, tarayıcı eklentisi ve sistem tercihleri')
+            subtitle: t('settings.general.desc', 'Appearance, language, browser extension, and system preferences')
         },
         {
             id: 'folders',
-            label: t('settings.tabs.folders', 'Klasörler'),
+            label: t('settings.tabs.folders', 'Folders'),
             icon: Folder,
             color: 'text-blue-500',
-            subtitle: t('settings.folders.desc', 'Yer imi klasör hiyerarşisi ve renk yönetimi')
+            subtitle: t('settings.folders.desc', 'Bookmark folder hierarchy and color management')
         },
         {
             id: 'tags',
-            label: t('settings.tabs.tags', 'Etiketler'),
+            label: t('settings.tabs.tags', 'Tags'),
             icon: Tag,
             color: 'text-emerald-500',
-            subtitle: t('settings.tags.desc', 'Etiket koleksiyonu ve otomatik keşfedilen etiketler')
+            subtitle: t('settings.tags.desc', 'Tag collection and auto-discovered tags')
         },
         {
             id: 'ai',
-            label: t('settings.tabs.ai', 'Yapay Zeka'),
+            label: t('settings.tabs.ai', 'AI & Intelligence'),
             icon: Sparkles,
             color: 'text-purple-500',
-            subtitle: t('settings.ai.desc', 'Yapay zeka modelleri, şifreli anahtar kasası ve özetleme')
+            subtitle: t('settings.ai.desc', 'AI models, encrypted key vault, and summarization')
         },
         {
             id: 'backup',
-            label: t('settings.tabs.backup', 'Yedekleme & Veri'),
+            label: t('settings.tabs.backup', 'Backup & Data'),
             icon: Database,
             color: 'text-amber-500',
-            subtitle: t('settings.backup.desc', 'Veritabanı yedekleme, içe aktarma ve önbellek yönetimi')
+            subtitle: t('settings.backup.desc', 'Database backup, import, export, and cache management')
         },
         {
             id: 'about',
-            label: t('settings.tabs.about', 'Hakkında'),
+            label: t('settings.tabs.about', 'About'),
             icon: Info,
             color: 'text-sky-500',
-            subtitle: t('settings.about.desc', 'BookSmart sürüm bilgisi ve yerel depolama güvencesi')
+            subtitle: t('settings.about.desc', 'BookSmart version info and local storage guarantee')
         }
     ]
 

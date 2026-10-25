@@ -100,9 +100,9 @@ export function PreviewPane({ bookmark, onClose, className }) {
     const handleUnsubscribeFeed = async (feedUrl) => {
         try {
             await unsubscribeFeed(feedUrl);
-            toast.success(t('rss.unsubscribeSuccess', { defaultValue: 'Abonelikten çıkıldı.' }));
+            toast.success(t('rss.unsubscribeSuccess', 'Abonelikten çıkıldı.'));
         } catch {
-            toast.error('Kaldırılamadı');
+            toast.error(t('common.removeFailed', 'Could not be removed'));
         }
     };
 

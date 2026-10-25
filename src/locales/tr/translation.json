@@ -55,7 +55,8 @@
             "twoWay": "İki Yönlü Eşitle",
             "pull": "Tarayıcıdan Çek",
             "push": "Tarayıcıya Gönder",
-            "syncBtn": "Tarayıcı Eşitle"
+            "syncBtn": "Tarayıcı Eşitle",
+            "title": "Tarayıcı Eklentisi (Companion)"
         },
         "extensionNotConnectedDesc": "Sunucusuz CORS'suz link kontrolleri ve tarayıcınızla 2 yönlü eşitlemeyi etkinleştirin.",
         "installExtensionBtn": "Eklenti Kurulum Rehberi",
@@ -78,7 +79,10 @@
             "asc": "Artan Sıralama (A→Z, Eski→Yeni)",
             "desc": "Azalan Sıralama (Z→A, Yeni→Eski)"
         },
-        "themeLabel": "Tema"
+        "themeLabel": "Tema",
+        "toggleSidebar": "Kenar Çubuğunu Aç/Kapat",
+        "connected": "Bağlı",
+        "dataManagement": "Veri & Oturum"
     },
     "sidebar": {
         "allBookmarks": "Tüm Yer İmleri",
@@ -142,17 +146,19 @@
         },
         "about": {
             "title": "BookSmart Hakkında",
-            "desc": "Sürüm bilgisi, yerel depolama ve gizlilik güvencesi",
+            "desc": "Gizlilik odaklı, yerel ve modern yer imi yöneticisi",
             "version": "Sürüm",
             "privacyTitle": "100% Yerel & Gizlilik Odaklı",
             "privacyDesc": "Tüm yer imleriniz, klasörleriniz, etiketleriniz ve şifrelenmiş API anahtarlarınız yalnızca bu tarayıcının IndexedDB deposunda saklanır. Verileriniz asla harici sunuculara veya buluta aktarılmaz.",
             "stats": "Yerel Veritabanı İstatistikleri",
-            "totalBookmarks": "Toplam Yer İmi",
+            "totalBookmarks": "Yer İmi",
             "totalFolders": "Klasör",
             "totalTags": "Etiket",
             "totalSnapshots": "Çevrimdışı Arşiv",
             "github": "GitHub Deposu",
-            "license": "Açık Kaynak MIT Lisansı"
+            "license": "Açık Kaynak MIT Lisansı",
+            "totalCollections": "Koleksiyon",
+            "totalRules": "Otomasyon Kuralı"
         },
         "language": {
             "label": "Dil",
@@ -179,7 +185,24 @@
             "reqOllama": "Varsayılan http://localhost:11434 kullanmak için boş bırakın",
             "reqAnthropic": "Anthropic API Anahtarı Gerekir",
             "autoSummarize": "Yer İmi Detayında Otomatik Özetleme",
-            "autoSummarizeDesc": "Yer imi önizlemesini veya detayını açtığınızda tek cümlelik \"Bu sayfa ne anlatıyor?\" özeti otomatik oluşturulur."
+            "autoSummarizeDesc": "Yer imi önizlemesini veya detayını açtığınızda tek cümlelik \"Bu sayfa ne anlatıyor?\" özeti otomatik oluşturulur.",
+            "desc": "Yapay zeka modelleri, şifreli anahtar kasası ve özetleme",
+            "privacyTitle": "%100 Gizli & Yerel Mod (API Anahtarı Gerekmez)",
+            "browserDesc": "Tarayıcı içi model (Chrome Gemini Nano) tamamen cihazınızda yerel çalışır. Hiçbir veri veya yer imi internete iletilmez, tamamen ücretsizdir.",
+            "ollamaDesc": "Ollama modeli bilgisayarınızdaki yerel sunucunuzda çalışır. Verileriniz üçüncü taraf bulut sağlayıcılarına gönderilmez.",
+            "browserReady": "Tarayıcınızda Kullanıma Hazır",
+            "browserNotAvailable": "Tarayıcıda Doğrudan Etkin Değil",
+            "browserHelp": "Bu özellik Google Chrome'un yerel Gemini Nano modelini kullanır. API anahtarı gerekmez. Etkinleştirmek için chrome://flags/#prompt-api-for-gemini-nano ayarını 'Enabled' yapın.",
+            "ollamaTesting": "Ollama sunucusuna bağlanılıyor...",
+            "ollamaConnected": "Bağlantı başarılı! {{count}} adet yerel model bulundu (v{{version}}).",
+            "ollamaConnectedEmpty": "Bağlandı (v{{version}}), ancak henüz model indirilmemiş. Örneğin 'ollama run llama3.2' çalıştırabilirsiniz.",
+            "ollamaError": "Ollama sunucusuna ulaşılamadı. 'ollama serve' komutunun çalıştığından emin olun.",
+            "ollamaTestBtn": "Bağlantıyı Test Et & Modelleri Getir",
+            "ollamaLocalLabel": "Yerel Ollama",
+            "browserGroupLabel": "🔒 Tarayıcı İçi Yerel YZ (Çevrimdışı & Ücretsiz)",
+            "ollamaGroupLabel": "🔒 Yerel YZ (Ollama - Çevrimdışı)",
+            "reqApiKey": "Lütfen Ayarlar > Yapay Zeka sekmesinden API anahtarınızı girin.",
+            "browserBuiltin": "Tarayıcı İçi YZ (Chrome Gemini Nano - Yerel)"
         },
         "network": {
             "extensionTitle": "Sunucusuz Sağlık Kontrolü (Companion Eklentisi)",
@@ -192,7 +215,8 @@
             "extensionDetectedToast": "Companion eklentisi başarıyla bağlandı!",
             "extensionNotFoundToast": "Eklenti henüz algılanamadı.",
             "corsProxy": "CORS Proxy Adresi",
-            "corsProxyDesc": "Bağlantı kontrolü ve sayfa özetleme için CORS kısıtlamalarını aşmakta kullanılacak isteğe bağlı proxy."
+            "corsProxyDesc": "Bağlantı kontrolü ve sayfa özetleme için CORS kısıtlamalarını aşmakta kullanılacak isteğe bağlı proxy.",
+            "extensionDesc": "CORS kısıtlaması olmadan sunucusuz ölü bağlantı denetimi sağlar."
         },
         "vault": {
             "title": "API Anahtarı Kasası",
@@ -217,7 +241,12 @@
         "theme": {
             "light": "Açık Tema",
             "dark": "Koyu Tema",
-            "system": "Sistem Teması"
+            "system": "Sistem Teması",
+            "title": "Görünüm ve Tema",
+            "desc": "Uygulama arayüzünün renk temasını belirleyin.",
+            "lightDesc": "Açık renkler",
+            "darkDesc": "Koyu renkler",
+            "systemDesc": "İşletim sistemi tercihini izler"
         },
         "previewCache": {
             "title": "OpenGraph ve Favicon Önbelleği",
@@ -231,6 +260,25 @@
             "es": "İspanyolca",
             "fr": "Fransızca",
             "de": "Almanca"
+        },
+        "general": {
+            "desc": "Görünüm, dil, tarayıcı eklentisi ve sistem tercihleri"
+        },
+        "folders": {
+            "desc": "Yer imi klasör hiyerarşisi ve renk yönetimi"
+        },
+        "tags": {
+            "desc": "Etiket koleksiyonu ve otomatik keşfedilen etiketler"
+        },
+        "backup": {
+            "desc": "Veritabanı yedekleme, içe aktarma ve önbellek yönetimi"
+        },
+        "shortcuts": {
+            "title": "Klavye Kısayolları",
+            "desc": "Hızlı klavye komutlarıyla daha verimli gezinin.",
+            "viewAll": "Tüm Kısayolları Gör",
+            "quickPreview": "Hızlı Önizleme",
+            "spaceKey": "Boşluk (Space)"
         }
     },
     "common": {
@@ -271,7 +319,14 @@
         "cachedItems": "adet önbellekte",
         "retry": "Tekrar Dene",
         "search": "Ara...",
-        "openInNewTab": "Yeni Sekmede Aç"
+        "openInNewTab": "Yeni Sekmede Aç",
+        "all": "Hepsi",
+        "copy": "Kopyala",
+        "copied": "Kopyalandı",
+        "copyLink": "Bağlantıyı Kopyala",
+        "saved": "Eklendi",
+        "dismiss": "Yoksay",
+        "removeFailed": "Kaldırılamadı"
     },
     "modals": {
         "rules": {
@@ -303,17 +358,25 @@
             "title": "Akıllı Kural Önerileri",
             "description": "Yer imlerinizi kaydettiğiniz klasörler incelendi ve sık tekrarlanan alışkanlıklarınıza göre otomatik kurallar tespit edildi.",
             "analyzeAI": "AI ile Derin Analiz",
-            "emptyTitle": "Henüz belirgin bir kural kalıbı bulunamadı",
-            "emptyDesc": "Yer imlerinizi belirli klasörlere düzenli olarak kaydettikçe BookSmart burada otomatik kurallar önerecektir.",
+            "emptyTitle": "Öneri Bulunamadı",
+            "emptyDesc": "Yer imi kütüphanenizde henüz belirgin bir klasörleme deseni tespit edilmedi. Daha fazla yer imi ekledikçe akıllı öneriler burada görünecektir.",
             "match": "eşleşme",
             "samples": "Örnekler",
             "acceptBtn": "Kuralı Oluştur",
             "acceptAllBtn": "Tüm Önerileri Kabul Et ({{count}})",
-            "noAiRules": "AI tarafından yeni bir kural kalıbı bulunamadı."
+            "noAiRules": "AI tarafından yeni bir kural kalıbı bulunamadı.",
+            "analyzingAI": "Alışkanlıklar AI ile analiz ediliyor...",
+            "applyAll": "Tüm Önerileri Uygula ({{count}})",
+            "apply": "Uygula",
+            "applied": "Uygulandı",
+            "dismiss": "Öneriyi Yoksay",
+            "sourcePattern": "Kaynak Kalıbı",
+            "targetFolder": "Hedef Klasör",
+            "addTags": "Etiketler"
         },
         "metadataEnricher": {
             "title": "Toplu Favicon ve Meta Veri Yenileyici",
-            "description": "Kütüphanenizdeki eksik başlıklı, açıklamasız veya kırık ikonlu yer imlerini arka planda sırayla tarayarak web sitelerinden en güncel favicon, başlık ve OpenGraph meta verilerini çeker.",
+            "description": "Kütüphanenizdeki eksik başlıklı, açıklamasız veya kırık ikonlu yer imlerini arka planda sıraya alıp zenginleştirin.",
             "candidatesBadge": "eksik",
             "stats": {
                 "missingTitles": "Eksik Başlık",
@@ -322,9 +385,9 @@
                 "candidates": "Zenginleştirilebilir"
             },
             "scopeTitle": "Tarama Kapsamı",
-            "scopeNeeding": "Yalnızca Eksikleri Tara",
-            "scopeAll": "Tüm Kütüphane",
-            "scopeSelected": "Seçili Olanlar",
+            "scopeNeeding": "Yalnızca Eksikleri Tamamla",
+            "scopeAll": "Tüm Kütüphaneyi Yenile",
+            "scopeSelected": "Yalnızca Seçilenler ({{count}})",
             "optTitle": "Eksik veya URL olan başlıkları güncelle",
             "optIcon": "Eksik favicon ve ikonları tamamla",
             "optNotes": "Boş açıklamalara meta açıklamasını yaz",
@@ -342,7 +405,18 @@
             "btnPause": "Duraklat",
             "btnResume": "Devam Et",
             "btnCancel": "İptal",
-            "btnStart": "Zenginleştirmeyi Başlat"
+            "btnStart": "Zenginleştirmeyi Başlat",
+            "scope": "Kapsam",
+            "updateTitle": "Sayfa Başlığını Getir",
+            "updateNotes": "Meta Açıklamasını Notlara Ekle",
+            "updateIcon": "Favicon & Logoyu Yenile",
+            "start": "Zenginleştirmeyi Başlat",
+            "pause": "Duraklat",
+            "resume": "Devam Et",
+            "cancel": "Durdur",
+            "reset": "Sıfırla",
+            "progress": "İlerleme: {{processed}} / {{total}}",
+            "completed": "İşlem tamamlandı!"
         },
         "ruleConflict": {
             "title": "Kural Çakışması Tespit Edildi",
@@ -699,10 +773,25 @@
             "noMetadata": "Sayfa bilgisi bulunamadı.",
             "undoDesc": "\"{{title}}\" düzenlendi"
         },
-
         "tree": {
             "expandAll": "Tümünü Aç",
-            "collapseAll": "Tümünü Kapat"
+            "collapseAll": "Tümünü Kapat",
+            "hint": "Klasörleri sürükleyerek iç içe yerleştirebilir veya kök dizine çıkarabilirsiniz",
+            "addRootFolder": "Yeni Ana Klasör Oluştur",
+            "newFolderBtn": "Yeni Klasör",
+            "rootFolderPlaceholder": "Yeni ana klasör adı...",
+            "dragFolder": "Klasörü taşımak için sürükleyin",
+            "nestInto": "İçine Taşı",
+            "addSubfolder": "İçinde Yeni Alt Klasör Aç",
+            "newSubfolderPlaceholder": "Alt klasör adı...",
+            "dragToMove": "Klasöre taşımak için sürükleyin",
+            "dropToRoot": "Ana Dizine Çıkar (Kök Seviye)",
+            "releaseToDrop": "Buraya Bırak",
+            "rootLevel": "Kök Dizin",
+            "folderCreated": "\"{{name}}\" klasörü oluşturuldu",
+            "cannotMoveIntoChild": "Bir klasör kendi alt klasörünün içine taşınamaz",
+            "folderMoved": "\"{{name}}\" klasörü taşındı",
+            "bookmarkMoved": "Yer imi \"{{folder}}\" klasörüne taşındı"
         }
     },
     "main": {
@@ -772,7 +861,10 @@
         "addedToCollection": "\"{{name}}\" koleksiyonuna eklendi",
         "removedFromCollection": "{{count}} yer imi \"{{name}}\" koleksiyonundan çıkarıldı",
         "aiTitlesFixed": "{{count}} yer imi başlığı düzeltildi.",
-        "aiDupesFound": "{{count}} grup bulundu."
+        "aiDupesFound": "{{count}} grup bulundu.",
+        "ruleCreatedFromSuggestion": "Öneri kalıbından kural oluşturuldu!",
+        "rulesCreatedBatch": "{{count}} kural önerisi uygulandı!",
+        "aiRulesFound": "YZ ile {{count}} yeni kural kalıbı bulundu!"
     },
     "collections": {
         "add": "Yeni Koleksiyon",
@@ -872,7 +964,8 @@
         "allBookmarksAlreadyImported": "Tüm tarayıcı yer imleri zaten kütüphanenizde mevcut",
         "noBookmarksToExport": "Tarayıcıya gönderilecek yer imi yok",
         "tabCaptured": "Aktif sekme kaydedildi: {{title}}",
-        "sessionSavedSuccess": "\"{{name}}\" koleksiyonu kaydedildi ({{count}} sekme)"
+        "sessionSavedSuccess": "\"{{name}}\" koleksiyonu kaydedildi ({{count}} sekme)",
+        "snapshotSavedSuccess": "Çevrimdışı sayfa arşivi kaydedildi: {{title}}"
     },
     "commandPalette": {
         "title": "Komut Paleti",
@@ -946,7 +1039,8 @@
         "opmlExportSuccess": "OPML dosyası dışa aktarıldı.",
         "opmlExportError": "OPML dışa aktarma başarısız.",
         "opmlImportSuccess": "{{count}} akış başarıyla içe aktarıldı.",
-        "opmlImportError": "OPML içe aktarma başarısız."
+        "opmlImportError": "OPML içe aktarma başarısız.",
+        "readerSubtitle": "Takip edilen siteler ve yeni yazılar"
     },
     "reader": {
         "modeTitle": "Okuma Modu",
@@ -1049,44 +1143,49 @@
         "savedAt": "Kayıt Tarihi",
         "fileSize": "Boyut"
     },
-    "modals": {
-        "extensionGuide": {
-            "title": "BookSmart Companion Eklentisi"
-        },
-        "ruleSuggestions": {
-            "title": "Akıllı Kural Önerileri",
-            "description": "Yer imlerinizi kaydettiğiniz klasörler incelendi ve sık tekrarlanan alışkanlıklarınıza göre otomatik kurallar tespit edildi.",
-            "analyzeAI": "AI ile Derin Analiz",
-            "analyzingAI": "Alışkanlıklar AI ile analiz ediliyor...",
-            "applyAll": "Tüm Önerileri Uygula ({{count}})",
-            "apply": "Uygula",
-            "applied": "Uygulandı",
-            "dismiss": "Öneriyi Yoksay",
-            "emptyTitle": "Öneri Bulunamadı",
-            "emptyDesc": "Yer imi kütüphanenizde henüz belirgin bir klasörleme deseni tespit edilmedi. Daha fazla yer imi ekledikçe akıllı öneriler burada görünecektir.",
-            "sourcePattern": "Kaynak Kalıbı",
-            "targetFolder": "Hedef Klasör",
-            "addTags": "Etiketler"
-        },
-        "metadataEnricher": {
-            "title": "Toplu Favicon ve Meta Veri Yenileyici",
-            "candidatesBadge": "eksik",
-            "description": "Kütüphanenizdeki eksik başlıklı, açıklamasız veya kırık ikonlu yer imlerini arka planda sıraya alıp zenginleştirin.",
-            "scope": "Kapsam",
-            "scopeNeeding": "Yalnızca Eksikleri Tamamla",
-            "scopeAll": "Tüm Kütüphaneyi Yenile",
-            "scopeSelected": "Yalnızca Seçilenler ({{count}})",
-            "updateTitle": "Sayfa Başlığını Getir",
-            "updateNotes": "Meta Açıklamasını Notlara Ekle",
-            "updateIcon": "Favicon & Logoyu Yenile",
-            "start": "Zenginleştirmeyi Başlat",
-            "pause": "Duraklat",
-            "resume": "Devam Et",
-            "cancel": "Durdur",
-            "reset": "Sıfırla",
-            "progress": "İlerleme: {{processed}} / {{total}}",
-            "completed": "İşlem tamamlandı!"
-        }
+    "highlights": {
+        "menuTitle": "Vurgular & Yapışkan Notlar",
+        "menuSubtitle": "Web alıntıları ve Obsidian (.md) aktarımı",
+        "modalTitle": "Vurgular & Yapışkan Notlar (Obsidian)",
+        "syncSuccess": "Eklentiden vurgular başarıyla eşitlendi!",
+        "allSynced": "Tüm eklenti vurguları zaten güncel.",
+        "noExtensionFound": "Eklentide henüz kayıtlı vurgu bulunamadı.",
+        "syncError": "Eklentiden vurgular alınırken hata oluştu.",
+        "exportSuccess": "Obsidian Markdown dosyası indirildi!",
+        "copySuccess": "Vurgular Obsidian formatında panoya kopyalandı!",
+        "copyError": "Panoya kopyalanamadı.",
+        "deleted": "Vurgu silindi.",
+        "noteUpdated": "Not güncellendi.",
+        "searchPlaceholder": "Vurgularda veya notlarda ara...",
+        "onlyNotesTooltip": "Sadece not içeren vurguları göster",
+        "withNotes": "Notlular",
+        "syncFromExtension": "Eklentiden vurguları eşitle",
+        "syncBtn": "Eklentiden Eşitle",
+        "copyObsidian": "Obsidian formatında panoya kopyala",
+        "exportObsidian": "Obsidian Markdown (.md) Olarak İndir",
+        "obsidianExportBtn": "Obsidian .md",
+        "emptyTitle": "Henüz vurgulanmış metin yok",
+        "emptyHelp": "Tarayıcı eklentisiyle internette gezinirken dilediğiniz metni seçip sağ tıklayarak vurgulayabilir ve sayfa üzerine yapışkan notlar bırakabilirsiniz.",
+        "trySync": "Eklentiyi Tara ve Eşitle",
+        "addNotePlaceholder": "Not ekleyin veya düzenleyin...",
+        "clickToEditNote": "Notu düzenlemek için tıklayın",
+        "addNote": "Not Ekle"
+    },
+    "similarDuplicates": {
+        "menuBtn": "Benzer & Yinelenenleri İncele ve Birleştir",
+        "modalTitle": "Yinelenen ve Benzer İçerikleri Birleştir",
+        "mergedGroupSuccess": "Grup başarıyla birleştirildi!",
+        "mergedAllSuccess": "Tüm {{count}} grup birleştirildi!",
+        "urlVariants": "URL Varyasyonları",
+        "similarTitles": "Benzer Başlıklar",
+        "similarity": "Hassasiyet:",
+        "mergeAllBtn": "Tümünü Birleştir ({{count}})",
+        "cleanTitle": "Tebrikler! Yinelenen veya benzer içerik bulunamadı.",
+        "cleanHelp": "Kütüphanenizdeki yer imleri temiz ve düzenli görünüyor. Daha geniş aramak için yukarıdaki hassasiyeti kaydırabilirsiniz.",
+        "mergeThisGroup": "Birleştir",
+        "choosePrimary": "Ana (korunacak) yer imini seçin:"
+    },
+    "metadataEnricher": {
+        "running": "Zenginleştiriliyor..."
     }
 }
-

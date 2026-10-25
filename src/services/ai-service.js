@@ -16,7 +16,7 @@ export function isLocalAIProvider(provider) {
 
 export const AI_MODELS = [
     // --- Local & Privacy-First (No API Key Required) ---
-    { id: 'browser-builtin', name: 'Tarayıcı İçi YZ (Chrome Gemini Nano - Yerel)', provider: 'browser' },
+    { id: 'browser-builtin', name: 'In-Browser AI (Chrome Gemini Nano - Local)', provider: 'browser' },
     { id: 'llama3.2', name: 'Llama 3.2 (Ollama Local)', provider: 'ollama' },
     { id: 'qwen2.5', name: 'Qwen 2.5 (Ollama Local)', provider: 'ollama' },
     { id: 'deepseek-r1', name: 'DeepSeek-r1 (Ollama Local)', provider: 'ollama' },

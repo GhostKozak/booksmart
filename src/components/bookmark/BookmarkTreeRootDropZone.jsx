@@ -32,12 +32,12 @@ export function BookmarkTreeRootDropZone({ activeDragItem }) {
             <div className="flex items-center gap-2 min-w-0">
                 <FolderTree className={cn("h-4 w-4 shrink-0", isOver ? "text-primary" : "text-muted-foreground")} />
                 <span className="truncate font-semibold">
-                    {t('bookmarks.tree.dropToRoot', 'Ana Dizine Çıkar (Kök Seviye)')}
+                    {t('bookmarks.tree.dropToRoot', 'Move to Root Level')}
                 </span>
             </div>
             <div className="flex items-center gap-1 text-[11px] font-medium shrink-0 opacity-80">
                 <CornerDownLeft className="h-3.5 w-3.5" />
-                <span>{isOver ? t('bookmarks.tree.releaseToDrop', 'Buraya Bırak') : t('bookmarks.tree.rootLevel', 'Kök Dizin')}</span>
+                <span>{isOver ? t('bookmarks.tree.releaseToDrop', 'Drop Here') : t('bookmarks.tree.rootLevel', 'Root Level')}</span>
             </div>
         </div>
     )

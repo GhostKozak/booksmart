@@ -24,7 +24,7 @@ export function AboutTab({
                         <div>
                             <h3 className="text-base font-bold text-foreground">BookSmart</h3>
                             <p className="text-xs text-muted-foreground">
-                                {t('settings.about.desc', 'Gizlilik odaklı, yerel ve modern yer imi yöneticisi')}
+                                {t('settings.about.desc', 'Privacy-first, local, and modern bookmark manager')}
                             </p>
                         </div>
                     </div>
@@ -38,38 +38,38 @@ export function AboutTab({
             <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
                 <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                     <ShieldCheck className="w-4 h-4" />
-                    <span>{t('settings.about.privacyTitle', '100% Yerel & Gizlilik Odaklı')}</span>
+                    <span>{t('settings.about.privacyTitle', '100% Local & Privacy-Focused')}</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                    {t('settings.about.privacyDesc', 'Tüm yer imleriniz, klasörleriniz, etiketleriniz ve şifrelenmiş API anahtarlarınız yalnızca bu tarayıcının IndexedDB deposunda saklanır. Verileriniz asla harici sunuculara veya buluta aktarılmaz.')}
+                    {t('settings.about.privacyDesc', "All your bookmarks, folders, tags, and encrypted API keys are stored solely in this browser's IndexedDB. Your data is never sent to external servers or cloud.")}
                 </p>
             </div>
 
             {/* Live Stats */}
             <div className="space-y-2">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {t('settings.about.stats', 'Yerel Veritabanı İstatistikleri')}
+                    {t('settings.about.stats', 'Local Database Statistics')}
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                     <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-center">
                         <div className="text-lg font-bold text-foreground">{bookmarkCount}</div>
-                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalBookmarks', 'Yer İmi')}</div>
+                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalBookmarks', 'Bookmarks')}</div>
                     </div>
                     <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-center">
                         <div className="text-lg font-bold text-foreground">{collectionCount}</div>
-                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalCollections', 'Koleksiyon')}</div>
+                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalCollections', 'Collections')}</div>
                     </div>
                     <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-center">
                         <div className="text-lg font-bold text-foreground">{foldersCount}</div>
-                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalFolders', 'Klasör')}</div>
+                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalFolders', 'Folders')}</div>
                     </div>
                     <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-center">
                         <div className="text-lg font-bold text-foreground">{tagsCount}</div>
-                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalTags', 'Etiket')}</div>
+                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalTags', 'Tags')}</div>
                     </div>
                     <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-center">
                         <div className="text-lg font-bold text-foreground">{snapshotCount}</div>
-                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalSnapshots', 'Çevrimdışı Arşiv')}</div>
+                        <div className="text-[11px] text-muted-foreground">{t('settings.about.totalSnapshots', 'Offline Snapshots')}</div>
                     </div>
                 </div>
             </div>
@@ -83,9 +83,9 @@ export function AboutTab({
                     className="inline-flex items-center gap-1.5 font-medium hover:text-foreground transition-colors cursor-pointer"
                 >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    <span>{t('settings.about.github', 'GitHub Deposu')}</span>
+                    <span>{t('settings.about.github', 'GitHub Repository')}</span>
                 </a>
-                <span>{t('settings.about.license', 'Açık Kaynak MIT Lisansı')}</span>
+                <span>{t('settings.about.license', 'Open Source MIT License')}</span>
             </div>
         </div>
     )

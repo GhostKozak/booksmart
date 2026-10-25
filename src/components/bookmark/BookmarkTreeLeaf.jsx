@@ -51,8 +51,8 @@ export const BookmarkTreeLeaf = ({
                     {...attributes}
                     {...listeners}
                     className="cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-muted-foreground group-hover/leaf:text-muted-foreground/60 transition-colors p-0.5 -ml-1 rounded"
-                    title={t('bookmarks.tree.dragToMove', 'Klasöre taşımak için sürükleyin')}
-                    aria-label={t('bookmarks.tree.dragToMove', 'Klasöre taşımak için sürükleyin')}
+                    title={t('bookmarks.tree.dragToMove', 'Drag to move bookmark')}
+                    aria-label={t('bookmarks.tree.dragToMove', 'Drag to move bookmark')}
                 >
                     <GripVertical className="h-3.5 w-3.5" />
                 </div>
@@ -122,8 +122,8 @@ export const BookmarkTreeLeaf = ({
                         size="icon"
                         className="w-7 h-7 hover:bg-primary/10 hover:text-primary cursor-pointer"
                         onClick={() => useAppStore.getState().openReaderMode(bookmark)}
-                        title={t('reader.openReaderMode', 'Okuma Modunu Aç')}
-                        aria-label={t('reader.openReaderMode', 'Okuma Modunu Aç')}
+                        title={t('reader.openReaderMode', 'Open Reader Mode')}
+                        aria-label={t('reader.openReaderMode', 'Open Reader Mode')}
                     >
                         <BookOpen className="w-3.5 h-3.5" />
                     </Button>

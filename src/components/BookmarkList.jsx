@@ -68,7 +68,7 @@ export function BookmarkList({
             </div>
 
             {/* Col 2: Title / URL */}
-            <div className="hidden lg:flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors group" onClick={handleSortTitle} title={t('header.sort.label', 'Sırala')}>
+            <div className="hidden lg:flex items-center gap-1.5 cursor-pointer hover:text-foreground transition-colors group" onClick={handleSortTitle} title={t('header.sort.label', 'Sort')}>
                 <span>{t('bookmarks.columns.title')}</span>
                 <ArrowUpDown className={cn(
                     "w-3 h-3 transition-opacity",

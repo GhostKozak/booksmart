@@ -50,9 +50,9 @@ export function GeneralTab({
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                     {[
-                        { id: 'light', label: t('settings.theme.light'), icon: Sun, desc: 'Açık renkler' },
-                        { id: 'dark', label: t('settings.theme.dark'), icon: Moon, desc: 'Koyu renkler' },
-                        { id: 'system', label: t('settings.theme.system'), icon: Laptop, desc: 'Sistemle senkron' }
+                        { id: 'light', label: t('settings.theme.light'), icon: Sun, desc: t('settings.theme.lightDesc', 'Light colors') },
+                        { id: 'dark', label: t('settings.theme.dark'), icon: Moon, desc: t('settings.theme.darkDesc', 'Dark colors') },
+                        { id: 'system', label: t('settings.theme.system'), icon: Laptop, desc: t('settings.theme.systemDesc', 'Follows system preferences') }
                     ].map((tOption) => {
                         const Icon = tOption.icon
                         const isSelected = theme === tOption.id
@@ -215,19 +215,19 @@ export function GeneralTab({
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2.5 rounded-xl border border-border/50 bg-muted/20 flex items-center justify-between">
-                        <span className="text-muted-foreground">Komut Paleti & Arama</span>
+                        <span className="text-muted-foreground">{t('settings.shortcuts.commandPalette', 'Command Palette & Search')}</span>
                         <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">⌘ / Ctrl + K</kbd>
                     </div>
                     <div className="p-2.5 rounded-xl border border-border/50 bg-muted/20 flex items-center justify-between">
-                        <span className="text-muted-foreground">Hızlı Önizleme</span>
-                        <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">Boşluk (Space)</kbd>
+                        <span className="text-muted-foreground">{t('settings.shortcuts.quickPreview', 'Quick Preview')}</span>
+                        <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">{t('settings.shortcuts.spaceKey', 'Space')}</kbd>
                     </div>
                     <div className="p-2.5 rounded-xl border border-border/50 bg-muted/20 flex items-center justify-between">
-                        <span className="text-muted-foreground">Arama Kutusuna Odaklan</span>
+                        <span className="text-muted-foreground">{t('settings.shortcuts.focusSearch', 'Focus Search')}</span>
                         <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">⌘ / Ctrl + F</kbd>
                     </div>
                     <div className="p-2.5 rounded-xl border border-border/50 bg-muted/20 flex items-center justify-between">
-                        <span className="text-muted-foreground">Pencereleri Kapat</span>
+                        <span className="text-muted-foreground">{t('settings.shortcuts.closeModals', 'Close Modals')}</span>
                         <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">Escape</kbd>
                     </div>
                 </div>

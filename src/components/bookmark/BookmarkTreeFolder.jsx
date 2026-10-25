@@ -152,8 +152,8 @@ export const BookmarkTreeFolder = ({
                         {...listeners}
                         onClick={e => e.stopPropagation()}
                         className="cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-muted-foreground group-hover/folder:text-muted-foreground/60 transition-colors p-0.5 -ml-1 rounded shrink-0"
-                        title={t('bookmarks.tree.dragFolder', 'Klasörü taşımak için sürükleyin')}
-                        aria-label={t('bookmarks.tree.dragFolder', 'Klasörü taşımak için sürükleyin')}
+                        title={t('bookmarks.tree.dragFolder', 'Drag to move folder')}
+                        aria-label={t('bookmarks.tree.dragFolder', 'Drag to move folder')}
                     >
                         <GripVertical className="h-3.5 w-3.5" />
                     </div>
@@ -192,7 +192,7 @@ export const BookmarkTreeFolder = ({
                     {isDropTarget && (
                         <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-primary text-primary-foreground animate-pulse shrink-0">
                             <CornerDownRight className="w-2.5 h-2.5" />
-                            <span>{t('bookmarks.tree.nestInto', 'İçine Taşı')}</span>
+                            <span>{t('bookmarks.tree.nestInto', 'Nest Into')}</span>
                         </span>
                     )}
                 </div>
@@ -209,8 +209,8 @@ export const BookmarkTreeFolder = ({
                             }
                             setIsCreatingSubfolder(true)
                         }}
-                        title={t('bookmarks.tree.addSubfolder', 'İçinde Yeni Alt Klasör Aç')}
-                        aria-label={t('bookmarks.tree.addSubfolder', 'İçinde Yeni Alt Klasör Aç')}
+                        title={t('bookmarks.tree.addSubfolder', 'Add Subfolder')}
+                        aria-label={t('bookmarks.tree.addSubfolder', 'Add Subfolder')}
                     >
                         <FolderPlus className="w-3.5 h-3.5 text-muted-foreground hover:text-primary" />
                     </Button>
@@ -236,7 +236,7 @@ export const BookmarkTreeFolder = ({
                                     if (e.key === 'Enter') handleConfirmCreate()
                                     if (e.key === 'Escape') handleCancelCreate()
                                 }}
-                                placeholder={t('bookmarks.tree.newSubfolderPlaceholder', 'Alt klasör adı...')}
+                                placeholder={t('bookmarks.tree.newSubfolderPlaceholder', 'Subfolder name...')}
                                 className="h-7 text-xs bg-background py-1 px-2 border-primary/40 focus:border-primary flex-1 min-w-[140px] max-w-xs rounded-md shadow-xs"
                             />
                             <div className="flex items-center gap-1 shrink-0">
@@ -245,8 +245,8 @@ export const BookmarkTreeFolder = ({
                                     size="icon"
                                     className="h-6 w-6 rounded-md cursor-pointer"
                                     onClick={handleConfirmCreate}
-                                    title={t('common.save', 'Kaydet')}
-                                    aria-label={t('common.save', 'Kaydet')}
+                                    title={t('common.save', 'Save')}
+                                    aria-label={t('common.save', 'Save')}
                                 >
                                     <Check className="w-3.5 h-3.5" />
                                 </Button>
@@ -255,8 +255,8 @@ export const BookmarkTreeFolder = ({
                                     size="icon"
                                     className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
                                     onClick={handleCancelCreate}
-                                    title={t('common.cancel', 'İptal')}
-                                    aria-label={t('common.cancel', 'İptal')}
+                                    title={t('common.cancel', 'Cancel')}
+                                    aria-label={t('common.cancel', 'Cancel')}
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </Button>
