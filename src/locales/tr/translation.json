@@ -1103,7 +1103,8 @@
                 "yellow": "Sarı",
                 "green": "Yeşil",
                 "blue": "Mavi",
-                "purple": "Mor"
+                "purple": "Mor",
+                "pink": "Pembe"
             }
         },
         "articleLoadError": "Makale içeriği yüklenemedi",
@@ -1215,7 +1216,8 @@
         "exactUrl": "Birebir Aynı URL",
         "urlVariation": "Farklı Parametre / Format Varyasyonu",
         "similarTitle": "Benzer Başlık & İçerik ({{percent}}% Benzerlik)",
-        "bookmarksCount": "{{count}} yer imi"
+        "bookmarksCount": "{{count}} yer imi",
+        "groupsCount": "{{count}} grup"
     },
     "metadataEnricher": {
         "running": "Zenginleştiriliyor..."

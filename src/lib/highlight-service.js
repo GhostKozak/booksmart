@@ -5,7 +5,7 @@ import { cleanUrl } from './url-cleaner';
 export const HIGHLIGHT_COLORS = [
     {
         id: 'yellow',
-        name: 'Sarı',
+        name: 'Yellow',
         nameKey: 'reader.highlights.colors.yellow',
         hex: '#fef08a',
         bg: 'rgba(254, 240, 138, 0.45)',
@@ -13,7 +13,7 @@ export const HIGHLIGHT_COLORS = [
     },
     {
         id: 'green',
-        name: 'Yeşil',
+        name: 'Green',
         nameKey: 'reader.highlights.colors.green',
         hex: '#bbf7d0',
         bg: 'rgba(187, 247, 208, 0.45)',
@@ -21,7 +21,7 @@ export const HIGHLIGHT_COLORS = [
     },
     {
         id: 'blue',
-        name: 'Mavi',
+        name: 'Blue',
         nameKey: 'reader.highlights.colors.blue',
         hex: '#bae6fd',
         bg: 'rgba(186, 230, 253, 0.45)',
@@ -29,7 +29,7 @@ export const HIGHLIGHT_COLORS = [
     },
     {
         id: 'purple',
-        name: 'Mor',
+        name: 'Purple',
         nameKey: 'reader.highlights.colors.purple',
         hex: '#e9d5ff',
         bg: 'rgba(233, 213, 255, 0.45)',

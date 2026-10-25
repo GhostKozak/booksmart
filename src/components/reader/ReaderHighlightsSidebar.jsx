@@ -61,15 +61,15 @@ export function ReaderHighlightsSidebar({
             await navigator.clipboard.writeText(md);
             setCopiedAll(true);
             setTimeout(() => setCopiedAll(false), 2000);
-            toast.success(t('reader.highlights.allCopied', 'Tüm vurgular Markdown olarak kopyalandı!'));
+            toast.success(t('reader.highlights.allCopied', 'All highlights copied as Markdown!'));
         } catch {
-            toast.error(t('common.error', 'Kopyalanamadı'));
+            toast.error(t('common.error', 'Failed to copy'));
         }
     };
 
     return (
         <aside
-            aria-label="Vurgular ve Notlar"
+            aria-label={t('reader.highlights.title', 'Highlights & Notes')}
             className="w-80 sm:w-88 border-l bg-card flex flex-col h-full z-20 shadow-xl transition-all duration-300 animate-in slide-in-from-right-4"
         >
             {/* Header */}
@@ -80,10 +80,10 @@ export function ReaderHighlightsSidebar({
                     </span>
                     <div>
                         <h3 className="font-semibold text-xs leading-tight">
-                            {t('reader.highlights.title', 'Vurgular ve Notlar')}
+                            {t('reader.highlights.title', 'Highlights & Notes')}
                         </h3>
                         <p className="text-[11px] text-muted-foreground">
-                            {highlights.length} {t('reader.highlights.countSuffix', 'vurgu')}
+                            {highlights.length} {t('reader.highlights.countSuffix', 'highlight(s)')}
                         </p>
                     </div>
                 </div>
@@ -96,7 +96,7 @@ export function ReaderHighlightsSidebar({
                             size="icon"
                             onClick={handleCopyAll}
                             className="h-7 w-7 cursor-pointer text-muted-foreground hover:text-foreground"
-                            title={t('reader.highlights.copyAllMarkdown', 'Tümünü Markdown Olarak Kopyala')}
+                            title={t('reader.highlights.copyAllMarkdown', 'Copy All as Markdown')}
                         >
                             {copiedAll ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                         </Button>
@@ -121,10 +121,10 @@ export function ReaderHighlightsSidebar({
                     <div className="py-12 px-4 text-center text-muted-foreground space-y-2">
                         <FileText className="w-8 h-8 mx-auto opacity-30" />
                         <p className="text-xs font-medium">
-                            {t('reader.highlights.emptyTitle', 'Henüz vurgu yok')}
+                            {t('reader.highlights.emptyTitle', 'No highlights yet')}
                         </p>
                         <p className="text-[11px] opacity-75 leading-relaxed">
-                            {t('reader.highlights.emptyDesc', 'Makaleden herhangi bir metin seçerek renkli vurgulayabilir ve kenar notları ekleyebilirsiniz.')}
+                            {t('reader.highlights.emptyDesc', 'Select any text in the article to highlight in color and add margin notes.')}
                         </p>
                     </div>
                 ) : (
@@ -142,7 +142,7 @@ export function ReaderHighlightsSidebar({
                                     onClick={() => onScrollToHighlight && onScrollToHighlight(h.id)}
                                     className="cursor-pointer border-l-3 pl-2 leading-relaxed text-foreground select-none hover:opacity-85 transition-opacity"
                                     style={{ borderColor: colorObj.border }}
-                                    title={t('reader.highlights.scrollTo', 'Metinde konumuna git')}
+                                    title={t('reader.highlights.scrollTo', 'Scroll to in article')}
                                 >
                                     <p className="italic text-[11.5px] line-clamp-4">
                                         "{h.text}"
@@ -155,7 +155,7 @@ export function ReaderHighlightsSidebar({
                                         <textarea
                                             value={noteDraft}
                                             onChange={(e) => setNoteDraft(e.target.value)}
-                                            placeholder={t('reader.highlights.notePlaceholder', 'Notunuzu yazın...')}
+                                            placeholder={t('reader.highlights.notePlaceholder', 'Write your note...')}
                                             rows={2}
                                             autoFocus
                                             className="w-full text-xs p-1.5 rounded-lg border bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden resize-none"
@@ -171,7 +171,7 @@ export function ReaderHighlightsSidebar({
                                                 }}
                                                 className="h-6 text-[11px] px-2"
                                             >
-                                                {t('common.cancel', 'İptal')}
+                                                {t('common.cancel', 'Cancel')}
                                             </Button>
                                             <Button
                                                 type="button"
@@ -212,7 +212,7 @@ export function ReaderHighlightsSidebar({
                                                     h.color === c.id ? "ring-2 ring-primary ring-offset-1 scale-110" : "opacity-60"
                                                 )}
                                                 style={{ backgroundColor: c.hex }}
-                                                title={c.name}
+                                                title={t(c.nameKey, c.name)}
                                             />
                                         ))}
                                     </div>

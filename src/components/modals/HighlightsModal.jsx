@@ -114,36 +114,36 @@ export function HighlightsModal({ isOpen, onClose }) {
     const handleExportObsidian = () => {
         if (filteredHighlights.length === 0) return;
         const md = exportHighlightsToObsidianMarkdown(filteredHighlights, {
-            title: 'BookSmart Vurgular ve Notlar',
+            title: 'BookSmart Highlights & Notes',
             includeCallouts: true
         });
         downloadMarkdownFile(md, `booksmart-highlights-${new Date().toISOString().split('T')[0]}.md`);
-        toast.success(t('highlights.exportSuccess', 'Obsidian Markdown dosyası indirildi!'));
+        toast.success(t('highlights.exportSuccess', 'Obsidian Markdown file downloaded!'));
     };
 
     const handleCopyMarkdown = async () => {
         if (filteredHighlights.length === 0) return;
         const md = exportHighlightsToObsidianMarkdown(filteredHighlights, {
-            title: 'BookSmart Vurgular ve Notlar',
+            title: 'BookSmart Highlights & Notes',
             includeCallouts: true
         });
         try {
             await navigator.clipboard.writeText(md);
-            toast.success(t('highlights.copySuccess', 'Vurgular Obsidian formatında panoya kopyalandı!'));
+            toast.success(t('highlights.copySuccess', 'Highlights copied to clipboard in Obsidian format!'));
         } catch {
-            toast.error(t('highlights.copyError', 'Panoya kopyalanamadı.'));
+            toast.error(t('highlights.copyError', 'Failed to copy to clipboard.'));
         }
     };
 
     const handleDelete = async (id, bookmarkId) => {
         await deleteHighlight(id, bookmarkId);
-        toast.success(t('highlights.deleted', 'Vurgu silindi.'));
+        toast.success(t('highlights.deleted', 'Highlight removed.'));
     };
 
     const handleSaveNote = async (id) => {
         await updateHighlight(id, { note: noteDraft });
         setEditingNoteId(null);
-        toast.success(t('highlights.noteUpdated', 'Not güncellendi.'));
+        toast.success(t('highlights.noteUpdated', 'Note updated.'));
     };
 
     return (
@@ -153,7 +153,7 @@ export function HighlightsModal({ isOpen, onClose }) {
             title={
                 <div className="flex items-center gap-2">
                     <Highlighter className="w-5 h-5 text-amber-500" />
-                    <span>{t('highlights.modalTitle', 'Vurgular & Yapışkan Notlar')}</span>
+                    <span>{t('highlights.modalTitle', 'Highlights & Sticky Notes')}</span>
                     {rawHighlights?.length > 0 && (
                         <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
                             {rawHighlights.length}
@@ -201,7 +201,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                     "w-5 h-5 rounded-full border border-black/15 transition-transform cursor-pointer flex items-center justify-center",
                                     selectedColor === c.id ? "scale-110 ring-2 ring-primary ring-offset-1" : "hover:scale-105 opacity-80"
                                 )}
-                                title={c.name}
+                                title={t(c.nameKey, c.name)}
                             >
                                 {selectedColor === c.id && <Check className="w-3 h-3 text-slate-800" />}
                             </button>
@@ -215,10 +215,10 @@ export function HighlightsModal({ isOpen, onClose }) {
                             size="sm"
                             onClick={() => setOnlyWithNotes(!onlyWithNotes)}
                             className={cn("h-8 px-2.5 text-xs cursor-pointer", onlyWithNotes && "bg-amber-500/15 text-amber-600 font-semibold")}
-                            title={t('highlights.onlyNotesTooltip', 'Sadece not içeren vurguları göster')}
+                            title={t('highlights.onlyNotesTooltip', 'Show only highlights with notes')}
                         >
                             <StickyNote className="w-3.5 h-3.5 mr-1" />
-                            <span>{t('highlights.withNotes', 'Notlular')}</span>
+                            <span>{t('highlights.withNotes', 'With Notes')}</span>
                         </Button>
 
                         <Button
@@ -227,10 +227,10 @@ export function HighlightsModal({ isOpen, onClose }) {
                             onClick={handleSync}
                             disabled={isSyncing}
                             className="h-8 px-2.5 text-xs cursor-pointer gap-1"
-                            title={t('highlights.syncFromExtension', 'Eklentiden vurguları eşitle')}
+                            title={t('highlights.syncFromExtension', 'Sync highlights from extension')}
                         >
                             <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin text-primary")} />
-                            <span className="hidden sm:inline">{t('highlights.syncBtn', 'Eklentiden Eşitle')}</span>
+                            <span className="hidden sm:inline">{t('highlights.syncBtn', 'Sync from Extension')}</span>
                         </Button>
 
                         <Button
@@ -239,10 +239,10 @@ export function HighlightsModal({ isOpen, onClose }) {
                             onClick={handleCopyMarkdown}
                             disabled={filteredHighlights.length === 0}
                             className="h-8 px-2.5 text-xs cursor-pointer gap-1"
-                            title={t('highlights.copyObsidian', 'Obsidian formatında panoya kopyala')}
+                            title={t('highlights.copyObsidian', 'Copy to clipboard in Obsidian format')}
                         >
                             <Copy className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{t('common.copy', 'Kopyala')}</span>
+                            <span className="hidden sm:inline">{t('common.copy', 'Copy')}</span>
                         </Button>
 
                         <Button
@@ -251,7 +251,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                             onClick={handleExportObsidian}
                             disabled={filteredHighlights.length === 0}
                             className="h-8 px-2.5 text-xs cursor-pointer bg-purple-600 hover:bg-purple-700 text-white gap-1"
-                            title={t('highlights.exportObsidian', 'Obsidian Markdown (.md) Olarak İndir')}
+                            title={t('highlights.exportObsidian', 'Download as Obsidian Markdown (.md)')}
                         >
                             <Download className="w-3.5 h-3.5" />
                             <span>{t('highlights.obsidianExportBtn', 'Obsidian .md')}</span>
@@ -265,10 +265,10 @@ export function HighlightsModal({ isOpen, onClose }) {
                         <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground my-12">
                             <Highlighter className="w-12 h-12 text-muted-foreground/30 mb-3" />
                             <h4 className="font-semibold text-base text-foreground mb-1">
-                                {t('highlights.emptyTitle', 'Henüz vurgulanmış metin yok')}
+                                {t('highlights.emptyTitle', 'No highlighted text yet')}
                             </h4>
                             <p className="text-xs max-w-md text-muted-foreground leading-relaxed mb-4">
-                                {t('highlights.emptyHelp', 'Tarayıcı eklentisiyle internette gezinirken dilediğiniz metni seçip sağ tıklayarak vurgulayabilir ve sayfa üzerine yapışkan notlar bırakabilirsiniz.')}
+                                {t('highlights.emptyHelp', 'While browsing the web with the companion extension, you can select any text, right-click to highlight it, and leave sticky notes on pages.')}
                             </p>
                             <Button
                                 variant="outline"
@@ -278,7 +278,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                 className="cursor-pointer gap-1.5"
                             >
                                 <RefreshCw className={cn("w-3.5 h-3.5", isSyncing && "animate-spin")} />
-                                <span>{t('highlights.trySync', 'Eklentiyi Tara ve Eşitle')}</span>
+                                <span>{t('highlights.trySync', 'Scan & Sync Extension')}</span>
                             </Button>
                         </div>
                     ) : (
@@ -342,7 +342,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                                         <Input
                                                             value={noteDraft}
                                                             onChange={(e) => setNoteDraft(e.target.value)}
-                                                            placeholder={t('highlights.addNotePlaceholder', 'Not ekleyin veya düzenleyin...')}
+                                                            placeholder={t('highlights.addNotePlaceholder', 'Add or edit note...')}
                                                             className="text-xs h-7 bg-background"
                                                             autoFocus
                                                         />
@@ -351,7 +351,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                                             className="h-7 text-xs px-2.5"
                                                             onClick={() => handleSaveNote(item.id)}
                                                         >
-                                                            {t('common.save', 'Kaydet')}
+                                                            {t('common.save', 'Save')}
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
@@ -359,7 +359,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                                             className="h-7 text-xs px-2"
                                                             onClick={() => setEditingNoteId(null)}
                                                         >
-                                                            {t('common.cancel', 'İptal')}
+                                                            {t('common.cancel', 'Cancel')}
                                                         </Button>
                                                     </div>
                                                 ) : item.note ? (
@@ -369,7 +369,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                                             setNoteDraft(item.note);
                                                         }}
                                                         className="group/note flex items-start gap-2 bg-amber-500/10 border border-amber-500/25 p-2.5 rounded-xl text-xs text-amber-900 dark:text-amber-200 cursor-pointer hover:bg-amber-500/15 transition-colors"
-                                                        title={t('highlights.clickToEditNote', 'Notu düzenlemek için tıklayın')}
+                                                        title={t('highlights.clickToEditNote', 'Click to edit note')}
                                                     >
                                                         <StickyNote className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                                         <p className="flex-1 whitespace-pre-wrap">{item.note}</p>
@@ -383,7 +383,7 @@ export function HighlightsModal({ isOpen, onClose }) {
                                                             className="inline-block w-2.5 h-2.5 rounded-full border border-black/10"
                                                             style={{ backgroundColor: colorCfg.hex }}
                                                         />
-                                                        <span>{colorCfg.name} vurgu</span>
+                                                        <span>{t(colorCfg.nameKey, colorCfg.name)}</span>
                                                         <span>•</span>
                                                         <span>{getRelativeTime(Math.floor((item.createdAt || Date.now()) / 1000), t)}</span>
                                                     </div>

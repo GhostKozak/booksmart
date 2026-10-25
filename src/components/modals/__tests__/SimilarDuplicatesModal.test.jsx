@@ -44,7 +44,7 @@ describe('SimilarDuplicatesModal', () => {
             />
         );
 
-        expect(screen.getByText(/Yinelenen ve Benzer İçerikleri Birleştir/i)).toBeInTheDocument();
+        expect(screen.getByText(/(Yinelenen ve Benzer İçerikleri Birleştir|Consolidate Similar & Duplicate Bookmarks)/i)).toBeInTheDocument();
         expect(screen.getByText('React Documentation')).toBeInTheDocument();
         expect(screen.getByText('React Docs | Overview')).toBeInTheDocument();
         expect(screen.queryByText('Unrelated Site')).not.toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('SimilarDuplicatesModal', () => {
             />
         );
 
-        const mergeBtn = screen.getByRole('button', { name: /^Birleştir$/i });
+        const mergeBtn = screen.getByRole('button', { name: /^(Birleştir|Merge)$/i });
         fireEvent.click(mergeBtn);
 
         expect(onBatchMerge).toHaveBeenCalledWith([
@@ -99,10 +99,10 @@ describe('SimilarDuplicatesModal', () => {
             />
         );
 
-        const dismissBtn = screen.getByTitle(/Yok Say/i);
+        const dismissBtn = screen.getByTitle(/(Yok Say|Dismiss)/i);
         fireEvent.click(dismissBtn);
 
         expect(screen.queryByText('React Documentation')).not.toBeInTheDocument();
-        expect(screen.getByText(/Yinelenen veya benzer içerik bulunamadı/i)).toBeInTheDocument();
+        expect(screen.getByText(/(Yinelenen veya benzer içerik bulunamadı|No duplicate or similar content found)/i)).toBeInTheDocument();
     });
 });

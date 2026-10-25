@@ -909,7 +909,7 @@
             "copiedMarkdown": "Markdown list copied to clipboard!",
             "authorPlaceholder": "ej.: @usuario",
             "guideStep1": "Haz clic arriba en \"Descargar HTML (index.html)\" para descargar el archivo.",
-            "guideStep2": "Crea un nuevo repositorio público en GitHub (ej.: \"links\").",
+            "guideStep2": "– crea un nuevo repositorio público (ej.: \"links\").",
             "guideStep3": "Arrastra y haz commit del archivo index.html en el repositorio.",
             "guideStep4": "En Settings > Pages, selecciona \"Deploy from a branch\" y elige main.",
             "guideStep5": "¡Tu centro de enlaces ya está en línea en https://<usuario>.github.io/<repo>/!"
@@ -1100,10 +1100,11 @@
             "emptyDesc": "Select any text in the article to color-highlight and add annotations.",
             "scrollTo": "Jump to text location",
             "colors": {
-                "yellow": "Yellow",
-                "green": "Green",
-                "blue": "Blue",
-                "purple": "Purple"
+                "yellow": "Amarillo",
+                "green": "Verde",
+                "blue": "Azul",
+                "purple": "Morado",
+                "pink": "Rosa"
             }
         },
         "articleLoadError": "No se pudo cargar el contenido del artículo",
@@ -1215,7 +1216,8 @@
         "exactUrl": "Coincidencia exacta de URL",
         "urlVariation": "Variación de parámetros / URL",
         "similarTitle": "Título y contenido similar ({{percent}}% de similitud)",
-        "bookmarksCount": "{{count}} marcadores"
+        "bookmarksCount": "{{count}} marcadores",
+        "groupsCount": "{{count}} grupo(s)"
     },
     "metadataEnricher": {
         "running": "Enriching in background..."

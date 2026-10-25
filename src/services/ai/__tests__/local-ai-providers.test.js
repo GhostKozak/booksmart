@@ -70,7 +70,7 @@ describe('Local AI Providers', () => {
         });
 
         it('throws helpful error if browser AI is not available when called', async () => {
-            await expect(callBrowserAI({ messages: [] })).rejects.toThrow(/Tarayıcı içi yerel YZ/i);
+            await expect(callBrowserAI({ messages: [] })).rejects.toThrow(/In-browser local AI|Prompt API/i);
         });
     });
 

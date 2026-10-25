@@ -137,17 +137,29 @@ export function formatByteSize(bytes) {
 /**
  * Downloads snapshot as a self-contained offline HTML file.
  */
+function escapeHtml(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 export function downloadSnapshotFile(snapshot) {
     if (!snapshot || !snapshot.html) return;
     const safeTitle = (snapshot.title || 'snapshot').replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+    const safeUrl = escapeHtml(snapshot.url || '');
+    const displayTitle = escapeHtml(snapshot.title || 'Untitled');
     const fullHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${snapshot.title || 'Offline Snapshot'} (BookSmart Archive)</title>
+  <title>${displayTitle} (BookSmart Archive)</title>
   <meta name="generator" content="BookSmart Offline Snapshot">
-  <meta name="original-url" content="${snapshot.url}">
+  <meta name="original-url" content="${safeUrl}">
   <style>
     body {
       max-width: 760px;
@@ -174,10 +186,10 @@ export function downloadSnapshotFile(snapshot) {
 <body>
   <div class="archive-banner">
     📦 <strong>BookSmart Offline Archive Copy</strong><br>
-    Original Link: <a href="${snapshot.url}" target="_blank" rel="noopener noreferrer">${snapshot.url}</a><br>
+    Original Link: <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a><br>
     Archived Date: ${new Date(snapshot.savedAt).toLocaleString()}
   </div>
-  <h1>${snapshot.title || 'Untitled'}</h1>
+  <h1>${displayTitle}</h1>
   ${snapshot.html}
 </body>
 </html>`;

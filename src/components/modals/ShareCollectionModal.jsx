@@ -388,11 +388,11 @@ export function ShareCollectionModal({ isOpen, collection, onClose }) {
 
                     {showGithubGuide && (
                         <div className="pt-2 text-muted-foreground space-y-1.5 leading-relaxed border-t border-border/60 animate-in fade-in duration-200">
-                            <p><strong>1.</strong> {t('collections.share.guideStep1', 'Yukarıdaki "HTML İndir (index.html)" butonuna tıklayarak dosyayı indirin.')}</p>
-                            <p><strong>2.</strong> <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" className="text-primary underline">github.com/new</a> {t('collections.share.guideStep2', 'adresinde yeni bir genel (Public) repository oluşturun (örn: linkler).')}</p>
-                            <p><strong>3.</strong> {t('collections.share.guideStep3', 'İndirdiğiniz index.html dosyasını repo içine sürükleyip Commit edin.')}</p>
-                            <p><strong>4.</strong> {t('collections.share.guideStep4', 'Repo içinde Settings > Pages sekmesine gidin, Source kısmından Deploy from a branch ve main seçip kaydedin.')}</p>
-                            <p className="text-emerald-600 dark:text-emerald-400 font-medium">🎉 {t('collections.share.guideStep5', 'Tebrikler! Sayfanız https://<kullanici-adiniz>.github.io/<repo>/ adresinde yayında!')}</p>
+                            <p><strong>1.</strong> {t('collections.share.guideStep1', 'Click "Download HTML (index.html)" above to download the file.')}</p>
+                            <p><strong>2.</strong> <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" className="text-primary underline">github.com/new</a> {t('collections.share.guideStep2', '— create a new public repository (e.g. "links").')}</p>
+                            <p><strong>3.</strong> {t('collections.share.guideStep3', 'Drag and commit index.html into the repository.')}</p>
+                            <p><strong>4.</strong> {t('collections.share.guideStep4', 'Under Settings > Pages, choose "Deploy from a branch" and select main.')}</p>
+                            <p className="text-emerald-600 dark:text-emerald-400 font-medium">🎉 {t('collections.share.guideStep5', 'Your link hub is now live at https://<username>.github.io/<repo>/!')}</p>
                         </div>
                     )}
                 </div>

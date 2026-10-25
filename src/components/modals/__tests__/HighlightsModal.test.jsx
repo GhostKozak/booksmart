@@ -64,7 +64,7 @@ describe('HighlightsModal', () => {
     it('filters highlights with notes when only notes button is clicked', () => {
         render(<HighlightsModal isOpen={true} onClose={vi.fn()} />);
 
-        const onlyNotesBtn = screen.getByRole('button', { name: /Notlular/i });
+        const onlyNotesBtn = screen.getByRole('button', { name: /(Notlular|With Notes)/i });
         fireEvent.click(onlyNotesBtn);
 
         expect(screen.getByText(/Important principle/i)).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('HighlightsModal', () => {
     it('calls syncExtensionHighlightsToDb when sync button is clicked', async () => {
         render(<HighlightsModal isOpen={true} onClose={vi.fn()} />);
 
-        const syncBtn = screen.getByRole('button', { name: /Eklentiden Eşitle/i });
+        const syncBtn = screen.getByRole('button', { name: /(Eklentiden Eşitle|Sync from Extension)/i });
         fireEvent.click(syncBtn);
 
         await waitFor(() => {

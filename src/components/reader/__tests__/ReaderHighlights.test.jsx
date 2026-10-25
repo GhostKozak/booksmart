@@ -37,7 +37,7 @@ describe('HighlightSelectionMenu', () => {
             />
         );
 
-        const yellowBtn = screen.getByRole('button', { name: /sarı/i });
+        const yellowBtn = screen.getByRole('button', { name: /(sarı|yellow)/i });
         expect(yellowBtn).toBeInTheDocument();
 
         fireEvent.click(yellowBtn);
@@ -65,10 +65,10 @@ describe('HighlightSelectionMenu', () => {
         const noteBtn = screen.getByRole('button', { name: /not/i });
         fireEvent.click(noteBtn);
 
-        const textarea = screen.getByPlaceholderText(/bu vurgu hakkında bir düşünce/i);
+        const textarea = screen.getByPlaceholderText(/(bu vurgu hakkında bir düşünce|write a thought or note)/i);
         fireEvent.change(textarea, { target: { value: 'Look into this reference' } });
 
-        const saveBtn = screen.getByRole('button', { name: /kaydet/i });
+        const saveBtn = screen.getByRole('button', { name: /(kaydet|save)/i });
         fireEvent.click(saveBtn);
 
         expect(onHighlight).toHaveBeenCalledWith({
@@ -118,8 +118,8 @@ describe('ReaderHighlightsSidebar', () => {
             />
         );
 
-        expect(screen.getByText('Vurgular ve Notlar')).toBeInTheDocument();
-        expect(screen.getByText(/2 vurgu/i)).toBeInTheDocument();
+        expect(screen.getByText(/(Vurgular ve Notlar|Highlights & Notes)/i)).toBeInTheDocument();
+        expect(screen.getByText(/2 (vurgu|highlight\(s\))/i)).toBeInTheDocument();
         expect(screen.getByText(/"Quote 1"/i)).toBeInTheDocument();
         expect(screen.getByText(/Note 1/i)).toBeInTheDocument();
     });
@@ -136,7 +136,7 @@ describe('ReaderHighlightsSidebar', () => {
             />
         );
 
-        const copyBtn = screen.getByTitle(/Tümünü Markdown Olarak Kopyala/i);
+        const copyBtn = screen.getByTitle(/(Tümünü Markdown Olarak Kopyala|Copy All as Markdown)/i);
         await act(async () => {
             fireEvent.click(copyBtn);
         });

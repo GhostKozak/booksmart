@@ -6,7 +6,7 @@ import { cleanJsonString } from '../ai-utils';
  */
 export async function getBrowserAICapability() {
     if (typeof window === 'undefined') {
-        return { supported: false, status: 'unavailable', message: 'Ortam desteklenmiyor' };
+        return { supported: false, status: 'unavailable', message: 'Environment not supported' };
     }
 
     const aiObj = window.ai || (typeof globalThis !== 'undefined' ? globalThis.ai : null);
@@ -14,7 +14,7 @@ export async function getBrowserAICapability() {
         return {
             supported: false,
             status: 'unavailable',
-            message: 'Tarayıcı içi YZ API bulunamadı (Chrome 128+ ve Prompt API flag gereklidir).'
+            message: 'In-browser AI API not found (Chrome 128+ with Prompt API flag required).'
         };
     }
 
@@ -46,7 +46,7 @@ export async function getBrowserAICapability() {
 export async function callBrowserAI({ messages, asJson = true, signal }) {
     const aiObj = (typeof window !== 'undefined' && window.ai) || (typeof globalThis !== 'undefined' ? globalThis.ai : null);
     if (!aiObj?.languageModel) {
-        throw new Error('Tarayıcı içi yerel YZ (Chrome Prompt API) bu tarayıcıda bulunamadı. Lütfen Chrome 128+ ile chrome://flags/#prompt-api-for-gemini-nano ayarını açın veya Ollama kullanın.');
+        throw new Error('In-browser local AI (Chrome Prompt API) is not available in this browser. Please open chrome://flags/#prompt-api-for-gemini-nano in Chrome 128+ or use Ollama.');
     }
 
     let systemPrompt = '';
@@ -68,7 +68,7 @@ export async function callBrowserAI({ messages, asJson = true, signal }) {
         const createOptions = systemPrompt.trim() ? { systemPrompt: systemPrompt.trim() } : undefined;
         session = await aiObj.languageModel.create(createOptions);
     } catch (e) {
-        throw new Error(`Tarayıcı içi model oturumu başlatılamadı: ${e.message}`);
+        throw new Error(`Failed to initialize in-browser model session: ${e.message}`);
     }
 
     try {

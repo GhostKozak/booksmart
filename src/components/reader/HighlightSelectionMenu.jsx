@@ -44,7 +44,7 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                                 )}
                                 style={{ backgroundColor: c.hex }}
                                 title={t(c.nameKey, c.name)}
-                                aria-label={c.name}
+                                aria-label={t(c.nameKey, c.name)}
                             />
                         ))}
 
@@ -54,17 +54,17 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                             type="button"
                             onClick={() => setShowNoteInput(true)}
                             className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground text-xs flex items-center gap-1 cursor-pointer transition-colors"
-                            title={t('reader.highlights.addNote', 'Not Ekle')}
+                            title={t('reader.highlights.addNote', 'Add Note')}
                         >
                             <MessageSquare className="w-3.5 h-3.5" />
-                            <span className="text-[11px] font-medium pr-1">{t('reader.highlights.note', 'Not')}</span>
+                            <span className="text-[11px] font-medium pr-1">{t('reader.highlights.note', 'Note')}</span>
                         </button>
 
                         <button
                             type="button"
                             onClick={onClose}
                             className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                            title={t('common.cancel', 'İptal')}
+                            title={t('common.cancel', 'Cancel')}
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -73,7 +73,7 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                     <div className="flex flex-col gap-1.5 w-60 p-1">
                         <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold text-muted-foreground">
-                                {t('reader.highlights.addNote', 'Kenar Notu Ekle')}
+                                {t('reader.highlights.addNote', 'Add Margin Note')}
                             </span>
                             <div className="flex items-center gap-1">
                                 {HIGHLIGHT_COLORS.map((c) => (
@@ -86,7 +86,7 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                                             selectedColor === c.id ? "scale-125 ring-2 ring-primary ring-offset-1" : "opacity-75 hover:opacity-100"
                                         )}
                                         style={{ backgroundColor: c.hex }}
-                                        title={c.name}
+                                        title={t(c.nameKey, c.name)}
                                     />
                                 ))}
                             </div>
@@ -95,7 +95,7 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                         <textarea
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
-                            placeholder={t('reader.highlights.notePlaceholder', 'Bu vurgu hakkında bir düşünce veya not yazın...')}
+                            placeholder={t('reader.highlights.notePlaceholder', 'Write a thought or note for this highlight...')}
                             autoFocus
                             rows={2}
                             className="w-full text-xs p-1.5 rounded-md border bg-background text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden resize-none"
@@ -112,7 +112,7 @@ export function HighlightSelectionMenu({ position, selectedText, onHighlight, on
                                 onClick={() => setShowNoteInput(false)}
                                 className="px-2 py-0.5 rounded text-[11px] hover:bg-muted text-muted-foreground cursor-pointer"
                             >
-                                {t('common.cancel', 'İptal')}
+                                {t('common.cancel', 'Cancel')}
                             </button>
                             <button
                                 type="button"

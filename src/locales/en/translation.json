@@ -909,7 +909,7 @@
             "footer": "{{count}} bookmarks shared via BookSmart",
             "authorPlaceholder": "e.g. @username",
             "guideStep1": "Click \"Download HTML (index.html)\" above to download the file.",
-            "guideStep2": "Create a new public repository on GitHub (e.g. \"links\").",
+            "guideStep2": "— create a new public repository (e.g. \"links\").",
             "guideStep3": "Drag and commit index.html into the repository.",
             "guideStep4": "Under Settings > Pages, choose \"Deploy from a branch\" and select main.",
             "guideStep5": "Your link hub is now live at https://<username>.github.io/<repo>/!"
@@ -1103,7 +1103,8 @@
                 "yellow": "Yellow",
                 "green": "Green",
                 "blue": "Blue",
-                "purple": "Purple"
+                "purple": "Purple",
+                "pink": "Pink"
             }
         },
         "articleLoadError": "Could not load article content",
@@ -1215,7 +1216,8 @@
         "exactUrl": "Exact URL Match",
         "urlVariation": "Parameter / URL Variation",
         "similarTitle": "Similar Title & Content ({{percent}}% Similarity)",
-        "bookmarksCount": "{{count}} bookmarks"
+        "bookmarksCount": "{{count}} bookmarks",
+        "groupsCount": "{{count}} group(s)"
     },
     "metadataEnricher": {
         "running": "Enriching in background..."

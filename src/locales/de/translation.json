@@ -909,7 +909,7 @@
             "copiedMarkdown": "Markdown list copied to clipboard!",
             "authorPlaceholder": "z. B. @benutzername",
             "guideStep1": "Klicken Sie oben auf \"HTML herunterladen (index.html)\", um die Datei herunterzuladen.",
-            "guideStep2": "Erstellen Sie ein neues öffentliches Repository auf GitHub (z. B. \"links\").",
+            "guideStep2": "– erstellen Sie ein neues öffentliches Repository (z. B. \"links\").",
             "guideStep3": "Ziehen Sie die Datei index.html in das Repository und committen Sie sie.",
             "guideStep4": "Wählen Sie unter Settings > Pages \"Deploy from a branch\" und wählen Sie den main-Branch.",
             "guideStep5": "Ihr Link-Hub ist jetzt live unter https://<benutzername>.github.io/<repo>/!"
@@ -1100,10 +1100,11 @@
             "emptyDesc": "Select any text in the article to color-highlight and add annotations.",
             "scrollTo": "Jump to text location",
             "colors": {
-                "yellow": "Yellow",
-                "green": "Green",
-                "blue": "Blue",
-                "purple": "Purple"
+                "yellow": "Gelb",
+                "green": "Grün",
+                "blue": "Blau",
+                "purple": "Lila",
+                "pink": "Rosa"
             }
         },
         "articleLoadError": "Artikelinhalt konnte nicht geladen werden",
@@ -1215,7 +1216,8 @@
         "exactUrl": "Exakte URL-Übereinstimmung",
         "urlVariation": "Parameter- / Formatvariation",
         "similarTitle": "Ähnlicher Titel & Inhalt ({{percent}}% Ähnlichkeit)",
-        "bookmarksCount": "{{count}} Lesezeichen"
+        "bookmarksCount": "{{count}} Lesezeichen",
+        "groupsCount": "{{count}} Gruppe(n)"
     },
     "metadataEnricher": {
         "running": "Enriching in background..."

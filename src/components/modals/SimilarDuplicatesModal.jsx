@@ -74,7 +74,7 @@ export function SimilarDuplicatesModal({
                 }
             ]);
             handleDismissCluster(cluster.id);
-            toast.success(t('similarDuplicates.mergedGroupSuccess', 'Grup başarıyla birleştirildi!'));
+            toast.success(t('similarDuplicates.mergedGroupSuccess', 'Group merged successfully!'));
         }
     };
 
@@ -96,7 +96,7 @@ export function SimilarDuplicatesModal({
             await onBatchMerge(mergePayload);
             toast.success(t('similarDuplicates.mergedAllSuccess', {
                 count: visibleClusters.length,
-                defaultValue: `${visibleClusters.length} grup başarıyla birleştirildi!`
+                defaultValue: `${visibleClusters.length} group(s) consolidated successfully!`
             }));
             onClose();
         }
@@ -109,10 +109,10 @@ export function SimilarDuplicatesModal({
             title={
                 <div className="flex items-center gap-2">
                     <GitMerge className="w-5 h-5 text-primary" />
-                    <span>{t('similarDuplicates.modalTitle', 'Yinelenen ve Benzer İçerikleri Birleştir')}</span>
+                    <span>{t('similarDuplicates.modalTitle', 'Consolidate Similar & Duplicate Bookmarks')}</span>
                     {visibleClusters.length > 0 && (
                         <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
-                            {visibleClusters.length} grup
+                            {t('similarDuplicates.groupsCount', { count: visibleClusters.length, defaultValue: `${visibleClusters.length} group(s)` })}
                         </span>
                     )}
                 </div>
@@ -134,7 +134,7 @@ export function SimilarDuplicatesModal({
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            {t('common.all', 'Tümü')} ({allClusters.length})
+                            {t('common.all', 'All')} ({allClusters.length})
                         </button>
                         <button
                             type="button"
@@ -146,7 +146,7 @@ export function SimilarDuplicatesModal({
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            {t('similarDuplicates.urlVariants', 'URL Varyasyonları')}
+                            {t('similarDuplicates.urlVariants', 'URL Variations')}
                         </button>
                         <button
                             type="button"
@@ -158,14 +158,14 @@ export function SimilarDuplicatesModal({
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            {t('similarDuplicates.similarTitles', 'Benzer Başlıklar')}
+                            {t('similarDuplicates.similarTitles', 'Similar Titles')}
                         </button>
                     </div>
 
                     {/* Middle: Similarity Threshold Slider */}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-xl border border-border/50">
                         <Sliders className="w-3.5 h-3.5 text-primary" />
-                        <span>{t('similarDuplicates.similarity', 'Hassasiyet:')} {Math.round(threshold * 100)}%</span>
+                        <span>{t('similarDuplicates.similarity', 'Sensitivity:')} {Math.round(threshold * 100)}%</span>
                         <input
                             type="range"
                             min="0.65"
@@ -186,7 +186,7 @@ export function SimilarDuplicatesModal({
                         className="h-8 px-3 text-xs bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-xs gap-1.5"
                     >
                         <CheckCheck className="w-3.5 h-3.5" />
-                        <span>{t('similarDuplicates.mergeAllBtn', { count: visibleClusters.length, defaultValue: `Tümünü Birleştir (${visibleClusters.length})` })}</span>
+                        <span>{t('similarDuplicates.mergeAllBtn', { count: visibleClusters.length, defaultValue: `Consolidate All (${visibleClusters.length})` })}</span>
                     </Button>
                 </div>
 
@@ -196,10 +196,10 @@ export function SimilarDuplicatesModal({
                         <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground my-12">
                             <Sparkles className="w-12 h-12 text-primary/40 mb-3" />
                             <h4 className="font-semibold text-base text-foreground mb-1">
-                                {t('similarDuplicates.cleanTitle', 'Tebrikler! Yinelenen veya benzer içerik bulunamadı.')}
+                                {t('similarDuplicates.cleanTitle', 'Congratulations! No duplicate or similar content found.')}
                             </h4>
                             <p className="text-xs max-w-sm text-muted-foreground leading-relaxed">
-                                {t('similarDuplicates.cleanHelp', 'Kütüphanenizdeki yer imleri temiz ve düzenli görünüyor. Daha geniş aramak için yukarıdaki hassasiyeti kaydırabilirsiniz.')}
+                                {t('similarDuplicates.cleanHelp', 'Your bookmark library looks clean and organized. Adjust sensitivity slider above to widen detection.')}
                             </p>
                         </div>
                     ) : (
@@ -227,16 +227,16 @@ export function SimilarDuplicatesModal({
                                                 )}
                                             >
                                                 {cluster.type === 'exact_url'
-                                                    ? t('similarDuplicates.exactUrl', 'Birebir Aynı URL')
+                                                    ? t('similarDuplicates.exactUrl', 'Exact URL Match')
                                                     : cluster.type === 'url_variation'
-                                                    ? t('similarDuplicates.urlVariation', 'Farklı Parametre / Format Varyasyonu')
+                                                    ? t('similarDuplicates.urlVariation', 'Different Parameters / Format Variation')
                                                     : t('similarDuplicates.similarTitle', {
                                                         percent: Math.round((cluster.similarityScore || 0) * 100),
-                                                        defaultValue: `Benzer Başlık & İçerik (${Math.round((cluster.similarityScore || 0) * 100)}% Benzerlik)`
+                                                        defaultValue: `Similar Title & Content (${Math.round((cluster.similarityScore || 0) * 100)}% Similarity)`
                                                     })}
                                             </span>
                                             <span className="text-xs text-muted-foreground font-medium">
-                                                {t('similarDuplicates.bookmarksCount', { count: cluster.bookmarks.length, defaultValue: `${cluster.bookmarks.length} yer imi` })}
+                                                {t('similarDuplicates.bookmarksCount', { count: cluster.bookmarks.length, defaultValue: `${cluster.bookmarks.length} bookmark(s)` })}
                                             </span>
                                         </div>
 
@@ -248,14 +248,14 @@ export function SimilarDuplicatesModal({
                                                 className="h-7 px-2.5 text-xs cursor-pointer text-primary border-primary/30 hover:bg-primary/10 gap-1"
                                             >
                                                 <GitMerge className="w-3 h-3" />
-                                                <span>{t('similarDuplicates.mergeThisGroup', 'Birleştir')}</span>
+                                                <span>{t('similarDuplicates.mergeThisGroup', 'Merge')}</span>
                                             </Button>
 
                                             <button
                                                 type="button"
                                                 onClick={() => handleDismissCluster(cluster.id)}
                                                 className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-muted cursor-pointer transition-colors"
-                                                title={t('common.dismiss', 'Yok Say')}
+                                                title={t('common.dismiss', 'Dismiss')}
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
@@ -265,7 +265,7 @@ export function SimilarDuplicatesModal({
                                     {/* Bookmarks in this cluster */}
                                     <div className="p-3.5 space-y-2.5">
                                         <div className="text-[11px] font-medium text-muted-foreground">
-                                            {t('similarDuplicates.choosePrimary', 'Ana (korunacak) yer imini seçin:')}
+                                            {t('similarDuplicates.choosePrimary', 'Select primary (to keep) bookmark:')}
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -300,7 +300,7 @@ export function SimilarDuplicatesModal({
                                                                             : "bg-muted text-muted-foreground"
                                                                     )}
                                                                 >
-                                                                    {isPrimary ? t('similarDuplicates.primaryBadge', '✓ Ana Yer İmi') : t('similarDuplicates.duplicateBadge', 'Yinelenen')}
+                                                                    {isPrimary ? t('similarDuplicates.primaryBadge', '✓ Primary Bookmark') : t('similarDuplicates.duplicateBadge', 'Duplicate')}
                                                                 </span>
                                                             </div>
 
@@ -319,20 +319,20 @@ export function SimilarDuplicatesModal({
                                                         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40 text-[10px] text-muted-foreground">
                                                             <span className="inline-flex items-center gap-1">
                                                                 <Folder className="w-3 h-3" />
-                                                                <span className="truncate max-w-[90px]">{bm.newFolder || bm.originalFolder || t('common.library', 'Kütüphane')}</span>
+                                                                <span className="truncate max-w-[90px]">{bm.newFolder || bm.originalFolder || t('common.library', 'Library')}</span>
                                                             </span>
 
                                                             {bm.tags && bm.tags.length > 0 && (
                                                                 <span className="inline-flex items-center gap-0.5 bg-muted px-1 rounded">
                                                                     <Hash className="w-2.5 h-2.5" />
-                                                                    <span>{t('similarDuplicates.tagsCount', { count: bm.tags.length, defaultValue: `${bm.tags.length} etiket` })}</span>
+                                                                    <span>{t('similarDuplicates.tagsCount', { count: bm.tags.length, defaultValue: `${bm.tags.length} tag(s)` })}</span>
                                                                 </span>
                                                             )}
 
                                                             {bm.note && (
                                                                 <span className="inline-flex items-center gap-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1 rounded">
                                                                     <StickyNote className="w-2.5 h-2.5" />
-                                                                    <span>{t('similarDuplicates.hasNote', 'Not var')}</span>
+                                                                    <span>{t('similarDuplicates.hasNote', 'Has note')}</span>
                                                                 </span>
                                                             )}
 
@@ -351,25 +351,25 @@ export function SimilarDuplicatesModal({
                                     {/* Merge Outcome Summary Preview */}
                                     <div className="p-3 bg-muted/20 text-xs flex flex-wrap items-center justify-between gap-2">
                                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                            <span className="font-semibold text-foreground">{t('similarDuplicates.mergeResult', 'Birleşme Sonucu:')}</span>
+                                            <span className="font-semibold text-foreground">{t('similarDuplicates.mergeResult', 'Merge Result:')}</span>
 
                                             {cluster.mergedPreview.tags.length > 0 && (
                                                 <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                     <Hash className="w-3 h-3 text-primary" />
-                                                    <span>{t('similarDuplicates.mergedTags', { count: cluster.mergedPreview.tags.length, defaultValue: `${cluster.mergedPreview.tags.length} birleşik etiket` })}</span>
+                                                    <span>{t('similarDuplicates.mergedTags', { count: cluster.mergedPreview.tags.length, defaultValue: `${cluster.mergedPreview.tags.length} merged tags` })}</span>
                                                 </span>
                                             )}
 
                                             {cluster.mergedPreview.note && (
                                                 <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                     <StickyNote className="w-3 h-3 text-amber-500" />
-                                                    <span>{t('similarDuplicates.mergedNotes', 'Birleşik notlar')}</span>
+                                                    <span>{t('similarDuplicates.mergedNotes', 'Merged notes')}</span>
                                                 </span>
                                             )}
 
                                             <span className="inline-flex items-center gap-1 bg-background px-2 py-0.5 rounded-md border border-border/60">
                                                 <Trash2 className="w-3 h-3 text-rose-500" />
-                                                <span>{t('similarDuplicates.copiesDeleted', { count: cluster.bookmarks.length - 1, defaultValue: `${cluster.bookmarks.length - 1} kopya silinecek` })}</span>
+                                                <span>{t('similarDuplicates.copiesDeleted', { count: cluster.bookmarks.length - 1, defaultValue: `${cluster.bookmarks.length - 1} duplicate(s) will be removed` })}</span>
                                             </span>
                                         </div>
                                     </div>

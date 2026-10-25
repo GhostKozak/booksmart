@@ -200,8 +200,8 @@ export function HeaderMenuActionsTab({
                         <Highlighter className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                        <div className="text-xs font-semibold">{t('highlights.menuTitle', 'Vurgular & Yapışkan Notlar')}</div>
-                        <div className="text-[10px] text-muted-foreground">{t('highlights.menuSubtitle', 'Web alıntıları ve Obsidian (.md) aktarımı')}</div>
+                        <div className="text-xs font-semibold">{t('highlights.menuTitle', 'Highlights & Sticky Notes')}</div>
+                        <div className="text-[10px] text-muted-foreground">{t('highlights.menuSubtitle', 'Web clippings and Obsidian (.md) export')}</div>
                     </div>
                 </div>
             </button>

@@ -17,7 +17,7 @@ export async function checkOllamaHealth(baseUrl) {
         const data = await res.json().catch(() => ({}));
         return { ok: true, version: data.version || 'running' };
     } catch (err) {
-        return { ok: false, error: err.message || 'Sunucuya ulaşılamadı' };
+        return { ok: false, error: err.message || 'Could not connect to Ollama server' };
     }
 }
 

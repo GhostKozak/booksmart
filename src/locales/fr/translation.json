@@ -909,7 +909,7 @@
             "copiedMarkdown": "Markdown list copied to clipboard!",
             "authorPlaceholder": "ex. : @nomdutilisateur",
             "guideStep1": "Cliquez sur \"Télécharger HTML (index.html)\" ci-dessus pour télécharger le fichier.",
-            "guideStep2": "Créez un nouveau dépôt public sur GitHub (ex. : \"links\").",
+            "guideStep2": "– créez un nouveau dépôt public (ex. : \"links\").",
             "guideStep3": "Glissez et validez le fichier index.html dans le dépôt.",
             "guideStep4": "Dans Settings > Pages, choisissez \"Deploy from a branch\" et sélectionnez main.",
             "guideStep5": "Votre hub de liens est maintenant en ligne sur https://<nomdutilisateur>.github.io/<repo>/ !"
@@ -1100,10 +1100,11 @@
             "emptyDesc": "Select any text in the article to color-highlight and add annotations.",
             "scrollTo": "Jump to text location",
             "colors": {
-                "yellow": "Yellow",
-                "green": "Green",
-                "blue": "Blue",
-                "purple": "Purple"
+                "yellow": "Jaune",
+                "green": "Vert",
+                "blue": "Bleu",
+                "purple": "Violet",
+                "pink": "Rose"
             }
         },
         "articleLoadError": "Impossible de charger le contenu de l'article",
@@ -1215,7 +1216,8 @@
         "exactUrl": "Correspondance exacte de l'URL",
         "urlVariation": "Variation de paramètres / URL",
         "similarTitle": "Titre et contenu similaires ({{percent}}% de similarité)",
-        "bookmarksCount": "{{count}} favoris"
+        "bookmarksCount": "{{count}} favoris",
+        "groupsCount": "{{count}} groupe(s)"
     },
     "metadataEnricher": {
         "running": "Enriching in background..."
